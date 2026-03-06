@@ -16,7 +16,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  cursor: none; /* Hide default cursor */
+  cursor: none;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -46,7 +46,6 @@ body {
   left: 0;
   width: 20px;
   height: 20px;
-  /* background-color is now set dynamically in React */
   mix-blend-mode: difference;
   border-radius: 50%;
   clip-path: circle(50%);
@@ -90,9 +89,9 @@ body {
   100% { transform: perspective(500px) rotateX(60deg) translateY(5vw) translateZ(-200px); }
 }
 
-/* Hero Section */
 .hero-section {
   min-height: 100vh;
+  padding-top: 6rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -103,7 +102,7 @@ body {
 
 .hero-bg-logo {
   position: absolute;
-  top: 45%;
+  top: 52%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 95vw;
@@ -127,7 +126,7 @@ body {
   font-family: var(--font-logo);
   font-size: clamp(4rem, 15vw, 15rem);
   line-height: 0.8;
-  letter-spacing: 0.05em; /* Added small gap to prevent W and Y overlap */
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   margin: 0;
   position: relative;
@@ -137,7 +136,6 @@ body {
   z-index: 2;
 }
 
-/* Glitch Effect on Title */
 .glitch-mega {
   animation: main-glitch 4s infinite;
 }
@@ -232,7 +230,6 @@ body {
   line-height: 1.5;
 }
 
-/* Fluid Marquee */
 .marquee-container {
   position: relative;
   width: 100vw;

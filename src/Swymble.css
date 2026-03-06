@@ -110,6 +110,7 @@ body {
 /* Hero Section */
 .hero-section {
   min-height: 100vh;
+  padding-top: 4rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -120,7 +121,7 @@ body {
 
 .hero-bg-logo {
   position: absolute;
-  top: 45%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 95vw;
@@ -860,11 +861,37 @@ body {
   min-width: 200px;
 }
 
-.submit-btn:hover {
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submit-btn:hover:not(:disabled) {
   background: var(--accent-volt);
   border-color: var(--accent-volt);
   color: var(--bg-color);
   box-shadow: 0 10px 30px rgba(239, 255, 4, 0.2);
+}
+
+.form-success {
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.form-success p {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--text-main);
+  letter-spacing: 1px;
+}
+
+.form-error {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: #ff6b6b;
+  margin-top: 1rem;
 }
 
 /* Footer Section */

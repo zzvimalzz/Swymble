@@ -1,0 +1,111 @@
+.desktop-projects-page {
+  padding-top: 12rem; /* just enough padding under the nav */
+  padding-bottom: 5rem;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6rem;
+  margin-top: 4rem;
+}
+
+.project-row {
+  display: flex;
+  flex-direction: row;
+  gap: 4rem;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.03);
+  padding: 2rem;
+  border: 1px solid var(--muted);
+}
+
+.project-row-reversed {
+  flex-direction: row-reverse;
+}
+
+.project-image-container {
+  flex: 0 0 50%;
+  aspect-ratio: 16 / 9;
+  background-color: rgba(5, 5, 5, 0.8);
+  overflow: hidden;
+  border: 1px solid var(--muted);
+}
+
+.project-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 1rem;
+}
+
+.project-details {
+  flex: 1;
+}
+
+.project-title {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.project-meta {
+  margin-bottom: 2rem;
+  border-top: none !important;
+  padding: 0 !important;
+}
+
+.project-description {
+  color: var(--text-main);
+  opacity: 0.8;
+  font-size: 1.2rem;
+  line-height: 1.8;
+}
+
+.project-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 0;
+}
+
+.project-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.project-btn.secondary {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--text-main);
+}
+
+.project-btn.secondary:hover {
+  border-color: var(--text-main);
+  background: var(--text-main);
+  color: var(--bg-color);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
+}
+
+/* Ensure responsiveness even on desktop views scaling down to ~1024px */
+@media screen and (max-width: 1200px) {
+  .project-row,
+  .project-row-reversed {
+    gap: 2rem;
+  }
+  
+  .project-image-container {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .project-title {
+    font-size: 2.5rem;
+  }
+}

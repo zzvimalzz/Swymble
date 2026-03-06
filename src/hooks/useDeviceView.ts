@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 
 const DESKTOP_QUERY = '(min-width: 1280px) and (hover: hover) and (pointer: fine)';
 
@@ -22,6 +22,42 @@ function getDesktopViewMatch(): boolean {
 }
 
 export function useDeviceView(): boolean {
-  const isDesktopView = useMemo(() => getDesktopViewMatch(), []);
+  const [isDesktopView, setIsDesktopView] = useState<boolean>(() => getDesktopViewMatch());
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
+    const mediaQuery = window.matchMedia(DESKTOP_QUERY);
+
+    const updateView = () => {
+      setIsDesktopView(mediaQuery.matches && !isIpadLikeDevice());
+    };
+
+    updateView();
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', updateView);
+    } else {
+      mediaQuery.addListener(updateView);
+    }
+
+    // Keep view mode in sync across resize/orientation changes.
+    window.addEventListener('resize', updateView);
+    window.addEventListener('orientationchange', updateView);
+
+    return () => {
+      if (typeof mediaQuery.removeEventListener === 'function') {
+        mediaQuery.removeEventListener('change', updateView);
+      } else {
+        mediaQuery.removeListener(updateView);
+      }
+
+      window.removeEventListener('resize', updateView);
+      window.removeEventListener('orientationchange', updateView);
+    };
+  }, []);
+
   return isDesktopView;
 }

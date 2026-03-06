@@ -16,6 +16,12 @@
   scroll-snap-type: x mandatory;
 }
 
+.carousel-container.grid-mode {
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+}
+
 .carousel-container::-webkit-scrollbar {
   display: none; /* Chrome/Safari */
 }
@@ -25,6 +31,17 @@
   gap: 3rem;
   width: max-content;
   padding-right: 5vw;
+}
+
+.carousel-inner.grid-mode {
+  width: 100%;
+  justify-content: center;
+  padding-right: 0;
+  flex-wrap: nowrap;
+}
+
+.carousel-inner.grid-mode .carousel-card {
+  flex: 1; /* Allow cards to adjust width slightly so they fit cleanly in a row without wrapping */
 }
 
 .carousel-card {
@@ -47,7 +64,8 @@
 .carousel-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain; /* changed from cover to contain to prevent zooming */
+  padding: 1rem; /* optional: adds some breathing room so it doesn't touch the edges */
   pointer-events: none;
   filter: grayscale(100%);
   transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
@@ -251,7 +269,7 @@
   color: var(--accent-neon);
 }
 
-.email-wrapper {
+.form-field-wrapper {
   position: relative;
   display: inline-block;
 }
@@ -293,10 +311,38 @@
   min-width: 200px;
 }
 
-.submit-btn:hover {
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submit-btn:hover:not(:disabled) {
   background: var(--accent-volt);
   border-color: var(--accent-volt);
   color: var(--bg-color);
   box-shadow: 0 10px 30px rgba(239, 255, 4, 0.2);
+}
+
+.honeypot-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.form-feedback {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.form-feedback.success {
+  color: #9cff9c;
+}
+
+.form-feedback.error {
+  color: var(--accent-neon);
 }
 

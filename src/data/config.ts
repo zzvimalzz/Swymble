@@ -1,4 +1,4 @@
-import { Github, Instagram, MessageCircle, Mail } from 'lucide-react';
+import { Github, Mail } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type SwymbleService = {
@@ -13,6 +13,39 @@ export type SwymbleWork = {
   category: string;
   client: string | null;
   image: string;
+  landingImage?: string;
+  description: string;
+  link?: string;
+  blogLink?: string;
+  status?: 'Live' | 'In Development' | 'Pending';
+};
+
+export type SwymbleAbout = {
+  title: string;
+  paragraphs: string[];
+};
+
+export type SwymbleBlogContentBlock =
+  | { type: 'paragraph'; text: string }
+  | { type: 'image'; src: string; caption?: string }
+  | { type: 'heading'; text: string; level?: 2 | 3 | 4 }
+  | { type: 'code'; code: string; language: string };
+
+export type SwymbleBlogPost = {
+  id: string;
+  title: string;
+  date: string;
+  summary: string;
+  tags: string[];
+  coverImage?: string;
+  content: SwymbleBlogContentBlock[];
+};
+
+export type SwymbleBlogState = {
+  title: string;
+  description: string;
+  emptyStateMsg: string;
+  posts: SwymbleBlogPost[];
 };
 
 export type SwymbleSkillItem = {
@@ -39,67 +72,143 @@ export type SwymbleData = {
   marquee: string;
   services: SwymbleService[];
   work: SwymbleWork[];
+  about: SwymbleAbout;
+  blog: SwymbleBlogState;
   skills: SwymbleSkillCategory[];
   socials: SwymbleSocial[];
 };
 
 export const SWYMBLE_DATA: SwymbleData = {
   name: "SWYMBLE",
-  tagline: "We build digital experiences.",
-  marquee: "INDEPENDENT DESIGN & DEV  ELEVATING SMALL BUSINESSES  STAND OUT FROM THE NOISE  ",
+  tagline: "We build digital experiences that elevates your brand.",
+  marquee: "SEPERATE YOUR BRAND FROM THE NOISE WITH SWYMBLE",
   services: [
     { title: "STRATEGY", colorHex: "#EFFF04", colorRgb: "239, 255, 4", desc: "Blueprint your success. I analyze market gaps and define a clear, actionable roadmap for your brand's digital presence." },
     { title: "DESIGN", colorHex: "#FF003C", colorRgb: "255, 0, 60", desc: "Visuals that hit hard. Moving beyond templates to craft a unique, high-contrast aesthetic that captures your brand's true edge." },
-    { title: "CREATIVE DEV", colorHex: "#00F0FF", colorRgb: "0, 240, 255", desc: "Performance meets physics. I build lightning-fast, custom-coded experiences with fluid animations and responsive interactions." }
+    { title: "DEVELOP", colorHex: "#00F0FF", colorRgb: "0, 240, 255", desc: "Performance meets physics. I build your custom digital experiences with precision and creativity that brings your vision to life." }
   ],
   work: [
-    { title: "AURORA", category: "BRAND & WEB", client: "Aurora Sports", image: "https://images.unsplash.com/photo-1481481303964-b52bef1d26fa?q=80&w=1200&auto=format&fit=crop" },
-    { title: "Cortex", category: "MEMBERSHIP PLATFORM", client: "Vanguard Inc", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop" },
-    { title: "ELEVATE", category: "CONSULTING SITE", client: null, image: "https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=1200&auto=format&fit=crop" },
-    { title: "NEXUS", category: "E-COMMERCE", client: "Nexus Retail", image: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=1200&auto=format&fit=crop" }
+    { 
+      title: "IB Solutions", 
+      category: "Company Profile", 
+      client: "IB Solutions (M)", 
+      image: "/ibsolutions_logo.png",
+      landingImage: "/ibsolutions_website.png",
+      description: "Complete digital transformation for IB Solutions. We rebuilt their company profile from the ground up, focusing on clean aesthetics, responsive layouts, and seamless user navigation.",
+      link: "https://ibsolutions.com.my",
+      // blogLink: "/blog",
+      status: 'Live'
+    },
+    { 
+      title: "CORTEX", 
+      category: "ARTIFICIAL INTELLIGENCE", 
+      client: null, 
+      image: "/cortex_logo.png",
+      landingImage: "/cortex_website.png",
+      description: "A look into Cortex. A neural memory system that captures, organizes, and understands your thoughts through natural conversation. Cortex is designed to be your second brain, helping you remember and make sense of everything you experience.",
+      link: "#",
+      // blogLink: "/blog",
+      status: 'In Development'
+    }
+    
   ],
+// ==========================================
+// ABOUT SECTION DATA
+// ==========================================
+  about: {
+    title: "ABOUT ME",
+    paragraphs: [
+      "Software engineer with hands-on experience building and supporting fintech and banking systems across multiple enterprise clients — including Maxis, LPPSA, TAIB, and BMMB.",
+      "Strong background in backend development, production systems, and regulatory-driven workflows. I have served as Technical Lead for Change Requests, owning the full lifecycle from requirements to production deployment, and have resolved high-priority incidents under strict SLAs.",
+      "Outside of enterprise work, I build scalable platforms using modern architectures and AI-assisted development — most notably Cortex, a modular AI-powered cognitive assistant leveraging vector search, graph databases, and multi-provider orchestration."
+    ]
+  },
+
+// ==========================================
+// TECH & TOOLS SECTION DATA
+// ==========================================
   skills: [
     {
       category: "LANGUAGES",
       items: [
-        { name: "TypeScript", color: "#3178c6", level: 50 },
-        { name: "Python", color: "#3572A5", level: 30 },
-        { name: "HTML/CSS", color: "#e34c26", level: 20 },
+        { name: "PHP", color: "#777BB4", level: 80 },
+        { name: "Python", color: "#3776AB", level: 60 },
+        { name: "HTML/CSS", color: "#E34F26", level: 45 },
+        { name: "PL/SQL", color: "#F29111", level: 60 },
+        { name: "JavaScript", color: "#F7DF1E", level: 55 },
+        { name: "TypeScript", color: "#3178C6", level: 45 },
       ]
     },
     {
-      category: "FRAMEWORKS",
+      category: "Backend & APIs",
       items: [
-        { name: "React", color: "#61dafb", level: 40 },
-        { name: "Next.js", color: "#ffffff", level: 30 },
-        { name: "Node.js", color: "#339933", level: 20 },
-        { name: "Tailwind", color: "#38b2ac", level: 10 }
+        { name: "REST APIs", color: "#0096D6", level: 70 },
+        { name: "Batch Jobs", color: "#A8B9CC", level: 65 },
+        { name: "Workflow Logic", color: "#10A54A", level: 75 }
       ]
     },
     {
-      category: "TOOLS & OS",
+      category: "Databases & DevOps",
       items: [
-        { name: "Git", color: "#f14e32", level: 35 },
-        { name: "Docker", color: "#2496ed", level: 30 },
-        { name: "AWS", color: "#ff9900", level: 20 },
-        { name: "Linux", color: "#fcc624", level: 15 }
+        { name: "PostgreSQL", color: "#336791", level: 55 },
+        { name: "MySQL", color: "#4479A1", level: 40 },
+        { name: "Neo4j", color: "#018BFF", level: 45 },
+        { name: "Docker", color: "#2496ED", level: 55 },
+        { name: "CI/CD Pipelines", color: "#F05032", level: 60 },
+        { name: "Linux", color: "#FCC624", level: 40 }
       ]
     },
     {
-      category: "EDITING",
+      category: "AI & Data",
       items: [
-        { name: "Premiere Pro", color: "#9999ff", level: 45 },
-        { name: "After Effects", color: "#e34c26", level: 35 },
-        { name: "DaVinci", color: "#faaaaa", level: 25 },
+        { name: "Retrieval-Augmented Generation (RAG)", color: "#FF6A00", level: 65 },
+        { name: "Vector & Graph Search", color: "#00B4AB", level: 60 },
+        { name: "Multi-Agent Orchestration", color: "#9B59B6", level: 55 },
+        { name: "Claude Code", color: "#D19A66", level: 45 },
+        { name: "ChatGPT Codex", color: "#10A37F", level: 45 },
+      ]
+    },
+    {
+      category: "Domains",
+      items: [
+        { name: "Fintech & Banking Systems", color: "#1E3A8A", level: 85 },
+        { name: "Loan Origination", color: "#16A34A", level: 80 },
+        { name: "Production Support", color: "#DC2626", level: 80 },
+        { name: "AI Automation Systems", color: "#7C3AED", level: 65 }
       ]
     }
   ],
   socials: [
-    { id: "gh", name: "GITHUB", link: "https://github.com", icon: Github },
-    { id: "ig", name: "INSTAGRAM", link: "https://instagram.com", icon: Instagram },
-    { id: "wa", name: "WHATSAPP", link: "https://whatsapp.com", icon: MessageCircle },
-    { id: "em", name: "EMAIL", link: "mailto:hello@example.com", icon: Mail },
-    // You can easily add more below; just import a new icon from 'lucide-react' at the top:
-    // { id: "yt", name: "YOUTUBE", link: "https://youtube.com", icon: Video },
-  ]
+    { id: "gh", name: "GITHUB", link: "https://github.com/zzvimalzz", icon: Github },
+    // { id: "wa", name: "WHATSAPP", link: "tel:+1234567890", icon: MessageCircle },
+    { id: "em", name: "EMAIL", link: "mailto:hello@swymble.com", icon: Mail },
+    // Import a new icon from 'lucide-react' at the top
+  ],
+
+// ==========================================
+// BLOG SECTION DATA
+// ==========================================
+  blog: {
+    title: "BLOG",
+    description: "Read through my thoughts",
+    emptyStateMsg: "No posts yet. Check back soon for random thoughts and deep dives into my projects and learnings.",
+    posts: [
+      // {
+      //   id: "introducing-cortex",
+      //   title: "Building Cortex: A Neural Memory System",
+      //   date: "2026-03-01",
+      //   summary: "A deep dive into how we built Cortex to serve as a second brain, leveraging AI to capture and organize thoughts.",
+      //   tags: ["AI", "React", "Architecture"],
+      //   coverImage: "/cortex_website.png",
+      //   content: [
+      //     { type: 'heading', text: 'The Origin of Cortex', level: 2 },
+      //     { type: 'paragraph', text: 'Cortex started as a simple idea: what if you could talk to your notes? Over the past year, we have been developing a system that understands natural conversation and organizes data dynamically.' },
+      //     { type: 'image', src: '/cortex_logo.png', caption: 'The Cortex Logo Concept' },
+      //     { type: 'heading', text: 'Technical Challenges', level: 2 },
+      //     { type: 'paragraph', text: 'Integrating vector databases with a conversational UI was no easy feat. Here is a small snippet of our indexing logic:' },
+      //     { type: 'code', language: 'typescript', code: 'function indexThought(text: string) {\n  const vector = generateEmbedding(text);\n  db.insert(vector);\n}' }
+      //   ]
+      // }
+    ]
+  }
 };
