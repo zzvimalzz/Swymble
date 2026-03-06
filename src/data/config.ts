@@ -3,7 +3,7 @@ import { Github, Instagram, MessageCircle, Mail } from 'lucide-react';
 export const SWYMBLE_DATA = {
   name: "SWYMBLE",
   tagline: "I BUILD DIGITAL EXPERIENCES THAT REFUSE TO BLEND IN.",
-  marquee: "INDEPENDENT DESIGN & DEV  ELEVATING SMALL BUSINESSES  STAND OUT FROM THE NOISE  ",
+  marquee: "SWYMBLE - SWYMBLE - SWYMBLE - SWYMBLE - SWYMBLE - SWYMBLE - SWYMBLE - SWYMBLE - ",
   services: [
     { title: "STRATEGY", colorHex: "#EFFF04", colorRgb: "239, 255, 4", desc: "Blueprint your success. I analyze market gaps and define a clear, actionable roadmap for your brand's digital presence." },
     { title: "DESIGN", colorHex: "#FF003C", colorRgb: "255, 0, 60", desc: "Visuals that hit hard. Moving beyond templates to craft a unique, high-contrast aesthetic that captures your brand's true edge." },

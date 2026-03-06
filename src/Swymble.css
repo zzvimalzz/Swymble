@@ -16,9 +16,14 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  cursor: none; /* Hide default cursor */
   user-select: none;
   -webkit-user-select: none;
+}
+
+@media (pointer: fine) {
+  * {
+    cursor: none;
+  }
 }
 
 input, textarea {
@@ -37,6 +42,12 @@ body {
   font-family: var(--font-mono);
   overflow-x: hidden;
   line-height: 1.5;
+  width: 100%;
+}
+
+.swymble-app {
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* Custom Interactive Cursor */
@@ -54,6 +65,12 @@ body {
   z-index: 9999;
   transform: translate(-50%, -50%);
   transition: opacity 0.3s ease, width 0.2s ease, height 0.2s ease, background-color 0.2s ease, border-radius 0.2s ease, transform 0.2s ease;
+}
+
+@media (pointer: coarse), (max-width: 768px) {
+  .glitch-cursor {
+    display: none !important;
+  }
 }
 
 .glitch-cursor.hovering {
@@ -232,7 +249,7 @@ body {
 /* Fluid Marquee */
 .marquee-container {
   position: relative;
-  width: 100vw;
+  width: 100%;
   overflow: hidden;
   background: var(--accent-volt);
   color: var(--bg-color);
@@ -990,5 +1007,43 @@ body {
   color: var(--accent-volt);
   filter: drop-shadow(0 0 15px rgba(239, 255, 4, 0.6));
   transform: translateY(-5px) scale(1.1) !important;
+}
+
+/* ========================================================= */
+/* ========================================================= */
+/*                   MOBILE OPTIMIZATION                     */
+/* ========================================================= */
+
+@media (max-width: 768px) {
+  /* HIDE EVERYTHING EXCEPT TITLE FOR MOBILE */
+  .hero-bg-logo,
+  .hero-tagline,
+  .marquee-container,
+  .layout-content,
+  .site-footer,
+  .scroll-top-btn,
+  .bg-grid {
+    display: none !important;
+  }
+
+  .hero-section {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .hero-title {
+    font-size: clamp(3rem, 15vw, 6rem);
+    letter-spacing: 0.02em;
+    margin: auto;
+  }
+
+  * {
+    cursor: auto !important;
+  }
 }
 
