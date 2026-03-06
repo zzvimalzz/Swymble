@@ -107,6 +107,7 @@ function ProximityCard({ svc, index, mousePos }: { svc: any, index: number, mous
 }
 
 function App() {
+  const baseUrl = import.meta.env.BASE_URL;
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [cursorVisible, setCursorVisible] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
@@ -264,7 +265,7 @@ function App() {
         style={{ y: heroY, opacity: heroOpacity }}
       >
         <div className="hero-bg-logo">
-          <img src="/favicon.png" alt="Swymble Background Logo" />
+          <img src={`${baseUrl}favicon.png`} alt="Swymble Background Logo" />
         </div>
         <h1 
           className="hero-title glitch-mega" 
@@ -432,7 +433,7 @@ function App() {
 
       <footer className="site-footer">
         <div className="footer-logo-center" onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
-          <img src="/logo-with-name.png" alt={`${SWYMBLE_DATA.name} Logo`} className="footer-logo-full-centered" />
+          <img src={`${baseUrl}logo-with-name.png`} alt={`${SWYMBLE_DATA.name} Logo`} className="footer-logo-full-centered" />
         </div>
         
         <div className="footer-bottom-bar">
