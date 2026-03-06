@@ -1,9 +1,52 @@
 import { Github, Instagram, MessageCircle, Mail } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-export const SWYMBLE_DATA = {
+export type SwymbleService = {
+  title: string;
+  colorHex: string;
+  colorRgb: string;
+  desc: string;
+};
+
+export type SwymbleWork = {
+  title: string;
+  category: string;
+  client: string | null;
+  image: string;
+};
+
+export type SwymbleSkillItem = {
+  name: string;
+  color: string;
+  level: number;
+};
+
+export type SwymbleSkillCategory = {
+  category: string;
+  items: SwymbleSkillItem[];
+};
+
+export type SwymbleSocial = {
+  id: string;
+  name: string;
+  link: string;
+  icon: LucideIcon;
+};
+
+export type SwymbleData = {
+  name: string;
+  tagline: string;
+  marquee: string;
+  services: SwymbleService[];
+  work: SwymbleWork[];
+  skills: SwymbleSkillCategory[];
+  socials: SwymbleSocial[];
+};
+
+export const SWYMBLE_DATA: SwymbleData = {
   name: "SWYMBLE",
-  tagline: "I BUILD DIGITAL EXPERIENCES THAT REFUSE TO BLEND IN.",
-  marquee: "SWYMBLE - SWYMBLE - SWYMBLE - SWYMBLE - SWYMBLE - SWYMBLE - SWYMBLE - SWYMBLE - ",
+  tagline: "We build digital experiences.",
+  marquee: "INDEPENDENT DESIGN & DEV  ELEVATING SMALL BUSINESSES  STAND OUT FROM THE NOISE  ",
   services: [
     { title: "STRATEGY", colorHex: "#EFFF04", colorRgb: "239, 255, 4", desc: "Blueprint your success. I analyze market gaps and define a clear, actionable roadmap for your brand's digital presence." },
     { title: "DESIGN", colorHex: "#FF003C", colorRgb: "255, 0, 60", desc: "Visuals that hit hard. Moving beyond templates to craft a unique, high-contrast aesthetic that captures your brand's true edge." },
@@ -11,7 +54,7 @@ export const SWYMBLE_DATA = {
   ],
   work: [
     { title: "AURORA", category: "BRAND & WEB", client: "Aurora Sports", image: "https://images.unsplash.com/photo-1481481303964-b52bef1d26fa?q=80&w=1200&auto=format&fit=crop" },
-    { title: "VANGUARD", category: "MEMBERSHIP PLATFORM", client: "Vanguard Inc", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop" },
+    { title: "Cortex", category: "MEMBERSHIP PLATFORM", client: "Vanguard Inc", image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop" },
     { title: "ELEVATE", category: "CONSULTING SITE", client: null, image: "https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=1200&auto=format&fit=crop" },
     { title: "NEXUS", category: "E-COMMERCE", client: "Nexus Retail", image: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=1200&auto=format&fit=crop" }
   ],

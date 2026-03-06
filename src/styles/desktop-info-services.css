@@ -1,0 +1,289 @@
+/* Socials and Tools Grid Layout */
+.info-row {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  width: 100%;
+  margin-top: 10rem;
+}
+
+.info-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.socials-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.socials-list.horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 3rem;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: var(--font-logo);
+  font-size: 2.2rem;
+  text-decoration: none;
+  color: var(--text-main);
+  position: relative;
+  width: fit-content;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+
+.social-icon {
+  margin-bottom: 5px;
+  transition: transform 0.3s ease;
+}
+
+.social-link:hover {
+  color: var(--accent-volt);
+  cursor: none;
+}
+
+.social-link:hover .social-icon {
+  transform: scale(1.1) rotate(-5deg);
+}
+
+.social-link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--accent-neon);
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease-out;
+}
+
+.social-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+.skills-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.mb-2 {
+  margin-bottom: 1rem;
+}
+
+.skill-category {
+  display: flex;
+  flex-direction: column;
+}
+
+.skill-bar-wrapper {
+  display: flex;
+  height: 40px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin-bottom: 1rem;
+}
+
+.skill-segment {
+  height: 100%;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: none;
+}
+
+.skill-segment:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.skill-segment:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.skill-segment:hover {
+  transform: scaleY(1.15);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+  z-index: 10;
+}
+
+.skill-tooltip {
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-main);
+  color: var(--bg-color);
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  display: flex;
+  gap: 0.8rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.skill-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: var(--text-main) transparent transparent transparent;
+}
+
+.skill-segment:hover .skill-tooltip {
+  opacity: 1;
+  visibility: visible;
+  bottom: calc(100% + 15px);
+}
+
+.skill-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+}
+
+.skill-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.skill-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.skill-legend-name {
+  color: #ccc;
+}
+
+/* Services / Brutalist Grid */
+.layout-content {
+  padding: 10rem 5vw;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section-header {
+  margin-bottom: 4rem;
+  border-bottom: 4px solid var(--text-main);
+  padding-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.section-header h2 {
+  font-family: var(--font-logo);
+  font-size: 5rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.header-accent {
+  color: var(--accent-neon);
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.service-card {
+  border: 2px solid rgba(255, 255, 255, calc(0.1 + var(--prox, 0) * 0.3));
+  padding: 3rem 2rem 4rem 2rem;
+  position: relative;
+  background: rgba(5, 5, 5, 0.8);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: center;
+}
+
+.card-inner-border {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border: 2px solid var(--card-color, var(--accent-volt));
+  opacity: calc(var(--power, 0) * 0.5);
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.1s ease;
+}
+
+.card-glare {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+    rgba(var(--card-color-rgb), calc(var(--power, 0) * 0.2)), 
+    transparent 40%
+  );
+  z-index: 0;
+}
+
+.card-content-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.service-card:hover,
+.service-card.force-hover {
+  border-color: var(--card-color);
+  box-shadow: 0 10px 30px rgba(var(--card-color-rgb), 0.15);
+}
+
+.service-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  color: var(--text-main);
+  transition: text-shadow 0.3s ease;
+}
+
+.service-card:hover h3,
+.service-card.force-hover h3 {
+  text-shadow: 0 0 15px rgba(var(--card-color-rgb), 0.8);
+}
+
+.service-desc {
+  font-size: 1.1rem;
+  opacity: calc(0.6 + var(--prox, 0) * 0.4);
+}
+
