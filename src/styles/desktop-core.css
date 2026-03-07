@@ -5,6 +5,7 @@
   --text-main: #f0f0f0;
   --accent-volt: #EFFF04;
   --accent-neon: #FF003C;
+  --accent-cyan: #00F0FF;
   --muted: #4a4a4a;
   
   --font-logo: 'Anton', sans-serif;
@@ -175,7 +176,7 @@ body {
 }
 .hero-title:hover {
   animation: main-glitch 0.2s infinite;
-  text-shadow: 5px 5px 0px var(--accent-neon), -5px -5px 0px var(--accent-volt);
+  text-shadow: 5px 5px 0px var(--accent-neon), -5px -5px 0px var(--accent-volt), 0px 5px 0px var(--accent-cyan);
 }
 
 @keyframes main-glitch {
