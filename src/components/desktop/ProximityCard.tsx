@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
-import type { SwymbleService } from '../../data/config';
+import type { SwymbleWhatIDo } from '../../data/config';
 
 type ProximityCardProps = {
-  service: SwymbleService;
+  service: SwymbleWhatIDo;
   index: number;
   mousePos: { x: number; y: number };
 };

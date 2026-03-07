@@ -29,7 +29,7 @@ export default function DesktopProjects({ setIsHovering }: { setIsHovering: (val
       </div>
 
       <div className="projects-list">
-        {SWYMBLE_DATA.work.map((workItem, index) => {
+        {SWYMBLE_DATA.projects.map((workItem, index) => {
           const projectId = workItem.title.replace(/\s+/g, '-').toLowerCase();
           return (
             <motion.div

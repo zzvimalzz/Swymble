@@ -34,6 +34,46 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 100dvh;
+  width: 100%;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--mobile-muted);
+  text-decoration: none;
+  animation: bounce 2s infinite;
+  z-index: 10;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.scroll-indicator.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.scroll-text {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
 }
 
 .mobile-logo {
@@ -59,3 +99,285 @@
   position: relative;
   z-index: 2;
 }
+
+/* MOBILE PROJECTS - TINDER CARD */
+.mobile-projects-wrapper {
+  width: 100%;
+  padding: 2rem 1.5rem 6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.mobile-projects-wrapper .section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.mobile-projects-wrapper .section-header h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4.5rem;
+  line-height: 1;
+  margin: 0 0 0.5rem;
+  letter-spacing: 2px;
+}
+
+.swipe-tip {
+  color: var(--mobile-muted);
+  font-size: 0.9rem;
+  margin: 0 0 2rem;
+  text-align: center;
+}
+
+.card-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  height: 65vh;
+  min-height: 480px;
+  max-height: 800px;
+  margin: 0 auto;
+  perspective: 1000px;
+}
+
+.tinder-card {
+  border-radius: 20px;
+  background: #121212;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  cursor: grab;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.tinder-card:active {
+  cursor: grabbing;
+}
+
+.tinder-card.flipped {
+  /* No actual 180 rotation to avoid drag confusion, but we style the details */
+  background: #181818;
+}
+
+.card-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.card-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 8rem 1.5rem 1.5rem;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.9) 30%,
+    rgba(0, 0, 0, 0.6) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  color: white;
+  pointer-events: none;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.card-header h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  margin: 0;
+  line-height: 1;
+}
+
+.status-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-badge.live { background: rgba(0, 255, 0, 0.2); color: #4ade80; }
+.status-badge.in-development { background: rgba(255, 165, 0, 0.2); color: #facc15; }
+.status-badge.pending { background: rgba(255, 0, 0, 0.2); color: #f87171; }
+
+.card-category {
+  font-size: 0.9rem;
+  color: var(--mobile-muted);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tap-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.card-details {
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.details-header h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.5rem;
+  margin: 0;
+  color: var(--mobile-accent-2);
+}
+
+.details-body {
+  margin-top: 1.5rem;
+  flex-grow: 1;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #ddd;
+}
+
+.detail-item {
+  margin-top: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.8rem;
+  border-radius: 8px;
+}
+
+.detail-item strong {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--mobile-muted);
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.details-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.project-link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 1rem;
+  background: var(--mobile-text);
+  color: #000;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 12px;
+  transition: active 0.2s ease;
+}
+
+.project-link-btn:active {
+  transform: scale(0.95);
+}
+
+/* MOBILE SERVICES */
+.mobile-services-wrapper {
+  width: 100%;
+  padding: 4rem 1.2rem 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-services-wrapper .section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.mobile-services-wrapper .section-header h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4.5rem;
+  margin: 0;
+  letter-spacing: 2px;
+  color: var(--mobile-text);
+  line-height: 1;
+}
+
+.services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 4rem; /* buffer at bottom so the last card scrolls up */
+}
+
+.service-card {
+  background: #0f0f0f;
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  position: sticky;
+  top: calc(80px + (var(--card-index) * 20px));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+  transform-origin: center top;
+}
+
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--service-color);
+  box-shadow: 0 0 20px var(--service-color);
+}
+
+.service-number {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--service-color);
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.service-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.2rem;
+  margin: 0 0 1rem;
+  letter-spacing: 1px;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.service-desc {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--mobile-muted);
+  margin: 0;
+}
+
+

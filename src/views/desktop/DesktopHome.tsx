@@ -80,7 +80,7 @@ export default function DesktopHome({
         </div>
 
         <div className="services-grid">
-          {SWYMBLE_DATA.services.map((service, index) => (
+          {SWYMBLE_DATA.whatIDo.map((service, index) => (
             <ProximityCard key={service.title} service={service} index={index} mousePos={mousePos} />
           ))}
         </div>
@@ -90,9 +90,9 @@ export default function DesktopHome({
             <h2>PROJECTS</h2>
           </div>
 
-          <div className={`carousel-container ${SWYMBLE_DATA.work.length <= 3 ? 'grid-mode' : ''}`}>
-            <div className={`carousel-inner ${SWYMBLE_DATA.work.length <= 3 ? 'grid-mode' : ''}`}>
-              {SWYMBLE_DATA.work.map((workItem, index) => {
+          <div className={`carousel-container ${SWYMBLE_DATA.projects.length <= 3 ? 'grid-mode' : ''}`}>
+            <div className={`carousel-inner ${SWYMBLE_DATA.projects.length <= 3 ? 'grid-mode' : ''}`}>
+              {SWYMBLE_DATA.projects.map((workItem, index) => {
                 const projectId = workItem.title.replace(/\s+/g, '-').toLowerCase();
                 return (
                   <motion.div

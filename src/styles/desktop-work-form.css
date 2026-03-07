@@ -11,8 +11,8 @@
   overflow-y: hidden;
   padding: 2rem 5vw 2rem 5vw;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
   scroll-snap-type: x mandatory;
 }
 
@@ -23,7 +23,7 @@
 }
 
 .carousel-container::-webkit-scrollbar {
-  display: none; /* Chrome/Safari */
+  display: none;
 }
 
 .carousel-inner {
@@ -41,7 +41,7 @@
 }
 
 .carousel-inner.grid-mode .carousel-card {
-  flex: 1; /* Allow cards to adjust width slightly so they fit cleanly in a row without wrapping */
+  flex: 1;
 }
 
 .carousel-card {
@@ -64,8 +64,8 @@
 .carousel-image {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* changed from cover to contain to prevent zooming */
-  padding: 1rem; /* optional: adds some breathing room so it doesn't touch the edges */
+  object-fit: contain; 
+  padding: 1rem; 
   pointer-events: none;
   filter: grayscale(100%);
   transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
@@ -129,8 +129,8 @@
 
 .footer-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6rem;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 8rem;
   width: 100%;
 }
 
@@ -169,7 +169,7 @@
   align-items: flex-end;
   gap: 2rem;
   width: 100%;
-  flex-wrap: wrap; /* allow wrapping on smaller screens */
+  flex-wrap: wrap;
 }
 
 .form-row span {
@@ -293,7 +293,7 @@
 .inline-select option {
   background: var(--bg-color);
   color: var(--accent-volt);
-  font-size: 1rem; /* resets to safe size inside dropdown */
+  font-size: 1rem;
 }
 
 .submit-btn {
