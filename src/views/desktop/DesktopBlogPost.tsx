@@ -11,14 +11,18 @@ export default function DesktopBlogPost() {
   if (!post) {
     return (
       <section className="layout-content blog-post-page">
-        <div className="section-header" style={{ marginTop: '10rem' }}>
-          <h2>POST NOT FOUND</h2>
-        </div>
-        <div className="page-content-wrapper">
+        <div className="blog-post-not-found-header">
           <Link to="/blog" className="back-link">
             <ArrowLeft size={16} /> Back to Blog
           </Link>
-          <p style={{ marginTop: '2rem' }}>We couldn't find the article you were looking for.</p>
+
+          <div className="section-header">
+            <h2>POST NOT FOUND</h2>
+          </div>
+        </div>
+
+        <div className="page-content-wrapper blog-post-not-found-body">
+          <p className="blog-post-not-found-message">We couldn't find the article you were looking for.</p>
         </div>
       </section>
     );
