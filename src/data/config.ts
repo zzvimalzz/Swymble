@@ -198,7 +198,6 @@ export const SWYMBLE_DATA: SwymbleData = {
       ],
       tags: ["AI", "R&D", "Private"],
       updatedAt: "Mar 2026",
-      blogLink: "/blog/introducing-cortex",
       primaryAction: {
         label: "REQUEST PRIVATE DEMO",
         href: "mailto:hello@swymble.com?subject=CORTEX%20Private%20Demo",
