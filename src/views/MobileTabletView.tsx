@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { SWYMBLE_DATA } from '../data/config';
 import MobileServices from '../components/mobile/MobileServices';
 import MobileProjects from '../components/mobile/MobileProjects';
+import MobileContact from '../components/mobile/MobileContact';
 import { ChevronDown } from 'lucide-react';
 import '../styles/mobile-tablet.css';
 
@@ -40,6 +41,10 @@ export default function MobileTabletView() {
 
       <section className="mobile-section" id="projects" style={{ width: '100%' }}>
         <MobileProjects projects={SWYMBLE_DATA.projects} />
+      </section>
+
+      <section className="mobile-section" id="contact-section" style={{ width: '100%', marginBottom: '4rem' }}>
+        <MobileContact />
       </section>
     </div>
   );
