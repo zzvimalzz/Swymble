@@ -7,6 +7,7 @@ export default function MobileContact() {
   const [showRocket, setShowRocket] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
   const baseUrl = import.meta.env.BASE_URL;
+  const isMailtoLink = (link: string) => link.toLowerCase().startsWith('mailto:');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,12 +38,13 @@ export default function MobileContact() {
         <div className="socials-list" style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
           {SWYMBLE_DATA.socials.map((social) => {
             const Icon = social.icon;
+            const isMailto = isMailtoLink(social.link);
             return (
               <a
                 key={social.id}
                 href={social.link}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={isMailto ? undefined : '_blank'}
+                rel={isMailto ? undefined : 'noopener noreferrer'}
                 className="social-btn"
                 aria-label={social.name}
               >

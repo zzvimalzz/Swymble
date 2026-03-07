@@ -136,9 +136,9 @@ export const SWYMBLE_DATA: SwymbleData = {
   about: {
     title: "ABOUT ME",
     paragraphs: [
-      "I'm a Software engineer with hands-on experience building and supporting fintech and banking systems across multiple enterprise clients � including Maxis, LPPSA, TAIB, and BMMB.",
+      "I'm a Software engineer with hands-on experience building and supporting fintech and banking systems across multiple enterprise clients from banking sectors to the telco industry.",
       "Strong background in backend development, production systems, and regulatory-driven workflows. I have served as Technical Lead for Change Requests, owning the full lifecycle from requirements to production deployment, and have resolved high-priority incidents under strict SLAs.",
-      "Outside of enterprise work, I build scalable platforms using modern architectures and AI-assisted development � most notably Cortex, a modular AI-powered cognitive assistant leveraging vector search, graph databases, and multi-provider orchestration."
+      "Outside of enterprise work, I build scalable platforms using modern architectures and AI-assisted development and most notably Cortex, a modular AI-powered cognitive assistant leveraging vector search, graph databases, and multi-provider orchestration."
     ]
   },
 

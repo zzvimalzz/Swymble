@@ -144,21 +144,54 @@
 .tinder-card {
   border-radius: 20px;
   background: #121212;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.72);
   cursor: grab;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  isolation: isolate;
   transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: box-shadow 0.35s ease, border-color 0.35s ease, background-color 0.35s ease;
+}
+
+.tinder-card::before {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -16px;
+  height: 32px;
+  background: radial-gradient(ellipse at center, rgba(255, 107, 0, 0.26) 0%, rgba(255, 107, 0, 0) 75%);
+  filter: blur(14px);
+  opacity: 0.45;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .tinder-card:active {
   cursor: grabbing;
+  border-color: rgba(255, 255, 255, 0.26);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.8), 0 0 26px rgba(0, 209, 255, 0.18);
 }
 
 .tinder-card.flipped {
   /* No actual 180 rotation to avoid drag confusion, but we style the details */
   background: #181818;
+  border-color: rgba(0, 209, 255, 0.35);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 32px rgba(0, 209, 255, 0.15);
+}
+
+@media (hover: hover) {
+  .tinder-card:hover {
+    border-color: rgba(255, 107, 0, 0.42);
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.82), 0 0 30px rgba(255, 107, 0, 0.16);
+  }
+
+  .tinder-card:hover::before {
+    opacity: 0.9;
+    transform: scale(1.04);
+  }
 }
 
 .card-content {

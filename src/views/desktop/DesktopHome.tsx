@@ -45,6 +45,7 @@ export default function DesktopHome({
   setIsHovering,
 }: DesktopHomeProps) {
   const navigate = useNavigate();
+  const isMailtoLink = (link: string) => link.toLowerCase().startsWith('mailto:');
 
   return (
     <>
@@ -269,12 +270,13 @@ export default function DesktopHome({
               <div className="socials-list">
                 {SWYMBLE_DATA.socials.map((social) => {
                   const Icon = social.icon;
+                  const isMailto = isMailtoLink(social.link);
                   return (
                     <a
                       key={social.id}
                       href={social.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      target={isMailto ? undefined : '_blank'}
+                      rel={isMailto ? undefined : 'noopener noreferrer'}
                       className="social-link w-client"
                       onMouseEnter={() => setIsHovering(true)}
                       onMouseLeave={() => setIsHovering(false)}
