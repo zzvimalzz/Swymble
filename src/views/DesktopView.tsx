@@ -18,6 +18,7 @@ import DesktopProjects from './desktop/DesktopProjects';
 import DesktopAbout from './desktop/DesktopAbout';
 import DesktopBlog from './desktop/DesktopBlog';
 import DesktopBlogPost from './desktop/DesktopBlogPost';
+import DesktopLabs from './desktop/DesktopLabs';
 
 import { SWYMBLE_DATA } from '../data/config';
 import '../styles/desktop.css';
@@ -352,6 +353,10 @@ export default function DesktopView() {
         <Route 
           path="/projects" 
           element={<DesktopProjects setIsHovering={setIsHovering} />} 
+        />
+        <Route 
+          path="/labs" 
+          element={<DesktopLabs setIsHovering={setIsHovering} />} 
         />
         <Route 
           path="/about" 

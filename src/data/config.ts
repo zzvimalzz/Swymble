@@ -7,27 +7,50 @@ import type { LucideIcon } from 'lucide-react';
 
 export type SwymbleWhatIDo = {
   title: string;
-  colorHex: string; // Used for accent colors (e.g. #FF003C)
-  colorRgb: string; // Used for glowing shadows (e.g. 255, 0, 60)
+  colorHex: string;
+  colorRgb: string; 
   desc: string;
 };
 
 export type SwymbleProject = {
   title: string;
   category: string;
-  client: string | null;           // Who did you build this for? null if personal.
-  image: string;                   // Main desktop thumbnail (e.g. /ibsolutions_logo.png)
-  landingImage?: string;           // Optional secondary image
-  mobileImage?: string;            // The vertical image shown on the Mobile swipe cards
+  client: string | null; 
+  image: string; 
+  landingImage?: string;  
+  mobileImage?: string; 
   description: string;
-  link?: string;                   // External link to live site or repo
-  blogLink?: string;               // Optional link to your blog post discussing this project 
+  link?: string;    
+  blogLink?: string;  
   status?: 'Live' | 'In Development' | 'Pending'; 
+};
+
+export type SwymbleLabVisibility = 'public' | 'teaser' | 'private';
+
+export type SwymbleLabAction = {
+  label: string;
+  href: string; 
+  kind: 'external' | 'internal' | 'mailto'; 
+};
+
+export type SwymbleLab = {
+  id: string; 
+  title: string;
+  category: string; 
+  image: string; 
+  status: 'In Development' | 'Private Beta' | 'Live';
+  visibility: SwymbleLabVisibility;
+  publicSummary: string;
+  safeHighlights: string[]; 
+  tags: string[];
+  updatedAt: string;
+  blogLink?: string;
+  primaryAction?: SwymbleLabAction;
 };
 
 export type SwymbleAbout = {
   title: string;
-  paragraphs: string[];            // Each string is a new paragraph block
+  paragraphs: string[]; 
 };
 
 export type SwymbleBlogContentBlock =
@@ -37,26 +60,26 @@ export type SwymbleBlogContentBlock =
   | { type: 'code'; code: string; language: string };
 
 export type SwymbleBlogPost = {
-  id: string;                      // URL slug (e.g. "introducing-cortex")
+  id: string;  
   title: string;
-  date: string;                    // e.g. "YYYY-MM-DD"
+  date: string; 
   summary: string;
-  tags: string[];                  // e.g. ["AI", "React"]
+  tags: string[]; 
   coverImage?: string;             
-  content: SwymbleBlogContentBlock[]; // The body of the blog post built with blocks
+  content: SwymbleBlogContentBlock[]; 
 };
 
 export type SwymbleBlogState = {
   title: string;
   description: string;
-  emptyStateMsg: string;           // Fallback text when there are no posts yet
+  emptyStateMsg: string;  
   posts: SwymbleBlogPost[];
 };
 
 export type SwymbleSkillItem = {
   name: string;
-  color: string;                   // e.g. "#777BB4"
-  level: number;                   // 1 to 100 for the progress bar
+  color: string;  
+  level: number; 
 };
 
 export type SwymbleSkillCategory = {
@@ -74,11 +97,12 @@ export type SwymbleSocial = {
 export type SwymbleData = {
   name: string;
   tagline: string;
-  marquee: string;                 // The fast moving banner text
-  whatIDo: SwymbleWhatIDo[];       // Mobile 'WHAT I DO' / Desktop 'Strategy/Design/Develop'
-  projects: SwymbleProject[];      // The Tinder deck projects / Desktop Work Carousel
-  endCardMobileImage?: string;     // The fallback card when swiping is done
+  marquee: string;   
+  whatIDo: SwymbleWhatIDo[]; 
+  projects: SwymbleProject[]; 
+  endCardMobileImage?: string;  
   about: SwymbleAbout;
+  labs: SwymbleLab[];
   blog: SwymbleBlogState;
   skills: SwymbleSkillCategory[];
   socials: SwymbleSocial[];
@@ -104,7 +128,7 @@ export const SWYMBLE_DATA: SwymbleData = {
 
   // END CARD
   // The image shown on mobile when a user swipes through all projects
-  endCardMobileImage: '/white-logo.png', // <-- Change end card image here 
+  endCardMobileImage: '/white-logo.png',
 
   // PROJECTS LIST
   projects: [
@@ -119,16 +143,88 @@ export const SWYMBLE_DATA: SwymbleData = {
       link: "https://ibsolutions.com.my",
       status: 'Live'
     },
+    // Cortex moved to Labs
+  ],
+
+  // LABS - IN PROGRESS EXPERIMENTS
+  // NOTES:
+  // 1) Keep Labs copy public-safe: avoid architecture internals, prompts, infra details, secrets.
+  // 2) Use visibility='private' for entries you do not want rendered publicly.
+  // 3) Card has a single optional button via `primaryAction`:
+  //    - kind: 'internal' -> route path like /blog/slug
+  //    - kind: 'external' -> full URL opened in a new tab
+  //    - kind: 'mailto'   -> email CTA with prefilled subject
+  // 4) Optional `blogLink` lets you attach a blog post route to the card.
+  //    If both `primaryAction` and `blogLink` are provided, BOTH buttons are shown.
+  //    - primaryAction = main button (e.g. "VISIT LIVE", "JOIN WAITLIST", "REQUEST DEMO")
+  //    - blogLink      = secondary "READ BLOG" button
+  // 5) You can add as many labs as you want. Keep id values unique.
+  labs: [
+    // FULL TEMPLATE EXAMPLE (copy this block and edit values):
+    // {
+    //   id: "your-lab-id",
+    //   title: "PROJECT NAME",
+    //   category: "AI PLATFORM",
+    //   image: "/white-logo.png",
+    //   status: 'In Development', // allowed: 'In Development' | 'Private Beta' | 'Live'
+    //   visibility: 'teaser', // allowed: 'public' | 'teaser' | 'private'
+    //   publicSummary: "One-line non-sensitive summary of your lab.",
+    //   safeHighlights: [
+    //     "Public-safe capability or progress point",
+    //     "Another public-safe highlight",
+    //     "Optional third highlight"
+    //   ],
+    //   tags: ["AI", "R&D", "Security"],
+    //   updatedAt: "Apr 2026",
+    //   blogLink: "/blog/your-post-id", // optional
+    //   primaryAction: {
+    //     label: "VISIT LIVE PREVIEW",
+    //     href: "https://example.com",
+    //     kind: "external" // allowed: "internal" | "external" | "mailto"
+    //   }
+    // },
     { 
+      id: "cortex",
       title: "CORTEX", 
       category: "ARTIFICIAL INTELLIGENCE", 
-      client: null, 
       image: "/cortex_logo.png",
-      landingImage: "/cortex_website.png",
-      mobileImage: "/cortex_logo.png",
-      description: "A look into Cortex. A neural memory system that captures, organizes, and understands your thoughts through natural conversation. Cortex is designed to be your second brain, helping you remember and make sense of everything you experience.",
-      link: "#",
-      status: 'In Development'
+      status: 'In Development',
+      visibility: 'teaser',
+      publicSummary: "A proprietary cognitive platform focused on long-context memory and operator decision support for complex digital workflows.",
+      safeHighlights: [
+        "Private architecture under active R&D",
+        "Operator-first UX experiments",
+        "Controlled pilot evaluations in progress"
+      ],
+      tags: ["AI", "R&D", "Private"],
+      updatedAt: "Mar 2026",
+      blogLink: "/blog/introducing-cortex",
+      primaryAction: {
+        label: "REQUEST PRIVATE DEMO",
+        href: "mailto:hello@swymble.com?subject=CORTEX%20Private%20Demo",
+        kind: "mailto"
+      }
+    },
+    { 
+      id: "alias-vault",
+      title: "ALIAS VAULT", 
+      category: "PRIVACY TOOL", 
+      image: "/white-logo.png",
+      status: 'Private Beta',
+      visibility: 'teaser',
+      publicSummary: "A privacy-first alias management concept designed to reduce personal email exposure across signups and transactional workflows.",
+      safeHighlights: [
+        "Disposable identity workflows",
+        "Admin and abuse-control policy layer",
+        "Private usability validation"
+      ],
+      tags: ["Privacy", "Security", "Beta"],
+      updatedAt: "Mar 2026",
+      primaryAction: {
+        label: "JOIN BETA WAITLIST",
+        href: "mailto:hello@swymble.com?subject=Alias%20Vault%20Beta%20Waitlist",
+        kind: "mailto"
+      }
     }
   ],
 
@@ -138,7 +234,7 @@ export const SWYMBLE_DATA: SwymbleData = {
     paragraphs: [
       "I'm a Software engineer with hands-on experience building and supporting fintech and banking systems across multiple enterprise clients from banking sectors to the telco industry.",
       "Strong background in backend development, production systems, and regulatory-driven workflows. I have served as Technical Lead for Change Requests, owning the full lifecycle from requirements to production deployment, and have resolved high-priority incidents under strict SLAs.",
-      "Outside of enterprise work, I build scalable platforms using modern architectures and AI-assisted development and most notably Cortex, a modular AI-powered cognitive assistant leveraging vector search, graph databases, and multi-provider orchestration."
+      "Outside of enterprise work, I build scalable platforms using modern architectures and AI-assisted development, including Cortex, a proprietary cognitive system currently in private R&D."
     ]
   },
 

@@ -68,3 +68,13 @@
   transform: scaleX(1);
   transform-origin: bottom left;
 }
+
+/* Labs should be blue only when selected (active). */
+.nav-link.labs-link.active,
+.nav-link.labs-link.active:hover {
+  color: var(--accent-cyan);
+}
+
+.nav-link.labs-link.active::after {
+  background-color: var(--accent-cyan);
+}

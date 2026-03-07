@@ -18,11 +18,13 @@ export default function DesktopNav({ setIsHovering, brandName }: DesktopNavProps
       </div>
 
       <div className="nav-links">
-        {['Home', 'Projects', 'About', 'Blog'].map((item) => (
+        {['Home', 'Projects', 'Labs', 'About', 'Blog'].map((item) => (
           <NavLink
             key={item}
             to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            className={({ isActive }) =>
+              `nav-link ${item === 'Labs' ? 'labs-link' : ''} ${isActive ? 'active' : ''}`.trim()
+            }
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
             end={item === 'Home'}
