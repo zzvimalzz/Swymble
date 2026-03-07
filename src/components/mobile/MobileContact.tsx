@@ -29,7 +29,7 @@ export default function MobileContact() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="mobile-contact-wrapper" id="contact" style={{ paddingBottom: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div className="mobile-contact-wrapper" id="contact" style={{ paddingBottom: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div className="mobile-find-me" style={{ width: '100%' }}>
         <div className="section-header">
           <h2>FIND ME</h2>
