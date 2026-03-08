@@ -2,12 +2,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { SWYMBLE_DATA } from '../../data/config';
 import { Rocket } from 'lucide-react';
+import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
 
 export default function MobileContact() {
   const [showRocket, setShowRocket] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
   const baseUrl = import.meta.env.BASE_URL;
-  const isMailtoLink = (link: string) => link.toLowerCase().startsWith('mailto:');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,12 +39,13 @@ export default function MobileContact() {
           {SWYMBLE_DATA.socials.map((social) => {
             const Icon = social.icon;
             const isMailto = isMailtoLink(social.link);
+            const socialHref = isMailto ? buildGmailComposeUrl(social.link) : social.link;
             return (
               <a
                 key={social.id}
-                href={social.link}
-                target={isMailto ? undefined : '_blank'}
-                rel={isMailto ? undefined : 'noopener noreferrer'}
+                href={socialHref}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="social-btn"
                 aria-label={social.name}
               >

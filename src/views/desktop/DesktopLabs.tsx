@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { SWYMBLE_DATA } from '../../data/config';
+import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
 import '../../styles/desktop-labs.css';
 
 export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: boolean) => void }) {
@@ -33,8 +34,10 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
           <h3>NO PUBLIC LABS YET</h3>
           <p>Current R&D items are private. Reach out if you want a confidential walkthrough.</p>
           <a
-            href="mailto:hello@swymble.com?subject=Private%20Labs%20Walkthrough"
+            href={buildGmailComposeUrl('mailto:hello@swymble.com?subject=Private%20Labs%20Walkthrough')}
             className="lab-btn"
+            target="_blank"
+            rel="noopener noreferrer"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
@@ -96,20 +99,27 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
 
                 <div className="lab-actions">
                   {labItem.primaryAction &&
-                    (labItem.primaryAction.kind === 'internal' ? (
-                      <Link to={labItem.primaryAction.href} className="lab-btn">
-                        {labItem.primaryAction.label}
-                      </Link>
-                    ) : (
-                      <a
-                        href={labItem.primaryAction.href}
-                        target={labItem.primaryAction.kind === 'external' ? '_blank' : undefined}
-                        rel={labItem.primaryAction.kind === 'external' ? 'noopener noreferrer' : undefined}
-                        className="lab-btn"
-                      >
-                        {labItem.primaryAction.label}
-                      </a>
-                    ))}
+                    (() => {
+                      const action = labItem.primaryAction;
+                      if (action.kind === 'internal') {
+                        return (
+                          <Link to={action.href} className="lab-btn">
+                            {action.label}
+                          </Link>
+                        );
+                      }
+
+                      return (
+                        <a
+                          href={isMailtoLink(action.href) ? buildGmailComposeUrl(action.href) : action.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="lab-btn"
+                        >
+                          {action.label}
+                        </a>
+                      );
+                    })()}
 
                   {(labItem.blogCategoryId || labItem.blogLink) && (
                     <Link

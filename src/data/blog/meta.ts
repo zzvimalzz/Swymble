@@ -5,7 +5,7 @@ export const SWYMBLE_BLOG_META: Pick<
   'title' | 'description' | 'emptyStateMsg' | 'categories'
 > = {
   title: 'BLOG',
-  description: 'Read through my thoughts',
+  description: 'Read through my thoughts...',
   emptyStateMsg: 'No posts yet. Check back soon for random thoughts and deep dives into my projects and learnings.',
   categories: [
     {

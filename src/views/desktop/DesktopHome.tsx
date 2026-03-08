@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ParallaxMarquee from '../../components/desktop/ParallaxMarquee';
 import ProximityCard from '../../components/desktop/ProximityCard';
 import { SWYMBLE_DATA } from '../../data/config';
+import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
 
 type DesktopHomeProps = {
   baseUrl: string;
@@ -45,7 +46,6 @@ export default function DesktopHome({
   setIsHovering,
 }: DesktopHomeProps) {
   const navigate = useNavigate();
-  const isMailtoLink = (link: string) => link.toLowerCase().startsWith('mailto:');
 
   return (
     <>
@@ -271,12 +271,13 @@ export default function DesktopHome({
                 {SWYMBLE_DATA.socials.map((social) => {
                   const Icon = social.icon;
                   const isMailto = isMailtoLink(social.link);
+                  const socialHref = isMailto ? buildGmailComposeUrl(social.link) : social.link;
                   return (
                     <a
                       key={social.id}
-                      href={social.link}
-                      target={isMailto ? undefined : '_blank'}
-                      rel={isMailto ? undefined : 'noopener noreferrer'}
+                      href={socialHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="social-link w-client"
                       onMouseEnter={() => setIsHovering(true)}
                       onMouseLeave={() => setIsHovering(false)}
