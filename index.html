@@ -4,7 +4,54 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="%BASE_URL%white-logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SWYMBLE</title>
+    <meta name="description" content="SWYMBLE builds modern digital experiences, product websites, and intelligent web solutions for brands and businesses." />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="SWYMBLE" />
+    <meta name="theme-color" content="#050505" />
+
+    <link rel="canonical" href="https://swymble.com/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SWYMBLE" />
+    <meta property="og:title" content="SWYMBLE | Digital Experiences That Elevate Your Brand" />
+    <meta property="og:description" content="SWYMBLE builds modern digital experiences, product websites, and intelligent web solutions for brands and businesses." />
+    <meta property="og:url" content="https://swymble.com/" />
+    <meta property="og:image" content="https://swymble.com/ibsolutions_website.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SWYMBLE | Digital Experiences That Elevate Your Brand" />
+    <meta name="twitter:description" content="SWYMBLE builds modern digital experiences, product websites, and intelligent web solutions for brands and businesses." />
+    <meta name="twitter:image" content="https://swymble.com/ibsolutions_website.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "SWYMBLE",
+        "url": "https://swymble.com",
+        "logo": "https://swymble.com/white-logo.png",
+        "sameAs": ["https://github.com/zzvimalzz"],
+        "email": "hello@swymble.com"
+      }
+    </script>
+
+    <title>SWYMBLE | Digital Experiences That Elevate Your Brand</title>
+
+    <script>
+      (function (location) {
+        if (location.search[1] === '/') {
+          var decodedPath = location.search
+            .slice(1)
+            .split('&')
+            .map(function (part) {
+              return part.replace(/~and~/g, '&');
+            })
+            .join('?');
+
+          window.history.replaceState(null, '', decodedPath + location.hash);
+        }
+      })(window.location);
+    </script>
   </head>
   <body>
     <div id="root"></div>
