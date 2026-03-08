@@ -86,6 +86,15 @@ export type SwymbleBlogState = {
   posts: SwymbleBlogPost[];
 };
 
+export type SwymbleLatestUpdateCard = {
+  id: string;
+  kicker: string;
+  title: string;
+  description: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+};
+
 export type SwymbleSkillItem = {
   name: string;
   color: string;
@@ -110,6 +119,7 @@ export type SwymbleData = {
   marquee: string;
   whatIDo: SwymbleWhatIDo[];
   projects: SwymbleProject[];
+  latestUpdates: SwymbleLatestUpdateCard[];
   endCardMobileImage?: string;
   about: SwymbleAbout;
   labs: SwymbleLab[];

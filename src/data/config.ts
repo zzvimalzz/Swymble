@@ -2,6 +2,7 @@ import { SWYMBLE_ABOUT } from './about';
 import { SWYMBLE_BLOG } from './blog';
 import { SWYMBLE_BRANDING } from './branding';
 import { SWYMBLE_LABS } from './labs';
+import { SWYMBLE_LATEST_UPDATES } from './latestupdates';
 import { SWYMBLE_PROJECTS } from './projects';
 import { SWYMBLE_SOCIALS } from './socials';
 import { SWYMBLE_TECH_TOOLS } from './techtools';
@@ -14,6 +15,7 @@ export * from './types';
 // - branding: branding.ts
 // - what I do: whatido.ts
 // - projects: projects.ts
+// - latest updates: latestupdates.ts
 // - about: about.ts
 // - labs: labs.ts
 // - blog: blog/
@@ -25,6 +27,7 @@ export const SWYMBLE_DATA: SwymbleData = {
   marquee: SWYMBLE_BRANDING.marquee,
   whatIDo: SWYMBLE_WHAT_I_DO,
   projects: SWYMBLE_PROJECTS,
+  latestUpdates: SWYMBLE_LATEST_UPDATES,
   endCardMobileImage: SWYMBLE_BRANDING.endCardMobileImage,
   about: SWYMBLE_ABOUT,
   labs: SWYMBLE_LABS,

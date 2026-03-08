@@ -90,7 +90,12 @@ export default function MobileContact() {
             whileHover={!isLaunching ? { y: -5 } : {}}
             whileTap={!isLaunching ? { scale: 0.9 } : {}}
             aria-label="Scroll to top"
-            style={{ position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '3.6rem', height: '3.6rem', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(10px)',
+            }}
           >
             <Rocket size={30} style={{ transform: 'rotate(-45deg)' }} />
           </motion.button>

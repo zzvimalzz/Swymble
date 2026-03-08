@@ -98,12 +98,307 @@
   text-transform: uppercase;
   position: relative;
   z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  isolation: isolate;
+  transform: scale(var(--title-hold-scale, 1));
+  text-shadow: 0 0 0 rgba(255, 32, 68, 0), 0 0 0 rgba(255, 230, 0, 0), 0 0 0 rgba(0, 234, 255, 0);
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), text-shadow 0.2s ease;
+  will-change: transform, text-shadow;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.mobile-title.is-holding {
+  transition-duration: 1.2s, 0.2s;
+  text-shadow: 0 0 18px rgba(255, 32, 68, 0.55), 0 0 26px rgba(255, 230, 0, 0.45),
+    0 0 34px rgba(0, 234, 255, 0.35);
+}
+
+.mobile-title-text,
+.mobile-title-glitch {
+  grid-area: 1 / 1;
+}
+
+.mobile-title-text {
+  position: relative;
+  z-index: 2;
+}
+
+.mobile-title-glitch {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.mobile-title-glitch-a {
+  color: rgba(255, 32, 68, 0.95);
+  mix-blend-mode: screen;
+}
+
+.mobile-title-glitch-c {
+  color: rgba(255, 230, 0, 0.9);
+  mix-blend-mode: screen;
+}
+
+.mobile-title-glitch-b {
+  color: rgba(0, 234, 255, 0.9);
+  mix-blend-mode: screen;
+}
+
+.mobile-title-spark-field {
+  position: absolute;
+  inset: -1.1rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.mobile-title-spark {
+  position: absolute;
+  width: 0.22rem;
+  height: 0.22rem;
+  border-radius: 999px;
+  opacity: 0;
+  background: #ffffff;
+  box-shadow: 0 0 9px rgba(255, 255, 255, 0.8), 0 0 14px rgba(255, 32, 68, 0.5),
+    0 0 20px rgba(255, 230, 0, 0.4), 0 0 26px rgba(0, 234, 255, 0.25);
+}
+
+.mobile-title.is-tapped {
+  text-shadow: 0 0 16px rgba(255, 32, 68, 0.6), 0 0 22px rgba(255, 230, 0, 0.45),
+    0 0 30px rgba(0, 234, 255, 0.35);
+}
+
+.mobile-title.is-tapped .mobile-title-glitch,
+.mobile-title.is-holding .mobile-title-glitch {
+  opacity: 0.95;
+}
+
+.mobile-title.is-tapped .mobile-title-text {
+  animation: mobile-title-rumble 0.36s steps(2, end);
+}
+
+.mobile-title.is-holding .mobile-title-text {
+  animation: mobile-title-rumble-hold 0.2s steps(2, end) infinite;
+}
+
+.mobile-title.is-tapped .mobile-title-glitch-a,
+.mobile-title.is-holding .mobile-title-glitch-a {
+  animation: mobile-title-glitch-a 0.34s steps(2, end) infinite;
+}
+
+.mobile-title.is-tapped .mobile-title-glitch-c,
+.mobile-title.is-holding .mobile-title-glitch-c {
+  animation: mobile-title-glitch-c 0.36s steps(2, end) infinite;
+}
+
+.mobile-title.is-tapped .mobile-title-glitch-b,
+.mobile-title.is-holding .mobile-title-glitch-b {
+  animation: mobile-title-glitch-b 0.32s steps(2, end) infinite;
+}
+
+.mobile-title.is-holding .mobile-title-spark-field {
+  opacity: 1;
+}
+
+.mobile-title.is-holding .mobile-title-spark {
+  animation: mobile-title-spark-burst var(--spark-duration, 0.9s) linear infinite;
+}
+
+.mobile-title-spark.spark-1 {
+  left: 8%;
+  top: 66%;
+  --spark-x: -0.2rem;
+  --spark-y: -2.3rem;
+  --spark-duration: 0.95s;
+  animation-delay: 0.02s;
+}
+
+.mobile-title-spark.spark-2 {
+  left: 20%;
+  top: 30%;
+  --spark-x: -0.9rem;
+  --spark-y: -2rem;
+  --spark-duration: 0.8s;
+  animation-delay: 0.18s;
+}
+
+.mobile-title-spark.spark-3 {
+  left: 36%;
+  top: 16%;
+  --spark-x: 0.2rem;
+  --spark-y: -2.6rem;
+  --spark-duration: 0.7s;
+  animation-delay: 0.1s;
+}
+
+.mobile-title-spark.spark-4 {
+  left: 62%;
+  top: 11%;
+  --spark-x: 0.9rem;
+  --spark-y: -2.1rem;
+  --spark-duration: 0.88s;
+  animation-delay: 0.28s;
+}
+
+.mobile-title-spark.spark-5 {
+  left: 84%;
+  top: 35%;
+  --spark-x: 1.2rem;
+  --spark-y: -1.9rem;
+  --spark-duration: 0.76s;
+  animation-delay: 0.21s;
+}
+
+.mobile-title-spark.spark-6 {
+  left: 88%;
+  top: 72%;
+  --spark-x: 1rem;
+  --spark-y: -2.4rem;
+  --spark-duration: 0.92s;
+  animation-delay: 0.06s;
+}
+
+.mobile-title-spark.spark-7 {
+  left: 55%;
+  top: 82%;
+  --spark-x: 0.1rem;
+  --spark-y: -2.8rem;
+  --spark-duration: 0.98s;
+  animation-delay: 0.15s;
+}
+
+.mobile-title-spark.spark-8 {
+  left: 22%;
+  top: 84%;
+  --spark-x: -0.8rem;
+  --spark-y: -2.2rem;
+  --spark-duration: 0.84s;
+  animation-delay: 0.24s;
+}
+
+@keyframes mobile-title-rumble {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  20% {
+    transform: translate(-1.5px, 0.8px) rotate(-0.35deg);
+  }
+  40% {
+    transform: translate(1.7px, -0.9px) rotate(0.35deg);
+  }
+  65% {
+    transform: translate(-1px, -0.6px) rotate(-0.2deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes mobile-title-rumble-hold {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-1.2px, 0.6px) rotate(-0.35deg);
+  }
+  50% {
+    transform: translate(1.2px, -0.7px) rotate(0.28deg);
+  }
+  75% {
+    transform: translate(-0.8px, -0.5px) rotate(-0.22deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes mobile-title-glitch-a {
+  0% {
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  30% {
+    transform: translate(-2px, 1px);
+    clip-path: inset(12% 0 43% 0);
+  }
+  60% {
+    transform: translate(2px, -1px);
+    clip-path: inset(58% 0 8% 0);
+  }
+  100% {
+    transform: translate(-1px, 0);
+    clip-path: inset(24% 0 30% 0);
+  }
+}
+
+@keyframes mobile-title-glitch-b {
+  0% {
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  25% {
+    transform: translate(2px, -1px);
+    clip-path: inset(62% 0 10% 0);
+  }
+  55% {
+    transform: translate(-2px, 1px);
+    clip-path: inset(10% 0 56% 0);
+  }
+  100% {
+    transform: translate(1px, 0);
+    clip-path: inset(34% 0 28% 0);
+  }
+}
+
+@keyframes mobile-title-glitch-c {
+  0% {
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  25% {
+    transform: translate(-1px, 1px);
+    clip-path: inset(42% 0 20% 0);
+  }
+  55% {
+    transform: translate(1px, -1px);
+    clip-path: inset(8% 0 63% 0);
+  }
+  100% {
+    transform: translate(-1px, 0);
+    clip-path: inset(28% 0 33% 0);
+  }
+}
+
+@keyframes mobile-title-spark-burst {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(calc(var(--spark-x) * 0.3), calc(var(--spark-y) * 0.25)) scale(1);
+  }
+  65% {
+    opacity: 0.9;
+    transform: translate(var(--spark-x), var(--spark-y)) scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--spark-x) * 1.3), calc(var(--spark-y) * 1.3)) scale(0.3);
+  }
 }
 
 /* MOBILE PROJECTS - TINDER CARD */
 .mobile-projects-wrapper {
   width: 100%;
-  padding: 2rem 1.5rem 6rem;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 2rem clamp(1rem, 4vw, 1.6rem) 6rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -132,13 +427,21 @@
 
 .card-container {
   position: relative;
-  width: 100%;
-  max-width: 500px;
+  width: min(100%, 40rem);
+  max-width: none;
   height: 65vh;
   min-height: 480px;
   max-height: 800px;
   margin: 0 auto;
   perspective: 1000px;
+}
+
+@media (min-width: 680px) {
+  .card-container {
+    width: min(100%, 44rem);
+    height: 68vh;
+    min-height: 500px;
+  }
 }
 
 .tinder-card {
