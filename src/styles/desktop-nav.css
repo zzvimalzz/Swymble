@@ -20,7 +20,7 @@
 }
 
 .nav-brand a {
-  font-family: var(--font-logo);
+  font-family: 'Lucidity Expand', var(--font-logo);
   font-size: 2rem;
   color: var(--text-main);
   text-decoration: none;

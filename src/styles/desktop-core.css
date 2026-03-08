@@ -124,7 +124,7 @@ body {
 }
 
 .hero-title {
-  font-family: var(--font-logo);
+  font-family: 'Lucidity Expand', var(--font-logo);
   font-size: clamp(4rem, 15vw, 15rem);
   line-height: 0.8;
   letter-spacing: 0.05em;

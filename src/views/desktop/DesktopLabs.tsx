@@ -111,13 +111,16 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
                       </a>
                     ))}
 
-                  {labItem.blogLink && (
-                    <Link to={labItem.blogLink} className={`lab-btn ${labItem.primaryAction ? 'secondary' : ''}`}>
+                  {(labItem.blogCategoryId || labItem.blogLink) && (
+                    <Link
+                      to={labItem.blogCategoryId ? `/blog?category=${encodeURIComponent(labItem.blogCategoryId)}` : (labItem.blogLink as string)}
+                      className={`lab-btn ${labItem.primaryAction ? 'secondary' : ''}`}
+                    >
                       READ BLOG
                     </Link>
                   )}
 
-                  {!labItem.primaryAction && !labItem.blogLink && (
+                  {!labItem.primaryAction && !labItem.blogCategoryId && !labItem.blogLink && (
                     <div className="lab-btn disabled">NO PUBLIC ACTION</div>
                   )}
                 </div>

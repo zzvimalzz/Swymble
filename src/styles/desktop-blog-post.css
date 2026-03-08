@@ -90,6 +90,23 @@
   flex-wrap: wrap;
 }
 
+.post-categories-header {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.post-category-header {
+  font-family: var(--font-mono);
+  font-size: clamp(0.68rem, 1.4vw, 0.78rem);
+  color: var(--accent-volt);
+  background: rgba(239, 255, 4, 0.08);
+  border: 1px solid rgba(239, 255, 4, 0.3);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
 .post-tag-header {
   font-family: var(--font-mono);
   font-size: clamp(0.7rem, 1.5vw, 0.8rem);
@@ -126,6 +143,109 @@
   color: var(--text-secondary);
 }
 
+.post-question {
+  font-size: clamp(1.1rem, 2.3vw, 1.3rem);
+  line-height: 1.85;
+  color: var(--text-main);
+  font-family: var(--font-display);
+  font-weight: 600;
+  border-left: 3px solid var(--accent-volt);
+  padding-left: 1rem;
+  background: rgba(239, 255, 4, 0.04);
+}
+
+.post-quote {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.05);
+  border-radius: 0 8px 8px 0;
+}
+
+.post-quote p {
+  margin: 0;
+  font-size: clamp(1rem, 2vw, 1.1rem);
+  line-height: 1.8;
+  color: var(--text-main);
+}
+
+.post-quote cite {
+  display: block;
+  margin-top: 0.75rem;
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.post-list {
+  margin: 0;
+  padding-left: 1.3rem;
+  display: grid;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.post-list li {
+  line-height: 1.8;
+}
+
+.post-list.is-numbered {
+  list-style: decimal;
+}
+
+.post-list.is-bullet {
+  list-style: disc;
+}
+
+.post-spacer {
+  width: 100%;
+}
+
+.post-spacer.size-sm {
+  height: 0.75rem;
+}
+
+.post-spacer.size-md {
+  height: 1.5rem;
+}
+
+.post-spacer.size-lg {
+  height: 2.5rem;
+}
+
+.post-indent-0 {
+  margin-left: 0;
+}
+
+.post-indent-1 {
+  margin-left: clamp(0.75rem, 2vw, 1rem);
+}
+
+.post-indent-2 {
+  margin-left: clamp(1.5rem, 4vw, 2rem);
+}
+
+.post-indent-3 {
+  margin-left: clamp(2.25rem, 6vw, 3rem);
+}
+
+.post-underline {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.post-inline-code {
+  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+  font-size: 0.92em;
+  color: var(--text-main);
+}
+
 .post-heading-2 {
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 4vw, 2.2rem);
@@ -140,6 +260,16 @@
   font-size: clamp(1.3rem, 3vw, 1.8rem);
   margin-top: 1.5rem;
   color: var(--text-main);
+  word-wrap: break-word;
+}
+
+.post-heading-4 {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+  margin-top: 1.2rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   word-wrap: break-word;
 }
 
@@ -192,4 +322,60 @@
   font-family: var(--font-mono);
   font-size: clamp(0.85rem, 1.5vw, 0.95rem);
   color: #e0e0e0;
+}
+
+.related-posts-section {
+  margin-top: 4.5rem;
+  padding-top: 2.25rem;
+  border-top: 2px solid rgba(255, 255, 255, 0.16);
+}
+
+.related-posts-title {
+  margin: 0 0 1.4rem;
+  font-family: var(--font-logo);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+}
+
+.related-posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.related-post-card {
+  display: block;
+  text-decoration: none;
+  padding: 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.related-post-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(239, 255, 4, 0.45);
+}
+
+.related-post-date {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.related-post-card h3 {
+  margin: 0 0 0.55rem;
+  color: var(--text-main);
+  font-size: 1.05rem;
+}
+
+.related-post-card p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
