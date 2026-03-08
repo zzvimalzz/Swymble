@@ -6,6 +6,6 @@
 export const SWYMBLE_BRANDING = {
   name: 'SWYMBLE',
   tagline: 'We build digital experiences that elevates your brand.',
-  marquee: 'SEPERATE YOUR BRAND FROM THE NOISE WITH SWYMBLE',
+  marquee: 'SEPARATE YOUR BRAND FROM THE NOISE WITH SWYMBLE',
   endCardMobileImage: '/white-logo.png',
 };
