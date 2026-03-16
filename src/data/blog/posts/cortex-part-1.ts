@@ -105,7 +105,7 @@ export const CORTEX_PART_1_POST: SwymbleBlogPost = {
         {
             type: 'paragraph',
             text: [
-                'There\'s alot more to get into, the task system, the way of how I tried to approach securitym the specific technical decisions and changes I made halfway into it. I\'ll do my best to cover all of that in my other blog posts',
+                'There\'s alot more to get into, the task system, the way of how I tried to approach security the specific technical decisions and changes I made halfway into it. I\'ll do my best to cover all of that in my other blog posts',
                 '\nBut I just wanted to start here. With the *why* and the *what* before diving into the how.',
                 '\nCortex is the most ambitious thing I\'ve built. It\'s still a work in progress though mind you. But its alive and running. And everyday it gets a little bit more like what I imagined when I started',
                 '\nI can\'t wait to share more soon.'
