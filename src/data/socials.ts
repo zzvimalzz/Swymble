@@ -9,6 +9,6 @@ import type { SwymbleSocial } from './types';
 export const SWYMBLE_SOCIALS: SwymbleSocial[] = [
   { id: 'gh', name: 'GITHUB', link: 'https://github.com/zzvimalzz', icon: Github },
   { id: 'em', name: 'EMAIL', link: 'mailto:hello@swymble.com', icon: Mail },
-  { id: 'wa', name: 'WHATSAPP', link: 'https://wa.me/0172358500', icon: MessageCircleMore },
+  { id: 'wa', name: 'WHATSAPP', link: 'https://wa.me/60172358500', icon: MessageCircleMore },
 
 ];

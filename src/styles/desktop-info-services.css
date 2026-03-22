@@ -276,17 +276,26 @@
   box-shadow: 0 10px 30px rgba(var(--card-color-rgb), 0.15);
 }
 
-.service-card h3 {
+.service-card-title {
   font-family: var(--font-display);
-  font-size: 1.8rem;
-  margin-bottom: 2rem;
+  font-size: clamp(1.55rem, 1.4rem + 0.85vw, 1.95rem);
+  line-height: 1.02;
+  letter-spacing: 0.02em;
+  max-width: 10ch;
+  margin: 0 auto 1.75rem;
   text-transform: uppercase;
   color: var(--text-main);
   transition: text-shadow 0.3s ease;
+  text-wrap: balance;
 }
 
-.service-card:hover h3,
-.service-card.force-hover h3 {
+.service-card-title-tight {
+  font-size: clamp(1.35rem, 1.2rem + 0.7vw, 1.7rem);
+  max-width: 13ch;
+}
+
+.service-card:hover .service-card-title,
+.service-card.force-hover .service-card-title {
   text-shadow: 0 0 15px rgba(var(--card-color-rgb), 0.8);
 }
 

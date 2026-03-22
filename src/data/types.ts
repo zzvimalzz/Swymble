@@ -7,6 +7,15 @@ export type SwymbleWhatIDo = {
   desc: string;
 };
 
+export type SwymbleService = {
+  id: string;
+  title: string;
+  colorHex: string;
+  colorRgb: string;
+  summary: string;
+  highlights: string[];
+};
+
 export type SwymbleProject = {
   title: string;
   category: string;
@@ -126,4 +135,5 @@ export type SwymbleData = {
   blog: SwymbleBlogState;
   skills: SwymbleSkillCategory[];
   socials: SwymbleSocial[];
+  services: SwymbleService[];
 };

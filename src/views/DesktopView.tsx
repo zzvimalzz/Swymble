@@ -19,6 +19,8 @@ import DesktopAbout from './desktop/DesktopAbout';
 import DesktopBlog from './desktop/DesktopBlog';
 import DesktopBlogPost from './desktop/DesktopBlogPost';
 import DesktopLabs from './desktop/DesktopLabs';
+import DesktopServices from './desktop/DesktopServices';
+import DesktopNotFound from './desktop/DesktopNotFound';
 
 import { SWYMBLE_DATA } from '../data/config';
 import '../styles/desktop.css';
@@ -269,7 +271,7 @@ export default function DesktopView() {
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         signal: controller.signal,
         body: JSON.stringify({
-          access_key: 'f9d2f115-7cfc-4cf4-a393-4e5bb3a521df',
+          access_key: import.meta.env.VITE_WEB3FORMS_KEY,
           name: cleanName,
           email: cleanEmail,
           subject: `New inquiry from ${cleanName} via Swymble`,
@@ -359,6 +361,10 @@ export default function DesktopView() {
           element={<DesktopLabs setIsHovering={setIsHovering} />} 
         />
         <Route 
+          path="/services" 
+          element={<DesktopServices setIsHovering={setIsHovering} />} 
+        />
+        <Route 
           path="/about" 
           element={<DesktopAbout />} 
         />
@@ -369,6 +375,10 @@ export default function DesktopView() {
         <Route 
           path="/blog/:id" 
           element={<DesktopBlogPost />} 
+        />
+        <Route 
+          path="*" 
+          element={<DesktopNotFound setIsHovering={setIsHovering} />} 
         />
       </Routes>
 

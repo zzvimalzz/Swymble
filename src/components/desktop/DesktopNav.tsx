@@ -18,7 +18,7 @@ export default function DesktopNav({ setIsHovering, brandName }: DesktopNavProps
       </div>
 
       <div className="nav-links">
-        {['Home', 'Projects', 'Labs', 'About', 'Blog'].map((item) => (
+        {['Home', 'Services', 'Projects', 'Labs', 'About', 'Blog'].map((item) => (
           <NavLink
             key={item}
             to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}

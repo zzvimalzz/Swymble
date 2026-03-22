@@ -1,6 +1,7 @@
 import { motion, MotionValue } from 'framer-motion';
 import type { ChangeEvent, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ParallaxMarquee from '../../components/desktop/ParallaxMarquee';
 import ProximityCard from '../../components/desktop/ProximityCard';
 import { SWYMBLE_DATA } from '../../data/config';
@@ -46,6 +47,22 @@ export default function DesktopHome({
   setIsHovering,
 }: DesktopHomeProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!location.hash) {
+      return;
+    }
+
+    const id = decodeURIComponent(location.hash.substring(1));
+
+    setTimeout(() => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  }, [location.hash]);
 
   return (
     <>
@@ -178,7 +195,7 @@ export default function DesktopHome({
           transition={{ duration: 0.8 }}
         >
           <div className="footer-grid">
-            <div className="form-container">
+            <div id="work-with-me" className="form-container">
               <div className="section-header" style={{ marginBottom: '2rem' }}>
                 <h2>LET'S TALK</h2>
               </div>

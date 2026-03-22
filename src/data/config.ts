@@ -4,6 +4,7 @@ import { SWYMBLE_BRANDING } from './branding';
 import { SWYMBLE_LABS } from './labs';
 import { SWYMBLE_LATEST_UPDATES } from './latestupdates';
 import { SWYMBLE_PROJECTS } from './projects';
+import { SWYMBLE_SERVICES } from './services';
 import { SWYMBLE_SOCIALS } from './socials';
 import { SWYMBLE_TECH_TOOLS } from './techtools';
 import { SWYMBLE_WHAT_I_DO } from './whatido';
@@ -34,4 +35,5 @@ export const SWYMBLE_DATA: SwymbleData = {
   blog: SWYMBLE_BLOG,
   skills: SWYMBLE_TECH_TOOLS,
   socials: SWYMBLE_SOCIALS,
+  services: SWYMBLE_SERVICES,
 };

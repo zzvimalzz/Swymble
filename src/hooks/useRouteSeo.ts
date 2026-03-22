@@ -89,6 +89,16 @@ const buildSeoPayload = (pathname: string): SeoPayload => {
     };
   }
 
+  if (pathname === '/services') {
+    return {
+      title: `Services | ${SITE_NAME}`,
+      description:
+        'Web design, development, and maintenance services by SWYMBLE. End-to-end digital solutions for brands and businesses.',
+      type: 'website',
+      shouldIndex: true,
+    };
+  }
+
   if (pathname === '/about') {
     return {
       title: `About | ${SITE_NAME}`,
