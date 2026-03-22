@@ -47,7 +47,7 @@ export const CORTEX_PART_1_POST: SwymbleBlogPost = {
             type: 'paragraph',
             text: [
                 `The concept that everything else is built around was the idea of a working brain. Instead of a single AI responding to everything the same way, Cortex routes your messages to different "sections" of the brain depending on what you're trying to get out of the conversation.`,
-                '\nThree main regions, three different personalities and purposes:'
+                '\nFour main regions, each one with a distinct role:'
             ]
         },
         {
@@ -57,11 +57,15 @@ export const CORTEX_PART_1_POST: SwymbleBlogPost = {
                 `**Limbic** - Emotional core. When you're processing something hard, venting, or need to feel genuinely heard, Limbic handles it with empathy instead of generic filler.`,
                 `**Prefrontal** - Structured logic. Planning, problem-solving, and breaking down decisions into clear next actions.`,
                 `**Amygdala** - Fast and direct. Quick questions get quick answers because not every message needs a five-paragraph response.`,
+                `**Hippocampus** - Memory store. Every conversation is indexed, graph and vector, so Cortex can actually recall what you've told it across sessions, not just within one.`
             ],
         },
         {
             type: 'paragraph',
             text: `The routing between these regions happens automatically. You don't have to specify which mode you want. The system reads intent and routes accordingly. I've been calling that layer the **Thalamus**.`,
+        },
+        {
+            type: 'image', src: '/cortex_brain_regions.png', caption: 'Diagram of Cortex Brain Regions' 
         },
         {
             type: 'heading', text: 'Memory That Actually Works', level: 2,
