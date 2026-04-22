@@ -44,26 +44,4 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
       kind: 'mailto',
     },
   },
-  {
-    id: 'alias-vault',
-    title: 'ALIAS VAULT',
-    category: 'PRIVACY TOOL',
-    image: '/white-logo.png',
-    status: 'Private Beta',
-    visibility: 'teaser',
-    publicSummary:
-      'A privacy-first alias management concept designed to reduce personal email exposure across signups and transactional workflows.',
-    safeHighlights: [
-      'Disposable identity workflows',
-      'Admin and abuse-control policy layer',
-      'Private usability validation',
-    ],
-    tags: ['Privacy', 'Security', 'Beta'],
-    updatedAt: 'Mar 2026',
-    primaryAction: {
-      label: 'JOIN BETA WAITLIST',
-      href: 'mailto:hello@swymble.com?subject=Alias%20Vault%20Beta%20Waitlist',
-      kind: 'mailto',
-    },
-  },
 ];
