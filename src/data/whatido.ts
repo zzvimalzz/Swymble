@@ -6,21 +6,21 @@ import type { SwymbleWhatIDo } from './types';
 // - desc: card description text
 export const SWYMBLE_WHAT_I_DO: SwymbleWhatIDo[] = [
   {
-    title: 'WEB DESIGN',
+    title: 'SOFTWARE ENGINEERING',
     colorHex: '#EFFF04',
     colorRgb: '239, 255, 4',
-    desc: "I design websites for businesses that want to standout. My approach is to create a unique, high-contrast aesthetic that captures your brand's true edge.",
+    desc: 'Production-minded engineering across backend systems, enterprise workflows, fintech platforms, and the day-to-day problem solving that keeps real software running.',
   },
   {
-    title: 'WEB DEVELOPMENT',
+    title: 'BUILDS AND EXPERIMENTS',
     colorHex: '#FF003C',
     colorRgb: '255, 0, 60',
-    desc: "Visuals that hit hard. Moving beyond templates to craft a unique, high-contrast aesthetic that captures your brand's true edge.",
+    desc: 'Apps, tools, prototypes, and side projects that let me test ideas quickly, learn in public, and turn concepts into working products.',
   },
   {
-    title: 'WEB MAINTENANCE',
+    title: 'WEB, WRITING, AND LIFE',
     colorHex: '#00F0FF',
     colorRgb: '0, 240, 255',
-    desc: 'Regular updates, security checks, and performance optimizations to keep your website running smoothly and securely.',
+    desc: 'A place to share the websites I make, the stories behind my work, blog posts, travel notes, and the personal side of what I am building next.',
   },
 ];

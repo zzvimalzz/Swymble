@@ -12,18 +12,17 @@ import '../styles/mobile-enhancements.css';
 
 const HOME_SECTIONS = [
   { id: 'top', label: 'Home' },
-  { id: 'services-section', label: 'What I do' },
+  { id: 'focus-section', label: 'Overview' },
   { id: 'projects', label: 'Projects' },
   { id: 'latest-updates', label: 'Latest Updates' },
   { id: 'contact-section', label: 'Contact' },
 ] as const;
 
-const HOME_ROUTE_PATHS = new Set(['/', '/projects', '/services', '/contact', '/about', '/labs']);
-const HOME_RENDER_PATHS = ['/', '/projects', '/services', '/contact'];
+const HOME_ROUTE_PATHS = new Set(['/', '/projects', '/contact', '/about', '/labs']);
+const HOME_RENDER_PATHS = ['/', '/projects', '/contact'];
 
 const getHomeSectionFromPath = (pathname: string): MobileHomeSectionId => {
   if (pathname === '/projects') return 'projects';
-  if (pathname === '/services') return 'services-section';
   if (pathname === '/contact') return 'contact-section';
   return 'top';
 };
@@ -422,10 +421,10 @@ export default function MobileTabletView() {
       isActive: isHomeRoute && activeSection === 'top',
     },
     {
-      key: 'home-services',
-      label: 'What I do',
-      action: () => jumpToSection('services-section'),
-      isActive: isHomeRoute && activeSection === 'services-section',
+      key: 'home-focus',
+      label: 'Overview',
+      action: () => jumpToSection('focus-section'),
+      isActive: isHomeRoute && activeSection === 'focus-section',
     },
     {
       key: 'home-projects',

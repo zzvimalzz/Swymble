@@ -94,10 +94,10 @@ export default function DesktopHome({
 
       <section className="layout-content">
         <div className="section-header">
-          <h2>What I Do</h2>
+          <h2>What You'll Find Here</h2>
         </div>
 
-        <div className="services-grid">
+        <div className="focus-grid">
           {SWYMBLE_DATA.whatIDo.map((service, index) => (
             <ProximityCard key={service.title} service={service} index={index} mousePos={mousePos} />
           ))}

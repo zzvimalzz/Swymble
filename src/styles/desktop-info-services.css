@@ -189,7 +189,7 @@
   color: #ccc;
 }
 
-/* Services / Brutalist Grid */
+/* Home Focus Grid */
 .layout-content {
   padding: 10rem 5vw;
   max-width: 1400px;
@@ -220,7 +220,15 @@
   font-weight: 400;
 }
 
-.services-grid {
+.section-intro {
+  max-width: 52rem;
+  margin: -1.5rem 0 3rem;
+  font-size: 1.08rem;
+  line-height: 1.75;
+  color: var(--muted);
+}
+
+.focus-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;

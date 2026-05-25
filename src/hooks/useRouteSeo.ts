@@ -61,9 +61,9 @@ const toAbsoluteUrl = (pathOrUrl: string) => {
 const buildSeoPayload = (pathname: string): SeoPayload => {
   if (pathname === '/') {
     return {
-      title: `${SITE_NAME} | Digital Experiences That Elevate Your Brand`,
+      title: `${SITE_NAME} | Projects, Builds, Writing, and Story`,
       description:
-        'SWYMBLE builds modern digital experiences, product websites, and intelligent web solutions for brands and businesses.',
+        'A personal site for software engineering work, shipped projects, experimental builds, blog posts, and the story behind what I am making.',
       type: 'website',
       shouldIndex: true,
     };
@@ -73,7 +73,7 @@ const buildSeoPayload = (pathname: string): SeoPayload => {
     return {
       title: `Projects | ${SITE_NAME}`,
       description:
-        'Explore recent SWYMBLE projects, client work, and digital product builds delivered with performance and clarity in mind.',
+        'Explore websites, apps, and product builds from SWYMBLE, including shipped work and the thinking behind each project.',
       type: 'website',
       shouldIndex: true,
     };
@@ -83,17 +83,7 @@ const buildSeoPayload = (pathname: string): SeoPayload => {
     return {
       title: `Labs | ${SITE_NAME}`,
       description:
-        'See SWYMBLE Labs experiments across AI, product R&D, and private concept development.',
-      type: 'website',
-      shouldIndex: true,
-    };
-  }
-
-  if (pathname === '/services') {
-    return {
-      title: `Services | ${SITE_NAME}`,
-      description:
-        'Web design, development, and maintenance services by SWYMBLE. End-to-end digital solutions for brands and businesses.',
+        'See SWYMBLE Labs experiments across AI, product R&D, prototypes, and in-progress ideas.',
       type: 'website',
       shouldIndex: true,
     };
@@ -103,7 +93,7 @@ const buildSeoPayload = (pathname: string): SeoPayload => {
     return {
       title: `About | ${SITE_NAME}`,
       description:
-        'Learn about the engineer behind SWYMBLE and the approach used to build scalable, production-grade digital experiences.',
+        'Learn about the engineer behind SWYMBLE, from enterprise software experience to personal builds, writing, and long-term experiments.',
       type: 'website',
       shouldIndex: true,
     };
@@ -113,7 +103,7 @@ const buildSeoPayload = (pathname: string): SeoPayload => {
     return {
       title: `Blog | ${SITE_NAME}`,
       description:
-        'Read SWYMBLE insights on software engineering, AI systems, and product architecture.',
+        'Read SWYMBLE notes on software engineering, AI systems, builds, lessons learned, and ideas worth documenting.',
       type: 'website',
       shouldIndex: true,
     };

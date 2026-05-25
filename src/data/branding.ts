@@ -5,7 +5,7 @@
 // - endCardMobileImage: image shown at the end of mobile project swipe
 export const SWYMBLE_BRANDING = {
   name: 'SWYMBLE',
-  tagline: 'We build digital experiences that elevates your brand.',
-  marquee: 'SEPARATE YOUR BRAND FROM THE NOISE WITH SWYMBLE',
+  tagline: 'Software engineering, builds, writing, and the story behind what I make.',
+  marquee: 'PROJECTS - APPS - BLOG - LAB - TRAVEL - STORY - SWYMBLE',
   endCardMobileImage: '/white-logo.png',
 };

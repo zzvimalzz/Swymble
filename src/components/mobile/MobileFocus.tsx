@@ -2,12 +2,18 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import type { SwymbleWhatIDo } from '../../data/config';
 
-export default function MobileServices({ whatIDo }: { whatIDo: SwymbleWhatIDo[] }) {
+export default function MobileFocus({ whatIDo }: { whatIDo: SwymbleWhatIDo[] }) {
   return (
-    <div className="mobile-services-wrapper" id="services">
+    <div className="mobile-focus-wrapper" id="focus">
       <div className="section-header">
-        <h2>WHAT I DO</h2>
+        <h2>WHAT YOU'LL FIND HERE</h2>
       </div>
+
+      <p className="mobile-focus-intro">
+        A running overview of my engineering experience, the products and websites I ship, the ideas I am
+        exploring in public, and the writing and life updates that shape the work.
+      </p>
+
       <div className="services-list">
         {whatIDo.map((service, idx) => (
           <motion.div
@@ -18,9 +24,9 @@ export default function MobileServices({ whatIDo }: { whatIDo: SwymbleWhatIDo[] 
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.6, delay: idx * 0.1 }}
             style={
-              { 
+              {
                 '--service-color': service.colorHex,
-                '--card-index': idx 
+                '--card-index': idx,
               } as React.CSSProperties
             }
           >

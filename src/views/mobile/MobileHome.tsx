@@ -3,11 +3,11 @@ import { ChevronDown, Newspaper } from 'lucide-react';
 import { useEffect, useMemo, useState, type CSSProperties, type MutableRefObject, type PointerEvent as ReactPointerEvent } from 'react';
 
 import MobileContact from '../../components/mobile/MobileContact';
+import MobileFocus from '../../components/mobile/MobileFocus';
 import MobileProjects from '../../components/mobile/MobileProjects';
-import MobileServices from '../../components/mobile/MobileServices';
 import { SWYMBLE_DATA } from '../../data/config';
 
-export type MobileHomeSectionId = 'top' | 'services-section' | 'projects' | 'latest-updates' | 'contact-section';
+export type MobileHomeSectionId = 'top' | 'focus-section' | 'projects' | 'latest-updates' | 'contact-section';
 
 type MobileHomeProps = {
   scrolled: boolean;
@@ -131,11 +131,11 @@ export default function MobileHome({
         </h1>
 
         <a
-          href="#services-section"
+          href="#focus-section"
           className={`scroll-indicator ${scrolled ? 'hidden' : ''}`}
           onClick={(event) => {
             event.preventDefault();
-            onJumpToSection('services-section');
+            onJumpToSection('focus-section');
           }}
         >
           <span className="scroll-text">Scroll down</span>
@@ -143,8 +143,8 @@ export default function MobileHome({
         </a>
       </header>
 
-      <section className="mobile-section mobile-home-section" id="services-section" style={{ width: '100%' }}>
-        <MobileServices whatIDo={SWYMBLE_DATA.whatIDo} />
+      <section className="mobile-section mobile-home-section" id="focus-section" style={{ width: '100%' }}>
+        <MobileFocus whatIDo={SWYMBLE_DATA.whatIDo} />
       </section>
 
       <section className="mobile-section mobile-home-section" id="projects" style={{ width: '100%' }}>

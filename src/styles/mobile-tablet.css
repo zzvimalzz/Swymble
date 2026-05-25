@@ -640,26 +640,35 @@
   transform: scale(0.95);
 }
 
-/* MOBILE SERVICES */
-.mobile-services-wrapper {
+/* MOBILE HOME FOCUS */
+.mobile-focus-wrapper {
   width: 100%;
   padding: 4rem 1.2rem 2rem;
   display: flex;
   flex-direction: column;
 }
 
-.mobile-services-wrapper .section-header {
+.mobile-focus-wrapper .section-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
 }
 
-.mobile-services-wrapper .section-header h2 {
+.mobile-focus-wrapper .section-header h2 {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 4.5rem;
   margin: 0;
   letter-spacing: 2px;
   color: var(--mobile-text);
   line-height: 1;
+}
+
+.mobile-focus-intro {
+  margin: 0 auto 2rem;
+  max-width: 34rem;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--mobile-muted);
 }
 
 .services-list {
