@@ -39,6 +39,34 @@
 
     <script>
       (function (location) {
+        var hostname = location.hostname.toLowerCase();
+        var hostLabels = hostname.split('.').filter(Boolean);
+        var localhostSubdomain =
+          hostLabels.length > 1 && hostLabels[hostLabels.length - 1] === 'localhost'
+            ? hostLabels[0]
+            : null;
+        var swymbleSubdomain =
+          hostLabels.length > 2 && hostname.endsWith('.swymble.com')
+            ? hostLabels[0]
+            : null;
+        var activeSubdomain = localhostSubdomain || swymbleSubdomain;
+
+        if (activeSubdomain && !location.pathname.startsWith('/subdomains/')) {
+          var resolvedPath =
+            location.pathname === '/' || location.pathname === '/index.html'
+              ? '/index.html'
+              : location.pathname;
+
+          location.replace(
+            '/subdomains/' +
+              encodeURIComponent(activeSubdomain) +
+              resolvedPath +
+              location.search +
+              location.hash,
+          );
+          return;
+        }
+
         if (location.search[1] === '/') {
           var decodedPath = location.search
             .slice(1)

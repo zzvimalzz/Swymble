@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
+import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_DATA } from '../../data/config';
+import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import '../../styles/desktop-info-services.css';
 import '../../styles/desktop-projects.css';
 
@@ -31,6 +33,7 @@ export default function DesktopProjects({ setIsHovering }: { setIsHovering: (val
       <div className="projects-list">
         {SWYMBLE_DATA.projects.map((workItem, index) => {
           const projectId = workItem.title.replace(/\s+/g, '-').toLowerCase();
+          const categoryAccentStyle = getCategoryAccentStyle(workItem.category, workItem.categoryColor);
           return (
             <motion.div
               id={projectId}
@@ -46,15 +49,10 @@ export default function DesktopProjects({ setIsHovering }: { setIsHovering: (val
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
               >
-              <img
+              <SmartImage
                 src={workItem.landingImage || workItem.image}
                 alt={workItem.title}
                 className="project-image"
-                style={
-                  workItem.landingImage !== workItem.image
-                    ? { objectFit: 'cover', objectPosition: 'top', padding: 0 }
-                    : {}
-                }
               />
             </div>
 
@@ -63,7 +61,7 @@ export default function DesktopProjects({ setIsHovering }: { setIsHovering: (val
                 {workItem.title}
               </h3>
               <div className="carousel-meta project-meta">
-                <span className="w-category">{workItem.category}</span>
+                <span className="w-category category-accent-text" style={categoryAccentStyle}>{workItem.category}</span>
                 {workItem.client && <span className="w-impact">{workItem.client}</span>}
               </div>
               <p className="project-description">

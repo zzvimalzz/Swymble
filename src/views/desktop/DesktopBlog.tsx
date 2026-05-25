@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_DATA } from '../../data/config';
+import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import '../../styles/desktop-blog.css';
 
 export default function DesktopBlog() {
@@ -76,9 +78,10 @@ export default function DesktopBlog() {
               <button
                 key={category.id}
                 type="button"
-                className={`blog-folder-btn ${activeCategory === category.id ? 'active' : ''}`}
+                className={`blog-folder-btn category-accent-button ${activeCategory === category.id ? 'active' : ''}`}
                 onClick={() => onCategoryChange(category.id)}
                 title={category.description ?? category.label}
+                style={getCategoryAccentStyle(category.label, category.categoryColor)}
               >
                 {category.label} <span>{categoryCountMap.get(category.id) ?? 0}</span>
               </button>
@@ -106,7 +109,7 @@ export default function DesktopBlog() {
               >
                 {post.coverImage && (
                   <div className="blog-card-image">
-                    <img src={post.coverImage} alt={post.title} />
+                    <SmartImage src={post.coverImage} alt={post.title} />
                   </div>
                 )}
                 <div className="blog-card-content">
@@ -116,7 +119,14 @@ export default function DesktopBlog() {
                     </span>
                     <div className="blog-card-tags">
                       {post.categories.map((categoryId) => (
-                        <span key={`${post.id}-${categoryId}`} className="blog-card-tag category">
+                        <span
+                          key={`${post.id}-${categoryId}`}
+                          className="blog-card-tag category category-accent-tag"
+                          style={getCategoryAccentStyle(
+                            categoryMap.get(categoryId)?.label ?? categoryId,
+                            categoryMap.get(categoryId)?.categoryColor,
+                          )}
+                        >
                           {categoryMap.get(categoryId)?.label ?? categoryId}
                         </span>
                       ))}

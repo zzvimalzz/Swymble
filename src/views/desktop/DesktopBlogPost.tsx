@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
+import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_DATA } from '../../data/config';
+import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import '../../styles/desktop-blog-post.css';
 
 const INLINE_TOKEN_REGEX = /(\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|`[^`]+`)/g;
@@ -141,7 +143,14 @@ export default function DesktopBlogPost() {
           </div>
           <div className="post-categories-header">
             {post.categories.map((categoryId) => (
-              <span key={`${post.id}-${categoryId}`} className="post-category-header">
+              <span
+                key={`${post.id}-${categoryId}`}
+                className="post-category-header category-accent-tag"
+                style={getCategoryAccentStyle(
+                  categoryMap.get(categoryId)?.label ?? categoryId,
+                  categoryMap.get(categoryId)?.categoryColor,
+                )}
+              >
                 {categoryMap.get(categoryId)?.label ?? categoryId}
               </span>
             ))}
@@ -151,7 +160,7 @@ export default function DesktopBlogPost() {
 
       {post.coverImage && (
         <div className="post-cover-image">
-          <img src={post.coverImage} alt={post.title} />
+          <SmartImage src={post.coverImage} alt={post.title} />
         </div>
       )}
 
@@ -212,7 +221,7 @@ export default function DesktopBlogPost() {
             const imageAlt = block.caption ? normalizeRichText(block.caption) : 'Blog post image';
             return (
               <figure key={index} className="post-image-figure">
-                <img src={block.src} alt={imageAlt} className="post-inline-image" />
+                <SmartImage src={block.src} alt={imageAlt} className="post-inline-image" />
                 {block.caption && (
                   <figcaption className="post-image-caption">{renderInlineRichText(block.caption, `cap-${index}`)}</figcaption>
                 )}

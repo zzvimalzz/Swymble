@@ -9,6 +9,8 @@ import MobileBlogPost from './mobile/MobileBlogPost';
 
 import '../styles/mobile-tablet.css';
 import '../styles/mobile-enhancements.css';
+import '../styles/mobile-footer.css';
+import '../styles/category-accent.css';
 
 const HOME_SECTIONS = [
   { id: 'top', label: 'Home' },

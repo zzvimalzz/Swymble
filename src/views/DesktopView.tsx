@@ -23,6 +23,7 @@ import DesktopNotFound from './desktop/DesktopNotFound';
 
 import { SWYMBLE_DATA } from '../data/config';
 import '../styles/desktop.css';
+import '../styles/category-accent.css';
 
 export default function DesktopView() {
   const baseUrl = import.meta.env.BASE_URL;

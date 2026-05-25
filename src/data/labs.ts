@@ -10,12 +10,11 @@ import type { SwymbleLab } from './types';
 // - status allowed values: 'In Development' | 'Private Beta' | 'Live'
 //
 // Actions:
-// - primaryAction is the main CTA button.
-// - primaryAction.kind:
+// - actions supports multiple CTAs per lab card.
+// - action.kind:
 //   - 'internal' -> route path (e.g. /blog/cortex-part-1)
 //   - 'external' -> full URL (opens new tab)
 //   - 'mailto'   -> email link
-//
 // Blog wiring:
 // - blogCategoryId -> routes READ BLOG button to /blog?category=<id>
 // - blogLink       -> direct blog route fallback if no category id is provided
@@ -38,10 +37,29 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     tags: ['AI', 'R&D', 'Private'],
     updatedAt: 'Mar 2026',
     blogCategoryId: 'cortex',
-    primaryAction: {
-      label: 'REQUEST PRIVATE DEMO',
-      href: 'mailto:hello@swymble.com?subject=CORTEX%20Private%20Demo',
-      kind: 'mailto',
-    },
+    actions: [
+      {
+        label: 'REQUEST PRIVATE DEMO',
+        href: 'mailto:hello@swymble.com?subject=CORTEX%20Private%20Demo',
+        kind: 'mailto',
+      },
+    ],
+  },
+  {
+    id: 'territory',
+    title: 'TERRITORY',
+    category: 'FITNESS & GAMING',
+    categoryColor: 'red',
+    image: '/territory_logo.png',
+    status: 'In Development',
+    visibility: 'teaser',
+    publicSummary:
+      'A fitness gamification tracker that turns your real-world movement into claimable territory on a virtual map, designed to motivate active lifestyles through exploration and competition.',
+    safeHighlights: [
+      'Private alpha testing underway',
+      'Clean and engaging map-based UX',
+    ],
+    tags: ['Fitness', 'Gaming', 'Private'],
+    updatedAt: 'May 2026',
   },
 ];

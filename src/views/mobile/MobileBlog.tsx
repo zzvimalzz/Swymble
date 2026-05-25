@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import MobileSiteFooter from '../../components/mobile/MobileSiteFooter';
+import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_DATA } from '../../data/config';
+import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 
 export default function MobileBlog() {
   const { title, description, emptyStateMsg, posts, categories } = SWYMBLE_DATA.blog;
@@ -72,9 +75,10 @@ export default function MobileBlog() {
           <button
             key={category.id}
             type="button"
-            className={`mobile-blog-chip ${activeCategory === category.id ? 'active' : ''}`}
+            className={`mobile-blog-chip category-accent-button ${activeCategory === category.id ? 'active' : ''}`}
             onClick={() => onCategoryChange(category.id)}
             title={category.description ?? category.label}
+            style={getCategoryAccentStyle(category.label, category.categoryColor)}
           >
             {category.label}
             <span>{categoryCountMap.get(category.id) ?? 0}</span>
@@ -98,7 +102,7 @@ export default function MobileBlog() {
               <Link key={post.id} to={postHref} className="mobile-blog-card" aria-label={`Read ${post.title}`}>
               {post.coverImage && (
                 <div className="mobile-blog-card-image">
-                  <img src={post.coverImage} alt={post.title} loading="lazy" />
+                  <SmartImage src={post.coverImage} alt={post.title} loading="lazy" />
                 </div>
               )}
 
@@ -116,7 +120,14 @@ export default function MobileBlog() {
 
                 <div className="mobile-blog-card-tags">
                   {post.categories.map((categoryId) => (
-                    <span key={`${post.id}-${categoryId}`} className="mobile-blog-tag category">
+                    <span
+                      key={`${post.id}-${categoryId}`}
+                      className="mobile-blog-tag category category-accent-tag"
+                      style={getCategoryAccentStyle(
+                        categoryMap.get(categoryId)?.label ?? categoryId,
+                        categoryMap.get(categoryId)?.categoryColor,
+                      )}
+                    >
                       {categoryMap.get(categoryId)?.label ?? categoryId}
                     </span>
                   ))}
@@ -132,6 +143,8 @@ export default function MobileBlog() {
           })
         )}
       </section>
+
+      <MobileSiteFooter />
     </main>
   );
 }

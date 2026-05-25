@@ -1,0 +1,26 @@
+.category-accent-text {
+  color: var(--category-accent, currentColor);
+}
+
+.category-accent-tag {
+  color: var(--category-accent, currentColor) !important;
+  border-color: var(--category-accent-strong, currentColor) !important;
+  background: var(--category-accent-soft, transparent) !important;
+}
+
+.category-accent-button:hover {
+  border-color: var(--category-accent, currentColor);
+  color: var(--category-accent, currentColor);
+}
+
+.category-accent-button.active {
+  border-color: var(--category-accent, currentColor);
+  color: var(--category-accent, currentColor);
+  background: var(--category-accent-soft, transparent);
+  box-shadow: 0 0 0.7rem var(--category-accent-soft, transparent);
+}
+
+.category-accent-button.active span {
+  background: var(--category-accent-muted, rgba(255, 255, 255, 0.1));
+  color: inherit;
+}

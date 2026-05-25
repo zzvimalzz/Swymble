@@ -2,9 +2,11 @@ import { motion, MotionValue } from 'framer-motion';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import SmartImage from '../../components/SmartImage';
 import ParallaxMarquee from '../../components/desktop/ParallaxMarquee';
 import ProximityCard from '../../components/desktop/ProximityCard';
 import { SWYMBLE_DATA } from '../../data/config';
+import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
 
 type DesktopHomeProps = {
@@ -112,6 +114,7 @@ export default function DesktopHome({
             <div className={`carousel-inner ${SWYMBLE_DATA.projects.length <= 3 ? 'grid-mode' : ''}`}>
               {SWYMBLE_DATA.projects.map((workItem, index) => {
                 const projectId = workItem.title.replace(/\s+/g, '-').toLowerCase();
+                const categoryAccentStyle = getCategoryAccentStyle(workItem.category, workItem.categoryColor);
                 return (
                   <motion.div
                     key={workItem.title}
@@ -124,7 +127,7 @@ export default function DesktopHome({
                     style={{ cursor: 'pointer' }}
                   >
                     <div className="carousel-image-wrapper">
-                      <img
+                      <SmartImage
                         src={workItem.image}
                         alt={workItem.title}
                         className="carousel-image"
@@ -134,7 +137,7 @@ export default function DesktopHome({
                     <div className="carousel-info">
                       <h3 className="w-client">{workItem.title}</h3>
                       <div className="carousel-meta">
-                        <span className="w-category">{workItem.category}</span>
+                        <span className="w-category category-accent-text" style={categoryAccentStyle}>{workItem.category}</span>
                         {workItem.client && <span className="w-impact">{workItem.client}</span>}
                       </div>
                     </div>

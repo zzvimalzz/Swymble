@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
+import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_DATA } from '../../data/config';
+import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
 import '../../styles/desktop-labs.css';
 
@@ -19,6 +21,27 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
     window.scrollTo(0, 0);
   }, [location]);
 
+  const renderActionLink = (href: string, label: string, className: string) => {
+    if (href.startsWith('/')) {
+      return (
+        <Link to={href} className={className}>
+          {label}
+        </Link>
+      );
+    }
+
+    return (
+      <a
+        href={isMailtoLink(href) ? buildGmailComposeUrl(href) : href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+      >
+        {label}
+      </a>
+    );
+  };
+
   return (
     <section className="layout-content desktop-labs-page">
       <div className="section-header">
@@ -26,7 +49,7 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
       </div>
       
       <p className="labs-subtitle">
-        In-progress experiments and proprietary systems shown with public-safe details only.
+        In-progress experiments and proprietary systems.
       </p>
 
       {visibleLabs.length === 0 ? (
@@ -47,6 +70,13 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
       ) : (
       <div className="labs-grid">
         {visibleLabs.map((labItem, index) => {
+          const categoryAccentStyle = getCategoryAccentStyle(labItem.category, labItem.categoryColor);
+          const labActions = labItem.actions?.length
+            ? labItem.actions
+            : labItem.primaryAction
+              ? [labItem.primaryAction]
+              : [];
+
           return (
             <motion.div
               key={labItem.id}
@@ -59,7 +89,7 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
               onMouseLeave={() => setIsHovering(false)}
             >
               <div className="lab-card-image-wrap">
-                <img
+                <SmartImage
                   src={labItem.image}
                   alt={labItem.title}
                   className="lab-card-image"
@@ -71,7 +101,7 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
 
               <div className="lab-card-content">
                 <div className="lab-meta">
-                  <span className="lab-category">{labItem.category}</span>
+                  <span className="lab-category category-accent-text" style={categoryAccentStyle}>{labItem.category}</span>
                   <span className={`lab-visibility-badge visibility-${labItem.visibility}`}>
                     {visibilityLabelMap[labItem.visibility]}
                   </span>
@@ -98,39 +128,26 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
                 <div className="lab-updated">UPDATED {labItem.updatedAt.toUpperCase()}</div>
 
                 <div className="lab-actions">
-                  {labItem.primaryAction &&
-                    (() => {
-                      const action = labItem.primaryAction;
-                      if (action.kind === 'internal') {
-                        return (
-                          <Link to={action.href} className="lab-btn">
-                            {action.label}
-                          </Link>
-                        );
-                      }
+                  {labActions.map((action, actionIndex) => {
+                    const isSecondary = action.variant === 'secondary' || actionIndex > 0;
 
-                      return (
-                        <a
-                          href={isMailtoLink(action.href) ? buildGmailComposeUrl(action.href) : action.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="lab-btn"
-                        >
-                          {action.label}
-                        </a>
-                      );
-                    })()}
+                    return (
+                      <span key={`${labItem.id}-${action.label}`}>
+                        {renderActionLink(action.href, action.label, `lab-btn${isSecondary ? ' secondary' : ''}`)}
+                      </span>
+                    );
+                  })}
 
                   {(labItem.blogCategoryId || labItem.blogLink) && (
                     <Link
                       to={labItem.blogCategoryId ? `/blog?category=${encodeURIComponent(labItem.blogCategoryId)}` : (labItem.blogLink as string)}
-                      className={`lab-btn ${labItem.primaryAction ? 'secondary' : ''}`}
+                      className={`lab-btn ${labActions.length > 0 ? 'secondary' : ''}`}
                     >
                       READ BLOG
                     </Link>
                   )}
 
-                  {!labItem.primaryAction && !labItem.blogCategoryId && !labItem.blogLink && (
+                  {labActions.length === 0 && !labItem.blogCategoryId && !labItem.blogLink && (
                     <div className="lab-btn disabled">NO PUBLIC ACTION</div>
                   )}
                 </div>

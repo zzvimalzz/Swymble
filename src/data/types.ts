@@ -10,6 +10,7 @@ export type SwymbleWhatIDo = {
 export type SwymbleProject = {
   title: string;
   category: string;
+  categoryColor?: string;
   client: string | null;
   image: string;
   landingImage?: string;
@@ -26,12 +27,14 @@ export type SwymbleLabAction = {
   label: string;
   href: string;
   kind: 'external' | 'internal' | 'mailto';
+  variant?: 'primary' | 'secondary';
 };
 
 export type SwymbleLab = {
   id: string;
   title: string;
   category: string;
+  categoryColor?: string;
   image: string;
   status: 'In Development' | 'Private Beta' | 'Live';
   visibility: SwymbleLabVisibility;
@@ -41,6 +44,7 @@ export type SwymbleLab = {
   updatedAt: string;
   blogCategoryId?: string;
   blogLink?: string;
+  actions?: SwymbleLabAction[];
   primaryAction?: SwymbleLabAction;
 };
 
@@ -65,6 +69,7 @@ export type SwymbleBlogCategory = {
   id: string;
   label: string;
   description?: string;
+  categoryColor?: string;
 };
 
 export type SwymbleBlogPost = {

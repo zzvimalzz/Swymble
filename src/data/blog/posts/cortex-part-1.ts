@@ -1,5 +1,4 @@
 import type { SwymbleBlogPost } from '../../types';
-
 export const CORTEX_PART_1_POST: SwymbleBlogPost = {
     id: 'cortex-part-1',
     title: 'Cortex - Part 1: The Introduction',

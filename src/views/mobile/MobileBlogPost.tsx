@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
 import type { JSX } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
+import MobileSiteFooter from '../../components/mobile/MobileSiteFooter';
+import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_DATA } from '../../data/config';
+import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 
 const INLINE_TOKEN_REGEX = /(\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|`[^`]+`)/g;
 
@@ -91,6 +94,7 @@ export default function MobileBlogPost() {
           <h1>Post Not Found</h1>
           <p>We could not find the article you are looking for.</p>
         </header>
+        <MobileSiteFooter />
       </main>
     );
   }
@@ -110,7 +114,14 @@ export default function MobileBlogPost() {
 
         <div className="mobile-blog-post-tags">
           {post.categories.map((categoryId) => (
-            <span key={`${post.id}-${categoryId}`} className="mobile-blog-tag category">
+            <span
+              key={`${post.id}-${categoryId}`}
+              className="mobile-blog-tag category category-accent-tag"
+              style={getCategoryAccentStyle(
+                categoryMap.get(categoryId)?.label ?? categoryId,
+                categoryMap.get(categoryId)?.categoryColor,
+              )}
+            >
               {categoryMap.get(categoryId)?.label ?? categoryId}
             </span>
           ))}
@@ -124,7 +135,7 @@ export default function MobileBlogPost() {
 
       {post.coverImage && (
         <div className="mobile-blog-post-cover">
-          <img src={post.coverImage} alt={post.title} loading="eager" />
+          <SmartImage src={post.coverImage} alt={post.title} loading="eager" />
         </div>
       )}
 
@@ -197,7 +208,7 @@ export default function MobileBlogPost() {
             const imageAlt = block.caption ? normalizeRichText(block.caption) : 'Blog image';
             return (
               <figure key={index} className="mobile-blog-post-image-wrap">
-                <img src={block.src} alt={imageAlt} className="mobile-blog-post-image" loading="lazy" />
+                <SmartImage src={block.src} alt={imageAlt} className="mobile-blog-post-image" loading="lazy" />
                 {block.caption && (
                   <figcaption>{renderInlineRichText(block.caption, `cap-${index}`)}</figcaption>
                 )}
@@ -251,6 +262,8 @@ export default function MobileBlogPost() {
           </div>
         </section>
       )}
+
+      <MobileSiteFooter />
     </main>
   );
 }

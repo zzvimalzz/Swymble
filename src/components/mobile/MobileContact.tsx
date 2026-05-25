@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import MobileSiteFooter from './MobileSiteFooter';
 import { SWYMBLE_DATA } from '../../data/config';
 import { Rocket } from 'lucide-react';
 import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
@@ -7,7 +8,6 @@ import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
 export default function MobileContact() {
   const [showRocket, setShowRocket] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
-  const baseUrl = import.meta.env.BASE_URL;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,8 +26,6 @@ export default function MobileContact() {
       setIsLaunching(false);
     }, 1000);
   };
-
-  const currentYear = new Date().getFullYear();
 
   return (
     <div className="mobile-contact-wrapper" id="contact" style={{ paddingBottom: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -56,19 +54,7 @@ export default function MobileContact() {
         </div>
       </div>
 
-      <footer className="mobile-site-footer" style={{ marginTop: '5rem', width: '100%', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem' }}>
-        <img
-          src={`${baseUrl}logo-with-name.png`}
-          alt={`${SWYMBLE_DATA.name} Logo`}
-          style={{ height: '30px', opacity: 0.8, marginBottom: '1rem' }}
-        />
-        <div className="footer-status" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#4ade80' }} />
-          <span>AVAILABLE FOR WORK</span>
-        </div>
-        <span>BUILT WITH PASSION</span>
-        <span>&copy; {currentYear} {SWYMBLE_DATA.name}</span>
-      </footer>
+      <MobileSiteFooter />
 
       <AnimatePresence>
         {showRocket && (

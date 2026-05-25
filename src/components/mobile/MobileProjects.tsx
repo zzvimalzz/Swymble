@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import { ExternalLink, Info } from 'lucide-react';
+import SmartImage from '../SmartImage';
 import { type SwymbleProject, SWYMBLE_DATA } from '../../data/config';
+import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 
 interface TinderCardProps {
   project: SwymbleProject;
@@ -16,6 +18,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ project, isFront, onSwipe, inde
   const y = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-15, 15]);
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
+  const categoryAccentStyle = getCategoryAccentStyle(project.category, project.categoryColor);
 
   const [tapped, setTapped] = useState(false);
 
@@ -63,10 +66,12 @@ const TinderCard: React.FC<TinderCardProps> = ({ project, isFront, onSwipe, inde
       <div className="card-content">
         {!tapped ? (
           <>
-            <img
+            <SmartImage
               src={project.mobileImage || project.landingImage || project.image}
               alt={project.title}
               className="card-image"
+              fit="cover"
+              padding={0}
               draggable="false"
             />
             <div className="card-overlay">
@@ -78,7 +83,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ project, isFront, onSwipe, inde
                   </span>
                 )}
               </div>
-              <p className="card-category">{project.category}</p>
+              <p className="card-category category-accent-text" style={categoryAccentStyle}>{project.category}</p>
               <div className="tap-hint">
                 <Info size={16} /> Tap for details 
               </div>
@@ -88,7 +93,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ project, isFront, onSwipe, inde
           <div className="card-details">
             <div className="details-header">
               <h3>{project.title}</h3>
-              <p className="card-category">{project.category}</p>
+              <p className="card-category category-accent-text" style={categoryAccentStyle}>{project.category}</p>
             </div>
             
             <div className="details-body">
