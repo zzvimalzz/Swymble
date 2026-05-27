@@ -9,11 +9,6 @@ export default function MobileFocus({ whatIDo }: { whatIDo: SwymbleWhatIDo[] }) 
         <h2>WHAT YOU'LL FIND HERE</h2>
       </div>
 
-      <p className="mobile-focus-intro">
-        A running overview of my engineering experience, the products and websites I ship, the ideas I am
-        exploring in public, and the writing and life updates that shape the work.
-      </p>
-
       <div className="services-list">
         {whatIDo.map((service, idx) => (
           <motion.div

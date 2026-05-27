@@ -95,12 +95,13 @@ export const SWYMBLE_SOCIALS = [
 ];
 ```
 
-## Tech And Tools
+## Tech Planet
 ```ts
-export const SWYMBLE_TECH_TOOLS = [
+export const SWYMBLE_TECH_PLANET = [
   {
     category: 'LANGUAGES',
-    items: [{ name: 'TypeScript', color: '#3178C6', level: 75 }],
+    context: 'Core syntax, type systems, and everyday problem solving.',
+    items: [{ name: 'TypeScript', color: '#3178C6', description: 'Typed frontend application code.' }],
   },
 ];
 ```

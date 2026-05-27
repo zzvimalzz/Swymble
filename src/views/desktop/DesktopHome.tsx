@@ -1,6 +1,6 @@
 import { motion, MotionValue } from 'framer-motion';
 import type { ChangeEvent, FormEvent } from 'react';
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SmartImage from '../../components/SmartImage';
 import ParallaxMarquee from '../../components/desktop/ParallaxMarquee';
@@ -8,6 +8,8 @@ import ProximityCard from '../../components/desktop/ProximityCard';
 import { SWYMBLE_DATA } from '../../data/config';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
+
+const TechUniverse = lazy(() => import('../../components/desktop/TechUniverse'));
 
 type DesktopHomeProps = {
   baseUrl: string;
@@ -151,42 +153,12 @@ export default function DesktopHome({
         <div className="info-row">
           <div className="info-column" style={{ width: '100%' }}>
             <div className="section-header">
-              <h2>TECH & TOOLS</h2>
+              <h2>TECH PLANET</h2>
             </div>
 
-            <div className="skills-container">
-              {SWYMBLE_DATA.skills.map((skillCategory) => (
-                <div key={skillCategory.category} className="skill-category">
-                  <h3 className="w-category mb-2">{skillCategory.category}</h3>
-
-                  <div className="skill-bar-wrapper">
-                    {skillCategory.items.map((item, itemIndex) => (
-                      <div
-                        key={`${item.name}-${itemIndex}`}
-                        className="skill-segment"
-                        style={{ width: `${item.level}%`, backgroundColor: item.color }}
-                        onMouseEnter={() => setIsHovering(true)}
-                        onMouseLeave={() => setIsHovering(false)}
-                      >
-                        <div className="skill-tooltip">
-                          <span className="tooltip-name">{item.name}</span>
-                          <span className="tooltip-pct">{item.level}%</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="skill-legend">
-                    {skillCategory.items.map((item, itemIndex) => (
-                      <div key={`${item.name}-legend-${itemIndex}`} className="skill-legend-item">
-                        <span className="skill-dot" style={{ backgroundColor: item.color }} />
-                        <span className="skill-legend-name">{item.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Suspense fallback={<div className="tech-universe tech-universe--loading">Calibrating orbital stack...</div>}>
+              <TechUniverse skills={SWYMBLE_DATA.skills} setIsHovering={setIsHovering} />
+            </Suspense>
           </div>
         </div>
 

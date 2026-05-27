@@ -5,7 +5,7 @@ import { SWYMBLE_LABS } from './labs';
 import { SWYMBLE_LATEST_UPDATES } from './latestupdates';
 import { SWYMBLE_PROJECTS } from './projects';
 import { SWYMBLE_SOCIALS } from './socials';
-import { SWYMBLE_TECH_TOOLS } from './techtools';
+import { SWYMBLE_TECH_PLANET } from './techplanet';
 import { SWYMBLE_WHAT_I_DO } from './whatido';
 import type { SwymbleData } from './types';
 
@@ -19,7 +19,7 @@ export * from './types';
 // - about: about.ts
 // - labs: labs.ts
 // - blog: blog/
-// - tech/tools: techtools.ts
+// - tech planet: techplanet.ts
 // - socials: socials.ts
 // - home focus cards: whatido.ts
 export const SWYMBLE_DATA: SwymbleData = {
@@ -33,6 +33,6 @@ export const SWYMBLE_DATA: SwymbleData = {
   about: SWYMBLE_ABOUT,
   labs: SWYMBLE_LABS,
   blog: SWYMBLE_BLOG,
-  skills: SWYMBLE_TECH_TOOLS,
+  skills: SWYMBLE_TECH_PLANET,
   socials: SWYMBLE_SOCIALS,
 };

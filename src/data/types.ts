@@ -103,11 +103,12 @@ export type SwymbleLatestUpdateCard = {
 export type SwymbleSkillItem = {
   name: string;
   color: string;
-  level: number;
+  description?: string;
 };
 
 export type SwymbleSkillCategory = {
   category: string;
+  context?: string;
   items: SwymbleSkillItem[];
 };
 
