@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import * as THREE from 'three';
 import type { SwymbleSkillCategory, SwymbleSkillItem } from '../../data/types';
-import { createGlowTexture, createMoonLabel, createOrbitGeometry, createPlanetTexture, createStarGeometry, disposeObject } from './TechUniverseSceneAssets';
+import { createGlowTexture, createMoonLabel, createMoonTexture, createOrbitGeometry, createPlanetTexture, createStarGeometry, disposeObject } from './TechUniverseSceneAssets';
 
 export type ActiveTech = {
   category: string;
@@ -38,6 +38,7 @@ type UseTechUniverseSceneOptions = {
   skills: SwymbleSkillCategory[];
   activeTechRef: React.MutableRefObject<ActiveTech>;
   focusedCategoryRef: React.MutableRefObject<string>;
+  focusedItemRef: React.MutableRefObject<string>;
   setActiveTech: React.Dispatch<React.SetStateAction<ActiveTech>>;
   setTooltip: React.Dispatch<React.SetStateAction<TooltipState | null>>;
   setIsHovering: (val: boolean) => void;
@@ -76,18 +77,21 @@ const createMoon = (
   recordIndex: number,
   angle: number,
   orbitRadius: number,
+  category: string,
   glowTexture: THREE.Texture | null,
 ) => {
   const itemColor = new THREE.Color(item.color);
   const baseScale = 0.18 + (recordIndex % 3) * 0.025;
+  const moonTexture = createMoonTexture(item.name, item.color, category);
   const moon = new THREE.Mesh(
     new THREE.SphereGeometry(baseScale, 32, 32),
     new THREE.MeshStandardMaterial({
-      color: itemColor,
+      map: moonTexture ?? undefined,
+      color: 0xffffff,
       emissive: itemColor,
-      emissiveIntensity: 0.48,
-      roughness: 0.38,
-      metalness: 0.08,
+      emissiveIntensity: 0.16,
+      roughness: 0.52,
+      metalness: 0.04,
       transparent: true,
       depthWrite: false,
     }),
@@ -113,7 +117,7 @@ const createMoon = (
 
 export const useTechUniverseScene = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
-  { skills, activeTechRef, focusedCategoryRef, setActiveTech, setTooltip, setIsHovering }: UseTechUniverseSceneOptions,
+  { skills, activeTechRef, focusedCategoryRef, focusedItemRef, setActiveTech, setTooltip, setIsHovering }: UseTechUniverseSceneOptions,
 ) => {
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -188,7 +192,7 @@ export const useTechUniverseScene = (
 
       skillCategory.items.forEach((item, itemIndex) => {
         const angle = (itemIndex / skillCategory.items.length) * Math.PI * 2 + categoryIndex * 0.58;
-        const { moon, glow, baseScale } = createMoon(item, moonRecords.length, angle, orbitRadius, glowTexture);
+        const { moon, glow, baseScale } = createMoon(item, moonRecords.length, angle, orbitRadius, skillCategory.category, glowTexture);
         const label = createMoonLabel(item.name, item.color, item.description);
         if (label) label.visible = false;
         orbitGroup.add(moon, glow, ...(label ? [label] : []));
@@ -219,6 +223,7 @@ export const useTechUniverseScene = (
     const cameraLookTarget = new THREE.Vector3();
     const desiredCameraPosition = new THREE.Vector3();
     const desiredCameraTarget = new THREE.Vector3();
+    const focusedMoonPosition = new THREE.Vector3();
 
     const resizeRenderer = () => {
       const bounds = canvas.getBoundingClientRect();
@@ -245,8 +250,14 @@ export const useTechUniverseScene = (
 
     const handlePointerMove = (event: PointerEvent) => {
       if (isDragging) {
-        universeGroup.rotation.y += (event.clientX - previousClientX) * 0.007;
-        universeGroup.rotation.x = clamp(universeGroup.rotation.x + (event.clientY - previousClientY) * 0.004, -0.42, 0.34);
+        const focusedMoon = moonRecords.find((moonRecord) => moonRecord.category === focusedCategoryRef.current && moonRecord.item.name === focusedItemRef.current);
+        if (focusedMoon) {
+          focusedMoon.mesh.rotation.y += (event.clientX - previousClientX) * 0.012;
+          focusedMoon.mesh.rotation.x += (event.clientY - previousClientY) * 0.008;
+        } else {
+          universeGroup.rotation.y += (event.clientX - previousClientX) * 0.007;
+          universeGroup.rotation.x = clamp(universeGroup.rotation.x + (event.clientY - previousClientY) * 0.004, -0.42, 0.34);
+        }
         previousClientX = event.clientX;
         previousClientY = event.clientY;
       }
@@ -254,8 +265,12 @@ export const useTechUniverseScene = (
       setPointer(event);
       raycaster.setFromCamera(pointer, camera);
       const focusedCategory = focusedCategoryRef.current;
+      const focusedItem = focusedItemRef.current;
       const hitObjects = focusedCategory
-        ? interactiveObjects.filter((sceneObject) => sceneObject.userData.kind === 'moon' && moonRecords[sceneObject.userData.recordIndex]?.category === focusedCategory)
+        ? interactiveObjects.filter((sceneObject) => {
+          const moonRecord = moonRecords[sceneObject.userData.recordIndex];
+          return sceneObject.userData.kind === 'moon' && moonRecord?.category === focusedCategory && (!focusedItem || moonRecord.item.name === focusedItem);
+        })
         : interactiveObjects;
       const hitObject = raycaster.intersectObjects(hitObjects, false)[0]?.object;
       if (!hitObject) return clearHover();
@@ -302,57 +317,80 @@ export const useTechUniverseScene = (
       atmosphere.rotation.y -= 0.0015;
       starField.rotation.y += 0.00025;
       const focusedCategory = focusedCategoryRef.current;
+      const focusedItem = focusedItemRef.current;
       const focusedOrbit = orbitRecords.find((orbitRecord) => orbitRecord.category === focusedCategory);
+      const focusedMoon = moonRecords.find((moonRecord) => moonRecord.category === focusedCategory && moonRecord.item.name === focusedItem);
       const hasFocus = Boolean(focusedCategory && focusedOrbit);
+      const hasItemFocus = Boolean(hasFocus && focusedMoon);
 
       desiredCameraTarget.set(0, 0, 0);
       desiredCameraPosition.copy(cameraHomePosition);
       if (hasFocus && focusedOrbit) desiredCameraPosition.set(0, focusedOrbit.radius * 0.1, focusedOrbit.radius * 2.28 + 1.6);
+      if (hasItemFocus && focusedMoon) {
+        focusedMoon.mesh.getWorldPosition(focusedMoonPosition);
+        desiredCameraTarget.copy(focusedMoonPosition);
+        desiredCameraPosition.set(focusedMoonPosition.x, focusedMoonPosition.y + 0.32, focusedMoonPosition.z + 1.55);
+      }
       camera.position.lerp(desiredCameraPosition, 0.055);
       cameraLookTarget.lerp(desiredCameraTarget, 0.055);
       camera.lookAt(cameraLookTarget);
 
-      const planetOpacity = hasFocus ? 0.08 : 1;
+      const planetOpacity = hasFocus ? (hasItemFocus ? 0 : 0.08) : 1;
+      if (!hasItemFocus) {
+        planet.visible = true;
+        atmosphere.visible = true;
+      }
       planet.position.x = THREE.MathUtils.lerp(planet.position.x, 0, 0.08);
       atmosphere.position.copy(planet.position);
       planet.scale.setScalar(THREE.MathUtils.lerp(planet.scale.x, hasFocus ? 0.58 : 1, 0.06));
       atmosphere.scale.copy(planet.scale);
       planet.material.opacity = THREE.MathUtils.lerp(planet.material.opacity, planetOpacity, 0.06);
-      atmosphere.material.opacity = THREE.MathUtils.lerp(atmosphere.material.opacity, hasFocus ? 0.02 : 0.12, 0.06);
+      atmosphere.material.opacity = THREE.MathUtils.lerp(atmosphere.material.opacity, hasItemFocus ? 0 : hasFocus ? 0.02 : 0.12, 0.06);
+      if (hasItemFocus && planet.material.opacity < 0.03) planet.visible = false;
+      if (hasItemFocus && atmosphere.material.opacity < 0.03) atmosphere.visible = false;
 
       orbitRecords.forEach((orbitRecord) => {
         const isFocusOrbit = !hasFocus || orbitRecord.category === focusedCategory;
         const orbitScale = THREE.MathUtils.lerp(orbitRecord.group.scale.x, hasFocus && isFocusOrbit ? 1.08 : 1, 0.06);
         orbitRecord.group.position.x = THREE.MathUtils.lerp(orbitRecord.group.position.x, hasFocus && isFocusOrbit ? 0.55 : 0, 0.06);
         orbitRecord.group.scale.setScalar(orbitScale);
-        if (isFocusOrbit) orbitRecord.line.visible = true;
-        orbitRecord.line.material.opacity = THREE.MathUtils.lerp(orbitRecord.line.material.opacity, isFocusOrbit ? (hasFocus ? 0.52 : 0.24) : 0, 0.08);
-        if (!isFocusOrbit && orbitRecord.line.material.opacity < 0.03) orbitRecord.line.visible = false;
+        const orbitLineOpacity = isFocusOrbit && !hasItemFocus ? (hasFocus ? 0.52 : 0.24) : 0;
+        if (orbitLineOpacity > 0) orbitRecord.line.visible = true;
+        orbitRecord.line.material.opacity = THREE.MathUtils.lerp(orbitRecord.line.material.opacity, orbitLineOpacity, 0.08);
+        if (orbitLineOpacity === 0 && orbitRecord.line.material.opacity < 0.03) orbitRecord.line.visible = false;
       });
 
       moonRecords.forEach((moonRecord) => {
-        moonRecord.angle += moonRecord.speed;
-        const isActive = activeTechRef.current.category === moonRecord.category && activeTechRef.current.itemName === moonRecord.item.name;
-        const isVisibleOrbit = !hasFocus || moonRecord.category === focusedCategory;
-        const pulse = isActive ? 1 + Math.sin(performance.now() * 0.006) * 0.08 : 1;
+        const isFocusedMoon = hasItemFocus && moonRecord.category === focusedCategory && moonRecord.item.name === focusedItem;
+        if (!hasItemFocus) moonRecord.angle += moonRecord.speed;
+        const isHovered = activeTechRef.current.source === 'hover' && activeTechRef.current.category === moonRecord.category && activeTechRef.current.itemName === moonRecord.item.name;
+        const isVisibleOrbit = !hasFocus || (moonRecord.category === focusedCategory && (!hasItemFocus || isFocusedMoon));
+        const pulse = isHovered ? 1 + Math.sin(performance.now() * 0.006) * 0.08 : 1;
         const moonOpacity = isVisibleOrbit ? 1 : 0;
         if (isVisibleOrbit) {
           moonRecord.mesh.visible = true;
           moonRecord.glow.visible = true;
         }
         moonRecord.mesh.position.set(Math.cos(moonRecord.angle) * moonRecord.orbitRadius, 0, Math.sin(moonRecord.angle) * moonRecord.orbitRadius);
+        moonRecord.mesh.rotation.y += isFocusedMoon ? 0.012 : 0.0035;
+        moonRecord.mesh.rotation.x += isFocusedMoon ? 0.002 : 0;
         moonRecord.mesh.scale.setScalar(pulse);
-        moonRecord.mesh.material.opacity = THREE.MathUtils.lerp(moonRecord.mesh.material.opacity, moonOpacity, 0.08);
+        if (moonRecord.mesh.material.transparent === isFocusedMoon) {
+          moonRecord.mesh.material.transparent = !isFocusedMoon;
+          moonRecord.mesh.material.depthWrite = isFocusedMoon;
+          moonRecord.mesh.material.needsUpdate = true;
+        }
+        moonRecord.mesh.material.opacity = isFocusedMoon ? 1 : THREE.MathUtils.lerp(moonRecord.mesh.material.opacity, moonOpacity, 0.08);
         moonRecord.glow.position.copy(moonRecord.mesh.position);
-        moonRecord.glow.material.opacity = THREE.MathUtils.lerp(moonRecord.glow.material.opacity, isVisibleOrbit ? (isActive ? 0.78 : 0.35) : 0, 0.08);
-        moonRecord.glow.scale.setScalar(moonRecord.baseScale * (isActive ? 7.2 : 5.4));
+        moonRecord.glow.material.opacity = THREE.MathUtils.lerp(moonRecord.glow.material.opacity, isVisibleOrbit ? (isHovered ? 0.78 : 0.35) : 0, 0.08);
+        moonRecord.glow.scale.setScalar(moonRecord.baseScale * (isHovered ? 7.2 : 5.4));
         if (!isVisibleOrbit && moonRecord.mesh.material.opacity < 0.03) {
           moonRecord.mesh.visible = false;
           moonRecord.glow.visible = false;
         }
         if (moonRecord.label) {
           moonRecord.label.position.set(moonRecord.mesh.position.x, moonRecord.baseScale + 0.36, moonRecord.mesh.position.z);
-          moonRecord.label.material.opacity = THREE.MathUtils.lerp(moonRecord.label.material.opacity, hasFocus && isVisibleOrbit ? 0.9 : 0, 0.08);
+          moonRecord.label.material.opacity = THREE.MathUtils.lerp(moonRecord.label.material.opacity, hasFocus && isVisibleOrbit && !hasItemFocus ? 0.9 : 0, 0.08);
           moonRecord.label.visible = moonRecord.label.material.opacity > 0.04;
         }
       });
@@ -382,5 +420,5 @@ export const useTechUniverseScene = (
       glowTexture?.dispose();
       renderer.dispose();
     };
-  }, [activeTechRef, canvasRef, focusedCategoryRef, setActiveTech, setIsHovering, setTooltip, skills]);
+  }, [activeTechRef, canvasRef, focusedCategoryRef, focusedItemRef, setActiveTech, setIsHovering, setTooltip, skills]);
 };

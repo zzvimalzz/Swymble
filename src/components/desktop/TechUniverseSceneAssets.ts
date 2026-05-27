@@ -72,6 +72,113 @@ export const createPlanetTexture = () => {
   return planetTexture;
 };
 
+export const createMoonTexture = (name: string, color: string, category: string) => {
+  const textureCanvas = document.createElement('canvas');
+  textureCanvas.width = 256;
+  textureCanvas.height = 128;
+  const drawingContext = textureCanvas.getContext('2d');
+  if (!drawingContext) return null;
+
+  const seed = [...`${category}:${name}`].reduce((total, char) => total + char.charCodeAt(0), 0);
+  const accent = new THREE.Color(color);
+  const baseHue = (seed * 17) % 360;
+  const gradient = drawingContext.createLinearGradient(0, 0, 256, 128);
+  gradient.addColorStop(0, `hsl(${baseHue}, 68%, 12%)`);
+  gradient.addColorStop(0.55, color);
+  gradient.addColorStop(1, `hsl(${(baseHue + 74) % 360}, 70%, 10%)`);
+  drawingContext.fillStyle = gradient;
+  drawingContext.fillRect(0, 0, 256, 128);
+
+  for (let bandIndex = 0; bandIndex < 13; bandIndex += 1) {
+    const y = 10 + bandIndex * 9 + Math.sin(seed + bandIndex) * 5;
+    drawingContext.beginPath();
+    drawingContext.moveTo(0, y);
+    for (let x = 0; x <= 256; x += 12) {
+      drawingContext.lineTo(x, y + Math.sin(x * 0.04 + seed + bandIndex) * (3 + (seed % 5)));
+    }
+    drawingContext.strokeStyle = bandIndex % 2 ? 'rgba(255,255,255,0.15)' : `rgba(${accent.r * 255},${accent.g * 255},${accent.b * 255},0.28)`;
+    drawingContext.lineWidth = bandIndex % 3 === 0 ? 2.2 : 1;
+    drawingContext.stroke();
+  }
+
+  for (let markIndex = 0; markIndex < 18; markIndex += 1) {
+    const x = (seed * (markIndex + 3) * 19) % 256;
+    const y = (seed * (markIndex + 5) * 11) % 128;
+    const radius = 3 + ((seed + markIndex) % 12);
+    drawingContext.fillStyle = markIndex % 3 === 0 ? 'rgba(255,255,255,0.2)' : `rgba(${accent.r * 255},${accent.g * 255},${accent.b * 255},0.32)`;
+    drawingContext.beginPath();
+    drawingContext.ellipse(x, y, radius * 1.5, radius * 0.55, markIndex * 0.3, 0, Math.PI * 2);
+    drawingContext.fill();
+  }
+
+  drawingContext.save();
+  drawingContext.globalAlpha = 0.42;
+  drawingContext.strokeStyle = 'rgba(255,255,255,0.72)';
+  drawingContext.fillStyle = 'rgba(255,255,255,0.64)';
+  drawingContext.lineWidth = 2;
+
+  if (category === 'LANGUAGES') {
+    for (let index = 0; index < 7; index += 1) {
+      const x = 20 + index * 34;
+      drawingContext.font = '700 18px monospace';
+      drawingContext.fillText(index % 2 ? '</>' : '{}', x, 30 + ((seed + index) % 70));
+    }
+  } else if (category === 'AI & Data') {
+    for (let index = 0; index < 9; index += 1) {
+      const x = 18 + ((seed + index * 31) % 216);
+      const y = 18 + ((seed + index * 19) % 92);
+      drawingContext.beginPath();
+      drawingContext.arc(x, y, 4, 0, Math.PI * 2);
+      drawingContext.fill();
+      if (index > 0) {
+        drawingContext.beginPath();
+        drawingContext.moveTo(x, y);
+        drawingContext.lineTo(18 + ((seed + (index - 1) * 31) % 216), 18 + ((seed + (index - 1) * 19) % 92));
+        drawingContext.stroke();
+      }
+    }
+  } else if (category === 'Databases & DevOps') {
+    for (let index = 0; index < 6; index += 1) {
+      const x = 14 + index * 42;
+      drawingContext.strokeRect(x, 24 + (index % 3) * 18, 28, 18);
+      drawingContext.beginPath();
+      drawingContext.moveTo(x + 14, 42 + (index % 3) * 18);
+      drawingContext.lineTo(x + 36, 68 + ((seed + index) % 28));
+      drawingContext.stroke();
+    }
+  } else if (category === 'Backend & APIs') {
+    for (let index = 0; index < 6; index += 1) {
+      const x = 22 + index * 38;
+      drawingContext.beginPath();
+      drawingContext.roundRect(x, 24 + (index % 2) * 38, 30, 18, 5);
+      drawingContext.stroke();
+      drawingContext.beginPath();
+      drawingContext.moveTo(x + 30, 33 + (index % 2) * 38);
+      drawingContext.lineTo(x + 48, 33 + ((index + 1) % 2) * 38);
+      drawingContext.stroke();
+    }
+  } else {
+    for (let index = 0; index < 5; index += 1) {
+      const x = 22 + index * 46;
+      drawingContext.beginPath();
+      drawingContext.moveTo(x, 80);
+      drawingContext.lineTo(x + 18, 46 + ((seed + index) % 24));
+      drawingContext.lineTo(x + 38, 80);
+      drawingContext.stroke();
+    }
+  }
+
+  drawingContext.globalAlpha = 0.5;
+  drawingContext.font = '900 22px monospace';
+  drawingContext.fillText(name.slice(0, 2).toUpperCase(), 198, 108);
+  drawingContext.restore();
+
+  const texture = new THREE.CanvasTexture(textureCanvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.flipY = false;
+  return texture;
+};
+
 export const createOrbitGeometry = (radius: number) => {
   const points: THREE.Vector3[] = [];
   for (let segmentIndex = 0; segmentIndex <= 160; segmentIndex += 1) {
