@@ -1,66 +1,16 @@
 import { useMemo } from 'react';
-import type { JSX } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import MobileSiteFooter from '../../components/mobile/MobileSiteFooter';
 import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_DATA } from '../../data/config';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
+import { normalizeRichText, renderInlineRichText as renderBlogInlineRichText } from '../../utils/blogContent';
 
-const INLINE_TOKEN_REGEX = /(\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|`[^`]+`)/g;
-
-const normalizeRichText = (text: string | string[]) => (Array.isArray(text) ? text.join('\n') : text);
-
-const renderInlineRichText = (text: string | string[], keyPrefix: string) => {
-  const normalizedText = normalizeRichText(text);
-  const lines = normalizedText.split('\n');
-
-  return lines.flatMap((line, lineIndex) => {
-    const nodes: Array<string | JSX.Element> = [];
-    let cursor = 0;
-
-    for (const match of line.matchAll(INLINE_TOKEN_REGEX)) {
-      const token = match[0];
-      const start = match.index ?? 0;
-      const end = start + token.length;
-
-      if (start > cursor) {
-        nodes.push(line.slice(cursor, start));
-      }
-
-      if (token.startsWith('**') && token.endsWith('**')) {
-        nodes.push(<strong key={`${keyPrefix}-b-${lineIndex}-${start}`}>{token.slice(2, -2)}</strong>);
-      } else if (token.startsWith('__') && token.endsWith('__')) {
-        nodes.push(
-          <span className="mobile-blog-underline" key={`${keyPrefix}-u-${lineIndex}-${start}`}>
-            {token.slice(2, -2)}
-          </span>,
-        );
-      } else if (token.startsWith('*') && token.endsWith('*')) {
-        nodes.push(<em key={`${keyPrefix}-i-${lineIndex}-${start}`}>{token.slice(1, -1)}</em>);
-      } else if (token.startsWith('`') && token.endsWith('`')) {
-        nodes.push(
-          <code className="mobile-blog-inline-code" key={`${keyPrefix}-c-${lineIndex}-${start}`}>
-            {token.slice(1, -1)}
-          </code>,
-        );
-      } else {
-        nodes.push(token);
-      }
-
-      cursor = end;
-    }
-
-    if (cursor < line.length) {
-      nodes.push(line.slice(cursor));
-    }
-
-    if (lineIndex < lines.length - 1) {
-      nodes.push(<br key={`${keyPrefix}-br-${lineIndex}`} />);
-    }
-
-    return nodes;
+const renderInlineRichText = (text: string | string[], keyPrefix: string) =>
+  renderBlogInlineRichText(text, keyPrefix, {
+    underline: 'mobile-blog-underline',
+    inlineCode: 'mobile-blog-inline-code',
   });
-};
 
 export default function MobileBlogPost() {
   const { id } = useParams();

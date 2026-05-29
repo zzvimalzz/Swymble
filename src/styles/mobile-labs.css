@@ -1,0 +1,308 @@
+.mobile-labs-page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 1rem 0.95rem 6.2rem;
+  position: relative;
+  overflow-x: clip;
+}
+
+.mobile-labs-header {
+  width: min(100%, 44rem);
+  margin: 0 auto 1rem;
+  padding: 0.5rem 0.3rem 0.95rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.mobile-labs-header h1 {
+  margin: 0.25rem 0 0;
+  font-family: 'Bebas Neue', sans-serif;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  font-size: clamp(2.6rem, 11vw, 4rem);
+}
+
+.mobile-labs-header p {
+  max-width: 33rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: clamp(0.98rem, 3vw, 1.12rem);
+  line-height: 1.6;
+}
+
+.mobile-labs-stack {
+  width: min(100%, 44rem);
+  margin: 0 auto;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mobile-lab-card,
+.mobile-labs-empty {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--category-accent-strong, var(--sw-border-volt));
+  border-radius: var(--sw-radius-panel);
+  background:
+    linear-gradient(135deg, var(--category-accent-soft, rgba(239, 255, 4, 0.1)), transparent 28%),
+    linear-gradient(165deg, rgba(16, 16, 16, 0.95), rgba(3, 3, 3, 0.92));
+  box-shadow: var(--sw-shadow-panel);
+  transition: border-color 0.28s ease, transform 0.28s ease, background-color 0.28s ease, box-shadow 0.28s ease;
+}
+
+.mobile-lab-card::before,
+.mobile-labs-empty::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 6px);
+  opacity: 0.16;
+}
+
+.mobile-lab-card-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.mobile-lab-card-toggle {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  border: 0;
+  padding: 0.78rem 0.86rem;
+  background: transparent;
+  color: inherit;
+  display: grid;
+  gap: 0.7rem;
+  text-align: left;
+}
+
+.mobile-lab-category,
+.mobile-lab-visibility,
+.mobile-lab-status,
+.mobile-lab-footer-row {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.mobile-lab-visibility {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.mobile-lab-toggle-title {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.mobile-lab-toggle-title span:first-child {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.05rem, 8vw, 3rem);
+  line-height: 0.92;
+  letter-spacing: 0.04em;
+}
+
+.mobile-lab-toggle-title span:last-child {
+  flex: 0 0 auto;
+  color: var(--category-accent, var(--sw-accent-volt));
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mobile-lab-image-wrap {
+  position: relative;
+  z-index: 1;
+  aspect-ratio: 16 / 10;
+  width: min(calc(100% - 1.64rem), 38.5rem);
+  margin: 0 auto 0.82rem;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  place-items: center;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-0.35rem) scale(0.98);
+  transition: max-height 0.32s var(--sw-ease-standard), opacity 0.24s ease, transform 0.32s var(--sw-ease-standard), margin-bottom 0.32s ease;
+}
+
+.mobile-lab-image-wrap .mobile-lab-image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.mobile-lab-status {
+  position: absolute;
+  z-index: 1;
+  left: 0.7rem;
+  bottom: 0.7rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(5, 5, 5, 0.78);
+  color: var(--sw-text-main);
+  backdrop-filter: blur(8px);
+}
+
+.mobile-lab-body {
+  position: relative;
+  z-index: 1;
+  padding: 0 0.95rem;
+  display: grid;
+  gap: 0.85rem;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-0.35rem);
+  overflow: hidden;
+  transition: max-height 0.34s var(--sw-ease-standard), opacity 0.24s ease, transform 0.34s var(--sw-ease-standard), padding-bottom 0.34s ease;
+}
+
+.mobile-lab-body h2 {
+  margin: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.2rem, 9vw, 3.4rem);
+  line-height: 0.95;
+  letter-spacing: 0.03em;
+}
+
+.mobile-lab-body p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.74);
+  line-height: 1.58;
+}
+
+.mobile-lab-highlights {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.mobile-lab-highlights li {
+  padding-left: 1rem;
+  position: relative;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.mobile-lab-highlights li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  background: var(--category-accent, var(--sw-accent-volt));
+  box-shadow: 0 0 0.7rem var(--category-accent, var(--sw-accent-volt));
+}
+
+.mobile-lab-tags,
+.mobile-lab-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.48rem;
+}
+
+.mobile-lab-tags span {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.74rem;
+}
+
+.mobile-lab-footer-row {
+  color: rgba(255, 255, 255, 0.46);
+}
+
+.mobile-lab-action {
+  min-height: 2.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.62rem 0.8rem;
+  border-radius: 0.72rem;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+  font-size: 0.72rem;
+}
+
+.mobile-lab-action.primary {
+  background: var(--category-accent, var(--sw-accent-volt));
+  color: #050505;
+}
+
+.mobile-lab-action.secondary {
+  border: 1px solid var(--category-accent-strong, var(--sw-border-volt));
+  color: var(--category-accent, var(--sw-accent-volt));
+  background: var(--category-accent-soft, rgba(239, 255, 4, 0.1));
+}
+
+.mobile-lab-card.is-active {
+  transform: translateY(-0.1rem);
+  border-color: var(--category-accent, var(--sw-accent-volt));
+  box-shadow: 0 1rem 2.4rem rgba(0, 0, 0, 0.58), 0 0 1.2rem var(--category-accent-soft, rgba(239, 255, 4, 0.12));
+}
+
+.mobile-lab-card.is-active .mobile-lab-image-wrap {
+  max-height: 24rem;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.mobile-lab-card.is-active .mobile-lab-body {
+  max-height: 48rem;
+  opacity: 1;
+  transform: translateY(0);
+  padding-bottom: 1rem;
+}
+
+.mobile-lab-card:not(.is-active):active {
+  transform: scale(0.985);
+  border-color: var(--category-accent-strong, var(--sw-border-volt));
+}
+
+.mobile-labs-empty {
+  width: min(100%, 34rem);
+  margin: 0 auto;
+  padding: 1.2rem;
+  display: grid;
+  gap: 0.75rem;
+  justify-items: start;
+}
+
+.mobile-labs-empty h2,
+.mobile-labs-empty p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+
+.mobile-labs-empty h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.4rem;
+}
+
+.mobile-labs-empty p {
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.55;
+}

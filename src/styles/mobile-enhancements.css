@@ -150,10 +150,11 @@ body.mobile-snap-enabled {
   transform: scale(0.95);
 }
 
-.mobile-thumb-back-trigger {
+.mobile-thumb-back-trigger,
+.mobile-route-back-trigger {
   position: fixed;
   right: 1.5rem;
-  bottom: calc(5.15rem + env(safe-area-inset-bottom));
+  bottom: var(--mobile-route-back-bottom, calc(5.15rem + env(safe-area-inset-bottom)));
   z-index: 92;
   width: 3.55rem;
   height: 3.55rem;
@@ -168,7 +169,8 @@ body.mobile-snap-enabled {
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.mobile-thumb-back-trigger:active {
+.mobile-thumb-back-trigger:active,
+.mobile-route-back-trigger:active {
   transform: scale(0.95);
   border-color: #efff04;
 }

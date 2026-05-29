@@ -1,64 +1,53 @@
 import { useEffect, useRef, useState } from 'react';
-import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Menu, Rocket } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
-import MobileHome, { type MobileHomeSectionId } from './mobile/MobileHome';
+import MobileFloatingControls from '../components/mobile/MobileFloatingControls';
+import MobileHome from './mobile/MobileHome';
 import MobileBlog from './mobile/MobileBlog';
 import MobileBlogPost from './mobile/MobileBlogPost';
+import MobileLabs from './mobile/MobileLabs';
+import { MOBILE_NAV_ROUTES } from '../routes';
+import { useMobileSectionNavigation } from '../hooks/useMobileSectionNavigation';
+import { useMobileTitleInteraction } from '../hooks/useMobileTitleInteraction';
 
-import '../styles/mobile-tablet.css';
-import '../styles/mobile-enhancements.css';
-import '../styles/mobile-footer.css';
+import '../styles/mobile.css';
 import '../styles/category-accent.css';
 
-const HOME_SECTIONS = [
-  { id: 'top', label: 'Home' },
-  { id: 'focus-section', label: 'Overview' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'latest-updates', label: 'Latest Updates' },
-  { id: 'contact-section', label: 'Contact' },
-] as const;
-
-const HOME_ROUTE_PATHS = new Set(['/', '/projects', '/contact', '/about', '/labs']);
-const HOME_RENDER_PATHS = ['/', '/projects', '/contact'];
-
-const getHomeSectionFromPath = (pathname: string): MobileHomeSectionId => {
-  if (pathname === '/projects') return 'projects';
-  if (pathname === '/contact') return 'contact-section';
-  return 'top';
-};
+const HOME_RENDER_PATHS = ['/', '/projects', '/contact', '/about'];
+const MOBILE_NAV_PATH_ORDER = ['/', '/projects', '/contact', '/labs', '/blog'];
 
 export default function MobileTabletView() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isHomeRoute = HOME_ROUTE_PATHS.has(location.pathname);
+  const isHomeRoute = HOME_RENDER_PATHS.includes(location.pathname);
   const isBlogRoute = location.pathname.startsWith('/blog');
+  const isLabsRoute = location.pathname === '/labs';
+  const hasRouteFloatingControls = isBlogRoute || isLabsRoute;
   const [scrolled, setScrolled] = useState(false);
   const [showRouteRocket, setShowRouteRocket] = useState(false);
-  const [activeSection, setActiveSection] = useState<MobileHomeSectionId>('top');
-  const [isTitleTapped, setIsTitleTapped] = useState(false);
-  const [isTitleHolding, setIsTitleHolding] = useState(false);
   const [isThumbNavOpen, setIsThumbNavOpen] = useState(false);
 
-  const holdTimerRef = useRef<number | null>(null);
-  const holdDropTimerRef = useRef<number | null>(null);
-  const tapResetTimerRef = useRef<number | null>(null);
-
-  const holdReadyRef = useRef(false);
-  const holdActivatedRef = useRef(false);
-  const pointerDownRef = useRef(false);
-  const pointerInsideRef = useRef(false);
-  const activePointerIdRef = useRef<number | null>(null);
-
-  const titleRef = useRef<HTMLHeadingElement | null>(null);
   const thumbNavListRef = useRef<HTMLDivElement | null>(null);
   const thumbNavSheetRef = useRef<HTMLDivElement | null>(null);
   const menuTriggerRef = useRef<HTMLButtonElement | null>(null);
-  const thumbBackRef = useRef<HTMLButtonElement | null>(null);
 
-  const [routeRocketBottom, setRouteRocketBottom] = useState<number | null>(null);
+  const { activeSection, jumpToSection } = useMobileSectionNavigation({
+    isHomeRoute,
+    pathname: location.pathname,
+    hash: location.hash,
+    navigate,
+  });
+  const {
+    titleRef,
+    titleStyle,
+    isTitleTapped,
+    isTitleHolding,
+    handleTitlePointerDown,
+    handleTitlePointerMove,
+    clearTitleInteraction,
+  } = useMobileTitleInteraction();
 
   useEffect(() => {
     if (!isHomeRoute) {
@@ -76,7 +65,7 @@ export default function MobileTabletView() {
   }, [isHomeRoute]);
 
   useEffect(() => {
-    if (!isBlogRoute) {
+    if (!hasRouteFloatingControls) {
       setShowRouteRocket(false);
       return;
     }
@@ -88,149 +77,7 @@ export default function MobileTabletView() {
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isBlogRoute]);
-
-  useEffect(() => {
-    if (!isBlogRoute || !showRouteRocket) {
-      setRouteRocketBottom(null);
-      return;
-    }
-
-    let frameId: number | null = null;
-
-    const updateRouteRocketPosition = () => {
-      const candidates: Array<HTMLElement | null> = [menuTriggerRef.current, thumbBackRef.current];
-      if (isThumbNavOpen) {
-        candidates.push(thumbNavSheetRef.current);
-      }
-
-      const visibleRects = candidates
-        .filter((node): node is HTMLElement => Boolean(node))
-        .map((node) => node.getBoundingClientRect())
-        .filter((rect) => rect.width > 0 && rect.height > 0);
-
-      if (visibleRects.length === 0) {
-        setRouteRocketBottom(null);
-        return;
-      }
-
-      const highestTop = Math.min(...visibleRects.map((rect) => rect.top));
-      const nextBottom = Math.max(24, Math.round(window.innerHeight - highestTop + 12));
-      setRouteRocketBottom(nextBottom);
-    };
-
-    const scheduleUpdate = () => {
-      if (frameId !== null) {
-        return;
-      }
-
-      frameId = window.requestAnimationFrame(() => {
-        frameId = null;
-        updateRouteRocketPosition();
-      });
-    };
-
-    scheduleUpdate();
-    window.addEventListener('resize', scheduleUpdate);
-    window.addEventListener('scroll', scheduleUpdate, { passive: true });
-
-    return () => {
-      window.removeEventListener('resize', scheduleUpdate);
-      window.removeEventListener('scroll', scheduleUpdate);
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
-    };
-  }, [isBlogRoute, showRouteRocket, isThumbNavOpen]);
-
-  useEffect(() => {
-    const className = 'mobile-snap-enabled';
-
-    if (isHomeRoute) {
-      document.documentElement.classList.add(className);
-      document.body.classList.add(className);
-    } else {
-      document.documentElement.classList.remove(className);
-      document.body.classList.remove(className);
-    }
-
-    return () => {
-      document.documentElement.classList.remove(className);
-      document.body.classList.remove(className);
-    };
-  }, [isHomeRoute]);
-
-  useEffect(() => {
-    if (!isHomeRoute) {
-      return;
-    }
-
-    let frameId: number | null = null;
-
-    const updateActiveSection = () => {
-      const anchorY = window.scrollY + window.innerHeight * 0.42;
-      let nextSection: MobileHomeSectionId = 'top';
-
-      HOME_SECTIONS.forEach((section) => {
-        const node = document.getElementById(section.id);
-        if (!node) return;
-
-        if (node.offsetTop <= anchorY) {
-          nextSection = section.id;
-        }
-      });
-
-      setActiveSection((prev) => (prev === nextSection ? prev : nextSection));
-    };
-
-    const handleScroll = () => {
-      if (frameId !== null) {
-        return;
-      }
-
-      frameId = window.requestAnimationFrame(() => {
-        frameId = null;
-        updateActiveSection();
-      });
-    };
-
-    updateActiveSection();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-      if (frameId !== null) {
-        window.cancelAnimationFrame(frameId);
-      }
-    };
-  }, [isHomeRoute, location.pathname]);
-
-  useEffect(() => {
-    if (!isHomeRoute) {
-      return;
-    }
-
-    const hashId = location.hash ? decodeURIComponent(location.hash.slice(1)) : '';
-    const targetSectionId = (hashId || getHomeSectionFromPath(location.pathname)) as MobileHomeSectionId;
-
-    const frame = window.setTimeout(() => {
-      if (targetSectionId === 'top') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setActiveSection('top');
-        return;
-      }
-
-      const targetNode = document.getElementById(targetSectionId);
-      if (targetNode) {
-        targetNode.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setActiveSection(targetSectionId);
-      }
-    }, 30);
-
-    return () => window.clearTimeout(frame);
-  }, [isHomeRoute, location.pathname, location.hash]);
+  }, [hasRouteFloatingControls]);
 
   useEffect(() => {
     setIsThumbNavOpen(false);
@@ -252,207 +99,62 @@ export default function MobileTabletView() {
     return () => window.cancelAnimationFrame(frame);
   }, [isThumbNavOpen, activeSection, location.pathname]);
 
-  useEffect(() => {
-    return () => {
-      if (holdTimerRef.current !== null) window.clearTimeout(holdTimerRef.current);
-      if (holdDropTimerRef.current !== null) window.clearTimeout(holdDropTimerRef.current);
-      if (tapResetTimerRef.current !== null) window.clearTimeout(tapResetTimerRef.current);
-    };
-  }, []);
-
-  const triggerTapFeedback = () => {
-    setIsTitleTapped(true);
-
-    if (tapResetTimerRef.current !== null) {
-      window.clearTimeout(tapResetTimerRef.current);
-    }
-
-    tapResetTimerRef.current = window.setTimeout(() => {
-      setIsTitleTapped(false);
-      tapResetTimerRef.current = null;
-    }, 260);
-
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      navigator.vibrate(12);
-    }
-  };
-
-  const clearHoldTimer = () => {
-    if (holdTimerRef.current !== null) {
-      window.clearTimeout(holdTimerRef.current);
-      holdTimerRef.current = null;
-    }
-  };
-
-  const clearHoldDropTimer = () => {
-    if (holdDropTimerRef.current !== null) {
-      window.clearTimeout(holdDropTimerRef.current);
-      holdDropTimerRef.current = null;
-    }
-  };
-
-  const isPointerInsideTitle = (clientX: number, clientY: number) => {
-    const titleNode = titleRef.current;
-    if (!titleNode) return false;
-
-    const rect = titleNode.getBoundingClientRect();
-    const hitPadding = 14;
-
-    return (
-      clientX >= rect.left - hitPadding &&
-      clientX <= rect.right + hitPadding &&
-      clientY >= rect.top - hitPadding &&
-      clientY <= rect.bottom + hitPadding
-    );
-  };
-
-  const handleTitlePointerDown = (event: ReactPointerEvent<HTMLHeadingElement>) => {
-    setIsTitleTapped(false);
-    setIsTitleHolding(false);
-
-    pointerDownRef.current = true;
-    pointerInsideRef.current = true;
-    activePointerIdRef.current = event.pointerId;
-    holdReadyRef.current = false;
-    holdActivatedRef.current = false;
-
-    event.currentTarget.setPointerCapture(event.pointerId);
-    clearHoldTimer();
-    clearHoldDropTimer();
-
-    holdTimerRef.current = window.setTimeout(() => {
-      holdReadyRef.current = true;
-
-      if (pointerDownRef.current && pointerInsideRef.current) {
-        holdActivatedRef.current = true;
-        setIsTitleHolding(true);
-        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-          navigator.vibrate([16, 20, 16]);
-        }
-      }
-
-      holdTimerRef.current = null;
-    }, 280);
-  };
-
-  const handleTitlePointerMove = (event: ReactPointerEvent<HTMLHeadingElement>) => {
-    if (activePointerIdRef.current !== event.pointerId) {
-      return;
-    }
-
-    const isInside = isPointerInsideTitle(event.clientX, event.clientY);
-    pointerInsideRef.current = isInside;
-
-    if (!isInside && holdReadyRef.current) {
-      if (holdDropTimerRef.current === null) {
-        holdDropTimerRef.current = window.setTimeout(() => {
-          holdDropTimerRef.current = null;
-          if (pointerDownRef.current && !pointerInsideRef.current) {
-            setIsTitleHolding(false);
-          }
-        }, 70);
-      }
-      return;
-    }
-
-    clearHoldDropTimer();
-
-    if (pointerDownRef.current && holdReadyRef.current) {
-      holdActivatedRef.current = true;
-      setIsTitleHolding(true);
-    }
-  };
-
-  const clearTitleInteraction = (event: ReactPointerEvent<HTMLHeadingElement>) => {
-    if (activePointerIdRef.current !== null && activePointerIdRef.current === event.pointerId) {
-      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-        event.currentTarget.releasePointerCapture(event.pointerId);
-      }
-      activePointerIdRef.current = null;
-    }
-
-    const shouldTriggerTap = pointerDownRef.current && !holdActivatedRef.current;
-
-    pointerDownRef.current = false;
-    pointerInsideRef.current = false;
-    holdReadyRef.current = false;
-    holdActivatedRef.current = false;
-
-    clearHoldTimer();
-    clearHoldDropTimer();
-    setIsTitleHolding(false);
-
-    if (shouldTriggerTap) {
-      triggerTapFeedback();
-    }
-  };
-
-  const jumpToSection = (sectionId: MobileHomeSectionId) => {
-    if (!isHomeRoute) {
-      navigate(`/#${sectionId}`);
-      return;
-    }
-
-    if (sectionId === 'top') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setActiveSection('top');
-      return;
-    }
-
-    const targetNode = document.getElementById(sectionId);
-    if (targetNode) {
-      targetNode.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setActiveSection(sectionId);
-    }
-  };
-
-  const titleStyle = {
-    '--title-hold-scale': isTitleHolding ? 1.14 : 1,
-  } as CSSProperties;
+  const orderedMobileNavRoutes = [...MOBILE_NAV_ROUTES].sort(
+    (firstRoute, secondRoute) =>
+      MOBILE_NAV_PATH_ORDER.indexOf(firstRoute.path) - MOBILE_NAV_PATH_ORDER.indexOf(secondRoute.path),
+  );
 
   const thumbNavItems: Array<{
     key: string;
     label: string;
     action: () => void;
     isActive?: boolean;
-  }> = [
-    {
-      key: 'home-top',
-      label: 'Home',
-      action: () => jumpToSection('top'),
-      isActive: isHomeRoute && activeSection === 'top',
-    },
-    {
-      key: 'home-focus',
-      label: 'Overview',
-      action: () => jumpToSection('focus-section'),
-      isActive: isHomeRoute && activeSection === 'focus-section',
-    },
-    {
-      key: 'home-projects',
-      label: 'Projects',
-      action: () => jumpToSection('projects'),
-      isActive: isHomeRoute && activeSection === 'projects',
-    },
-    {
-      key: 'home-latest-updates',
-      label: 'Latest Updates',
-      action: () => jumpToSection('latest-updates'),
-      isActive: isHomeRoute && activeSection === 'latest-updates',
-    },
-    {
-      key: 'home-contact',
-      label: 'Contact',
-      action: () => jumpToSection('contact-section'),
-      isActive: isHomeRoute && activeSection === 'contact-section',
-    },
-    {
-      key: 'blog',
-      label: 'Blog',
-      action: () => navigate('/blog'),
-      isActive: location.pathname.startsWith('/blog'),
-    },
-  ];
+  }> = orderedMobileNavRoutes.flatMap((route) => {
+    const routeItem = {
+      key: route.path,
+      label: route.label,
+      action: () => {
+        if (route.mobileMode === 'home-section' && route.mobileSectionId) {
+          jumpToSection(route.mobileSectionId);
+          return;
+        }
+
+        navigate(route.path);
+      },
+      isActive:
+        route.mobileMode === 'home-section' && route.mobileSectionId
+          ? isHomeRoute && activeSection === route.mobileSectionId
+          : route.path === '/blog'
+            ? location.pathname.startsWith('/blog')
+            : location.pathname === route.path,
+    };
+
+    if (route.path === '/') {
+      return [
+        routeItem,
+        {
+          key: 'home-focus',
+          label: 'Overview',
+          action: () => jumpToSection('focus-section'),
+          isActive: isHomeRoute && activeSection === 'focus-section',
+        },
+      ];
+    }
+
+    if (route.path === '/projects') {
+      return [
+        routeItem,
+        {
+          key: 'home-latest-updates',
+          label: 'Latest Updates',
+          action: () => jumpToSection('latest-updates'),
+          isActive: isHomeRoute && activeSection === 'latest-updates',
+        },
+      ];
+    }
+
+    return [routeItem];
+  });
 
   const handleThumbNavItemClick = (action: () => void) => {
     action();
@@ -460,6 +162,11 @@ export default function MobileTabletView() {
   };
 
   const handleThumbBack = () => {
+    if (isLabsRoute) {
+      navigate('/');
+      return;
+    }
+
     if (location.pathname.startsWith('/blog/')) {
       const category = new URLSearchParams(location.search).get('category');
       navigate(category ? `/blog?category=${encodeURIComponent(category)}` : '/blog');
@@ -498,6 +205,7 @@ export default function MobileTabletView() {
         {HOME_RENDER_PATHS.map((path) => (
           <Route key={path} path={path} element={homeElement} />
         ))}
+        <Route path="/labs" element={<MobileLabs />} />
         <Route path="/blog" element={<MobileBlog />} />
         <Route path="/blog/:id" element={<MobileBlogPost />} />
         <Route path="*" element={homeElement} />
@@ -548,33 +256,16 @@ export default function MobileTabletView() {
         <Menu size={18} />
       </button>
 
-      {isBlogRoute && (
-        <button
-          ref={thumbBackRef}
-          type="button"
-          className="mobile-thumb-back-trigger"
-          aria-label="Go back"
-          onClick={handleThumbBack}
-        >
-          <ChevronLeft size={18} />
-        </button>
-      )}
-
-      {isBlogRoute && showRouteRocket && (
-        <button
-          type="button"
-          className="rocket-to-top mobile-route-rocket"
-          onClick={scrollToTop}
-          aria-label="Scroll to top"
-          style={
-            routeRocketBottom !== null
-              ? ({ '--route-rocket-bottom': `${routeRocketBottom}px` } as CSSProperties)
-              : undefined
-          }
-        >
-          <Rocket size={28} style={{ transform: 'rotate(-45deg)' }} />
-        </button>
-      )}
+      <MobileFloatingControls
+        isNavigationOpen={isThumbNavOpen}
+        menuTriggerRef={menuTriggerRef}
+        navigationSheetRef={thumbNavSheetRef}
+        showBack={hasRouteFloatingControls}
+        backLabel={isLabsRoute ? 'Back to home' : 'Go back'}
+        onBack={handleThumbBack}
+        showRocket={hasRouteFloatingControls && showRouteRocket}
+        onRocket={scrollToTop}
+      />
     </div>
   );
 }

@@ -1,10 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { SWYMBLE_DATA } from '../data/config';
-
-const SITE_NAME = 'SWYMBLE';
-const SITE_URL = 'https://swymble.com';
-const DEFAULT_IMAGE = `${SITE_URL}/images/ibsolutions_website.png`;
+import { DEFAULT_SEO_IMAGE, SITE_NAME, SITE_URL, findSiteRoute } from '../routes';
 
 type SeoPayload = {
   title: string;
@@ -59,53 +56,14 @@ const toAbsoluteUrl = (pathOrUrl: string) => {
 };
 
 const buildSeoPayload = (pathname: string): SeoPayload => {
-  if (pathname === '/') {
-    return {
-      title: `${SITE_NAME} | Projects, Builds, Writing, and Story`,
-      description:
-        'A personal site for software engineering work, shipped projects, experimental builds, blog posts, and the story behind what I am making.',
-      type: 'website',
-      shouldIndex: true,
-    };
-  }
+  const route = findSiteRoute(pathname);
 
-  if (pathname === '/projects') {
+  if (route) {
     return {
-      title: `Projects | ${SITE_NAME}`,
-      description:
-        'Explore websites, apps, and product builds from SWYMBLE, including shipped work and the thinking behind each project.',
+      title: route.seoTitle,
+      description: route.seoDescription,
       type: 'website',
-      shouldIndex: true,
-    };
-  }
-
-  if (pathname === '/labs') {
-    return {
-      title: `Labs | ${SITE_NAME}`,
-      description:
-        'See SWYMBLE Labs experiments across AI, product R&D, prototypes, and in-progress ideas.',
-      type: 'website',
-      shouldIndex: true,
-    };
-  }
-
-  if (pathname === '/about') {
-    return {
-      title: `About | ${SITE_NAME}`,
-      description:
-        'Learn about the engineer behind SWYMBLE, from enterprise software experience to personal builds, writing, and long-term experiments.',
-      type: 'website',
-      shouldIndex: true,
-    };
-  }
-
-  if (pathname === '/blog') {
-    return {
-      title: `Blog | ${SITE_NAME}`,
-      description:
-        'Read SWYMBLE notes on software engineering, AI systems, builds, lessons learned, and ideas worth documenting.',
-      type: 'website',
-      shouldIndex: true,
+      shouldIndex: route.shouldIndex,
     };
   }
 
@@ -117,7 +75,7 @@ const buildSeoPayload = (pathname: string): SeoPayload => {
       return {
         title: `${post.title} | ${SITE_NAME} Blog`,
         description: post.summary,
-        image: post.coverImage ? toAbsoluteUrl(post.coverImage) : DEFAULT_IMAGE,
+        image: post.coverImage ? toAbsoluteUrl(post.coverImage) : DEFAULT_SEO_IMAGE,
         type: 'article',
         shouldIndex: true,
       };
@@ -138,7 +96,7 @@ export function useRouteSeo() {
   useEffect(() => {
     const payload = buildSeoPayload(location.pathname);
     const canonicalUrl = toAbsoluteUrl(location.pathname === '' ? '/' : location.pathname);
-    const imageUrl = payload.image ?? DEFAULT_IMAGE;
+    const imageUrl = payload.image ?? DEFAULT_SEO_IMAGE;
     const robotsContent = payload.shouldIndex
       ? 'index, follow, max-image-preview:large'
       : 'noindex, nofollow';

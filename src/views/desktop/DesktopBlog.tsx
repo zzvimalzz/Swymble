@@ -1,62 +1,18 @@
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_DATA } from '../../data/config';
+import { useBlogCategoryFilter } from '../../hooks/useBlogCategoryFilter';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import '../../styles/desktop-blog.css';
 
 export default function DesktopBlog() {
   const { title, description, emptyStateMsg, posts, categories } = SWYMBLE_DATA.blog;
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const selectedCategory = searchParams.get('category') ?? 'all';
-  const categoryMap = useMemo(
-    () => new Map(categories.map((category) => [category.id, category])),
-    [categories],
-  );
-  const activeCategory =
-    selectedCategory === 'all' || categoryMap.has(selectedCategory) ? selectedCategory : 'all';
-
-  const filteredPosts = useMemo(() => {
-    const basePosts = [...posts].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-    );
-
-    if (activeCategory === 'all') {
-      return basePosts;
-    }
-
-    return basePosts.filter((post) => post.categories.includes(activeCategory));
-  }, [activeCategory, posts]);
-
-  const categoryCountMap = useMemo(() => {
-    const counts = new Map<string, number>();
-    categories.forEach((category) => counts.set(category.id, 0));
-
-    posts.forEach((post) => {
-      post.categories.forEach((categoryId) => {
-        counts.set(categoryId, (counts.get(categoryId) ?? 0) + 1);
-      });
-    });
-
-    return counts;
-  }, [categories, posts]);
-
+  const { activeCategory, categoryMap, categoryCountMap, filteredPosts, onCategoryChange } = useBlogCategoryFilter({
+    posts,
+    categories,
+  });
   const hasPosts = filteredPosts.length > 0;
-
-  const onCategoryChange = (categoryId: string) => {
-    const nextParams = new URLSearchParams(searchParams);
-
-    if (categoryId === 'all') {
-      nextParams.delete('category');
-      setSearchParams(nextParams, { replace: true });
-      return;
-    }
-
-    nextParams.set('category', categoryId);
-    setSearchParams(nextParams, { replace: true });
-  };
 
   return (
     <section className="layout-content desktop-page-layout">

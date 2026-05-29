@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
 import type { PanInfo } from 'framer-motion';
 import { ExternalLink, Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import SmartImage from '../SmartImage';
 import { type SwymbleProject, SWYMBLE_DATA } from '../../data/config';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
@@ -117,6 +118,15 @@ const TinderCard: React.FC<TinderCardProps> = ({ project, isFront, onSwipe, inde
                 >
                   <ExternalLink size={20} /> View Project
                 </a>
+              )}
+              {project.blogLink && (
+                <Link
+                  to={project.blogLink}
+                  className="project-link-btn secondary"
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  Read Notes
+                </Link>
               )}
               <div className="tap-hint">Tap to see image</div>
             </div>

@@ -1,4 +1,6 @@
-﻿:root {
+﻿@import './styles/tokens.css';
+
+:root {
   color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;

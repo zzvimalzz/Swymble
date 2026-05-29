@@ -1,0 +1,22 @@
+:root {
+  --sw-bg-ink: #050505;
+  --sw-bg-void: #000000;
+  --sw-text-main: #f4f4f4;
+  --sw-text-muted: #a7a7a7;
+  --sw-accent-volt: #efff04;
+  --sw-accent-neon: #ff2044;
+  --sw-accent-cyan: #00eaff;
+  --sw-border-soft: rgba(255, 255, 255, 0.12);
+  --sw-border-volt: rgba(239, 255, 4, 0.34);
+  --sw-surface-faint: rgba(255, 255, 255, 0.05);
+  --sw-surface-strong: rgba(255, 255, 255, 0.09);
+  --sw-shadow-panel: 0 0.8rem 2.2rem rgba(0, 0, 0, 0.52);
+  --sw-radius-panel: 1rem;
+  --sw-radius-card: 0.85rem;
+  --sw-motion-fast: 0.2s;
+  --sw-motion-med: 0.3s;
+  --sw-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --sw-z-nav: 90;
+  --sw-z-overlay: 95;
+  --sw-z-floating: 98;
+}

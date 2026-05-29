@@ -10,9 +10,10 @@
 }
 
 .mobile-site-footer-logo {
-  height: 22px;
+  height: 42px;
   width: auto;
-  opacity: 0.72;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 0.65rem rgba(255, 255, 255, 0.18));
 }
 
 .mobile-site-footer-meta {

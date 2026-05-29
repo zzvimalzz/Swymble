@@ -11,12 +11,6 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
   const location = useLocation();
   const visibleLabs = SWYMBLE_DATA.labs?.filter((lab) => lab.visibility !== 'private') ?? [];
 
-  const visibilityLabelMap: Record<string, string> = {
-    public: 'PUBLIC',
-    teaser: 'TEASER',
-    private: 'PRIVATE',
-  };
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location]);
@@ -103,7 +97,7 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
                 <div className="lab-meta">
                   <span className="lab-category category-accent-text" style={categoryAccentStyle}>{labItem.category}</span>
                   <span className={`lab-visibility-badge visibility-${labItem.visibility}`}>
-                    {visibilityLabelMap[labItem.visibility]}
+                    {labItem.visibility.toUpperCase()}
                   </span>
                 </div>
                 <h3 className="lab-title">{labItem.title}</h3>

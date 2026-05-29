@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { DESKTOP_NAV_ROUTES } from '../../routes';
 import '../../styles/desktop-nav.css';
 
 type DesktopNavProps = {
@@ -31,18 +32,18 @@ export default function DesktopNav({ setIsHovering, brandName }: DesktopNavProps
       </div>
 
       <div className="nav-links">
-        {['Home', 'Projects', 'Labs', 'About', 'Blog'].map((item) => (
+        {DESKTOP_NAV_ROUTES.map((route) => (
           <NavLink
-            key={item}
-            to={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
+            key={route.path}
+            to={route.path}
             className={({ isActive }) =>
-              `nav-link ${item === 'Labs' ? 'labs-link' : ''} ${isActive ? 'active' : ''}`.trim()
+              `nav-link ${route.path === '/labs' ? 'labs-link' : ''} ${isActive ? 'active' : ''}`.trim()
             }
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
-            end={item === 'Home'}
+            end={route.path === '/'}
           >
-            {item}
+            {route.label}
           </NavLink>
         ))}
       </div>
