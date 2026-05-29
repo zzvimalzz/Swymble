@@ -249,7 +249,7 @@ export default function DesktopHome({
                   onMouseEnter={() => setIsHovering(true)}
                   onMouseLeave={() => setIsHovering(false)}
                 >
-                  {formStatus === 'sending' ? 'SENDING...' : 'SEND IT'}
+                  {formStatus === 'sending' ? 'OPENING...' : 'OPEN EMAIL'}
                 </button>
               </form>
             </div>

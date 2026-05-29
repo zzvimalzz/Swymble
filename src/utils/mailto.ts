@@ -2,6 +2,30 @@ const MAILTO_PREFIX = 'mailto:';
 
 export const isMailtoLink = (link: string) => link.toLowerCase().startsWith(MAILTO_PREFIX);
 
+export const buildMailtoHref = (
+  mailtoHref: string,
+  options: { subject?: string; body?: string },
+) => {
+  if (!isMailtoLink(mailtoHref)) {
+    return mailtoHref;
+  }
+
+  const [toPart = ''] = mailtoHref.slice(MAILTO_PREFIX.length).split('?');
+  const mailtoParams = new URLSearchParams();
+
+  if (options.subject) {
+    mailtoParams.set('subject', options.subject);
+  }
+
+  if (options.body) {
+    mailtoParams.set('body', options.body);
+  }
+
+  const query = mailtoParams.toString();
+
+  return `${MAILTO_PREFIX}${toPart}${query ? `?${query}` : ''}`;
+};
+
 export const buildGmailComposeUrl = (mailtoHref: string) => {
   if (!isMailtoLink(mailtoHref)) {
     return mailtoHref;

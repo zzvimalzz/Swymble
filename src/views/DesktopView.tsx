@@ -22,6 +22,7 @@ import DesktopLabs from './desktop/DesktopLabs';
 import DesktopNotFound from './desktop/DesktopNotFound';
 
 import { SWYMBLE_DATA } from '../data/config';
+import { buildGmailComposeUrl, buildMailtoHref, isMailtoLink } from '../utils/mailto';
 import '../styles/desktop.css';
 import '../styles/category-accent.css';
 
@@ -213,7 +214,7 @@ export default function DesktopView() {
     if (formMessage) setFormMessage(null);
   };
 
-  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const now = Date.now();
@@ -262,45 +263,42 @@ export default function DesktopView() {
     setFormStatus('sending');
     setFormMessage(null);
 
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 10000);
-
     try {
-      const res = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          access_key: import.meta.env.VITE_WEB3FORMS_KEY,
-          name: cleanName,
-          email: cleanEmail,
-          subject: `New inquiry from ${cleanName} via Swymble`,
-          message: `Looking to build: ${cleanProject}`,
-          botcheck: '',
-        }),
-      });
+      const contactMailto = SWYMBLE_DATA.socials.find((social) => {
+        return social.id === 'em' && isMailtoLink(social.link);
+      })?.link;
 
-      const data = (await res.json()) as { success?: boolean; message?: string };
+      if (!contactMailto) {
+        throw new Error('Missing contact email');
+      }
 
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Submission failed');
+      const composeUrl = buildGmailComposeUrl(buildMailtoHref(contactMailto, {
+        subject: `New inquiry from ${cleanName} via Swymble`,
+        body: [
+          `Name: ${cleanName}`,
+          `Email: ${cleanEmail}`,
+          `Looking to build: ${cleanProject}`,
+        ].join('\n'),
+      }));
+
+      const openedWindow = window.open(composeUrl, '_blank');
+
+      if (openedWindow) {
+        openedWindow.opener = null;
+      } else {
+        window.location.href = composeUrl;
       }
 
       setFormStatus('success');
-      setFormMessage({ type: 'success', text: "Message received. I'll be in touch soon." });
-      setName('');
-      setProject('');
-      setEmail('');
-      setNameError('');
-      setProjectError('');
-      setEmailError('');
+      setFormMessage({
+        type: 'success',
+        text: 'Your email draft is open. Hit send when it looks right.',
+      });
       lastSubmittedAtRef.current = Date.now();
       formStartedAtRef.current = Date.now();
     } catch {
       setFormStatus('error');
-      setFormMessage({ type: 'error', text: 'Unable to send right now. Please try again in a moment.' });
-    } finally {
-      window.clearTimeout(timeoutId);
+      setFormMessage({ type: 'error', text: 'Unable to open email. Please use hello@swymble.com.' });
     }
   };
 
