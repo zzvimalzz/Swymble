@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import * as THREE from 'three';
 import type { SwymbleSkillCategory, SwymbleSkillItem } from '../../data/types';
-import { attachCometModels, createCometRecords, updateComets } from './TechUniverseComets';
+import { UFO_MODEL_URLS, attachCometModels, attachUfoModels, createCometRecords, createUfoRecords, updateComets, updateUfos } from './TechUniverseComets';
 import { COMET_MODEL_URL, CORE_PLANET_MODEL_URL, getPlanetModelScaleMultiplier, loadGltfScene, loadMoonModelLibrary, preparePlanetModel, selectMoonModel } from './TechUniverseModelAssets';
 import { createOrbitGeometry, createStarGeometry, disposeObject } from './TechUniverseSceneAssets';
 
@@ -110,6 +110,7 @@ export const useTechUniverseScene = (
     const orbitRecords: OrbitRecord[] = [];
     const interactiveObjects: THREE.Object3D[] = [];
     const cometRecords = createCometRecords(universeGroup);
+    const ufoRecords = createUfoRecords(universeGroup);
     let isDisposed = false;
 
     renderer.setClearColor(0x000000, 0);
@@ -156,6 +157,11 @@ export const useTechUniverseScene = (
     loadGltfScene(COMET_MODEL_URL).then((cometScene) => {
       if (isDisposed) return;
       attachCometModels(cometRecords, cometScene);
+    }).catch(() => undefined);
+
+    Promise.all(UFO_MODEL_URLS.map((modelUrl) => loadGltfScene(modelUrl))).then((ufoScenes) => {
+      if (isDisposed) return;
+      attachUfoModels(ufoRecords, ufoScenes);
     }).catch(() => undefined);
 
     const starField = new THREE.Points(
@@ -319,6 +325,7 @@ export const useTechUniverseScene = (
       const hasFocus = Boolean(focusedCategory && focusedOrbit);
       const hasItemFocus = Boolean(hasFocus && focusedMoon);
       updateComets(cometRecords, performance.now() * 0.001, outerOrbitRadius, hasFocus);
+      updateUfos(ufoRecords, performance.now() * 0.001, outerOrbitRadius, hasFocus);
 
       desiredCameraTarget.set(0, 0, 0);
       desiredCameraPosition.copy(cameraHomePosition);
