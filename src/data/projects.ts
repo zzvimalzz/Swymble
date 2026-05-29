@@ -14,9 +14,9 @@ export const SWYMBLE_PROJECTS: SwymbleProject[] = [
     category: 'Company Profile',
     categoryColor: '#ff9f43',
     client: 'IB Solutions (M)',
-    image: '/ibsolutions_logo.png',
-    landingImage: '/ibsolutions_website.png',
-    mobileImage: '/ibsolutions_logo.png',
+    image: '/images/ibsolutions_logo.png',
+    landingImage: '/images/ibsolutions_website.png',
+    mobileImage: '/images/ibsolutions_logo.png',
     description:
       'I designed and built IB Solutions company profile from the ground up. They are a Malaysian professional services company specialising in corporate training and capability development.',
     link: 'https://ibsolutions.com.my',

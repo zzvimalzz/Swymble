@@ -132,8 +132,8 @@ export default function MobileProjects({ projects }: { projects: SwymbleProject[
     title: "More projects coming soon!",
     category: "STAY TUNED",
     client: null,
-    image: SWYMBLE_DATA.endCardMobileImage || "/white-logo.png",
-    mobileImage: SWYMBLE_DATA.endCardMobileImage || "/white-logo.png",
+    image: SWYMBLE_DATA.endCardMobileImage || "/images/white-logo.png",
+    mobileImage: SWYMBLE_DATA.endCardMobileImage || "/images/white-logo.png",
     description: "I'm always working on new and exciting things. Check back later for updates! Swipe this card away to reload the deck.",
     link: "#",
     status: 'Pending'

@@ -24,7 +24,7 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     id: 'cortex',
     title: 'CORTEX',
     category: 'ARTIFICIAL INTELLIGENCE',
-    image: '/cortex_logo.png',
+    image: '/images/cortex_logo.png',
     status: 'In Development',
     visibility: 'teaser',
     publicSummary:
@@ -50,7 +50,7 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     title: 'TERRITORY',
     category: 'FITNESS & GAMING',
     categoryColor: 'red',
-    image: '/territory_logo.png',
+    image: '/images/territory_logo.png',
     status: 'In Development',
     visibility: 'teaser',
     publicSummary:

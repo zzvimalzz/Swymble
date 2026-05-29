@@ -6,7 +6,7 @@ export const CORTEX_PART_1_POST: SwymbleBlogPost = {
     summary: 'An introduction to Cortex, my proprietary cognitive platform focused on long-context memory and conversation.',
     tags: ['AI', 'R&D', 'Cortex'],
     categories: ['cortex'],
-    coverImage: '/cortex_website.png',
+    coverImage: '/images/cortex_website.png',
     content: [
         { 
             type: 'heading', text: 'What Is Cortex', level: 2 
@@ -64,7 +64,7 @@ export const CORTEX_PART_1_POST: SwymbleBlogPost = {
             text: `The routing between these regions happens automatically. You don't have to specify which mode you want. The system reads intent and routes accordingly. I've been calling that layer the **Thalamus**.`,
         },
         {
-            type: 'image', src: '/cortex_brain_regions.png', caption: 'Diagram of Cortex Brain Regions' 
+            type: 'image', src: '/images/cortex_brain_regions.png', caption: 'Diagram of Cortex Brain Regions' 
         },
         {
             type: 'heading', text: 'Memory That Actually Works', level: 2,

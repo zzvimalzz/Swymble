@@ -6,7 +6,7 @@ export const SWYMBLE_BRANDING = {
   name: 'SWYMBLE',
   tagline: 'Short brand statement.',
   marquee: 'PROJECTS - BLOG - LABS - STORY',
-  endCardMobileImage: '/white-logo.png',
+  endCardMobileImage: '/images/white-logo.png',
 };
 ```
 
@@ -134,7 +134,7 @@ const MY_POST: SwymbleBlogPost = {
   summary: 'Short summary shown in cards.',
   tags: ['AI', 'R&D'],
   categories: ['cortex'],
-  coverImage: '/cortex_website.png',
+  coverImage: '/images/cortex_website.png',
   content: [
     { type: 'heading', text: 'Section Title', level: 2 },
     { type: 'paragraph', text: ['Line one.', 'Line two.'] },
@@ -142,7 +142,7 @@ const MY_POST: SwymbleBlogPost = {
     { type: 'list', style: 'bullet', items: ['Item A', 'Item B'], indent: 1 },
     { type: 'spacer', size: 'sm' },
     { type: 'quote', text: 'Memory is continuity.', cite: 'Internal notes' },
-    { type: 'image', src: '/cortex_website.png', caption: 'System overview' },
+    { type: 'image', src: '/images/cortex_website.png', caption: 'System overview' },
     { type: 'code', language: 'typescript', code: 'console.log("hello");' },
   ],
 };

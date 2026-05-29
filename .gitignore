@@ -34,3 +34,6 @@ dist-ssr
 # Test and coverage
 coverage/
 *.lcov
+
+#Instructions
+/.github/copilot-*

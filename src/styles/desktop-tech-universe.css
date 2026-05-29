@@ -10,8 +10,8 @@
   margin-inline: calc(50% - 50vw);
   border: 0;
   background:
-    radial-gradient(circle at 48% 45%, rgba(0, 240, 255, 0.2), transparent 26%),
-    radial-gradient(circle at 62% 54%, rgba(255, 0, 60, 0.12), transparent 34%),
+    radial-gradient(circle at 48% 45%, rgba(255, 255, 255, 0.055), transparent 26%),
+    radial-gradient(circle at 62% 54%, rgba(255, 255, 255, 0.035), transparent 34%),
     linear-gradient(180deg, rgba(5, 5, 5, 0), rgba(2, 4, 10, 0.78) 18%, rgba(2, 4, 10, 0.86) 82%, rgba(5, 5, 5, 0));
   box-shadow: none;
   overflow: hidden;
@@ -173,10 +173,10 @@
   left: clamp(1rem, 4vw, 4rem);
   z-index: 2;
   display: grid;
-  grid-template-columns: minmax(0, 27rem);
+  grid-template-columns: minmax(0, 25rem);
   align-items: start;
   gap: 0.9rem;
-  max-width: min(32rem, calc(100vw - 2rem));
+  max-width: min(29rem, calc(100vw - 2rem));
   color: var(--text-main);
   pointer-events: auto;
 }
@@ -190,16 +190,16 @@
 .tech-universe__focus-panel h3 {
   margin-top: 0.2rem;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 3.2vw, 3.35rem);
+  font-size: clamp(1.8rem, 2.7vw, 2.85rem);
   font-weight: 900;
-  line-height: 0.98;
+  line-height: 1.04;
   letter-spacing: 0;
 }
 
 .tech-universe__focus-panel p {
   margin-top: 0.7rem;
   max-width: 29rem;
-  color: rgba(240, 240, 240, 0.72);
+  color: rgba(240, 240, 240, 0.8);
   font-family: var(--font-mono);
   font-size: 0.82rem;
   line-height: 1.55;
@@ -257,6 +257,10 @@
   .tech-universe__focus-panel {
     grid-template-columns: 1fr;
     gap: 0.7rem;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
   }
 
   .tech-universe__focus-panel h3 {

@@ -11,7 +11,7 @@ export default function MobileSiteFooter({ className = '' }: MobileSiteFooterPro
   return (
     <footer className={`mobile-site-footer ${className}`.trim()}>
       <img
-        src={`${baseUrl}logo-with-name.png`}
+        src={`${baseUrl}images/logo-with-name.png`}
         alt={`${SWYMBLE_DATA.name} Logo`}
         className="mobile-site-footer-logo"
       />

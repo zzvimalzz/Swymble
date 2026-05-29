@@ -72,7 +72,7 @@ export default function DesktopHome({
     <>
       <motion.section className="hero-section" style={{ y: heroY, opacity: heroOpacity }}>
         <div className="hero-bg-logo">
-          <img src={`${baseUrl}white-logo.png`} alt="Swymble Background Logo" />
+          <img src={`${baseUrl}images/white-logo.png`} alt="Swymble Background Logo" />
         </div>
 
         <h1

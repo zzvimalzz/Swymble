@@ -13,7 +13,7 @@ export default function DesktopFooter({ baseUrl, brandName, setIsHovering }: Des
         onMouseLeave={() => setIsHovering(false)}
       >
         <img
-          src={`${baseUrl}logo-with-name.png`}
+          src={`${baseUrl}images/logo-with-name.png`}
           alt={`${brandName} Logo`}
           className="footer-logo-full-centered"
         />

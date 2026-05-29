@@ -7,5 +7,5 @@ export const SWYMBLE_BRANDING = {
   name: 'SWYMBLE',
   tagline: 'Software engineering, builds, writing, and the story behind what I make.',
   marquee: 'PROJECTS - APPS - BLOG - LAB - TRAVEL - STORY - SWYMBLE',
-  endCardMobileImage: '/white-logo.png',
+  endCardMobileImage: '/images/white-logo.png',
 };

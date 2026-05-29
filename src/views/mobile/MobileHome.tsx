@@ -97,7 +97,7 @@ export default function MobileHome({
   return (
     <div className="mobile-home-page">
       <header className="mobile-hero mobile-home-section" id="top">
-        <img src="/white-logo.png" alt="Swymble Logo" className="mobile-logo" />
+        <img src="/images/white-logo.png" alt="Swymble Logo" className="mobile-logo" />
         <h1
           ref={titleRef}
           className={`mobile-title${isTitleTapped ? ' is-tapped' : ''}${isTitleHolding ? ' is-holding' : ''}`}

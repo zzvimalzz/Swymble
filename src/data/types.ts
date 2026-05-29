@@ -100,10 +100,13 @@ export type SwymbleLatestUpdateCard = {
   ctaHref?: string;
 };
 
+export type SwymbleMoonModelId = 'moon-01' | 'moon-02' | 'moon-03' | 'moon-04' | 'moon-05' | 'moon-06' | 'moon-07' | 'moon-08';
+
 export type SwymbleSkillItem = {
   name: string;
   color: string;
   description?: string;
+  moonModelId?: SwymbleMoonModelId;
 };
 
 export type SwymbleSkillCategory = {

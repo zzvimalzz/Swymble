@@ -4,7 +4,7 @@ import { SWYMBLE_DATA } from '../data/config';
 
 const SITE_NAME = 'SWYMBLE';
 const SITE_URL = 'https://swymble.com';
-const DEFAULT_IMAGE = `${SITE_URL}/ibsolutions_website.png`;
+const DEFAULT_IMAGE = `${SITE_URL}/images/ibsolutions_website.png`;
 
 type SeoPayload = {
   title: string;

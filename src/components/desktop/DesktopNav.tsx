@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import '../../styles/desktop-nav.css';
 
@@ -7,8 +8,20 @@ type DesktopNavProps = {
 };
 
 export default function DesktopNav({ setIsHovering, brandName }: DesktopNavProps) {
+  const [isCompact, setIsCompact] = useState(false);
+
+  useEffect(() => {
+    const updateNavDensity = () => {
+      setIsCompact(window.scrollY > 72);
+    };
+
+    updateNavDensity();
+    window.addEventListener('scroll', updateNavDensity, { passive: true });
+    return () => window.removeEventListener('scroll', updateNavDensity);
+  }, []);
+
   return (
-    <nav className="desktop-nav">
+    <nav className={`desktop-nav ${isCompact ? 'is-compact' : ''}`.trim()}>
       <div 
         className="nav-brand"
         onMouseEnter={() => setIsHovering(true)}

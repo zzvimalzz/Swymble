@@ -117,7 +117,7 @@ export default function TechUniverse({ skills, setIsHovering }: TechUniverseProp
           <div>
             <span className="tech-universe__eyebrow">{focusedItem ? 'Moon Focus' : 'Orbit Focus'}</span>
             <h3>{focusedItem?.name ?? focusedCategory.category}</h3>
-            {(focusedItem?.description ?? focusedCategory.context) && <p>{focusedItem?.description ?? focusedCategory.context}</p>}
+            {(focusedItem ? focusedItem.description : focusedCategory.context) && <p>{focusedItem ? focusedItem.description : focusedCategory.context}</p>}
           </div>
         </div>
       )}
