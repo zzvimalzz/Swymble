@@ -17,20 +17,13 @@ import type { SwymbleLatestUpdateCard } from './types';
 // - For external links, use full URLs like "https://example.com".
 // - Omit ctaLabel/ctaHref if a card should be informational only.
 export const SWYMBLE_LATEST_UPDATES: SwymbleLatestUpdateCard[] = [
-//   {
-//     id: 'build-queue',
-//     kicker: 'What is next',
-//     title: 'Build Queue',
-//     description: 'Drop quick progress notes here for upcoming experiments, launches, and polish passes.',
-//     ctaLabel: 'Open Labs',
-//     ctaHref: '/labs',
-//   },
-//   {
-//     id: 'community-signal',
-//     kicker: 'Community signal',
-//     title: 'Ideas to Add',
-//     description: 'Feature requests, mini changelog highlights, and release dates can rotate in this carousel next.',
-//     ctaLabel: 'Read Blog',
-//     ctaHref: '/blog',
-//   },
+  {
+    id: 'mybirth-launch',
+    kicker: 'New lab',
+    title: 'MyBirth is live',
+    description:
+      'A cinematic birthday archive that rebuilds the moon, weather, public signals, and keepsakes from the day someone arrived.',
+    ctaLabel: 'Open MyBirth',
+    ctaHref: 'https://mybirth.swymble.com',
+  },
 ];

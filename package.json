@@ -4,9 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently --names \"main,mybirth,what2watch\" -c \"cyan,green,yellow\" \"vite\" \"npm --prefix src/data/subdomains/mybirth run dev\" \"npm --prefix src/data/subdomains/what2watch run dev\"",
+    "dev:main": "vite",
+    "dev:mybirth": "npm --prefix src/data/subdomains/mybirth run dev",
+    "dev:what2watch": "npm --prefix src/data/subdomains/what2watch run dev",
     "generate:sitemap": "node scripts/generate-sitemap.mjs",
-    "build": "npm run generate:sitemap && tsc -b && vite build",
+    "build:main": "npm run generate:sitemap && tsc -b && vite build",
+    "build:mybirth": "npm --prefix src/data/subdomains/mybirth run build",
+    "build:what2watch": "npm --prefix src/data/subdomains/what2watch run build",
+    "build": "npm run build:main && npm run build:mybirth && npm run build:what2watch",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -24,6 +30,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.184.1",
     "@vitejs/plugin-react": "^5.1.4",
+    "concurrently": "^10.0.3",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   },

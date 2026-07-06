@@ -30,9 +30,19 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            src/data/subdomains/mybirth/package-lock.json
+            src/data/subdomains/what2watch/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Install MyBirth dependencies
+        run: npm ci --prefix src/data/subdomains/mybirth
+
+      - name: Install what2watch dependencies
+        run: npm ci --prefix src/data/subdomains/what2watch
 
       - name: Build site
         run: npm run build

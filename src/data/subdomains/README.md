@@ -34,6 +34,12 @@ src/data/subdomains/
 - You can build a completely custom site without React components, data objects, or app-specific presets.
 - Anything inside `src/data/subdomains/<subdomain>/` is copied to `dist/subdomains/<subdomain>/` during build.
 
+## Subdomain app sources
+
+Some subdomains can be full app sources inside this folder instead of plain static files.
+`mybirth.swymble.com` is built from `src/data/subdomains/mybirth/`, and the root build writes it into `dist/subdomains/mybirth/`.
+`what2watch.swymble.com` works the same way: it is built from `src/data/subdomains/what2watch/` into `dist/subdomains/what2watch/`.
+
 ## How to add a new subdomain site
 
 1. Create a folder at `src/data/subdomains/<subdomain>/`.

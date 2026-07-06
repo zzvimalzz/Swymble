@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="1254x1254" href="/images/what2watch_logo.png" />
+    <link rel="apple-touch-icon" href="/images/what2watch_logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- SEO Meta Tags -->
+    <title>what2watch — Lost in the algorithm? Get lost in this instead.</title>
+    <meta name="description" content="A living wall of movies and shows, packed into a single screen. Explore tens of thousands of films in an interactive force-directed voronoi diagram. A Swymble Labs experiment." />
+    <meta name="keywords" content="movies, films, discovery, visualization, interactive, WebGL, cinema, voronoi, force-directed graph, what2watch, swymble labs" />
+    <meta name="author" content="Swymble Labs" />
+    <link rel="canonical" href="https://what2watch.swymble.com/" />
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="what2watch — Lost in the algorithm? Get lost in this instead." />
+    <meta property="og:description" content="A living wall of movies and shows, packed into a single screen. Explore tens of thousands of films in an interactive force-directed voronoi diagram." />
+    <meta property="og:url" content="https://what2watch.swymble.com/" />
+    <meta property="og:site_name" content="what2watch" />
+    <meta property="og:image" content="https://what2watch.swymble.com/og.jpg" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="800" />
+    <meta property="og:image:alt" content="Interactive movie discovery visualization interface" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="what2watch — Lost in the algorithm? Get lost in this instead." />
+    <meta name="twitter:description" content="A living wall of movies and shows, packed into a single screen. Explore tens of thousands of films in an interactive force-directed voronoi diagram." />
+    <meta name="twitter:image" content="https://what2watch.swymble.com/og.jpg" />
+    <meta name="twitter:image:alt" content="Interactive movie discovery visualization interface" />
+
+    <!-- Additional Meta -->
+    <meta name="theme-color" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="what2watch" />
+    
+    <!-- Robots -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  </head>
+  <body class="bg-background">
+    <div id="root"></div>
+    <div
+      id="voroforce"
+      class="pointer-events-auto fixed inset-x-0 top-0 h-dvh w-screen"
+    >
+      <canvas class="h-full w-full pointer-events-none"></canvas>
+    </div>
+    <script type="module" src="/app/main.tsx"></script>
+  </body>
+</html>

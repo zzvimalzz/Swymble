@@ -1,0 +1,8 @@
+# Ignore everything
+*
+
+# But not these files - movies.json/shows.json are the runtime film data the
+# app fetches; they must ship with the repo for production builds.
+!.gitignore
+!movies.json
+!shows.json

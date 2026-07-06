@@ -1,0 +1,73 @@
+import { getCellPosterUrl } from '../../utils/films'
+
+const envInt = (value: string | undefined, fallback: number) => {
+  const parsed = Number.parseInt(value ?? '', 10)
+  return Number.isNaN(parsed) ? fallback : parsed
+}
+
+const mediaConfig = {
+  enabled: true,
+  baseUrl: import.meta.env.VITE_TEXTURES_BASE_URL ?? '/media',
+  preload: 'first', // 'v0', 'first' or false
+  compressionFormat: 'dds', // or 'ktx'
+  versions: [
+    {
+      cols: 512,
+      rows: 104,
+      width: 2048,
+      height: 624,
+      layers: envInt(import.meta.env.VITE_MEDIA_VERSION_0_LAYERS, 1),
+      layerSrcFormat: '/low/{EXT}/{INDEX}.{EXT}',
+      type: 'compressed-grid',
+    },
+    {
+      cols: 90,
+      rows: 60,
+      width: 1980,
+      height: 1980,
+      layers: envInt(import.meta.env.VITE_MEDIA_VERSION_1_LAYERS, 1),
+      layerSrcFormat: '/mid/{EXT}/{INDEX}.{EXT}',
+      type: 'compressed-grid',
+    },
+    {
+      cols: 18,
+      rows: 12,
+      width: 1980,
+      height: 1980,
+      layers: envInt(import.meta.env.VITE_MEDIA_VERSION_2_LAYERS, 1),
+      layerSrcFormat: '/high/{EXT}/{INDEX}.{EXT}',
+      type: 'compressed-grid',
+    },
+  ],
+}
+
+export default mediaConfig
+
+// "Virtual" single-poster media version: each layer index is a cell id whose
+// poster tile is fetched individually - dynamically resolved to the TMDB /
+// TVmaze image CDN for whatever film that cell currently maps to (respecting
+// the active filters). This is what keeps the in-grid tiles in sync with the
+// hover/select film info, and it fully replaces the baked poster atlases as
+// the source of truth for visible tiles (the atlases remain only as an
+// instant placeholder while posters stream in).
+export const uncompressedSingleMediaVersionConfig = {
+  cols: 1,
+  rows: 1,
+  virtualCols: 9,
+  virtualRows: 6,
+  tileWidth: 220,
+  tileHeight: 330,
+  width: 1980,
+  height: 1980,
+
+  layers: 50000, // real layer count for 50000/54: 925.9 = 926
+  virtualLayers: 50,
+  layerIndexStart: 0,
+  layerSrcFormat: (layerIndex: number) => getCellPosterUrl(layerIndex),
+  type: 'uncompressed-single',
+}
+
+export const mediaConfigWithUncompressedSingleVersion = {
+  ...mediaConfig,
+  versions: [...mediaConfig.versions, uncompressedSingleMediaVersionConfig],
+}

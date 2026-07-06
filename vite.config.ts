@@ -3,7 +3,7 @@ import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 
-const INTERNAL_PATH_PREFIXES = ['/@vite', '/@fs/', '/@id/', '/src/', '/node_modules/', '/subdomains/']
+const INTERNAL_PATH_PREFIXES = ['/@vite', '/@fs/', '/@id/', '/src/', '/node_modules/', '/subdomains/', '/models/']
 const SUBDOMAINS_SOURCE_ROOT = path.resolve(__dirname, 'src', 'data', 'subdomains')
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -72,6 +72,38 @@ function resolveSubdomainFilePath(requestPathname: string) {
   return resolvedFilePath
 }
 
+function resolveSubdomainIndexFallbackPath(requestPathname: string) {
+  if (!requestPathname.startsWith('/subdomains/')) {
+    return null
+  }
+
+  const lastSegment = requestPathname.split('/').filter(Boolean).at(-1) ?? ''
+
+  if (path.extname(lastSegment)) {
+    return null
+  }
+
+  const relativePath = requestPathname.replace(/^\/subdomains\//, '')
+  const [subdomain] = relativePath.split('/').filter(Boolean)
+
+  if (!subdomain) {
+    return null
+  }
+
+  const subdomainRoot = path.join(SUBDOMAINS_SOURCE_ROOT, subdomain)
+  const indexPath = path.resolve(subdomainRoot, 'index.html')
+
+  if (!indexPath.startsWith(subdomainRoot)) {
+    return null
+  }
+
+  return indexPath
+}
+
+function isSubdomainAppSource(subdomainRoot: string) {
+  return fs.existsSync(path.join(subdomainRoot, 'package.json'))
+}
+
 function copySubdomainSitesToDist() {
   if (!fs.existsSync(SUBDOMAINS_SOURCE_ROOT)) {
     return
@@ -86,8 +118,14 @@ function copySubdomainSitesToDist() {
       continue
     }
 
+    const subdomainRoot = path.join(SUBDOMAINS_SOURCE_ROOT, entry.name)
+
+    if (isSubdomainAppSource(subdomainRoot)) {
+      continue
+    }
+
     fs.cpSync(
-      path.join(SUBDOMAINS_SOURCE_ROOT, entry.name),
+      subdomainRoot,
       path.join(distSubdomainsRoot, entry.name),
       { recursive: true },
     )
@@ -97,7 +135,10 @@ function copySubdomainSitesToDist() {
 function createStaticSubdomainPlugin(): Plugin {
   let command: 'build' | 'serve' = 'serve'
 
-  const rewriteRequest = (request: { headers: { host?: string | undefined }; url?: string | undefined }) => {
+  const rewriteRequest = (
+    request: { headers: { host?: string | undefined }; url?: string | undefined },
+    options: { allowBuiltSubdomain?: boolean } = {},
+  ) => {
     const subdomain = resolveSubdomainFromHost(request.headers.host)
     const requestUrl = request.url ?? '/'
 
@@ -105,9 +146,14 @@ function createStaticSubdomainPlugin(): Plugin {
       return
     }
 
-    const subdomainIndexPath = path.join(SUBDOMAINS_SOURCE_ROOT, subdomain, 'index.html')
+    const subdomainRoot = path.join(SUBDOMAINS_SOURCE_ROOT, subdomain)
+    const subdomainIndexPath = path.join(subdomainRoot, 'index.html')
+    const builtSubdomainIndexPath = path.resolve(__dirname, 'dist', 'subdomains', subdomain, 'index.html')
 
-    if (!fs.existsSync(subdomainIndexPath)) {
+    const canServeSource = fs.existsSync(subdomainIndexPath) && !isSubdomainAppSource(subdomainRoot)
+    const canServeBuilt = options.allowBuiltSubdomain && fs.existsSync(builtSubdomainIndexPath)
+
+    if (!canServeSource && !canServeBuilt) {
       return
     }
 
@@ -122,14 +168,22 @@ function createStaticSubdomainPlugin(): Plugin {
     const pathname = new URL(requestUrl, 'http://swymble.local').pathname
     const resolvedFilePath = resolveSubdomainFilePath(pathname)
 
-    if (!resolvedFilePath || !fs.existsSync(resolvedFilePath) || !fs.statSync(resolvedFilePath).isFile()) {
+    const fallbackFilePath = resolveSubdomainIndexFallbackPath(pathname)
+    const filePath =
+      resolvedFilePath && fs.existsSync(resolvedFilePath) && fs.statSync(resolvedFilePath).isFile()
+        ? resolvedFilePath
+        : fallbackFilePath && fs.existsSync(fallbackFilePath) && fs.statSync(fallbackFilePath).isFile()
+          ? fallbackFilePath
+          : null
+
+    if (!filePath) {
       return false
     }
 
-    const contentType = CONTENT_TYPES[path.extname(resolvedFilePath).toLowerCase()] ?? 'application/octet-stream'
+    const contentType = CONTENT_TYPES[path.extname(filePath).toLowerCase()] ?? 'application/octet-stream'
     response.statusCode = 200
     response.setHeader('Content-Type', contentType)
-    response.end(fs.readFileSync(resolvedFilePath))
+    response.end(fs.readFileSync(filePath))
     return true
   }
 
@@ -151,7 +205,7 @@ function createStaticSubdomainPlugin(): Plugin {
     },
     configurePreviewServer(server) {
       server.middlewares.use((request, _response, next) => {
-        rewriteRequest(request)
+        rewriteRequest(request, { allowBuiltSubdomain: true })
         next()
       })
     },
