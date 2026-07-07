@@ -65,7 +65,7 @@ export const Favorites = () => {
     >
       <ScrollArea
         className='not-landscape:w-full bg-background/60 lg:w-full landscape:h-full'
-        innerClassName='max-h-[calc(100vh-var(--spacing)*12)]'
+        innerClassName='max-h-[calc(100dvh-var(--spacing)*12)]'
       >
         <div className='flex min-h-64 w-full flex-col gap-4 p-4 pb-18 md:gap-6 md:p-6 md:pb-24 lg:flex lg:pt-16 lg:pb-24'>
           {userConfig.favorites ? (

@@ -84,7 +84,7 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     safeHighlights: [
       'GPU voronoi wall with live poster streaming from public film APIs',
       'Mood, type and genre filters that rebuild the wall in place',
-      'Surprise-me jumps, title search and a Space hotkey for random picks',
+      'Surprise-me jumps, title search and a hotkey for random picks',
     ],
     tags: ['WebGL', 'Movies', 'Public'],
     updatedAt: 'Jul 2026',

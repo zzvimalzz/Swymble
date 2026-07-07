@@ -1,8 +1,9 @@
-import { CircleHelp, Heart, ListFilter, Settings } from 'lucide-react'
+import { useShallowState } from '@/store'
+import { CircleHelp, Heart, ListFilter, Settings, Shuffle } from 'lucide-react'
 import { useState } from 'react'
 
-import { useShallowState } from '@/store'
 import { cn } from '../../utils/tw'
+import { jumpToRandomFilteredCell } from '../../vf'
 import { Button } from '../ui/button'
 
 export const Navbar = () => {
@@ -13,6 +14,8 @@ export const Navbar = () => {
     toggleFiltersOpen,
     favoritesOpen,
     toggleFavoritesOpen,
+    voroforce,
+    filters,
   } = useShallowState((state) => ({
     settingsOpen: state.settingsOpen,
     toggleSettingsOpen: state.toggleSettingsOpen,
@@ -20,26 +23,66 @@ export const Navbar = () => {
     toggleFiltersOpen: state.toggleFiltersOpen,
     favoritesOpen: state.favoritesOpen,
     toggleFavoritesOpen: state.toggleFavoritesOpen,
+    voroforce: state.voroforce,
+    filters: state.filters,
   }))
 
   const [tipOpen, setTipOpen] = useState(false)
+  const [finding, setFinding] = useState(false)
 
   const buttonClassnames =
     '!size-6 [&_svg]:!size-4 lg:!size-8 lg:[&_svg]:!size-5 pointer-events-auto rounded-full cursor-pointer'
 
+  const surpriseMe = async () => {
+    if (!voroforce || finding) return
+    setFinding(true)
+    try {
+      await jumpToRandomFilteredCell(voroforce, filters)
+    } finally {
+      setFinding(false)
+    }
+  }
+
   return (
     <div className='pointer-events-none fixed inset-x-0 bottom-0 z-10 flex w-full flex-row items-center justify-end gap-1 p-3 md:top-0 md:bottom-auto md:z-60 md:px-9 md:py-9'>
       <div className='relative flex flex-row gap-1'>
+        {/* Desktop: hotkey tip (Space has no equivalent on touch devices) */}
+        <div className='relative hidden md:block'>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={() => setTipOpen((open) => !open)}
+            className={cn(buttonClassnames, {
+              'border border-foreground': tipOpen,
+            })}
+            aria-label='Tips'
+          >
+            <CircleHelp />
+          </Button>
+          <div
+            className={cn(
+              'pointer-events-auto absolute top-full right-0 mt-2 w-72 rounded-lg border border-foreground/15 bg-background/90 px-3 py-2 text-foreground/80 text-sm leading-snug opacity-0 backdrop-blur-sm transition-opacity duration-300',
+              {
+                'opacity-100': tipOpen,
+                'pointer-events-none': !tipOpen,
+              },
+            )}
+          >
+            Press <b className='text-primary'>Space</b> to jump to a random
+            movie or show — your filters apply.
+          </div>
+        </div>
+        {/* Mobile: no physical spacebar, so a direct action replaces the tip */}
         <Button
           variant='ghost'
           size='icon'
-          onClick={() => setTipOpen((open) => !open)}
-          className={cn(buttonClassnames, {
-            'border border-foreground': tipOpen,
-          })}
-          aria-label='Tips'
+          onClick={surpriseMe}
+          disabled={finding}
+          className={cn(buttonClassnames, 'md:hidden')}
+          aria-label='Surprise me'
+          title='Surprise me'
         >
-          <CircleHelp />
+          <Shuffle />
         </Button>
         <Button
           variant='ghost'
@@ -89,23 +132,6 @@ export const Navbar = () => {
         >
           <Heart />
         </Button>
-        <div
-          className={cn(
-            // tip bubble: above the bar on small screens (bottom navbar),
-            // below it on md+ (top navbar)
-            'pointer-events-auto absolute right-0 bottom-full mb-2 w-64 rounded-lg border border-foreground/15 bg-background/90 px-3 py-2 text-foreground/80 text-xs leading-snug opacity-0 backdrop-blur-sm transition-opacity duration-300 md:top-full md:bottom-auto md:mt-2 md:mb-0 md:w-72 md:text-sm',
-            {
-              'opacity-100': tipOpen,
-              'pointer-events-none': !tipOpen,
-            },
-          )}
-        >
-          Press <b className='text-primary'>Space</b> to jump to a random movie
-          or show — your filters apply.
-          <span className='mt-1 block text-foreground/50 md:hidden'>
-            On touch devices, use <b>Surprise me</b> in the filters.
-          </span>
-        </div>
       </div>
     </div>
   )

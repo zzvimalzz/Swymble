@@ -147,8 +147,10 @@ export const Filter = () => {
   const apply = () => {
     setFilters(draft)
     // Re-stream every in-grid poster tile against the new mapping, live -
-    // no page reload, the wall repopulates in the background.
+    // no page reload, the wall repopulates in the background. Close the
+    // panel so the change is actually visible instead of hidden behind it.
     refreshDynamicPosterTiles()
+    setOpen(false)
   }
 
   const jumpTo = (cellId: number) => {
@@ -207,7 +209,7 @@ export const Filter = () => {
     >
       <ScrollArea
         className='not-landscape:w-full bg-background/60 lg:w-full landscape:h-full'
-        innerClassName='max-h-[calc(100vh-var(--spacing)*12)]'
+        innerClassName='max-h-[calc(100dvh-var(--spacing)*12)]'
       >
         <div className='flex w-full flex-col gap-6 p-4 pb-40 md:gap-8 md:p-6 md:pr-10 md:pb-24 lg:pt-16 lg:pb-24'>
           <p className='text-foreground/60 text-sm'>

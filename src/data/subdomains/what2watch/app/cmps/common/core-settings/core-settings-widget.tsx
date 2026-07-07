@@ -1,6 +1,5 @@
 import { type ReactNode, useState } from 'react'
 
-import { THEME } from '../../../consts'
 import { useMediaQuery } from '../../../hooks/use-media-query'
 import { useShallowState } from '../../../store'
 import { REENTER_SESSION_KEY } from '../../../store/voroforce-slice'
@@ -28,21 +27,13 @@ export function CoreSettingsWidget({
   submitProps?: ButtonProps
   submitVisibility?: 'dirty' | 'always'
 }) {
-  const {
-    setStorePreset,
-    storePreset,
-    setStoreCellLimit,
-    storeCellLimit,
-    theme,
-    setTheme,
-  } = useShallowState((state) => ({
-    setStorePreset: state.setPreset,
-    storePreset: state.preset,
-    setStoreCellLimit: state.setCellLimit,
-    storeCellLimit: state.cellLimit,
-    theme: state.theme,
-    setTheme: state.setTheme,
-  }))
+  const { setStorePreset, storePreset, setStoreCellLimit, storeCellLimit } =
+    useShallowState((state) => ({
+      setStorePreset: state.setPreset,
+      storePreset: state.preset,
+      setStoreCellLimit: state.setCellLimit,
+      storeCellLimit: state.cellLimit,
+    }))
 
   const isSmallScreen = useMediaQuery(down('md'))
 
@@ -94,12 +85,6 @@ export function CoreSettingsWidget({
             const newPreset = isDefined(preset)
               ? preset
               : VOROFORCE_PRESET.minimal
-            if (
-              theme === THEME.light &&
-              newPreset !== VOROFORCE_PRESET.minimal
-            ) {
-              setTheme(THEME.dark)
-            }
             setStorePreset(newPreset)
             setStoreCellLimit(
               isDefined(cellLimit) ? cellLimit : CELL_LIMIT.xxxs,

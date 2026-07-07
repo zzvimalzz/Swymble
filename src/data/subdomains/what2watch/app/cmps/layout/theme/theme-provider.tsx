@@ -1,67 +1,12 @@
-import { store } from '@/store'
-import { type ReactNode, createContext, use, useEffect } from 'react'
-import { THEME } from '../../../consts'
+import { type ReactNode, useEffect } from 'react'
 
-type ThemeProviderProps = {
-  children: ReactNode
-  defaultTheme?: THEME
-  storageKey?: string
-}
-
-type ThemeProviderState = {
-  theme: THEME
-  setTheme: (theme: THEME) => void
-}
-
-const initialState: ThemeProviderState = {
-  theme: THEME.system,
-  setTheme: () => null,
-}
-
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
-
-export function ThemeProvider({
-  children,
-  defaultTheme = THEME.system,
-  ...props
-}: ThemeProviderProps) {
-  const { theme, setTheme } = store()
-
+// Bright mode has been removed - what2watch is dark-only. This just applies
+// the 'dark' class the CSS variables in app/styles.css expect, regardless
+// of OS preference or any previously persisted theme setting.
+export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
-    const root = window.document.documentElement
+    document.documentElement.classList.add('dark')
+  }, [])
 
-    root.classList.remove('light', 'dark')
-
-    if (theme === THEME.system) {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-        .matches
-        ? 'dark'
-        : 'light'
-
-      root.classList.add(systemTheme)
-      return
-    }
-
-    root.classList.add(theme)
-  }, [theme])
-
-  const value = {
-    theme,
-    setTheme,
-  }
-
-  return (
-    <ThemeProviderContext {...props} value={value}>
-      {children}
-    </ThemeProviderContext>
-  )
-}
-
-export const useTheme = () => {
-  const context = use(ThemeProviderContext)
-
-  if (context === undefined)
-    throw new Error('useTheme must be used within a ThemeProvider')
-
-  return context
+  return <>{children}</>
 }

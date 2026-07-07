@@ -1,11 +1,13 @@
+import { ArrowLeft } from 'lucide-react'
 import { useEffect, useReducer } from 'react'
 import { useShallowState } from '../../../store'
 import { cn } from '../../../utils/tw'
+import { SWYMBLE_LABS_URL } from '../../../utils/urls'
 import { VOROFORCE_MODE } from '../../../vf'
 import { OBSCURE_VISUAL_DEFECTS } from '../../../vf/consts'
 import { FadeTransition } from '../../common/fade-transition'
+import { LandingBackground } from '../../common/landing-background'
 import { Loader } from '../../common/loader'
-import { SmallScreenWarning } from '../../common/small-screen-warning'
 import { Button } from '../../ui/button'
 
 export const Intro = () => {
@@ -18,6 +20,14 @@ export const Intro = () => {
   )
 
   const visible = useIntroVisible(entered)
+
+  // The landing UI (this component) is the real page finally taking over
+  // from the static HTML/CSS boot loader in index.html, which exists so
+  // visitors see something other than a blank tab while the JS bundle
+  // downloads and parses. Tear it down now that we have something to show.
+  useEffect(() => {
+    document.getElementById('boot-loader')?.remove()
+  }, [])
 
   return (
     <FadeTransition
@@ -34,6 +44,13 @@ export const Intro = () => {
       }}
     >
       <LandingBackground />
+      <a
+        href={SWYMBLE_LABS_URL}
+        className='absolute top-4 left-4 z-10 flex flex-row items-center gap-1.5 text-foreground/60 text-sm transition-colors hover:text-foreground md:top-9 md:left-9'
+      >
+        <ArrowLeft className='size-4' />
+        Back to Swymble Labs
+      </a>
       <div className='relative flex h-full flex-col items-stretch'>
         <div className='h-1/3' />
         <div className='flex h-1/3 flex-col items-center justify-center gap-6'>
@@ -65,34 +82,12 @@ export const Intro = () => {
           )}
         </div>
         <div className='relative flex h-1/3 flex-col items-center justify-end gap-4 pb-12'>
-          <SmallScreenWarning />
           <MoviesDatasetLicenseInfo />
         </div>
       </div>
     </FadeTransition>
   )
 }
-
-const LandingBackground = () => (
-  <div className='-z-10 pointer-events-none absolute inset-0 overflow-hidden'>
-    <div
-      className='-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 h-[70vmax] w-[70vmax] rounded-full opacity-40 blur-3xl'
-      style={{
-        background:
-          'radial-gradient(circle, rgba(230,178,55,0.35) 0%, rgba(230,178,55,0.08) 45%, transparent 70%)',
-      }}
-    />
-    <div
-      className='absolute inset-0 opacity-[0.05]'
-      style={{
-        backgroundImage:
-          'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)',
-        backgroundSize: '28px 28px',
-      }}
-    />
-    <div className='absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60' />
-  </div>
-)
 
 const MoviesDatasetLicenseInfo = () => (
   <span className='inline-flex text-center text-xxs text-zinc-600 leading-none dark:text-zinc-300'>

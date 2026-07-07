@@ -1,12 +1,8 @@
 import { useShallowState } from '@/store'
 import { useState } from 'react'
-import { THEME } from '../../../consts'
 import { reload } from '../../../utils/misc'
-import { VOROFORCE_PRESET } from '../../../vf'
 import { CoreSettingsWidget } from '../../common/core-settings/core-settings-widget'
 import { Modal } from '../../common/modal'
-import { SmallScreenWarning } from '../../common/small-screen-warning'
-import { useTheme } from '../../layout'
 import { Button } from '../../ui/button'
 import { Label } from '../../ui/label'
 import { ScrollArea } from '../../ui/scroll-area'
@@ -22,7 +18,6 @@ export const Settings = () => {
     setPlayedIntro,
     voroforceDevSceneEnabled,
     setVoroforceDevSceneEnabled,
-    canChangeTheme,
   } = useShallowState((state) => ({
     open: state.settingsOpen,
     setOpen: state.setSettingsOpen,
@@ -32,12 +27,7 @@ export const Settings = () => {
     setPlayedIntro: state.setPlayedIntro,
     voroforceDevSceneEnabled: state.voroforceDevSceneEnabled,
     setVoroforceDevSceneEnabled: state.setVoroforceDevSceneEnabled,
-    canChangeTheme:
-      state.preset === VOROFORCE_PRESET.minimal ||
-      state.preset === VOROFORCE_PRESET.mobile,
   }))
-
-  const { theme, setTheme } = useTheme()
 
   const [fullscreen, setFullscreen] = useState(false)
 
@@ -67,24 +57,11 @@ export const Settings = () => {
     >
       <ScrollArea
         className='not-landscape:w-full bg-background/60 lg:w-full landscape:h-full'
-        innerClassName='max-h-[calc(100vh-var(--spacing)*12)]'
+        innerClassName='max-h-[calc(100dvh-var(--spacing)*12)]'
       >
         <div className='flex w-full flex-col gap-4 p-4 pb-18 md:gap-6 md:p-6 md:pr-10 md:pb-24 lg:pt-12 lg:pb-24'>
-          <SmallScreenWarning />
           <CoreSettingsWidget onSubmit={() => window.location.reload()} />
           <div className='flex flex-row flex-wrap gap-6'>
-            {canChangeTheme && (
-              <div className='flex flex-row items-center gap-2'>
-                <Switch
-                  id='light-mode'
-                  checked={theme === THEME.light}
-                  onCheckedChange={(checked) => {
-                    setTheme(checked ? THEME.light : THEME.dark)
-                  }}
-                />
-                <Label htmlFor='light-mode'>Bright mode</Label>
-              </div>
-            )}
             <div className='flex flex-row items-center gap-2 max-md:hidden'>
               <Switch
                 id='dev-tools'

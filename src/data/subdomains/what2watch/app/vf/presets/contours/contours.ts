@@ -194,17 +194,9 @@ export default {
         uniforms: {
           fEdge0: { value: 0.25 },
           fEdgeScale: { value: 1 },
-          fBaseColor: {
-            transition: true,
-            themes: {
-              default: {
-                value: [0.02, 0.02, 0.02],
-              },
-              light: {
-                value: [0.995, 0.995, 0.995],
-              },
-            },
-          },
+          // Bright mode has been removed - fixed value rather than a
+          // per-theme lookup.
+          fBaseColor: { value: [0.02, 0.02, 0.02] },
           iChannel0: {
             src: '/assets/rust.jpg',
             width: 512,

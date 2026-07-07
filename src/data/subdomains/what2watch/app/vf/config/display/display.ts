@@ -1,4 +1,3 @@
-import { THEME } from '../../../consts'
 import { VOROFORCE_MODE } from '../../consts'
 import mainFrag from './main.frag'
 
@@ -24,20 +23,9 @@ export default {
         },
         bMediaDistortion: { value: false },
         fMediaBboxScale: { value: 1 },
-        fBaseColor: {
-          transition: true,
-          themes: {
-            default: {
-              value: [0.035, 0.026, 0.008],
-            },
-            [THEME.light]: {
-              // value: [1, 1, 1],
-              value: [
-                0.6823529411764706, 0.6352941176470588, 0.5882352941176471,
-              ],
-            },
-          },
-        },
+        // Bright mode has been removed - what2watch is dark-only, so this is
+        // a fixed value rather than a per-theme lookup.
+        fBaseColor: { value: [0.035, 0.026, 0.008] },
         fBorderRoundnessMod: {
           transition: true,
           modes: {

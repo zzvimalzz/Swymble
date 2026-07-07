@@ -74,7 +74,7 @@ const ModalContentInner = ({
 }>) => (
   <div
     className={cn(
-      'pointer-events-auto relative not-landscape:w-full cursor-grab overflow-hidden rounded-2xl bg-background/70 transition-colors duration-500 max-lg:border md:rounded-xl landscape:h-full landscape:lg:h-full landscape:lg:max-h-[calc(100vh-var(--spacing)*6*2)]',
+      'pointer-events-auto relative not-landscape:w-full cursor-grab overflow-hidden rounded-2xl bg-background/70 transition-colors duration-500 max-lg:border md:rounded-xl landscape:h-full landscape:lg:h-full landscape:lg:max-h-[calc(100dvh-var(--spacing)*6*2)]',
       className,
     )}
   >

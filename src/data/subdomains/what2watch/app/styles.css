@@ -1,7 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
-@custom-variant light (&:is(.light *));
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant mouse {
   @media (any-hover: hover) and (any-pointer: fine) {
@@ -34,36 +33,6 @@
   --chart-4: hsl(280 65% 60%);
   --chart-5: hsl(340 75% 55%);
   --radius: 0.6rem;
-}
-
-.light {
-  /*--background: hsl(0 0% 100%);*/
-  --background: hsl(30, 13%, 64%);
-  --foreground: hsl(0 0% 3.9%);
-  --card: hsl(0 0% 100%);
-  --card-foreground: hsl(0 0% 3.9%);
-  --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(0 0% 3.9%);
-  --primary: hsl(43 74% 42%);
-  --primary-foreground: hsl(0 0% 98%);
-  --secondary: hsl(0 0% 96.1%);
-  --secondary-foreground: hsl(0 0% 9%);
-  --muted: hsl(0 0% 96.1%);
-  --muted-foreground: hsl(0 0% 45.1%);
-  --accent: hsl(43 74% 42%);
-  --accent-foreground: hsl(0 0% 98%);
-  --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(0 0% 98%);
-  /*--border: hsl(0 0% 89.8%);*/
-  --border: hsl(31, 9%, 55%);
-  /*--input: hsl(0 0% 89.8%);*/
-  --input: hsl(31, 9%, 55%);
-  --ring: hsl(0 0% 3.9%);
-  --chart-1: hsl(12 76% 61%);
-  --chart-2: hsl(173 58% 39%);
-  --chart-3: hsl(197 37% 24%);
-  --chart-4: hsl(43 74% 66%);
-  --chart-5: hsl(27 87% 67%);
 }
 
 @theme inline {
@@ -133,7 +102,7 @@
 
   html, body {
     @apply h-full;
-    color-scheme: light dark;
+    color-scheme: dark;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
