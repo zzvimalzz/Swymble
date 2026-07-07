@@ -224,6 +224,12 @@ export function createViewer(options = {}) {
     pivot.rotation.set(0, 0, 0);
     pivot.add(object);
     if (mounted) mounted.classList.add("is-ready");
+    // Rendering is otherwise gated entirely by the IntersectionObserver in
+    // mount(), whose first callback can lag well behind this call — leaving
+    // the canvas on its initial blank frame despite "is-ready" being set.
+    // Activating here guarantees an immediate, self-repainting loop; the
+    // observer can still deactivate it later if the plate is off-screen.
+    setActive(true);
   }
 
   /* --- per-frame --- */

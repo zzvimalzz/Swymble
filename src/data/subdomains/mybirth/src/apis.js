@@ -178,21 +178,17 @@ function sample(arr, n) {
   return out;
 }
 
-/* ---------- Wikipedia: what happened that YEAR (world + your country) ---------- */
-// Parses the "Events" list out of the "<year>" and "<year> in <country>"
-// articles, then tags each line as brighter / harder / notable.
-export async function yearEvents(year, countryName) {
-  const localTitles = countryName
-    ? [`${year} in ${countryName}`, `${year} in the ${countryName}`]
-    : [];
-  const [world, ...localTries] = await Promise.all([
+/* ---------- Wikipedia: what happened that YEAR (world + Malaysia) ---------- */
+// Parses the "Events" list out of the "<year>" and "<year> in Malaysia"
+// articles, keeping the first linked article on each line as a source link.
+export async function yearEvents(year) {
+  const [world, malaysia] = await Promise.all([
     articleEvents(String(year)),
-    ...localTitles.map((t) => articleEvents(t))
+    articleEvents(`${year} in Malaysia`)
   ]);
-  const local = localTries.find((arr) => arr.length) || [];
   return {
-    world: world.map((text) => ({ text, mood: classifyMood(text) })),
-    local: local.map((text) => ({ text, mood: classifyMood(text) }))
+    world: world.slice(0, 6),
+    malaysia: malaysia.slice(0, 6)
   };
 }
 
@@ -233,19 +229,21 @@ async function articleEvents(title) {
   }
 }
 
+// a bare date link ("January 1") isn't a useful source — prefer the next
+// wikilink in the line, which is usually the actual subject of the event
+const DATE_LINK_RE = /^\/wiki\/(January|February|March|April|May|June|July|August|September|October|November|December)_\d{1,2}$/;
+
+function pickLink(c) {
+  const anchors = [...c.querySelectorAll("a[href^='/wiki/']")];
+  const chosen = anchors.find((a) => !DATE_LINK_RE.test(a.getAttribute("href"))) || anchors[0];
+  return chosen ? `https://en.wikipedia.org${chosen.getAttribute("href")}` : null;
+}
+
 function cleanLi(li) {
   const c = li.cloneNode(true);
   c.querySelectorAll("sup, .mw-editsection, style, .reference").forEach((n) => n.remove());
+  const url = pickLink(c);
   const t = (c.textContent || "").replace(/\[\d+\]/g, "").replace(/\s+/g, " ").trim();
   if (t.length < 12 || t.length > 240) return null;
-  return t;
-}
-
-const BAD = /\b(war|wars|killed?|kills|dies|died|dead|deaths?|earthquake|disaster|crash(?:es)?|bomb(?:ing|ed)?|attacks?|massacre|genocide|assassinat\w*|flood\w*|famine|riots?|terror\w*|hurricane|tsunami|cyclone|explosion|shoot\w*|coup|invad\w*|invasion|conflict|outbreak|epidemic|pandemic|collaps\w*|wildfire|murder\w*|hostage|sank|sinks?|sinking|wounded|injur\w*|violence|drought|recession|crisis|scandal|overthrow\w*|execut\w*|protest\w*)\b/i;
-const GOOD = /\b(first|founded|found|opens?|opened|launch\w*|wins?|won|peace|treaty|independence|independent|discover\w*|premieres?|debut\w*|complet\w*|elect\w*|establish\w*|records?|awards?|awarded|unveil\w*|releases?|released|celebrat\w*|inaugurat\w*|signed|breakthrough|championship|reopen\w*|restor\w*|reunit\w*|liberat\w*|introduc\w*|breaks the record)\b/i;
-
-export function classifyMood(text) {
-  if (BAD.test(text)) return "bad";
-  if (GOOD.test(text)) return "good";
-  return "neutral";
+  return { text: t, url };
 }

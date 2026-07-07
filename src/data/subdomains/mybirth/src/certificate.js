@@ -114,7 +114,6 @@ export function buildCertificate(d, placeLabel) {
     </article>`;
 
   const wrap = document.createElement("div");
-  wrap.id = "cert-print";
   wrap.className = "cert-stage";
   wrap.innerHTML = `
     <div class="cert-flip size-a4" id="cert-flip" title="Click to flip">

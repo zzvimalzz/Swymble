@@ -18,8 +18,9 @@ export default {
       return response;
     }
 
-    originUrl.pathname = `${MYBIRTH_PREFIX}/index.html`;
-    return fetch(new Request(originUrl, request));
+    originUrl.pathname = `${MYBIRTH_PREFIX}/404.html`;
+    const notFound = await fetch(new Request(originUrl, request));
+    return new Response(notFound.body, { status: 404, headers: notFound.headers });
   },
 };
 

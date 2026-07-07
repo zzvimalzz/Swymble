@@ -69,13 +69,13 @@ export async function zodiacAnimalObject(animal, element) {
 
 // stone → which cut geometry to borrow, and how the material behaves
 export const STONE_CUTS = {
-  Garnet: { cut: "Round Cut", finish: "faceted" },
+  Garnet: { cut: "Round Cut", finish: "faceted", tilt: 0.35 },
   Amethyst: { cut: "Emerald Square Cut", finish: "faceted" },
   Aquamarine: { cut: "Oval Cut", finish: "faceted" },
   Diamond: { cut: "Diamond", finish: "faceted" },
   Emerald: { cut: "Emerald Cut", finish: "faceted" },
   Pearl: { cut: "Round Cabochon", finish: "pearl" },
-  Ruby: { cut: "Heart Cut", finish: "faceted" },
+  Ruby: { cut: "Round Cut", finish: "faceted", tilt: 0.35 },
   Peridot: { cut: "Marquise Cut", finish: "faceted" },
   Sapphire: { cut: "Square Cut", finish: "faceted" },
   Opal: { cut: "Oval Cabochon", finish: "opal" },
@@ -84,13 +84,16 @@ export const STONE_CUTS = {
 };
 
 // Node names arrive doubly mangled: the source file writes "Cabochon"
-// with a Cyrillic "С", and GLTFLoader then sanitizes names for animation
-// binding ("Square Cut.1_81" → "Square_Cut1_81"). Compare alphanumeric-
-// only forms so neither transformation matters.
+// with a Cyrillic "С", which isn't valid UTF-8 as authored and decodes to
+// one or more U+FFFD replacement characters — not reliably one-for-one
+// with the original byte(s) — and GLTFLoader then sanitizes names for
+// animation binding ("Square Cut.1_81" → "Square_Cut1_81"). Collapse each
+// *run* of invalid chars to a single "C" (not one "C" per char) so
+// "Oval ��abochon" still matches "Oval Cabochon".
 function keyName(name) {
   return name
     .normalize("NFKD")
-    .replace(/[^\x20-\x7E]/g, "C")
+    .replace(/[^\x20-\x7E]+/g, "C")
     .replace(/[^A-Za-z0-9]/g, "");
 }
 
@@ -137,13 +140,15 @@ function gemMaterial(finish, colors) {
       envMapIntensity: 1,
     });
   }
-  // faceted, transparent stone
+  // faceted stone — opaque rather than glass-like transmission, since
+  // transmission renders by refracting whatever sits behind the mesh and
+  // needs an opaque backdrop to look right; this reads as a solid gem
+  // against a transparent canvas instead of a black card behind it
   return new THREE.MeshPhysicalMaterial({
-    color: base, metalness: 0, roughness: 0.05,
-    transmission: 0.8, thickness: 1.6, ior: 2.0,
-    clearcoat: 1, clearcoatRoughness: 0.05,
-    attenuationColor: base, attenuationDistance: 2.4,
-    specularIntensity: 1, envMapIntensity: 1.5,
+    color: base, metalness: 0.12, roughness: 0.12,
+    clearcoat: 1, clearcoatRoughness: 0.06,
+    reflectivity: 1, ior: 2.2,
+    envMapIntensity: 1.6,
   });
 }
 
@@ -162,8 +167,10 @@ export async function gemstoneObject(stone, colors) {
   geometry.center();
 
   const mesh = new THREE.Mesh(geometry, gemMaterial(spec.finish, colors));
-  // rotate so the gem stands upright (crown facing viewer) rather than lying flat
-  mesh.rotation.x = Math.PI / 2;
+  // rotate so the gem stands upright (crown facing viewer) rather than lying
+  // flat; a cut can override the tilt (e.g. Round Cut uses less than a full
+  // quarter-turn so its pointed culet reads as pointing downward)
+  mesh.rotation.x = spec.tilt ?? Math.PI / 2;
   return normalizeObject(mesh, 1.9);
 }
 

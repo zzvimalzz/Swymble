@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#05060c" />
+    <meta name="robots" content="noindex" />
+    <title>Page not found · MyBirth</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Space+Grotesk:wght@300..700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #05060c;
+        --paper: #ece9f5;
+        --paper-soft: #b7b3cc;
+        --paper-mute: #6f6b88;
+        --line: rgba(180, 174, 210, 0.14);
+        --line-strong: rgba(180, 174, 210, 0.32);
+        --lunar: #ecd9ac;
+        --violet: #9a7ff0;
+        --display: "Fraunces", Georgia, "Times New Roman", serif;
+        --sans: "Space Grotesk", system-ui, -apple-system, sans-serif;
+        --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: var(--ink);
+        color: var(--paper);
+        font-family: var(--sans);
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: clamp(24px, 6vw, 48px);
+        overflow: hidden;
+        position: relative;
+      }
+      .glow {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.35;
+        pointer-events: none;
+      }
+      .glow--violet { width: 46vw; height: 46vw; top: -14vw; left: -10vw; background: var(--violet); }
+      .glow--teal { width: 40vw; height: 40vw; bottom: -16vw; right: -8vw; background: #6fe3d2; opacity: 0.22; }
+      main {
+        position: relative;
+        z-index: 1;
+        max-width: 560px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      p.eyebrow {
+        font-family: ui-monospace, "SF Mono", monospace;
+        font-size: 0.7rem;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: var(--violet);
+        margin: 0 0 22px;
+      }
+      p.code {
+        font-family: var(--display);
+        font-weight: 300;
+        font-style: italic;
+        font-size: clamp(4.5rem, 16vw, 8rem);
+        line-height: 0.9;
+        margin: 0 0 20px;
+        background: linear-gradient(160deg, var(--lunar), var(--violet));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      h1 {
+        font-family: var(--display);
+        font-weight: 300;
+        font-size: clamp(1.6rem, 4vw, 2.2rem);
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+        margin: 0 0 18px;
+        text-wrap: balance;
+      }
+      h1 em { font-style: italic; font-weight: 400; color: var(--lunar); }
+      p.lede {
+        font-size: 1rem;
+        color: var(--paper-soft);
+        max-width: 40ch;
+        margin: 0 0 38px;
+      }
+      a.back {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 28px;
+        border: 1px solid var(--line-strong);
+        border-radius: 100px;
+        background: rgba(255, 255, 255, 0.015);
+        color: var(--paper);
+        font-family: ui-monospace, "SF Mono", monospace;
+        font-size: 0.76rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        text-decoration: none;
+        overflow: hidden;
+        isolation: isolate;
+        transition: border-color 0.4s var(--ease), transform 0.4s var(--ease), color 0.4s var(--ease);
+      }
+      a.back::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(120deg, rgba(154, 127, 240, 0.9), rgba(236, 217, 172, 0.9));
+        transform: translateX(-101%);
+        transition: transform 0.6s var(--ease);
+      }
+      a.back:hover { border-color: transparent; transform: translateY(-2px); color: #0a0712; }
+      a.back:hover::before { transform: translateX(0); }
+      a.back svg { width: 18px; height: 18px; }
+      @media (prefers-reduced-motion: reduce) {
+        a.back, a.back::before { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <span class="glow glow--violet" aria-hidden="true"></span>
+    <span class="glow glow--teal" aria-hidden="true"></span>
+    <main>
+      <p class="eyebrow">Lost signal</p>
+      <p class="code">404</p>
+      <h1>This page <em>drifted off the map.</em></h1>
+      <p class="lede">Whatever you were looking for isn&rsquo;t here — but the day you were born still is.</p>
+      <a class="back" href="/">
+        Back to mybirth
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </main>
+  </body>
+</html>

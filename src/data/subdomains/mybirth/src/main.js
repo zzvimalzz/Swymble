@@ -255,7 +255,7 @@ async function runGeneration(inputs) {
   const geo = await geoP;
   const [weather, yearNews, otd, homeland] = await Promise.all([
     geo ? historicalWeather(geo.lat, geo.lon, iso).catch(() => null) : Promise.resolve(null),
-    yearEvents(year, geo?.country || country).catch(() => null),
+    yearEvents(year).catch(() => null),
     otdP,
     countryFacts(geo?.countryCode, geo?.country || country).catch(() => null)
   ]);
@@ -292,6 +292,9 @@ function validate({ name, day, month, year, country }) {
   const test = new Date(Date.UTC(year, month - 1, day));
   if (test.getUTCMonth() !== month - 1) return "That date doesn't exist on the calendar.";
   if (!country) return "Tell us the country you were born in.";
+  if (!COUNTRIES.some((c) => c.toLowerCase() === country.toLowerCase())) {
+    return "Please choose a country from the suggested list.";
+  }
   return null;
 }
 
@@ -413,7 +416,7 @@ function renderResult(d) {
         </p>
         <div id="ticket-mount" data-reveal></div>
         <div class="ticket-actions" data-reveal>
-          <button class="btn-ghost" id="print-ticket">Save / print ticket</button>
+          <button class="btn-ghost" id="save-ticket">⤓ Save ticket</button>
         </div>
       </section>
 
@@ -436,7 +439,7 @@ function renderResult(d) {
         </div>
         <div id="cert-view" data-reveal></div>
         <div class="ticket-actions" data-reveal>
-          <button class="btn-ghost" id="print-cert">⤓ Print / save as PDF</button>
+          <button class="btn-ghost" id="save-cert">⤓ Save as PDF</button>
           <button class="btn-ghost" id="copy-link">⧉ Copy my link</button>
           <button class="btn-ghost" id="restart">Recover another day</button>
         </div>
@@ -509,8 +512,14 @@ function renderResult(d) {
   }
 
   // wire actions
-  document.getElementById("print-ticket").addEventListener("click", () => printScoped("printing-ticket"));
-  document.getElementById("print-cert").addEventListener("click", () => printScoped("printing-cert"));
+  const saveTicketBtn = document.getElementById("save-ticket");
+  saveTicketBtn.addEventListener("click", () =>
+    runSaveAction(saveTicketBtn, () => saveTicketImage(document.getElementById("boarding-pass"), d.name))
+  );
+  const saveCertBtn = document.getElementById("save-cert");
+  saveCertBtn.addEventListener("click", () =>
+    runSaveAction(saveCertBtn, () => saveCertificatePDF(document.getElementById("cert-flip"), d.name))
+  );
   document.getElementById("restart").addEventListener("click", () => { location.href = location.pathname; });
   const copyBtn = document.getElementById("copy-link");
   if (copyBtn) copyBtn.addEventListener("click", () => copyLink(copyBtn, d.shareURL));
@@ -774,10 +783,10 @@ function startOdometer(container) {
   requestAnimationFrame(frame);
 }
 
-/* ---- the year in the world & at home (good / bad) ---- */
+/* ---- the year in the world & in Malaysia ---- */
 function renderYearNews(d) {
   const yn = d.yearNews;
-  const hasAny = yn && ((yn.world && yn.world.length) || (yn.local && yn.local.length));
+  const hasAny = yn && ((yn.world && yn.world.length) || (yn.malaysia && yn.malaysia.length));
   if (!hasAny) {
     return `
       <section class="block">
@@ -786,48 +795,35 @@ function renderYearNews(d) {
         <p class="sub" data-reveal>We couldn't pull ${d.year}'s chronicle from Wikipedia just now — refresh and the year should speak up.</p>
       </section>`;
   }
-  const localName = d.geo?.country || d.country;
   return `
     <section class="block">
       <p class="kicker" data-reveal>The year the world turned</p>
       <h2 class="h-section" data-reveal>What <em>${d.year}</em> was made of.</h2>
-      <p class="sub" data-reveal>The brighter moments first — then the harder ones. Pulled live and sorted by tone.</p>
+      <p class="sub" data-reveal>Pulled live from Wikipedia's chronicle of the year — each headline links to its source article.</p>
 
       ${yn.world && yn.world.length ? `
         <div class="news-scope" data-reveal>
           <h3 class="news-scope__h">🌍 Across the world</h3>
-          ${newsColumns(yn.world)}
+          ${newsList(yn.world)}
         </div>` : ""}
 
-      ${yn.local && yn.local.length ? `
+      ${yn.malaysia && yn.malaysia.length ? `
         <div class="news-scope" data-reveal>
-          <h3 class="news-scope__h">📍 In ${esc(localName)}</h3>
-          ${newsColumns(yn.local)}
+          <h3 class="news-scope__h">📍 In Malaysia</h3>
+          ${newsList(yn.malaysia)}
         </div>` : `
-        <p class="source" data-reveal style="margin-top:30px">No dedicated “${d.year} in ${esc(localName)}” chronicle was found — showing the world view above.</p>`}
+        <p class="source" data-reveal style="margin-top:30px">No dedicated “${d.year} in Malaysia” chronicle was found on Wikipedia.</p>`}
 
-      <p class="source source--live mt-l">Compiled live from Wikipedia · tone sorted automatically, so read it with a pinch of salt.</p>
+      <p class="source source--live mt-l">Compiled live from Wikipedia.</p>
     </section>`;
 }
 
-function newsColumns(events) {
-  const good = events.filter((e) => e.mood !== "bad").slice(0, 6);
-  const bad = events.filter((e) => e.mood === "bad").slice(0, 6);
-  const list = (items) =>
-    items.length
-      ? `<ul>${items.map((e) => `<li>${esc(e.text)}</li>`).join("")}</ul>`
-      : `<p class="news-empty">Nothing of this tone surfaced.</p>`;
-  return `
-    <div class="news-cols">
-      <div class="news-col news-col--good">
-        <h4 class="news-col__h">☀ Brighter moments</h4>
-        ${list(good)}
-      </div>
-      <div class="news-col news-col--bad">
-        <h4 class="news-col__h">☾ Harder headlines</h4>
-        ${list(bad)}
-      </div>
-    </div>`;
+function newsList(events) {
+  return `<ul class="news-list">${events
+    .map((e) => `<li>${e.url
+      ? `<a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.text)}</a>`
+      : esc(e.text)}</li>`)
+    .join("")}</ul>`;
 }
 
 /* ---- people who share the date ---- */
@@ -1014,15 +1010,98 @@ function renderHomeland(d) {
     </section>`;
 }
 
-/* ---------- print + share helpers ---------- */
-function printScoped(cls) {
-  document.body.classList.add(cls);
-  // give layout a beat to settle before the print dialog snapshots it
-  setTimeout(() => window.print(), 60);
+/* ---------- save-as-file helpers (ticket → PNG, certificate → PDF) ---------- */
+
+/** Run a save action with button feedback; never throws past this boundary. */
+async function runSaveAction(btn, action) {
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+  try {
+    await action();
+    btn.textContent = "✓ Saved";
+  } catch (err) {
+    console.warn("mybirth: save failed —", err);
+    btn.textContent = "Save failed";
+  }
+  setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2200);
 }
-window.addEventListener("afterprint", () => {
-  document.body.classList.remove("printing-cert", "printing-ticket");
-});
+
+function slugify(s) {
+  return String(s || "day").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "day";
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+/** Renders a node into a detached clone so html2canvas captures it flat —
+ *  the real nodes can carry a live hover-tilt transform (ticket) or a
+ *  rotateY(180deg) meant only for the 3D flip context (certificate back),
+ *  both of which would otherwise skew or mirror a standalone capture.
+ *  Only `transform` is reset; `position` is left alone since children
+ *  (glows, the certificate frame) are positioned absolutely against it. */
+async function renderNodeToCanvas(node, width, height, scale) {
+  // loaded on demand — html2canvas is a heavy dependency only ever needed
+  // when the user actually saves a ticket or certificate
+  const { default: html2canvas } = await import("html2canvas");
+  const clone = node.cloneNode(true);
+  clone.style.transform = "none";
+  const holder = document.createElement("div");
+  holder.style.cssText = `position:fixed;left:-99999px;top:0;width:${width}px;height:${height}px;pointer-events:none;`;
+  holder.appendChild(clone);
+  document.body.appendChild(holder);
+  try {
+    return await html2canvas(clone, {
+      backgroundColor: null,
+      scale,
+      useCORS: true,
+      width,
+      height,
+    });
+  } finally {
+    holder.remove();
+  }
+}
+
+async function saveTicketImage(ticketEl, name) {
+  const rect = ticketEl.getBoundingClientRect();
+  const canvas = await renderNodeToCanvas(ticketEl, rect.width, rect.height, Math.max(2, window.devicePixelRatio || 1));
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (!blob) throw new Error("canvas produced no image data");
+  downloadBlob(blob, `mybirth-ticket-${slugify(name)}.png`);
+}
+
+async function saveCertificatePDF(flipEl, name) {
+  const rect = flipEl.getBoundingClientRect();
+  const w = Math.round(rect.width);
+  const h = Math.round(rect.height);
+  const front = flipEl.querySelector(".cert-front");
+  const back = flipEl.querySelector(".cert-back");
+
+  const [{ jsPDF }, frontCanvas, backCanvas] = await Promise.all([
+    import("jspdf"),
+    renderNodeToCanvas(front, w, h, 2),
+    renderNodeToCanvas(back, w, h, 2),
+  ]);
+
+  const orientation = w >= h ? "landscape" : "portrait";
+  // JPEG rather than PNG here — the face backgrounds are fully opaque so
+  // there's no transparency to lose, and it keeps a 2-page A4 keepsake in
+  // the low single-digit MB instead of a lossless PNG's dozens of MB
+  const pdf = new jsPDF({ orientation, unit: "px", format: [w, h] });
+  pdf.addImage(frontCanvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, w, h);
+  pdf.addPage([w, h], orientation);
+  pdf.addImage(backCanvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, w, h);
+  pdf.save(`mybirth-certificate-${slugify(name)}.pdf`);
+}
 
 async function copyLink(btn, url) {
   const original = btn.textContent;

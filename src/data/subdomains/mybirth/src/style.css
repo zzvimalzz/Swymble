@@ -62,7 +62,6 @@ body {
   font-family: var(--sans);
   color: var(--paper);
   background: radial-gradient(140% 120% at 50% -10%, #0c0e1c 0%, var(--ink) 55%, #020308 100%);
-  background-attachment: fixed;
   overflow-x: hidden;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -157,7 +156,7 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
   justify-content: space-between;
   padding: 0 clamp(18px, 4vw, 48px);
-  background: rgba(7, 8, 16, 0.35);
+  background: rgba(7, 8, 16, 0.78);
   backdrop-filter: blur(22px) saturate(1.5);
   -webkit-backdrop-filter: blur(22px) saturate(1.5);
   border-bottom: 1px solid var(--line);
@@ -1453,7 +1452,7 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 .play-link--sp:hover { background: rgba(30, 215, 96, 0.14); border-color: #1ed760; color: #57e98c; transform: translateY(-2px); }
 
 /* ============================================================
-   YEAR NEWS — good / bad, world / local
+   YEAR NEWS — world / Malaysia
    ============================================================ */
 .news-scope { margin-top: 46px; }
 .news-scope__h {
@@ -1461,29 +1460,24 @@ main { position: relative; z-index: 2; padding-top: 56px; }
   font-size: var(--fs-h3); margin: 0 0 18px;
   color: var(--paper);
 }
-.news-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: clamp(18px, 3vw, 36px); }
-.news-col { padding: 22px 24px; border-radius: var(--r-card); border: 1px solid var(--line); position: relative; }
-.news-col--good { background: linear-gradient(180deg, rgba(111,227,210,0.05), transparent); }
-.news-col--bad { background: linear-gradient(180deg, rgba(240,138,111,0.05), transparent); }
-.news-col__h {
-  font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.2em;
-  text-transform: uppercase; margin: 0 0 16px;
-}
-.news-col--good .news-col__h { color: var(--teal); }
-.news-col--bad .news-col__h { color: var(--ember); }
-.news-col ul { list-style: none; margin: 0; padding: 0; }
-.news-col li {
+.news-list { list-style: none; margin: 0; padding: 0; }
+.news-list li {
   font-size: 0.94rem; color: var(--paper-soft);
   padding: 12px 0 12px 18px; position: relative;
   border-top: 1px solid var(--line); line-height: 1.45;
 }
-.news-col li:first-child { border-top: 0; }
-.news-col li::before {
+.news-list li:first-child { border-top: 0; }
+.news-list li::before {
   content: ""; position: absolute; left: 0; top: 19px;
   width: 5px; height: 5px; border-radius: 50%;
+  background: var(--violet);
 }
-.news-col--good li::before { background: var(--teal); }
-.news-col--bad li::before { background: var(--ember); }
+.news-list a {
+  color: inherit; text-decoration: none;
+  border-bottom: 1px solid var(--line-strong);
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.news-list a:hover { color: var(--paper); border-color: var(--violet); }
 .news-empty { color: var(--paper-mute); font-size: 0.88rem; font-style: italic; }
 
 /* ============================================================
@@ -1699,43 +1693,14 @@ main { position: relative; z-index: 2; padding-top: 56px; }
   .cert-dossier { grid-template-columns: 1fr; }
 }
 
-/* ============================================================
-   PRINT — only the chosen artefact, in colour, both sides
-   ============================================================ */
-@media print {
-  @page { size: landscape; margin: 8mm; }
-  body { background: #fff !important; }
-
-  body.printing-cert *, body.printing-ticket * { visibility: hidden !important; }
-  body.printing-cert #cert-print, body.printing-cert #cert-print *,
-  body.printing-ticket #ticket-mount, body.printing-ticket #ticket-mount * { visibility: visible !important; }
-  body.printing-cert #cert-print,
-  body.printing-ticket #ticket-mount { position: absolute; left: 0; top: 0; width: 100%; }
-
-  /* flatten the flip and lay both faces out as separate pages */
-  body.printing-cert .cert-flip { width: auto !important; aspect-ratio: auto !important; perspective: none !important; cursor: auto; }
-  body.printing-cert .cert-flip__inner { transform: none !important; transform-style: flat !important; }
-  body.printing-cert .cert-face {
-    position: relative !important; inset: auto !important; transform: none !important;
-    -webkit-backface-visibility: visible !important; backface-visibility: visible !important;
-    page-break-after: always; break-after: page; box-shadow: none !important;
-  }
-  body.printing-cert .cert-face:last-child { page-break-after: auto; break-after: auto; }
-  body.printing-cert .size-a4 .cert-face { width: 273mm; height: 190mm; }
-  body.printing-cert .size-letter .cert-face { width: 260mm; height: 196mm; }
-  body.printing-cert .size-card .cert-face { width: 148mm; height: 100mm; }
-
-  .cert-face, .cert-face *, .bp, .bp * {
-    -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
-  }
-
-  /* restore light theme on cert for print legibility */
-  body.printing-cert .cert-face {
-    --cert-ink: #1c2b4c !important;
-    --cert-gold: #a9854a !important;
-    background: radial-gradient(125% 135% at 50% 0%, #f9f2e1 0%, #f0e5cc 62%, #e6d7b6 100%) !important;
-    color: #1c2b4c !important;
-  }
+/* on narrow viewports the A4/Letter/Card ratios are all landscape, which
+   squashes every stacked line of the certificate into a sliver and clips
+   the bottom facts + signature under overflow:hidden — switch to a taller,
+   portrait-friendly ratio so the same content has room to breathe */
+@media (max-width: 640px) {
+  .cert-flip.size-a4,
+  .cert-flip.size-letter { aspect-ratio: 0.72 / 1; }
+  .cert-flip.size-card { aspect-ratio: 0.86 / 1; }
 }
 
 /* utility */
