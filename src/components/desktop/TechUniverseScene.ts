@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import * as THREE from 'three';
 import type { SwymbleSkillCategory, SwymbleSkillItem } from '../../data/types';
+import { setCursorHover } from './GlitchCursor';
 import { UFO_MODEL_URLS, attachCometModels, attachUfoModels, createCometRecords, createUfoRecords, updateComets, updateUfos } from './TechUniverseComets';
 import { COMET_MODEL_URL, CORE_PLANET_MODEL_URL, getPlanetModelScaleMultiplier, loadGltfScene, loadMoonModelLibrary, preparePlanetModel, selectMoonModel } from './TechUniverseModelAssets';
 import { createOrbitGeometry, createStarGeometry, disposeObject } from './TechUniverseSceneAssets';
@@ -41,7 +42,12 @@ type UseTechUniverseSceneOptions = {
   focusedItemRef: React.MutableRefObject<string>;
   setActiveTech: React.Dispatch<React.SetStateAction<ActiveTech>>;
   setTooltip: React.Dispatch<React.SetStateAction<TooltipState | null>>;
-  setIsHovering: (val: boolean) => void;
+  /** Click a moon on the canvas — mirrors clicking its side-menu item button. */
+  onSelectItem: (category: string, itemName: string, color: string) => void;
+  /** Click an orbit line on the canvas — mirrors clicking its side-menu category button. */
+  onSelectCategory: (category: string) => void;
+  /** Click the core planet — clears focus back to the resting/top-level view. */
+  onClearFocus: () => void;
 };
 
 const ORBIT_TILTS = [0.18, -0.24, 0.34, -0.36, 0.1];
@@ -72,14 +78,21 @@ const fitCameraToOrbitSystem = (
   camera.updateProjectionMatrix();
 };
 
+// The invisible hit-test sphere is intentionally larger than the visual moon (baseScale):
+// the attached GLTF model's own size is derived from baseScale independently (see
+// preparePlanetModel targetRadius below), so growing this radius only widens the clickable
+// area — it never changes what's rendered.
+const MOON_HIT_RADIUS_MULTIPLIER = 1.4;
+
 const createMoon = (
   recordIndex: number,
   angle: number,
   orbitRadius: number,
 ) => {
   const baseScale = 0.18 + (recordIndex % 3) * 0.025;
+  const hitRadius = baseScale * MOON_HIT_RADIUS_MULTIPLIER;
   const moon = new THREE.Mesh(
-    new THREE.SphereGeometry(baseScale, 32, 32),
+    new THREE.SphereGeometry(hitRadius, 32, 32),
     new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
@@ -96,7 +109,7 @@ const createMoon = (
 
 export const useTechUniverseScene = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
-  { skills, activeTechRef, focusedCategoryRef, focusedItemRef, setActiveTech, setTooltip, setIsHovering }: UseTechUniverseSceneOptions,
+  { skills, activeTechRef, focusedCategoryRef, focusedItemRef, setActiveTech, setTooltip, onSelectItem, onSelectCategory, onClearFocus }: UseTechUniverseSceneOptions,
 ) => {
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -181,8 +194,10 @@ export const useTechUniverseScene = (
         createOrbitGeometry(orbitRadius),
         new THREE.LineBasicMaterial({ color: new THREE.Color(skillCategory.items[0]?.color ?? '#00f0ff'), transparent: true, opacity: 0.24, blending: THREE.AdditiveBlending }),
       );
+      orbitLine.userData = { kind: 'orbit', category: skillCategory.category };
       orbitGroup.add(orbitLine);
       orbitRecords.push({ group: orbitGroup, line: orbitLine, category: skillCategory.category, radius: orbitRadius });
+      interactiveObjects.push(orbitLine);
 
       skillCategory.items.forEach((item, itemIndex) => {
         const angle = (itemIndex / skillCategory.items.length) * Math.PI * 2 + categoryIndex * 0.58;
@@ -215,12 +230,26 @@ export const useTechUniverseScene = (
     }).catch(() => undefined);
 
     const raycaster = new THREE.Raycaster();
+    // Orbit lines are thin THREE.Line geometry — widen the line hit-test tolerance (world
+    // units) so they're reasonably easy to click, not just the moons/planet.
+    raycaster.params.Line = { threshold: 0.15 };
     const pointer = new THREE.Vector2();
     let activeHoverKey = '';
     let animationFrame = 0;
+    // Assume visible until the IntersectionObserver reports otherwise — the scene is only
+    // mounted once the section has already come near the viewport (see useNearViewport in
+    // DesktopHome), so this avoids a one-frame flash of "not rendering" on mount.
+    let isCanvasVisible = true;
+    let isDocumentVisible = document.visibilityState !== 'hidden';
     let isDragging = false;
     let previousClientX = 0;
     let previousClientY = 0;
+    // Distinguish a click from an orbit-drag: a pointerdown followed by a pointerup with
+    // movement under this threshold (px) is treated as a click rather than a drag.
+    let pointerDownX = 0;
+    let pointerDownY = 0;
+    let pointerMovedPastClickThreshold = false;
+    const CLICK_MOVE_THRESHOLD_PX = 6;
     const outerOrbitRadius = getOuterOrbitRadius(skills);
     const cameraHomePosition = new THREE.Vector3();
     const cameraLookTarget = new THREE.Vector3();
@@ -245,7 +274,7 @@ export const useTechUniverseScene = (
     const clearHover = () => {
       activeHoverKey = '';
       setTooltip(null);
-      setIsHovering(false);
+      setCursorHover(false);
       if (activeTechRef.current.source === 'hover') {
         setActiveTech({ category: '' });
       }
@@ -253,6 +282,9 @@ export const useTechUniverseScene = (
 
     const handlePointerMove = (event: PointerEvent) => {
       if (isDragging) {
+        if (!pointerMovedPastClickThreshold && Math.hypot(event.clientX - pointerDownX, event.clientY - pointerDownY) > CLICK_MOVE_THRESHOLD_PX) {
+          pointerMovedPastClickThreshold = true;
+        }
         const focusedMoon = moonRecords.find((moonRecord) => moonRecord.category === focusedCategoryRef.current && moonRecord.item.name === focusedItemRef.current);
         if (focusedMoon) {
           focusedMoon.mesh.rotation.y += (event.clientX - previousClientX) * 0.012;
@@ -280,8 +312,18 @@ export const useTechUniverseScene = (
 
       if (hitObject.userData.kind === 'planet') {
         activeHoverKey = 'planet';
-        setIsHovering(true);
+        setCursorHover(true);
         setTooltip({ category: 'SWYMBLE CORE', itemName: 'Interactive system', x: event.clientX, y: event.clientY });
+        return;
+      }
+
+      // Orbit lines only ever appear in this unfiltered hit set at the top level (the
+      // focused-category branch above restricts hover to moons only), which is exactly when
+      // clicking one is meaningful (focuses that category).
+      if (hitObject.userData.kind === 'orbit') {
+        activeHoverKey = `orbit:${hitObject.userData.category}`;
+        setCursorHover(true);
+        setTooltip({ category: hitObject.userData.category, itemName: 'Focus orbit', x: event.clientX, y: event.clientY });
         return;
       }
 
@@ -298,7 +340,7 @@ export const useTechUniverseScene = (
           source: 'hover',
         });
       }
-      setIsHovering(true);
+      setCursorHover(true);
       setTooltip({ category: moonRecord.category, itemName: moonRecord.item.name, color: moonRecord.item.color, x: event.clientX, y: event.clientY });
     };
 
@@ -306,12 +348,58 @@ export const useTechUniverseScene = (
       isDragging = true;
       previousClientX = event.clientX;
       previousClientY = event.clientY;
+      pointerDownX = event.clientX;
+      pointerDownY = event.clientY;
+      pointerMovedPastClickThreshold = false;
       canvas.setPointerCapture(event.pointerId);
+    };
+
+    // Click hit-testing intentionally differs from hover hit-testing: hover only ever
+    // considers moons (see handlePointerMove), but clicks additionally need the core planet
+    // (to clear focus) and orbit lines (to focus a category) to be hit-testable, gated to
+    // whatever is actually visible/relevant at the current focus depth.
+    const getClickHitObjects = () => {
+      const focusedCategory = focusedCategoryRef.current;
+      const focusedItem = focusedItemRef.current;
+      if (!focusedCategory) return interactiveObjects;
+
+      return interactiveObjects.filter((sceneObject) => {
+        if (sceneObject.userData.kind === 'planet') return sceneObject.visible;
+        if (sceneObject.userData.kind === 'orbit') return !focusedItem && sceneObject.userData.category === focusedCategory;
+        if (sceneObject.userData.kind === 'moon') {
+          const moonRecord = moonRecords[sceneObject.userData.recordIndex];
+          return moonRecord?.category === focusedCategory && (!focusedItem || moonRecord.item.name === focusedItem);
+        }
+        return false;
+      });
+    };
+
+    const handleCanvasClick = (event: PointerEvent) => {
+      setPointer(event);
+      raycaster.setFromCamera(pointer, camera);
+      const hitObject = raycaster.intersectObjects(getClickHitObjects(), false)[0]?.object;
+      if (!hitObject) return;
+
+      if (hitObject.userData.kind === 'planet') {
+        onClearFocus();
+        return;
+      }
+
+      if (hitObject.userData.kind === 'orbit') {
+        onSelectCategory(hitObject.userData.category);
+        return;
+      }
+
+      if (hitObject.userData.kind === 'moon') {
+        const moonRecord = moonRecords[hitObject.userData.recordIndex];
+        if (moonRecord) onSelectItem(moonRecord.category, moonRecord.item.name, moonRecord.item.color);
+      }
     };
 
     const handlePointerUp = (event: PointerEvent) => {
       isDragging = false;
       if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      if (!pointerMovedPastClickThreshold) handleCanvasClick(event);
     };
 
     const animate = () => {
@@ -376,10 +464,43 @@ export const useTechUniverseScene = (
       renderer.render(scene, camera);
     };
 
+    // True zero-cost pause: cancel the pending rAF entirely rather than early-returning
+    // each frame, so an offscreen/backgrounded tab schedules no work at all.
+    const startLoop = () => {
+      if (animationFrame) return;
+      animationFrame = window.requestAnimationFrame(animate);
+    };
+
+    const stopLoop = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+    };
+
+    const syncLoopToVisibility = () => {
+      if (isCanvasVisible && isDocumentVisible) {
+        startLoop();
+      } else {
+        stopLoop();
+      }
+    };
+
+    const handleCanvasVisibility: IntersectionObserverCallback = ([entry]) => {
+      isCanvasVisible = entry.isIntersecting;
+      syncLoopToVisibility();
+    };
+
+    const handleDocumentVisibility = () => {
+      isDocumentVisible = document.visibilityState !== 'hidden';
+      syncLoopToVisibility();
+    };
+
     resizeRenderer();
-    animate();
+    startLoop();
     const resizeObserver = new ResizeObserver(resizeRenderer);
     resizeObserver.observe(canvas);
+    const canvasVisibilityObserver = new IntersectionObserver(handleCanvasVisibility, { threshold: 0 });
+    canvasVisibilityObserver.observe(canvas);
+    document.addEventListener('visibilitychange', handleDocumentVisibility);
     canvas.addEventListener('pointermove', handlePointerMove);
     canvas.addEventListener('pointerdown', handlePointerDown);
     canvas.addEventListener('pointerup', handlePointerUp);
@@ -387,15 +508,17 @@ export const useTechUniverseScene = (
 
     return () => {
       isDisposed = true;
-      window.cancelAnimationFrame(animationFrame);
+      stopLoop();
       resizeObserver.disconnect();
+      canvasVisibilityObserver.disconnect();
+      document.removeEventListener('visibilitychange', handleDocumentVisibility);
       canvas.removeEventListener('pointermove', handlePointerMove);
       canvas.removeEventListener('pointerdown', handlePointerDown);
       canvas.removeEventListener('pointerup', handlePointerUp);
       canvas.removeEventListener('pointerleave', clearHover);
-      setIsHovering(false);
+      setCursorHover(false);
       scene.traverse(disposeObject);
       renderer.dispose();
     };
-  }, [activeTechRef, canvasRef, focusedCategoryRef, focusedItemRef, setActiveTech, setIsHovering, setTooltip, skills]);
+  }, [activeTechRef, canvasRef, focusedCategoryRef, focusedItemRef, setActiveTech, setTooltip, skills, onSelectItem, onSelectCategory, onClearFocus]);
 };

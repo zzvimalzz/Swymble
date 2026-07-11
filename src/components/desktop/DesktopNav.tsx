@@ -4,11 +4,10 @@ import { DESKTOP_NAV_ROUTES } from '../../routes';
 import '../../styles/desktop-nav.css';
 
 type DesktopNavProps = {
-  setIsHovering: (val: boolean) => void;
   brandName: string;
 };
 
-export default function DesktopNav({ setIsHovering, brandName }: DesktopNavProps) {
+export default function DesktopNav({ brandName }: DesktopNavProps) {
   const [isCompact, setIsCompact] = useState(false);
 
   useEffect(() => {
@@ -21,27 +20,36 @@ export default function DesktopNav({ setIsHovering, brandName }: DesktopNavProps
     return () => window.removeEventListener('scroll', updateNavDensity);
   }, []);
 
+  // navEmphasis routes (e.g. /contact) render as a CTA pill after the regular links, regardless
+  // of their position in SITE_ROUTES.
+  const standardRoutes = DESKTOP_NAV_ROUTES.filter((route) => !route.navEmphasis);
+  const emphasisRoutes = DESKTOP_NAV_ROUTES.filter((route) => route.navEmphasis);
+
   return (
     <nav className={`desktop-nav ${isCompact ? 'is-compact' : ''}`.trim()}>
-      <div 
-        className="nav-brand"
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-      >
+      <div className="nav-brand">
         <Link to="/">{brandName}</Link>
       </div>
 
       <div className="nav-links">
-        {DESKTOP_NAV_ROUTES.map((route) => (
+        {standardRoutes.map((route) => (
           <NavLink
             key={route.path}
             to={route.path}
             className={({ isActive }) =>
               `nav-link ${route.path === '/labs' ? 'labs-link' : ''} ${isActive ? 'active' : ''}`.trim()
             }
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
             end={route.path === '/'}
+          >
+            {route.label}
+          </NavLink>
+        ))}
+
+        {emphasisRoutes.map((route) => (
+          <NavLink
+            key={route.path}
+            to={route.path}
+            className={({ isActive }) => `nav-link nav-cta ${isActive ? 'active' : ''}`.trim()}
           >
             {route.label}
           </NavLink>

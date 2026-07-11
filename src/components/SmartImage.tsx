@@ -56,6 +56,8 @@ export default function SmartImage({
 
   return (
     <img
+      loading="lazy"
+      decoding="async"
       {...rest}
       src={src}
       alt={alt}

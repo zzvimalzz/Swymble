@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const DESKTOP_QUERY = '(min-width: 1280px) and (hover: hover) and (pointer: fine)';
+const DESKTOP_QUERY = '(min-width: 1024px) and (hover: hover) and (pointer: fine)';
 
 function isIpadLikeDevice(): boolean {
   const platform = navigator.platform || '';

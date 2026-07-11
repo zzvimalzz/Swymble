@@ -15,13 +15,141 @@ html, body, #root {
   width: 100%;
 }
 
+/* Belt-and-suspenders horizontal overflow guard: full-bleed decorative elements
+   (e.g. the rotated marquee strip, width: 100vw plus a transform) can extend past
+   the viewport edge. body already sets overflow-x: hidden on desktop, but that
+   alone doesn't reliably stop the *html* element itself from being horizontally
+   scrollable (e.g. via trackpad/shift-wheel), so pin it here too, globally. */
+html {
+  overflow-x: hidden;
+}
+
+:focus-visible {
+  outline: 2px solid var(--sw-accent-volt);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: var(--sw-z-cursor);
+  padding: 0.75rem 1.25rem;
+  background: var(--sw-accent-volt);
+  color: var(--sw-bg-ink);
+  font-family: var(--sw-font-mono);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border-radius: var(--sw-radius-card);
+  transition: top var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.skip-link:focus-visible {
+  top: 1rem;
+  outline: 2px solid var(--sw-bg-ink);
+  outline-offset: 3px;
+}
+
 .app-loading {
   min-height: 100vh;
+  width: 100%;
   display: grid;
   place-items: center;
-  font-family: 'JetBrains Mono', monospace;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #f0f0f0;
-  background: #050505;
+  gap: 1.5rem;
+  background: var(--sw-bg-ink);
+}
+
+.app-loading-mark {
+  position: relative;
+  font-family: var(--sw-font-logo);
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--sw-text-main);
+}
+
+.app-loading-mark::before,
+.app-loading-mark::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.app-loading-mark::before {
+  color: var(--sw-accent-neon);
+  transform: translate(-2px, 0);
+  animation: app-loading-flicker-neon 0.9s steps(1) infinite;
+}
+
+.app-loading-mark::after {
+  color: var(--sw-accent-cyan);
+  transform: translate(2px, 0);
+  animation: app-loading-flicker-cyan 0.9s steps(1) infinite;
+}
+
+.app-loading-track {
+  position: relative;
+  width: 120px;
+  height: 2px;
+  background: var(--sw-surface-faint);
+  overflow: hidden;
+}
+
+.app-loading-bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -40%;
+  width: 40%;
+  background: var(--sw-accent-cyan);
+  animation: app-loading-sweep 1.1s ease-in-out infinite;
+}
+
+@keyframes app-loading-flicker-neon {
+  0%, 78% { opacity: 0; }
+  80% { opacity: 0.35; }
+  83% { opacity: 0; }
+  92% { opacity: 0.22; }
+  95% { opacity: 0; }
+}
+
+@keyframes app-loading-flicker-cyan {
+  0%, 60% { opacity: 0; }
+  62% { opacity: 0.3; }
+  66% { opacity: 0; }
+  87% { opacity: 0.2; }
+  90% { opacity: 0; }
+}
+
+@keyframes app-loading-sweep {
+  0% { left: -40%; }
+  100% { left: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* The global kill above still lets each animation "land" on its final keyframe,
+     which would freeze the loader bar off-canvas and the RGB-split flicker layers
+     mid-flash. Pin them to a deliberate static look instead. */
+  .app-loading-mark::before,
+  .app-loading-mark::after {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .app-loading-bar {
+    animation: none !important;
+    left: 0 !important;
+    width: 100% !important;
+    opacity: 0.6;
+  }
 }

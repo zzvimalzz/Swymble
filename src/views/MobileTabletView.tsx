@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
@@ -7,21 +8,35 @@ import MobileHome from './mobile/MobileHome';
 import MobileBlog from './mobile/MobileBlog';
 import MobileBlogPost from './mobile/MobileBlogPost';
 import MobileLabs from './mobile/MobileLabs';
-import { MOBILE_NAV_ROUTES } from '../routes';
+import { MOBILE_NAV_ROUTES, SITE_ROUTES } from '../routes';
 import { useMobileSectionNavigation } from '../hooks/useMobileSectionNavigation';
 import { useMobileTitleInteraction } from '../hooks/useMobileTitleInteraction';
 
 import '../styles/mobile.css';
 import '../styles/category-accent.css';
 
-const HOME_RENDER_PATHS = ['/', '/projects', '/contact', '/about'];
+// SITE_ROUTES entries with mobileMode 'home-section' (and 'hidden', which is treated the same —
+// it just isn't in the nav) all collapse onto MobileHome. Deriving this from the table instead of
+// a hard-coded path list means a new home-section/hidden route is picked up automatically.
+const homePaths: string[] = SITE_ROUTES.filter(
+  (route) => route.mobileMode === 'home-section' || route.mobileMode === 'hidden',
+).map((route) => route.path);
+
 const MOBILE_NAV_PATH_ORDER = ['/', '/projects', '/contact', '/labs', '/blog'];
+
+// Every SITE_ROUTES entry with mobileMode 'page' must have a matching element here. Unlike the
+// desktop registry, this can't be a fully-typed Record without also covering the home-section
+// paths, so the exhaustiveness check below runs at render time in dev instead of at compile time.
+const mobilePageRegistry: Record<string, ReactElement> = {
+  '/labs': <MobileLabs />,
+  '/blog': <MobileBlog />,
+};
 
 export default function MobileTabletView() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isHomeRoute = HOME_RENDER_PATHS.includes(location.pathname);
+  const isHomeRoute = homePaths.includes(location.pathname);
   const isBlogRoute = location.pathname.startsWith('/blog');
   const isLabsRoute = location.pathname === '/labs';
   const hasRouteFloatingControls = isBlogRoute || isLabsRoute;
@@ -138,6 +153,12 @@ export default function MobileTabletView() {
           action: () => jumpToSection('focus-section'),
           isActive: isHomeRoute && activeSection === 'focus-section',
         },
+        {
+          key: 'home-latest-updates',
+          label: 'Latest Updates',
+          action: () => jumpToSection('latest-updates'),
+          isActive: isHomeRoute && activeSection === 'latest-updates',
+        },
       ];
     }
 
@@ -145,10 +166,10 @@ export default function MobileTabletView() {
       return [
         routeItem,
         {
-          key: 'home-latest-updates',
-          label: 'Latest Updates',
-          action: () => jumpToSection('latest-updates'),
-          isActive: isHomeRoute && activeSection === 'latest-updates',
+          key: 'home-studio',
+          label: 'Work With Me',
+          action: () => jumpToSection('studio-section'),
+          isActive: isHomeRoute && activeSection === 'studio-section',
         },
       ];
     }
@@ -199,17 +220,37 @@ export default function MobileTabletView() {
     />
   );
 
+  // Every SITE_ROUTES entry is either home-section/hidden (→ homeElement, handled above) or
+  // 'page' (→ mobilePageRegistry, handled here). If a 'page' route has no registry entry, that's
+  // a drift bug — fail loudly in dev, and fall back to MobileHome in prod rather than crashing.
+  const pageRoutes = SITE_ROUTES.filter((route) => route.mobileMode === 'page');
+
   return (
     <div className={`mobile-view ${isThumbNavOpen ? 'thumb-nav-open' : ''}`}>
-      <Routes>
-        {HOME_RENDER_PATHS.map((path) => (
-          <Route key={path} path={path} element={homeElement} />
-        ))}
-        <Route path="/labs" element={<MobileLabs />} />
-        <Route path="/blog" element={<MobileBlog />} />
-        <Route path="/blog/:id" element={<MobileBlogPost />} />
-        <Route path="*" element={homeElement} />
-      </Routes>
+      <main id="main-content">
+        <Routes>
+          {homePaths.map((path) => (
+            <Route key={path} path={path} element={homeElement} />
+          ))}
+          {pageRoutes.map((route) => {
+            const pageElement = mobilePageRegistry[route.path];
+
+            if (!pageElement) {
+              if (import.meta.env.DEV) {
+                throw new Error(
+                  `MobileTabletView: route "${route.path}" has mobileMode "page" but no matching entry in mobilePageRegistry.`,
+                );
+              }
+
+              return <Route key={route.path} path={route.path} element={homeElement} />;
+            }
+
+            return <Route key={route.path} path={route.path} element={pageElement} />;
+          })}
+          <Route path="/blog/:id" element={<MobileBlogPost />} />
+          <Route path="*" element={homeElement} />
+        </Routes>
+      </main>
 
       {isThumbNavOpen && (
         <button
@@ -229,7 +270,7 @@ export default function MobileTabletView() {
           <span>Navigate</span>
         </div>
 
-        <div ref={thumbNavListRef} className="mobile-thumb-nav-list" role="menu" aria-label="Thumb navigation list">
+        <nav ref={thumbNavListRef} className="mobile-thumb-nav-list" aria-label="Section navigation">
           {thumbNavItems.map((item) => {
             return (
               <button
@@ -242,7 +283,7 @@ export default function MobileTabletView() {
               </button>
             );
           })}
-        </div>
+        </nav>
       </div>
 
       <button

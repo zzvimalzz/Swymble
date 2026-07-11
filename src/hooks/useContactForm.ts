@@ -1,9 +1,24 @@
 import { useRef, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { SWYMBLE_DATA } from '../data/config';
-import { buildGmailComposeUrl, buildMailtoHref, isMailtoLink } from '../utils/mailto';
+import { isMailtoLink } from '../utils/mailto';
 
-export function useDesktopContactForm() {
+const CONTACT_ENDPOINT = import.meta.env.VITE_CONTACT_ENDPOINT ?? 'https://swymble.com/api/contact';
+const MAILTO_PREFIX = 'mailto:';
+
+type ContactApiResponse = {
+  ok?: boolean;
+  error?: string;
+  fields?: { name?: string; email?: string; project?: string };
+};
+
+function getFallbackContactEmail() {
+  const contactMailto = SWYMBLE_DATA.socials.find((social) => social.id === 'em' && isMailtoLink(social.link))?.link;
+  if (!contactMailto) return 'hello@swymble.com';
+  return contactMailto.slice(MAILTO_PREFIX.length).split('?')[0] || 'hello@swymble.com';
+}
+
+export function useContactForm() {
   const [name, setName] = useState('');
   const [project, setProject] = useState('');
   const [email, setEmail] = useState('');
@@ -19,9 +34,13 @@ export function useDesktopContactForm() {
   const sanitizeInput = (value: string) =>
     value
       .replace(/[<>]/g, '')
-      .replace(/[\u0000-\u001F\u007F]/g, ' ')
+      .replace(/[\x00-\x1F\x7F]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
+
+  // Light pass for onChange: strips disallowed characters only, without
+  // collapsing whitespace or trimming, so users can type spaces mid-sentence.
+  const sanitizeInputLight = (value: string) => value.replace(/[<>]/g, '').replace(/[\x00-\x1F\x7F]/g, ' ');
 
   const validateName = (value: string) => {
     if (!value) return 'name is required';
@@ -51,27 +70,30 @@ export function useDesktopContactForm() {
   };
 
   const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = sanitizeInput(event.target.value);
+    const value = sanitizeInputLight(event.target.value);
     setName(value);
-    setNameError(value ? validateName(value) : '');
+    const trimmed = value.trim();
+    setNameError(trimmed ? validateName(trimmed) : '');
     resetFeedback();
   };
 
   const handleProjectChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = sanitizeInput(event.target.value);
+    const value = sanitizeInputLight(event.target.value);
     setProject(value);
-    setProjectError(value ? validateProject(value) : '');
+    const trimmed = value.trim();
+    setProjectError(trimmed ? validateProject(trimmed) : '');
     resetFeedback();
   };
 
   const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = sanitizeInput(event.target.value);
+    const value = sanitizeInputLight(event.target.value);
     setEmail(value);
-    setEmailError(value ? validateEmail(value) : '');
+    const trimmed = value.trim();
+    setEmailError(trimmed ? validateEmail(trimmed) : '');
     resetFeedback();
   };
 
-  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const now = Date.now();
@@ -121,34 +143,63 @@ export function useDesktopContactForm() {
     setFormMessage(null);
 
     try {
-      const contactMailto = SWYMBLE_DATA.socials.find((social) => social.id === 'em' && isMailtoLink(social.link))?.link;
-
-      if (!contactMailto) {
-        throw new Error('Missing contact email');
-      }
-
-      const composeUrl = buildGmailComposeUrl(
-        buildMailtoHref(contactMailto, {
-          subject: `New inquiry from ${cleanName} via Swymble`,
-          body: [`Name: ${cleanName}`, `Email: ${cleanEmail}`, `Looking to build: ${cleanProject}`].join('\n'),
+      const response = await fetch(CONTACT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: cleanName,
+          email: cleanEmail,
+          project: cleanProject,
+          website: botField,
+          startedAt: formStartedAtRef.current,
         }),
-      );
+        signal: AbortSignal.timeout(10000),
+      });
 
-      const openedWindow = window.open(composeUrl, '_blank');
-
-      if (openedWindow) {
-        openedWindow.opener = null;
-      } else {
-        window.location.href = composeUrl;
+      let json: ContactApiResponse = {};
+      try {
+        json = (await response.json()) as ContactApiResponse;
+      } catch {
+        json = {};
       }
 
-      setFormStatus('success');
-      setFormMessage({ type: 'success', text: 'Your email draft is open. Hit send when it looks right.' });
-      lastSubmittedAtRef.current = Date.now();
-      formStartedAtRef.current = Date.now();
+      if (response.ok && json.ok) {
+        setFormStatus('success');
+        setFormMessage({ type: 'success', text: "Message sent. I'll get back to you within 24 hours." });
+        setName('');
+        setProject('');
+        setEmail('');
+        lastSubmittedAtRef.current = Date.now();
+        formStartedAtRef.current = Date.now();
+        return;
+      }
+
+      if (response.status === 422) {
+        const serverFields = json.fields ?? {};
+        if (serverFields.name) setNameError(serverFields.name);
+        if (serverFields.email) setEmailError(serverFields.email);
+        if (serverFields.project) setProjectError(serverFields.project);
+        setFormStatus('error');
+        setFormMessage({ type: 'error', text: 'Please fix the highlighted fields and try again.' });
+        return;
+      }
+
+      if (response.status === 429) {
+        setFormStatus('error');
+        setFormMessage({
+          type: 'error',
+          text: 'Too many messages right now. Please try again in a few minutes.',
+        });
+        return;
+      }
+
+      throw new Error('delivery_failed');
     } catch {
       setFormStatus('error');
-      setFormMessage({ type: 'error', text: 'Unable to open email. Please use hello@swymble.com.' });
+      setFormMessage({
+        type: 'error',
+        text: `Couldn't send right now. Email me directly at ${getFallbackContactEmail()}.`,
+      });
     }
   };
 

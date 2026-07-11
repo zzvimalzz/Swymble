@@ -21,5 +21,10 @@ export const SWYMBLE_PROJECTS: SwymbleProject[] = [
       'I designed and built IB Solutions company profile from the ground up. They are a Malaysian professional services company specialising in corporate training and capability development.',
     link: 'https://ibsolutions.com.my',
     status: 'Live',
+    outcomes: [
+      'Designed and built end to end: brand, layout, and code',
+      'Fast, SEO-ready static build with zero maintenance overhead',
+      'Shipped, deployed, and live for a real client',
+    ],
   },
 ];

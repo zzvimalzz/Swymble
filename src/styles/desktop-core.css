@@ -1,16 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700;800&family=Syne:wght@400;600;800&display=swap');
-
 :root {
-  --bg-color: #050505;
-  --text-main: #f0f0f0;
-  --accent-volt: #EFFF04;
-  --accent-neon: #FF003C;
-  --accent-cyan: #00F0FF;
-  --muted: #4a4a4a;
-  
-  --font-logo: 'Anton', sans-serif;
-  --font-display: 'Syne', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --bg-color: var(--sw-bg-ink);
+  --text-main: var(--sw-text-main);
+  --accent-volt: var(--sw-accent-volt);
+  --accent-neon: var(--sw-accent-neon);
+  --accent-cyan: var(--sw-accent-cyan);
+  --muted: var(--sw-line-muted);
+  --font-logo: var(--sw-font-logo);
+  --font-display: var(--sw-font-display);
+  --font-mono: var(--sw-font-mono);
 }
 
 * {
@@ -40,20 +37,34 @@ body {
   line-height: 1.5;
 }
 
-/* Custom Interactive Cursor */
+/* Custom Interactive Cursor
+   `.glitch-cursor` is itself `position: fixed` (not a plain child nested inside a separate
+   `position: fixed` wrapper). A non-positioned descendant of a `position: fixed` ancestor does
+   not correctly composite `mix-blend-mode` against the rest of the page in Chromium/Edge — it
+   paints as a flat, non-blending shape instead of inverting what's beneath it. Making the
+   blended element itself the fixed one restores correct blending. Its `transform` (position +
+   self-centering offset) is fully JS-owned by GlitchCursor.tsx as a result — see the
+   `applyTransform` comment there — so no `transform` is set here, and `transform` is
+   deliberately left out of the transition list below so position tracking stays instant instead
+   of easing/lagging behind the pointer. */
 .glitch-cursor {
   position: fixed;
   top: 0;
   left: 0;
   width: 20px;
   height: 20px;
+  background-color: var(--sw-accent-volt);
   mix-blend-mode: difference;
   border-radius: 50%;
   clip-path: circle(50%);
   pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: opacity 0.3s ease, width 0.2s ease, height 0.2s ease, background-color 0.2s ease, border-radius 0.2s ease, transform 0.2s ease;
+  z-index: var(--sw-z-cursor);
+  will-change: transform;
+  transition: opacity 0.3s ease, width 0.2s ease, height 0.2s ease, background-color 0.2s ease, border-radius 0.2s ease;
+}
+
+.glitch-cursor.is-hidden {
+  opacity: 0;
 }
 
 .glitch-cursor.hovering {
@@ -69,7 +80,6 @@ body {
   border-radius: 0%;
   mix-blend-mode: difference;
   clip-path: polygon(0 0, 30% 100%, 45% 45%, 100% 30%);
-  transform: translate(-10%, -10%);
 }
 
 /* Grid Background */
@@ -124,7 +134,7 @@ body {
 }
 
 .hero-title {
-  font-family: 'Lucidity Expand', var(--font-logo);
+  font-family: var(--font-logo);
   font-size: clamp(4rem, 15vw, 15rem);
   line-height: 0.8;
   letter-spacing: 0.05em;

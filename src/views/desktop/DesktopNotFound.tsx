@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import GlitchRunner from '../../components/games/glitch-runner/GlitchRunner';
 
-export default function DesktopNotFound({ setIsHovering }: { setIsHovering: (val: boolean) => void }) {
+export default function DesktopNotFound() {
   return (
     <section className="layout-content desktop-page-layout desktop-not-found">
       <div className="not-found-content">
@@ -37,12 +38,12 @@ export default function DesktopNotFound({ setIsHovering }: { setIsHovering: (val
           <Link
             to="/"
             className="not-found-btn"
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
           >
             BACK TO HOME
           </Link>
         </motion.div>
+
+        <GlitchRunner />
       </div>
     </section>
   );

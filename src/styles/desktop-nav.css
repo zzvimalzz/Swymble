@@ -29,7 +29,7 @@
 }
 
 .nav-brand a {
-  font-family: 'Lucidity Expand', var(--font-logo);
+  font-family: var(--font-logo);
   font-size: 2rem;
   color: var(--text-main);
   text-decoration: none;
@@ -45,6 +45,7 @@
 
 .nav-links {
   display: flex;
+  align-items: center;
   gap: 3rem;
   pointer-events: auto;
   transition: gap 0.42s cubic-bezier(0.19, 1, 0.22, 1);
@@ -101,4 +102,39 @@
 
 .nav-link.labs-link.active::after {
   background-color: var(--accent-cyan);
+}
+
+/* Nav CTA pill (navEmphasis routes, e.g. /contact) */
+.nav-link.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  background: var(--sw-accent-volt);
+  color: var(--sw-bg-ink);
+  font-family: var(--sw-font-display);
+  font-weight: 700;
+  line-height: 1;
+  border-radius: var(--sw-radius-pill);
+  padding: 0.7em 1.1em;
+  margin-left: 0.75rem;
+  transition: background var(--sw-motion-fast) var(--sw-ease-standard), color var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.nav-link.nav-cta::after {
+  content: none;
+}
+
+.nav-link.nav-cta:hover {
+  background: var(--sw-accent-cyan);
+  color: var(--sw-bg-ink);
+}
+
+.nav-link.nav-cta.active {
+  background: var(--sw-accent-volt);
+  color: var(--sw-bg-ink);
+  outline: 2px solid var(--sw-bg-ink);
+  outline-offset: -4px;
+}
+
+.desktop-nav.is-compact .nav-link.nav-cta {
+  padding: 0.55em 0.9em;
 }

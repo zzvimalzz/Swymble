@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import Reveal from '../motion/Reveal';
 import type { SwymbleWhatIDo } from '../../data/config';
 
 export default function MobileFocus({ whatIDo }: { whatIDo: SwymbleWhatIDo[] }) {
@@ -11,13 +11,12 @@ export default function MobileFocus({ whatIDo }: { whatIDo: SwymbleWhatIDo[] }) 
 
       <div className="services-list">
         {whatIDo.map((service, idx) => (
-          <motion.div
+          <Reveal
             key={service.title}
             className="service-card"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.6, delay: idx * 0.1 }}
+            y={40}
+            margin="-50px"
+            delay={idx * 0.1}
             style={
               {
                 '--service-color': service.colorHex,
@@ -27,7 +26,7 @@ export default function MobileFocus({ whatIDo }: { whatIDo: SwymbleWhatIDo[] }) 
           >
             <h3 className="service-title">{service.title}</h3>
             <p className="service-desc">{service.desc}</p>
-          </motion.div>
+          </Reveal>
         ))}
       </div>
     </div>

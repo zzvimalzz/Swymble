@@ -1,31 +1,25 @@
 type DesktopFooterProps = {
   baseUrl: string;
   brandName: string;
-  setIsHovering: (value: boolean) => void;
 };
 
-export default function DesktopFooter({ baseUrl, brandName, setIsHovering }: DesktopFooterProps) {
+export default function DesktopFooter({ baseUrl, brandName }: DesktopFooterProps) {
   return (
     <footer className="site-footer">
-      <div
-        className="footer-logo-center"
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-      >
+      <div className="footer-logo-center" data-cursor="hover">
         <img
           src={`${baseUrl}images/logo-with-name.png`}
           alt={`${brandName} Logo`}
           className="footer-logo-full-centered"
+          loading="lazy"
+          width={969}
+          height={466}
         />
       </div>
 
       <div className="footer-bottom-bar">
-        <div
-          className="footer-brand"
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
-        >
-          <span className="footer-copyright">
+        <div className="footer-brand">
+          <span className="footer-copyright" data-cursor="hover">
             &copy; {new Date().getFullYear()} {brandName}
           </span>
         </div>
@@ -36,9 +30,7 @@ export default function DesktopFooter({ baseUrl, brandName, setIsHovering }: Des
         </div>
 
         <div className="footer-legal">
-          <span onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
-            BUILT WITH PASSION
-          </span>
+          <span data-cursor="hover">BUILT WITH PASSION</span>
         </div>
       </div>
     </footer>

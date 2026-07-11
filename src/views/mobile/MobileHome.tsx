@@ -5,9 +5,16 @@ import { useEffect, useMemo, useState, type CSSProperties, type MutableRefObject
 import MobileContact from '../../components/mobile/MobileContact';
 import MobileFocus from '../../components/mobile/MobileFocus';
 import MobileProjects from '../../components/mobile/MobileProjects';
+import MobileStudio from '../../components/mobile/MobileStudio';
 import { SWYMBLE_DATA } from '../../data/config';
 
-export type MobileHomeSectionId = 'top' | 'focus-section' | 'projects' | 'latest-updates' | 'contact-section';
+export type MobileHomeSectionId =
+  | 'top'
+  | 'focus-section'
+  | 'projects'
+  | 'studio-section'
+  | 'latest-updates'
+  | 'contact-section';
 
 type MobileHomeProps = {
   scrolled: boolean;
@@ -97,7 +104,16 @@ export default function MobileHome({
   return (
     <div className="mobile-home-page">
       <header className="mobile-hero mobile-home-section" id="top">
-        <img src="/images/white-logo.png" alt="Swymble Logo" className="mobile-logo" />
+        <img
+          src="/images/white-logo.png"
+          alt=""
+          aria-hidden="true"
+          className="mobile-logo"
+          loading="eager"
+          fetchPriority="high"
+          width={980}
+          height={342}
+        />
         <h1
           ref={titleRef}
           className={`mobile-title${isTitleTapped ? ' is-tapped' : ''}${isTitleHolding ? ' is-holding' : ''}`}
@@ -147,10 +163,6 @@ export default function MobileHome({
         <MobileFocus whatIDo={SWYMBLE_DATA.whatIDo} />
       </section>
 
-      <section className="mobile-section mobile-home-section" id="projects" style={{ width: '100%' }}>
-        <MobileProjects projects={SWYMBLE_DATA.projects} />
-      </section>
-
       <section id="latest-updates" className="mobile-latest-updates mobile-home-section" aria-label="Latest updates">
         <div className="section-header">
           <h2>LATEST UPDATES</h2>
@@ -176,6 +188,18 @@ export default function MobileHome({
             </article>
           ))}
         </div>
+      </section>
+
+      <section className="mobile-section mobile-home-section" id="projects" style={{ width: '100%' }}>
+        <MobileProjects projects={SWYMBLE_DATA.projects} />
+      </section>
+
+      <section className="mobile-section mobile-home-section" id="studio-section" style={{ width: '100%' }}>
+        <MobileStudio
+          services={SWYMBLE_DATA.services}
+          process={SWYMBLE_DATA.process}
+          onCta={() => onJumpToSection('contact-section')}
+        />
       </section>
 
       <section

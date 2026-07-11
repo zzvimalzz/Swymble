@@ -1,0 +1,79 @@
+/* -------------------------------------------------------------------------- */
+/* DESKTOP HOME — "WORK WITH ME" studio strip (services, process, CTA)        */
+/* -------------------------------------------------------------------------- */
+
+.studio-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10rem;
+}
+
+.studio-section .focus-grid {
+  margin-bottom: 6rem;
+}
+
+/* Process rail */
+.process-rail {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3rem;
+  padding-top: 2rem;
+}
+
+.process-rail::before {
+  content: '';
+  position: absolute;
+  top: 2.9rem;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(var(--sw-accent-volt-rgb), 0.5), rgba(255, 255, 255, 0.08));
+  z-index: 0;
+}
+
+.process-step {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.process-step-number {
+  font-family: var(--font-mono);
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent-volt);
+  background: var(--bg-color);
+  width: fit-content;
+  padding-right: 0.75rem;
+}
+
+.process-step-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-main);
+}
+
+.process-step-desc {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--sw-text-muted);
+}
+
+@media screen and (max-width: 1500px) {
+  .process-rail {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 3.5rem;
+  }
+
+  .process-rail::before {
+    display: none;
+  }
+}

@@ -1,0 +1,135 @@
+/* -------------------------------------------------------------------------- */
+/* MOBILE CONTACT FORM ("LET'S TALK") — conventional stacked fields          */
+/* -------------------------------------------------------------------------- */
+
+.mobile-contact-form-block {
+  margin-bottom: 3.5rem;
+}
+
+.mobile-contact-intro {
+  text-align: center;
+  color: var(--sw-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 42ch;
+  margin: 0.75rem auto 2rem;
+}
+
+.mobile-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.mobile-contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.mobile-contact-field label {
+  font-family: var(--sw-font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+}
+
+.mobile-contact-field input {
+  appearance: none;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.85rem 1rem;
+  font-family: var(--sw-font-mono);
+  font-size: 16px; /* prevent iOS auto-zoom on focus */
+  color: var(--sw-text-main);
+  background: var(--sw-surface-faint);
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-card);
+  transition: border-color var(--sw-motion-fast) var(--sw-ease-standard),
+    box-shadow var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.mobile-contact-field input::placeholder {
+  color: var(--sw-text-muted);
+  opacity: 0.6;
+}
+
+.mobile-contact-field input:focus {
+  border-color: var(--sw-accent-volt);
+  box-shadow: 0 0 0 3px rgba(var(--sw-accent-volt-rgb), 0.18);
+}
+
+.mobile-contact-field input.error {
+  border-color: var(--sw-accent-neon);
+}
+
+.mobile-contact-field-error {
+  color: var(--sw-accent-neon);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.mobile-contact-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mobile-contact-feedback {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--sw-radius-card);
+  border: 1px solid var(--sw-border-soft);
+  background: var(--sw-surface-faint);
+  font-family: var(--sw-font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.mobile-contact-feedback.success {
+  color: var(--sw-accent-volt);
+  border-color: var(--sw-border-volt);
+}
+
+.mobile-contact-feedback.error {
+  color: var(--sw-accent-neon);
+}
+
+.mobile-contact-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.9rem 1.5rem;
+  background: var(--sw-accent-volt);
+  color: var(--sw-bg-ink);
+  font-family: var(--sw-font-mono);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--sw-radius-pill);
+  cursor: pointer;
+  transition: transform var(--sw-motion-fast) var(--sw-ease-standard),
+    background var(--sw-motion-fast) var(--sw-ease-standard), opacity var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.mobile-contact-submit:active:not(:disabled) {
+  background: #cfdd03; /* slightly darker volt for the pressed state */
+  transform: scale(0.98);
+}
+
+.mobile-contact-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

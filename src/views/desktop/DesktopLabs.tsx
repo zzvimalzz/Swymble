@@ -4,16 +4,18 @@ import { Link, useLocation } from 'react-router-dom';
 import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_DATA } from '../../data/config';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
-import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
+import { isMailtoLink } from '../../utils/mailto';
 import '../../styles/desktop-labs.css';
 
-export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: boolean) => void }) {
+export default function DesktopLabs() {
   const location = useLocation();
   const visibleLabs = SWYMBLE_DATA.labs?.filter((lab) => lab.visibility !== 'private') ?? [];
 
+  // Depend on the primitive pathname, not the `location` object itself. See DesktopProjects.tsx
+  // for why depending on the whole object causes a scroll-to-top mid-scroll.
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [location]);
+  }, [location.pathname]);
 
   const renderActionLink = (href: string, label: string, className: string) => {
     if (href.startsWith('/')) {
@@ -24,11 +26,12 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
       );
     }
 
+    const isMailto = isMailtoLink(href);
+
     return (
       <a
-        href={isMailtoLink(href) ? buildGmailComposeUrl(href) : href}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={href}
+        {...(isMailto ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
         className={className}
       >
         {label}
@@ -39,7 +42,7 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
   return (
     <section className="layout-content desktop-labs-page">
       <div className="section-header">
-        <h2>SWYMBLE LABS</h2>
+        <h1>SWYMBLE LABS</h1>
       </div>
       
       <p className="labs-subtitle">
@@ -51,12 +54,8 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
           <h3>NO PUBLIC LABS YET</h3>
           <p>Current R&D items are private. Reach out if you want a confidential walkthrough.</p>
           <a
-            href={buildGmailComposeUrl('mailto:hello@swymble.com?subject=Private%20Labs%20Walkthrough')}
+            href="mailto:hello@swymble.com?subject=Private%20Labs%20Walkthrough"
             className="lab-btn"
-            target="_blank"
-            rel="noopener noreferrer"
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
           >
             REQUEST PRIVATE BRIEFING
           </a>
@@ -75,12 +74,11 @@ export default function DesktopLabs({ setIsHovering }: { setIsHovering: (val: bo
             <motion.div
               key={labItem.id}
               className="lab-card"
+              data-cursor="hover"
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               whileInView={{ opacity: 1, scale: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
             >
               <div className="lab-card-image-wrap">
                 <SmartImage

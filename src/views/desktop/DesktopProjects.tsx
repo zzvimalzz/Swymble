@@ -1,15 +1,20 @@
 import { useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
+import Reveal from '../../components/motion/Reveal';
 import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_DATA } from '../../data/config';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import '../../styles/desktop-info-services.css';
 import '../../styles/desktop-projects.css';
 
-export default function DesktopProjects({ setIsHovering }: { setIsHovering: (val: boolean) => void }) {
+export default function DesktopProjects() {
   const location = useLocation();
 
+  // Depend on the primitive pathname/hash strings, not the `location` object itself.
+  // `<Routes location={location}>` in DesktopView reconstructs a new location object on
+  // every render of the router tree (e.g. when the scroll-to-top button's visibility state
+  // flips), even when the URL hasn't changed. Depending on the whole object made this effect
+  // re-fire on every unrelated re-render and call window.scrollTo(0, 0) mid-scroll.
   useEffect(() => {
     if (location.hash) {
       const id = location.hash.substring(1);
@@ -22,12 +27,12 @@ export default function DesktopProjects({ setIsHovering }: { setIsHovering: (val
     } else {
       window.scrollTo(0, 0);
     }
-  }, [location]);
+  }, [location.pathname, location.hash]);
 
   return (
     <section className="layout-content desktop-projects-page">
       <div className="section-header">
-        <h2>PROJECTS</h2>
+        <h1>PROJECTS</h1>
       </div>
 
       <div className="projects-list">
@@ -35,20 +40,15 @@ export default function DesktopProjects({ setIsHovering }: { setIsHovering: (val
           const projectId = workItem.title.replace(/\s+/g, '-').toLowerCase();
           const categoryAccentStyle = getCategoryAccentStyle(workItem.category, workItem.categoryColor);
           return (
-            <motion.div
+            <Reveal
               id={projectId}
               key={workItem.title}
               className={`project-row ${index % 2 !== 0 ? 'project-row-reversed' : ''}`}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ delay: index * 0.1, duration: 0.6 }}
+              y={50}
+              margin="-50px"
+              delay={index * 0.1}
             >
-              <div
-                className="project-image-container"
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
-              >
+              <div className="project-image-container" data-cursor="hover">
               <SmartImage
                 src={workItem.landingImage || workItem.image}
                 alt={workItem.title}
@@ -67,16 +67,39 @@ export default function DesktopProjects({ setIsHovering }: { setIsHovering: (val
               <p className="project-description">
                 {workItem.description}
               </p>
-              
+
+              {workItem.outcomes && workItem.outcomes.length > 0 && (
+                <ul className="project-outcomes">
+                  {workItem.outcomes.map((outcome) => (
+                    <li key={outcome}>{outcome}</li>
+                  ))}
+                </ul>
+              )}
+
+              {workItem.stack && workItem.stack.length > 0 && (
+                <div className="project-stack">
+                  {workItem.stack.map((tech) => (
+                    <span key={tech} className="project-stack-chip">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {workItem.testimonial && (
+                <blockquote className="project-testimonial">
+                  <p>&ldquo;{workItem.testimonial.quote}&rdquo;</p>
+                  <cite>{workItem.testimonial.author}</cite>
+                </blockquote>
+              )}
+
               <div className="project-actions">
                 {(!workItem.status || workItem.status === 'Live') && workItem.link ? (
-                  <a 
+                  <a
                     href={workItem.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="submit-btn project-btn" 
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
+                    className="submit-btn project-btn"
                     style={{ textDecoration: 'none' }}
                   >
                     VIEW LIVE
@@ -98,8 +121,6 @@ export default function DesktopProjects({ setIsHovering }: { setIsHovering: (val
                   <Link
                     to={workItem.blogLink}
                     className="submit-btn project-btn secondary"
-                    onMouseEnter={() => setIsHovering(true)}
-                    onMouseLeave={() => setIsHovering(false)}
                     style={{ textDecoration: 'none' }}
                   >
                     READ BLOG
@@ -107,32 +128,18 @@ export default function DesktopProjects({ setIsHovering }: { setIsHovering: (val
                 )}
               </div>
             </div>
-          </motion.div>
+          </Reveal>
         );
       })}
       </div>
-      
-      <motion.div 
-        className="more-projects-message"
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-50px' }}
-        transition={{ delay: 0.3, duration: 0.6 }}
-        style={{
-          textAlign: 'center',
-          marginTop: '6rem',
-          padding: '2rem',
-          fontFamily: 'var(--font-mono)',
-          color: 'var(--muted)',
-          fontSize: '0.9rem',
-          textTransform: 'uppercase',
-          letterSpacing: '2px',
-          borderTop: '1px solid rgba(255, 255, 255, 0.05)'
-        }}
-      >
-        <div style={{ marginBottom: '0.5rem' }}>⋯</div>
-        MORE PROJECTS IN THE PIPELINE
-      </motion.div>
+
+      <Reveal className="projects-cta" y={30} margin="-50px" delay={0.3}>
+        <p className="projects-cta-kicker">More projects in the pipeline</p>
+        <p className="projects-cta-headline">Your project could be next.</p>
+        <Link to="/contact" className="submit-btn project-btn">
+          START A PROJECT
+        </Link>
+      </Reveal>
     </section>
   );
 }

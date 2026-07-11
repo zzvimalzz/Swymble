@@ -19,6 +19,24 @@ export type SwymbleProject = {
   link?: string;
   blogLink?: string;
   status?: 'Live' | 'In Development' | 'Pending';
+  outcomes?: string[];
+  stack?: string[];
+  testimonial?: { quote: string; author: string };
+};
+
+export type SwymbleService = {
+  id: string;
+  title: string;
+  colorHex: string;
+  colorRgb: string;
+  desc: string;
+};
+
+export type SwymbleProcessStep = {
+  id: string;
+  step: string;
+  title: string;
+  desc: string;
 };
 
 export type SwymbleLabVisibility = 'public' | 'teaser' | 'private';
@@ -102,18 +120,29 @@ export type SwymbleLatestUpdateCard = {
 
 export type SwymbleMoonModelId = 'moon-01' | 'moon-02' | 'moon-03' | 'moon-04' | 'moon-05' | 'moon-06' | 'moon-07' | 'moon-08';
 
+export type SwymbleSkillProof = {
+  label: string;
+  href: string; // internal route ('/labs', '/projects#ib-solutions', '/blog/cortex-part-1') or full external URL (starts with 'http')
+};
+
 export type SwymbleSkillItem = {
   name: string;
   color: string;
   description?: string;
   moonModelId?: SwymbleMoonModelId;
+  proof?: SwymbleSkillProof[];
 };
 
 export type SwymbleSkillCategory = {
   category: string;
   context?: string;
   items: SwymbleSkillItem[];
+  proof?: SwymbleSkillProof[];
 };
+
+/** The Swymble Universe orbits (kinds of work) and moons (real shipped things) shown in the
+ *  desktop 3D scene. Structurally identical to SwymbleSkillCategory. */
+export type SwymbleUniverseOrbit = SwymbleSkillCategory;
 
 export type SwymbleSocial = {
   id: string;
@@ -126,7 +155,10 @@ export type SwymbleData = {
   name: string;
   tagline: string;
   marquee: string;
+  contactIntro: string;
   whatIDo: SwymbleWhatIDo[];
+  services: SwymbleService[];
+  process: SwymbleProcessStep[];
   projects: SwymbleProject[];
   latestUpdates: SwymbleLatestUpdateCard[];
   endCardMobileImage?: string;
@@ -134,5 +166,6 @@ export type SwymbleData = {
   labs: SwymbleLab[];
   blog: SwymbleBlogState;
   skills: SwymbleSkillCategory[];
+  universe: SwymbleUniverseOrbit[];
   socials: SwymbleSocial[];
 };

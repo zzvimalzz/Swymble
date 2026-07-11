@@ -1,13 +1,29 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MobileSiteFooter from './MobileSiteFooter';
 import { SWYMBLE_DATA } from '../../data/config';
 import { Rocket } from 'lucide-react';
-import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
+import { isMailtoLink } from '../../utils/mailto';
+import { useContactForm } from '../../hooks/useContactForm';
 
 export default function MobileContact() {
   const [showRocket, setShowRocket] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
+
+  const {
+    name,
+    nameError,
+    handleNameChange,
+    project,
+    projectError,
+    handleProjectChange,
+    email,
+    emailError,
+    handleEmailChange,
+    formStatus,
+    formMessage,
+    handleFormSubmit,
+  } = useContactForm();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,6 +45,83 @@ export default function MobileContact() {
 
   return (
     <div className="mobile-contact-wrapper" id="contact" style={{ paddingBottom: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div className="mobile-contact-form-block" style={{ width: '100%' }}>
+        <div className="section-header">
+          <h2>LET&apos;S TALK</h2>
+        </div>
+        <p className="mobile-contact-intro">{SWYMBLE_DATA.contactIntro}</p>
+
+        <form className="mobile-contact-form" onSubmit={handleFormSubmit} noValidate>
+          <div className="mobile-contact-field">
+            <label htmlFor="mobile-contact-name">Name</label>
+            <input
+              id="mobile-contact-name"
+              type="text"
+              placeholder="Your name"
+              className={nameError ? 'error' : ''}
+              value={name}
+              onChange={handleNameChange}
+              autoComplete="name"
+              maxLength={60}
+              required
+            />
+            {nameError && <span className="mobile-contact-field-error">{nameError}</span>}
+          </div>
+
+          <div className="mobile-contact-field">
+            <label htmlFor="mobile-contact-email">Email</label>
+            <input
+              id="mobile-contact-email"
+              type="email"
+              placeholder="you@example.com"
+              className={emailError ? 'error' : ''}
+              value={email}
+              onChange={handleEmailChange}
+              autoComplete="email"
+              inputMode="email"
+              maxLength={120}
+              required
+            />
+            {emailError && <span className="mobile-contact-field-error">{emailError}</span>}
+          </div>
+
+          <div className="mobile-contact-field">
+            <label htmlFor="mobile-contact-project">What do you want to build?</label>
+            <input
+              id="mobile-contact-project"
+              type="text"
+              placeholder="Website / app / brand"
+              className={projectError ? 'error' : ''}
+              value={project}
+              onChange={handleProjectChange}
+              autoComplete="off"
+              maxLength={120}
+              required
+            />
+            {projectError && <span className="mobile-contact-field-error">{projectError}</span>}
+          </div>
+
+          <input
+            type="text"
+            name="website"
+            className="mobile-contact-honeypot"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+          />
+
+          {formMessage && (
+            <p className={`mobile-contact-feedback ${formMessage.type}`} role="status" aria-live="polite">
+              {formMessage.text}
+            </p>
+          )}
+
+          <button type="submit" className="mobile-contact-submit" disabled={formStatus === 'sending'}>
+            {formStatus === 'sending' ? 'SENDING...' : 'SEND MESSAGE'}
+          </button>
+        </form>
+      </div>
+
       <div className="mobile-find-me" style={{ width: '100%' }}>
         <div className="section-header">
           <h2>FIND ME</h2>
@@ -37,13 +130,11 @@ export default function MobileContact() {
           {SWYMBLE_DATA.socials.map((social) => {
             const Icon = social.icon;
             const isMailto = isMailtoLink(social.link);
-            const socialHref = isMailto ? buildGmailComposeUrl(social.link) : social.link;
             return (
               <a
                 key={social.id}
-                href={socialHref}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={social.link}
+                {...(isMailto ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
                 className="social-btn"
                 aria-label={social.name}
               >

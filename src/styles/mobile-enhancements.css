@@ -108,10 +108,10 @@ body.mobile-snap-enabled {
 }
 
 .mobile-thumb-nav-item.active {
-  border-color: #efff04;
-  background: #efff04;
-  color: #050505;
-  box-shadow: 0 0 0.8rem rgba(239, 255, 4, 0.28);
+  border-color: var(--sw-accent-volt);
+  background: var(--sw-accent-volt);
+  color: var(--sw-bg-ink);
+  box-shadow: 0 0 0.8rem rgba(var(--sw-accent-volt-rgb), 0.28);
 }
 
 .mobile-thumb-nav-item:not(.active):active {
@@ -142,8 +142,8 @@ body.mobile-snap-enabled {
 }
 
 .mobile-thumb-nav-trigger.open {
-  border-color: #efff04;
-  background: linear-gradient(160deg, rgba(239, 255, 4, 0.34), rgba(16, 16, 16, 0.92));
+  border-color: var(--sw-accent-volt);
+  background: linear-gradient(160deg, rgba(var(--sw-accent-volt-rgb), 0.34), rgba(16, 16, 16, 0.92));
 }
 
 .mobile-thumb-nav-trigger:active {
@@ -172,7 +172,7 @@ body.mobile-snap-enabled {
 .mobile-thumb-back-trigger:active,
 .mobile-route-back-trigger:active {
   transform: scale(0.95);
-  border-color: #efff04;
+  border-color: var(--sw-accent-volt);
 }
 
 .mobile-view .rocket-to-top:not(.mobile-route-rocket) {
@@ -210,7 +210,7 @@ body.mobile-snap-enabled {
 }
 
 .mobile-latest-updates .section-header h2 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   font-size: 4.5rem;
   line-height: 1;
   margin: 0 0 0.5rem;
@@ -310,7 +310,7 @@ body.mobile-snap-enabled {
 
 .mobile-update-card h4 {
   margin: 0;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   letter-spacing: 0.04em;
   font-size: clamp(1.6rem, 7vw, 2.05rem);
 }
@@ -342,7 +342,7 @@ body.mobile-snap-enabled {
 
 .mobile-blog-preview-content h3 {
   margin: 0;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   letter-spacing: 0.04em;
   font-size: clamp(1.7rem, 7vw, 2.2rem);
 }
@@ -403,7 +403,7 @@ body.mobile-snap-enabled {
 
 .mobile-blog-header h1 {
   margin: 0.25rem 0 0.65rem;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   line-height: 1;
   letter-spacing: 0.05em;
   font-size: clamp(2.6rem, 11vw, 4rem);
@@ -411,7 +411,7 @@ body.mobile-snap-enabled {
 
 .mobile-blog-post-header h1 {
   margin: 0.95rem 0 0.65rem;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   line-height: 1;
   letter-spacing: 0.05em;
   font-size: clamp(2.6rem, 11vw, 4rem);
@@ -460,15 +460,15 @@ body.mobile-snap-enabled {
 }
 
 .mobile-blog-chip.active {
-  color: #050505;
-  border-color: #efff04;
-  background: #efff04;
-  box-shadow: 0 0 0.7rem rgba(239, 255, 4, 0.26);
+  color: var(--sw-bg-ink);
+  border-color: var(--sw-accent-volt);
+  background: var(--sw-accent-volt);
+  box-shadow: 0 0 0.7rem rgba(var(--sw-accent-volt-rgb), 0.26);
 }
 
 .mobile-blog-chip.active span {
   background: rgba(5, 5, 5, 0.16);
-  color: #050505;
+  color: var(--sw-bg-ink);
 }
 
 .mobile-blog-feed {
@@ -518,7 +518,7 @@ body.mobile-snap-enabled {
 
 .mobile-blog-card-body h2 {
   margin: 0.5rem 0 0.5rem;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   letter-spacing: 0.04em;
   line-height: 1.05;
   font-size: clamp(1.5rem, 7.2vw, 2.1rem);
@@ -614,7 +614,7 @@ body.mobile-snap-enabled {
 
 .mobile-blog-post-heading {
   margin: 0.7rem 0 0;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   letter-spacing: 0.04em;
   line-height: 1.1;
 }
@@ -726,7 +726,7 @@ body.mobile-snap-enabled {
 
 .mobile-blog-related h2 {
   margin: 0 0 0.7rem;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   letter-spacing: 0.04em;
   font-size: clamp(1.4rem, 6.5vw, 1.95rem);
 }

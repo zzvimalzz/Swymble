@@ -93,6 +93,77 @@
   line-height: 1.8;
 }
 
+.project-outcomes {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.project-outcomes li {
+  position: relative;
+  padding-left: 1.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-main);
+  opacity: 0.85;
+}
+
+.project-outcomes li::before {
+  content: '+';
+  position: absolute;
+  left: 0;
+  color: var(--accent-volt);
+  font-weight: 700;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.project-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+.project-stack-chip {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-main);
+  padding: 0.35rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.project-testimonial {
+  margin: 1.75rem 0 0;
+  padding: 0.25rem 0 0.25rem 1.5rem;
+  border-left: 2px solid var(--accent-volt);
+}
+
+.project-testimonial p {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--text-main);
+  margin: 0 0 0.6rem;
+}
+
+.project-testimonial cite {
+  display: block;
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 .project-btn {
   display: inline-flex;
   justify-content: center;
@@ -120,6 +191,37 @@
   background: var(--text-main);
   color: var(--bg-color);
   box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
+}
+
+.projects-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  margin-top: 6rem;
+  padding: 3rem 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.projects-cta-kicker {
+  font-family: var(--font-mono);
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.projects-cta-headline {
+  font-family: var(--font-display);
+  color: var(--text-main);
+  font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.2rem);
+  font-weight: 600;
+}
+
+.projects-cta .project-btn {
+  margin-top: 0.5rem;
+  text-decoration: none;
 }
 
 /* Ensure responsiveness even on desktop views scaling down to ~1024px */

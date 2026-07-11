@@ -1,22 +1,58 @@
 :root {
+  /* -------------------------------------------------------------------------- */
+  /* COLORS                                                                      */
+  /* -------------------------------------------------------------------------- */
   --sw-bg-ink: #050505;
   --sw-bg-void: #000000;
-  --sw-text-main: #f4f4f4;
+  --sw-text-main: #f0f0f0;
   --sw-text-muted: #a7a7a7;
-  --sw-accent-volt: #efff04;
-  --sw-accent-neon: #ff2044;
-  --sw-accent-cyan: #00eaff;
+  --sw-line-muted: #4a4a4a;
+  --sw-accent-volt: #EFFF04;
+  --sw-accent-neon: #FF003C;
+  --sw-accent-cyan: #00F0FF;
+
+  /* RGB triplet helpers (for rgba() composition) */
+  --sw-accent-volt-rgb: 239, 255, 4;
+  --sw-accent-neon-rgb: 255, 0, 60;
+  --sw-accent-cyan-rgb: 0, 240, 255;
+
+  /* -------------------------------------------------------------------------- */
+  /* SURFACES / BORDERS                                                          */
+  /* -------------------------------------------------------------------------- */
   --sw-border-soft: rgba(255, 255, 255, 0.12);
   --sw-border-volt: rgba(239, 255, 4, 0.34);
   --sw-surface-faint: rgba(255, 255, 255, 0.05);
   --sw-surface-strong: rgba(255, 255, 255, 0.09);
   --sw-shadow-panel: 0 0.8rem 2.2rem rgba(0, 0, 0, 0.52);
+
+  /* -------------------------------------------------------------------------- */
+  /* RADII                                                                       */
+  /* -------------------------------------------------------------------------- */
   --sw-radius-panel: 1rem;
   --sw-radius-card: 0.85rem;
+  --sw-radius-pill: 999px;
+
+  /* -------------------------------------------------------------------------- */
+  /* TYPOGRAPHY                                                                  */
+  /* -------------------------------------------------------------------------- */
+  --sw-font-logo: 'Anton', sans-serif;
+  --sw-font-display: 'Syne', sans-serif;
+  --sw-font-mono: 'JetBrains Mono', monospace;
+
+  /* -------------------------------------------------------------------------- */
+  /* MOTION                                                                      */
+  /* -------------------------------------------------------------------------- */
   --sw-motion-fast: 0.2s;
-  --sw-motion-med: 0.3s;
+  --sw-motion-med: 0.35s;
+  --sw-motion-slow: 0.7s;
   --sw-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --sw-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* -------------------------------------------------------------------------- */
+  /* Z-INDEX                                                                     */
+  /* -------------------------------------------------------------------------- */
   --sw-z-nav: 90;
   --sw-z-overlay: 95;
   --sw-z-floating: 98;
+  --sw-z-cursor: 9999;
 }

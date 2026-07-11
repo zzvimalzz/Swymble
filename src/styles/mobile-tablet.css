@@ -1,23 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap');
-
 .mobile-view {
-  --mobile-bg: #0a0a0a;
-  --mobile-surface: rgba(255, 255, 255, 0.05);
-  --mobile-surface-strong: rgba(255, 255, 255, 0.08);
-  --mobile-text: #f4f4f4;
-  --mobile-muted: #a7a7a7;
-  --mobile-accent: #ff6b00;
-  --mobile-accent-2: #00d1ff;
+  --mobile-bg: #0a0a0a; /* keep — slightly lifted ink for mobile surfaces */
+  --mobile-surface: var(--sw-surface-faint);
+  --mobile-surface-strong: var(--sw-surface-strong);
+  --mobile-text: var(--sw-text-main);
+  --mobile-muted: var(--sw-text-muted);
+  --mobile-accent: var(--sw-accent-volt);
+  --mobile-accent-2: var(--sw-accent-cyan);
 
   position: relative;
   min-height: 100vh;
   overflow-x: clip;
   background: #000000;
   color: var(--mobile-text);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--sw-font-mono);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items must stay "stretch" (the flex default), not "center": with a column flex
+     parent, "center" makes <main> size itself to its own content (shrink-to-fit) instead of
+     the viewport, and any width:100% percentage inside then resolves against that indefinite
+     size as if it were "auto". The "Latest Updates" horizontal scroll carousel's fixed-width
+     cards were the descendant with a real max-content width, so their un-scrolled combined
+     width (~700px) became <main>'s width sitewide — content got centered inside that oversized,
+     off-screen box, which is what showed up as e.g. the "WORK WITH ME" header looking
+     right-aligned: the page was actually just much wider than the viewport and shifted. */
   justify-content: center;
 }
 
@@ -89,8 +94,8 @@
 }
 
 .mobile-title {
-  font-family: 'Lucidity Expand', 'Bebas Neue', sans-serif;
-  font-size: clamp(6rem, 22vw, 12rem);
+  font-family: var(--sw-font-logo);
+  font-size: clamp(4.5rem, 19vw, 10rem);
   line-height: 0.9;
   letter-spacing: 0.05em;
   margin: 0;
@@ -411,7 +416,7 @@
 }
 
 .mobile-projects-wrapper .section-header h2 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   font-size: 4.5rem;
   line-height: 1;
   margin: 0 0 0.5rem;
@@ -464,7 +469,7 @@
   right: 12%;
   bottom: -16px;
   height: 32px;
-  background: radial-gradient(ellipse at center, rgba(255, 107, 0, 0.26) 0%, rgba(255, 107, 0, 0) 75%);
+  background: radial-gradient(ellipse at center, rgba(var(--sw-accent-volt-rgb), 0.18) 0%, rgba(var(--sw-accent-volt-rgb), 0) 75%);
   filter: blur(14px);
   opacity: 0.45;
   transition: opacity 0.35s ease, transform 0.35s ease;
@@ -487,8 +492,8 @@
 
 @media (hover: hover) {
   .tinder-card:hover {
-    border-color: rgba(255, 107, 0, 0.42);
-    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.82), 0 0 30px rgba(255, 107, 0, 0.16);
+    border-color: rgba(var(--sw-accent-volt-rgb), 0.42);
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.82), 0 0 30px rgba(var(--sw-accent-volt-rgb), 0.16);
   }
 
   .tinder-card:hover::before {
@@ -537,7 +542,7 @@
 }
 
 .card-header h3 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   font-size: 2.2rem;
   margin: 0;
   line-height: 1;
@@ -584,7 +589,7 @@
 }
 
 .details-header h3 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   font-size: 2.5rem;
   margin: 0;
   color: var(--mobile-accent-2);
@@ -654,7 +659,7 @@
 }
 
 .mobile-focus-wrapper .section-header h2 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   font-size: 4.5rem;
   margin: 0;
   letter-spacing: 2px;
@@ -701,7 +706,7 @@
 }
 
 .service-number {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--sw-font-mono);
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--service-color);
@@ -710,8 +715,12 @@
 }
 
 .service-title {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 3.2rem;
+  font-family: var(--sw-font-logo);
+  /* Long single words in this display face ("ENGINEERING", "EXPERIMENTS") can be wider than a
+     phone viewport at a flat 3.2rem, and since .mobile-view centers its content instead of
+     stretching it, an unbreakable word here forces the whole page wider than the viewport
+     and off-center. Scale down at narrow widths so the longest word always fits. */
+  font-size: clamp(1.9rem, 6vw + 0.8rem, 3.2rem);
   margin: 0 0 1rem;
   letter-spacing: 1px;
   color: #ffffff;
@@ -747,7 +756,7 @@
 
 .mobile-form-container .section-header h2,
 .mobile-find-me .section-header h2 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   font-size: 4.5rem;
   margin: 0;
   letter-spacing: 2px;
@@ -761,7 +770,7 @@
 }
 
 .mobile-form-container .form-sentence {
-  font-family: var(--font-display, 'Space Grotesk', sans-serif);
+  font-family: var(--font-display, var(--sw-font-mono));
   font-size: clamp(1.4rem, 6.5vw, 2.5rem);
   font-weight: 500;
   line-height: clamp(1.8, 8vw, 2.2);
@@ -785,7 +794,6 @@
   background: transparent;
   border: none;
   border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
-  outline: none;
   padding: 0 0.25rem;
   width: auto;
   min-width: 140px;
@@ -833,7 +841,7 @@
   justify-content: center;
   background: var(--accent-volt, #b8ff00);
   color: #000;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--sw-font-mono);
   font-weight: 700;
   font-size: 1rem;
   padding: 1rem 2rem;
@@ -853,7 +861,7 @@
 
 .mobile-form-container .form-feedback {
   margin-top: 1.5rem;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--sw-font-mono);
   font-size: 0.9rem;
   text-align: center;
 }
@@ -895,7 +903,7 @@
   border-radius: 50%;
   color: #fff;
   text-decoration: none;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--sw-font-mono);
   font-weight: 500;
   font-size: 1.1rem;
   transition: background 0.3s ease, transform 0.2s ease, border-color 0.3s ease;

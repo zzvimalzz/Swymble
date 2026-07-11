@@ -14,6 +14,69 @@
   flex-grow: 1;
 }
 
+/* ── About: Stack strip ── */
+.about-stack {
+  margin-top: 3.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.about-stack__heading {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-main);
+  margin: 0 0 1.6rem;
+}
+
+.about-stack__grid {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.about-stack__category {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.about-stack__label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+}
+
+.about-stack__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.about-stack__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4em 0.85em;
+  background: var(--sw-surface-faint);
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-pill);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-main);
+}
+
+.about-stack__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  box-shadow: 0 0 8px currentColor;
+}
+
 /* Add responsive adjustments for slightly smaller desktop screens */
 @media screen and (max-width: 1200px) {
   .desktop-page-layout,

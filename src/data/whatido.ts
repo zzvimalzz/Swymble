@@ -9,18 +9,18 @@ export const SWYMBLE_WHAT_I_DO: SwymbleWhatIDo[] = [
     title: 'SOFTWARE ENGINEERING',
     colorHex: '#EFFF04',
     colorRgb: '239, 255, 4',
-    desc: 'Production-minded engineering across backend systems, enterprise workflows, fintech platforms, and the day-to-day problem solving that keeps real software running.',
+    desc: 'Production engineering across fintech, banking, and enterprise systems. The discipline behind everything I ship.',
   },
   {
     title: 'BUILDS AND EXPERIMENTS',
     colorHex: '#FF003C',
     colorRgb: '255, 0, 60',
-    desc: 'Apps, tools, prototypes, and side projects that let me test ideas quickly, learn in public, and turn concepts into working products.',
+    desc: 'Apps, tools, and prototypes shipped in public. Ideas tested fast and turned into working products.',
   },
   {
     title: 'WEB, WRITING, AND LIFE',
     colorHex: '#00F0FF',
     colorRgb: '0, 240, 255',
-    desc: 'A place to share the websites I make, the stories behind my work, blog posts, travel notes, and the personal side of what I am building next.',
+    desc: "The websites I make, the stories behind them, blog posts, travel notes, and what I'm building next.",
   },
 ];

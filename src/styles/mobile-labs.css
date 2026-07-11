@@ -16,7 +16,7 @@
 
 .mobile-labs-header h1 {
   margin: 0.25rem 0 0;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   line-height: 1;
   letter-spacing: 0.05em;
   font-size: clamp(2.6rem, 11vw, 4rem);
@@ -106,7 +106,7 @@
 }
 
 .mobile-lab-toggle-title span:first-child {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   font-size: clamp(2.05rem, 8vw, 3rem);
   line-height: 0.92;
   letter-spacing: 0.04em;
@@ -177,7 +177,7 @@
 
 .mobile-lab-body h2 {
   margin: 0;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   font-size: clamp(2.2rem, 9vw, 3.4rem);
   line-height: 0.95;
   letter-spacing: 0.03em;
@@ -248,7 +248,7 @@
 
 .mobile-lab-action.primary {
   background: var(--category-accent, var(--sw-accent-volt));
-  color: #050505;
+  color: var(--sw-bg-ink);
 }
 
 .mobile-lab-action.secondary {
@@ -298,7 +298,7 @@
 }
 
 .mobile-labs-empty h2 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--sw-font-logo);
   font-size: 2.4rem;
 }
 

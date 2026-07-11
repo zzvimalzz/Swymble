@@ -55,7 +55,7 @@ export default function DesktopBlogPost() {
           </Link>
 
           <div className="section-header">
-            <h2>POST NOT FOUND</h2>
+            <h1>POST NOT FOUND</h1>
           </div>
         </div>
 

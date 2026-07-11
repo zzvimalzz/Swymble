@@ -17,7 +17,7 @@ export default function DesktopBlog() {
   return (
     <section className="layout-content desktop-page-layout">
       <div className="section-header blog-section-header">
-        <h2>{title}</h2>
+        <h1>{title}</h1>
       </div>
       <div className="page-content-wrapper" style={{ maxWidth: '1200px' }}>
         <section className="blog-folder-section" aria-label="Blog categories">

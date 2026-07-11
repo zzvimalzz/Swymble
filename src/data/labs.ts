@@ -80,7 +80,7 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     status: 'Live',
     visibility: 'public',
     publicSummary:
-      'A living wall of movies and shows packed into one interactive screen — a force-directed voronoi mosaic of poster tiles you can wander, filter by mood, or let surprise you.',
+      'A living wall of movies and shows packed into one interactive screen: a force-directed voronoi mosaic of poster tiles you can wander, filter by mood, or let surprise you.',
     safeHighlights: [
       'GPU voronoi wall with live poster streaming from public film APIs',
       'Mood, type and genre filters that rebuild the wall in place',

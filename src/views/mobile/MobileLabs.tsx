@@ -6,7 +6,7 @@ import MobileSiteFooter from '../../components/mobile/MobileSiteFooter';
 import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_LABS } from '../../data/labs';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
-import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
+import { isMailtoLink } from '../../utils/mailto';
 
 function renderLabAction(href: string, label: string, className: string) {
   if (href.startsWith('/')) {
@@ -17,11 +17,12 @@ function renderLabAction(href: string, label: string, className: string) {
     );
   }
 
+  const isMailto = isMailtoLink(href);
+
   return (
     <a
-      href={isMailtoLink(href) ? buildGmailComposeUrl(href) : href}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={href}
+      {...(isMailto ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
       className={className}
     >
       {label}
@@ -46,10 +47,8 @@ export default function MobileLabs() {
           <h2>No public labs yet</h2>
           <p>Current R&D items are private. Request a quiet walkthrough if you need context.</p>
           <a
-            href={buildGmailComposeUrl('mailto:hello@swymble.com?subject=Private%20Labs%20Walkthrough')}
+            href="mailto:hello@swymble.com?subject=Private%20Labs%20Walkthrough"
             className="mobile-lab-action primary"
-            target="_blank"
-            rel="noopener noreferrer"
           >
             Request Briefing
           </a>

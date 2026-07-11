@@ -14,6 +14,9 @@ export default function MobileSiteFooter({ className = '' }: MobileSiteFooterPro
         src={`${baseUrl}images/logo-with-name.png`}
         alt={`${SWYMBLE_DATA.name} Logo`}
         className="mobile-site-footer-logo"
+        loading="lazy"
+        width={969}
+        height={466}
       />
 
       <div className="mobile-site-footer-meta">

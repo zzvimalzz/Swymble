@@ -1,13 +1,15 @@
 import { motion, MotionValue } from 'framer-motion';
-import type { ChangeEvent, FormEvent } from 'react';
 import { lazy, Suspense, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import Reveal from '../../components/motion/Reveal';
 import SmartImage from '../../components/SmartImage';
+import DesktopContactSection from '../../components/desktop/DesktopContactSection';
 import ParallaxMarquee from '../../components/desktop/ParallaxMarquee';
 import ProximityCard from '../../components/desktop/ProximityCard';
 import { SWYMBLE_DATA } from '../../data/config';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
-import { buildGmailComposeUrl, isMailtoLink } from '../../utils/mailto';
+import { useNearViewport } from '../../hooks/useNearViewport';
+import '../../styles/desktop-studio.css';
 
 const TechUniverse = lazy(() => import('../../components/desktop/TechUniverse'));
 
@@ -15,43 +17,12 @@ type DesktopHomeProps = {
   baseUrl: string;
   heroY: MotionValue<number>;
   heroOpacity: MotionValue<number>;
-  mousePos: { x: number; y: number };
-  name: string;
-  nameError: string;
-  handleNameChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  project: string;
-  projectError: string;
-  handleProjectChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  email: string;
-  emailError: string;
-  handleEmailChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  formStatus: 'idle' | 'sending' | 'success' | 'error';
-  formMessage: { type: 'success' | 'error'; text: string } | null;
-  handleFormSubmit: (e: FormEvent<HTMLFormElement>) => void;
-  setIsHovering: (val: boolean) => void;
 };
 
-export default function DesktopHome({
-  baseUrl,
-  heroY,
-  heroOpacity,
-  mousePos,
-  name,
-  nameError,
-  handleNameChange,
-  project,
-  projectError,
-  handleProjectChange,
-  email,
-  emailError,
-  handleEmailChange,
-  formStatus,
-  formMessage,
-  handleFormSubmit,
-  setIsHovering,
-}: DesktopHomeProps) {
+export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHomeProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { ref: techSectionRef, hasBeenNear: shouldMountTechUniverse } = useNearViewport<HTMLDivElement>('600px');
 
   useEffect(() => {
     if (!location.hash) {
@@ -71,15 +42,21 @@ export default function DesktopHome({
   return (
     <>
       <motion.section className="hero-section" style={{ y: heroY, opacity: heroOpacity }}>
-        <div className="hero-bg-logo">
-          <img src={`${baseUrl}images/white-logo.png`} alt="Swymble Background Logo" />
+        <div className="hero-bg-logo" aria-hidden="true">
+          <img
+            src={`${baseUrl}images/white-logo.png`}
+            alt=""
+            loading="eager"
+            fetchPriority="high"
+            width={980}
+            height={342}
+          />
         </div>
 
         <h1
           className="hero-title glitch-mega"
           data-text={SWYMBLE_DATA.name}
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
+          data-cursor="hover"
         >
           {SWYMBLE_DATA.name}
         </h1>
@@ -94,7 +71,7 @@ export default function DesktopHome({
         </motion.p>
       </motion.section>
 
-      <ParallaxMarquee text={SWYMBLE_DATA.marquee} setIsHovering={setIsHovering} />
+      <ParallaxMarquee text={SWYMBLE_DATA.marquee} />
 
       <section className="layout-content">
         <div className="section-header">
@@ -103,7 +80,7 @@ export default function DesktopHome({
 
         <div className="focus-grid">
           {SWYMBLE_DATA.whatIDo.map((service, index) => (
-            <ProximityCard key={service.title} service={service} index={index} mousePos={mousePos} />
+            <ProximityCard key={service.title} service={service} index={index} />
           ))}
         </div>
 
@@ -121,6 +98,7 @@ export default function DesktopHome({
                   <motion.div
                     key={workItem.title}
                     className="carousel-card"
+                    data-cursor="hover"
                     initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true, margin: '50px' }}
@@ -150,139 +128,51 @@ export default function DesktopHome({
           </div>
         </div>
 
-        <div className="info-row">
-          <div className="info-column" style={{ width: '100%' }}>
-            <div className="section-header">
-              <h2>TECH PLANET</h2>
-            </div>
+        <div className="studio-section">
+          <div className="section-header">
+            <h2>WORK WITH ME</h2>
+          </div>
 
-            <Suspense fallback={<div className="tech-universe tech-universe--loading">Calibrating orbital stack...</div>}>
-              <TechUniverse skills={SWYMBLE_DATA.skills} setIsHovering={setIsHovering} />
-            </Suspense>
+          <div className="focus-grid">
+            {SWYMBLE_DATA.services.map((service, index) => (
+              <ProximityCard key={service.id} service={service} index={index} />
+            ))}
+          </div>
+
+          <div className="process-rail">
+            {SWYMBLE_DATA.process.map((step, index) => (
+              <Reveal
+                key={step.id}
+                className="process-step"
+                y={24}
+                margin="-80px"
+                delay={index * 0.12}
+              >
+                <span className="process-step-number">{step.step}</span>
+                <h3 className="process-step-title">{step.title}</h3>
+                <p className="process-step-desc">{step.desc}</p>
+              </Reveal>
+            ))}
           </div>
         </div>
 
-        <motion.div
-          className="footer-cta"
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="footer-grid">
-            <div id="work-with-me" className="form-container">
-              <div className="section-header" style={{ marginBottom: '2rem' }}>
-                <h2>LET'S TALK</h2>
-              </div>
-
-              <form className="first-person-form" onSubmit={handleFormSubmit} noValidate>
-                <p className="form-sentence">
-                  Hi, my name is{' '}
-                  <span className="form-field-wrapper">
-                    <input
-                      type="text"
-                      placeholder="your name"
-                      className={`inline-input ${nameError ? 'error' : ''}`}
-                      value={name}
-                      onChange={handleNameChange}
-                      autoComplete="name"
-                      maxLength={60}
-                      required
-                    />
-                    {nameError && <span className="custom-error">{nameError}</span>}
-                  </span>
-                  .
-                  <br />
-                  I&apos;m looking to build a{' '}
-                  <span className="form-field-wrapper">
-                    <input
-                      type="text"
-                      placeholder="website / app / brand"
-                      className={`inline-input ${projectError ? 'error' : ''}`}
-                      value={project}
-                      onChange={handleProjectChange}
-                      autoComplete="off"
-                      maxLength={120}
-                      required
-                    />
-                    {projectError && <span className="custom-error">{projectError}</span>}
-                  </span>
-                  .
-                  <br />
-                  You can reach me at{' '}
-                  <span className="form-field-wrapper">
-                    <input
-                      type="email"
-                      placeholder="email address"
-                      className={`inline-input ${emailError ? 'error' : ''}`}
-                      value={email}
-                      onChange={handleEmailChange}
-                      autoComplete="email"
-                      inputMode="email"
-                      maxLength={120}
-                      required
-                    />
-                    {emailError && <span className="custom-error">{emailError}</span>}
-                  </span>
-                  .
-                </p>
-
-                <input
-                  type="text"
-                  name="website"
-                  className="honeypot-field"
-                  tabIndex={-1}
-                  autoComplete="off"
-                  aria-hidden="true"
-                />
-
-                {formMessage && (
-                  <p className={`form-feedback ${formMessage.type}`} role="status" aria-live="polite">
-                    {formMessage.text}
-                  </p>
-                )}
-
-                <button
-                  type="submit"
-                  className="submit-btn"
-                  disabled={formStatus === 'sending'}
-                  onMouseEnter={() => setIsHovering(true)}
-                  onMouseLeave={() => setIsHovering(false)}
-                >
-                  {formStatus === 'sending' ? 'OPENING...' : 'OPEN EMAIL'}
-                </button>
-              </form>
+        <div className="info-row" ref={techSectionRef}>
+          <div className="info-column" style={{ width: '100%' }}>
+            <div className="section-header">
+              <h2>SWYMBLE UNIVERSE</h2>
             </div>
 
-            <div className="find-me-container">
-              <div className="section-header" style={{ marginBottom: '2rem' }}>
-                <h2>FIND ME</h2>
-              </div>
-
-              <div className="socials-list">
-                {SWYMBLE_DATA.socials.map((social) => {
-                  const Icon = social.icon;
-                  const isMailto = isMailtoLink(social.link);
-                  const socialHref = isMailto ? buildGmailComposeUrl(social.link) : social.link;
-                  return (
-                    <a
-                      key={social.id}
-                      href={socialHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="social-link w-client"
-                      onMouseEnter={() => setIsHovering(true)}
-                      onMouseLeave={() => setIsHovering(false)}
-                    >
-                      <Icon size={32} className="social-icon" />
-                      <span>{social.name}</span>
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
+            {shouldMountTechUniverse ? (
+              <Suspense fallback={<div className="tech-universe tech-universe--loading">Calibrating the universe...</div>}>
+                <TechUniverse skills={SWYMBLE_DATA.universe} />
+              </Suspense>
+            ) : (
+              <div className="tech-universe tech-universe--loading">Calibrating the universe...</div>
+            )}
           </div>
-        </motion.div>
+        </div>
+
+        <DesktopContactSection />
       </section>
     </>
   );

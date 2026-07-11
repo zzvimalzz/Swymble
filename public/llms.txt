@@ -1,0 +1,29 @@
+# SWYMBLE
+
+> SWYMBLE is the software studio and engineering portfolio of a
+> fintech-grade software engineer, showcasing production systems, client
+> work, and personal experiments built in the open.
+
+Swymble is both a personal engineering brand and a small studio. The
+engineer behind it builds fintech and banking systems professionally,
+then applies the same discipline to independent products, AI-assisted
+tools, and client projects.
+
+## Key pages
+
+- / : Home. Focus areas, featured projects, and the Swymble Universe map.
+- /projects : Case studies and shipped project write-ups.
+- /labs : Experimental builds and works in progress.
+- /blog : Writing on engineering, fintech systems, and building in public.
+- /about : Background, professional experience, and technical stack.
+- /contact : Get in touch about client work or collaboration.
+
+## Services
+
+Company profile sites, product builds, and AI-powered systems, delivered
+with enterprise-grade discipline drawn from fintech production work.
+
+## Contact
+
+Email: hello@swymble.com
+Site: https://swymble.com

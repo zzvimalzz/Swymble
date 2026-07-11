@@ -18,12 +18,12 @@ import type { SwymbleLatestUpdateCard } from './types';
 // - Omit ctaLabel/ctaHref if a card should be informational only.
 export const SWYMBLE_LATEST_UPDATES: SwymbleLatestUpdateCard[] = [
   {
-    id: 'mybirth-launch',
+    id: 'what2watch-launch',
     kicker: 'New lab',
-    title: 'MyBirth is live',
+    title: 'What2Watch is live',
     description:
-      'A cinematic birthday archive that rebuilds the moon, weather, public signals, and keepsakes from the day someone arrived.',
-    ctaLabel: 'Open MyBirth',
-    ctaHref: 'https://mybirth.swymble.com',
+      'A living wall of movies and shows in one interactive screen. Wander the poster wall, filter by mood, or let it surprise you.',
+    ctaLabel: 'Open What2Watch',
+    ctaHref: 'https://what2watch.swymble.com',
   },
 ];

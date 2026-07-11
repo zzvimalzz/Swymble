@@ -3,7 +3,14 @@ import type { NavigateFunction } from 'react-router-dom';
 import type { MobileHomeSectionId } from '../routes';
 import { getMobileHomeSectionFromPath } from '../routes';
 
-const HOME_SECTIONS: MobileHomeSectionId[] = ['top', 'focus-section', 'projects', 'latest-updates', 'contact-section'];
+const HOME_SECTIONS: MobileHomeSectionId[] = [
+  'top',
+  'focus-section',
+  'latest-updates',
+  'projects',
+  'studio-section',
+  'contact-section',
+];
 
 type UseMobileSectionNavigationOptions = {
   isHomeRoute: boolean;

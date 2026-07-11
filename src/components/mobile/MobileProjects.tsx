@@ -99,7 +99,15 @@ const TinderCard: React.FC<TinderCardProps> = ({ project, isFront, onSwipe, inde
             
             <div className="details-body">
               <p>{project.description}</p>
-              
+
+              {project.outcomes && project.outcomes.length > 0 && (
+                <ul className="card-outcomes">
+                  {project.outcomes.slice(0, 3).map((outcome) => (
+                    <li key={outcome}>{outcome}</li>
+                  ))}
+                </ul>
+              )}
+
               {project.client && (
                 <div className="detail-item">
                   <strong>Client:</strong> {project.client}

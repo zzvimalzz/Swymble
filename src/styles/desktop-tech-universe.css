@@ -41,7 +41,9 @@
 .tech-universe--loading {
   display: grid;
   place-items: center;
-  min-height: 420px;
+  /* Matches .tech-universe's min-height so swapping in the real (post-near-viewport)
+     content never shifts layout. */
+  min-height: min(860px, 92vh);
   color: rgba(240, 240, 240, 0.72);
   font-family: var(--font-mono);
   font-weight: 800;
@@ -164,7 +166,6 @@
   border-color: rgba(0, 240, 255, 0.48);
   background: linear-gradient(90deg, rgb(4, 35, 42), rgb(3, 5, 10));
   transform: translateY(-0.18rem);
-  outline: none;
 }
 
 .tech-universe__focus-panel {
@@ -210,6 +211,55 @@
   min-height: 2.35rem;
   padding: 0 0.85rem;
   color: var(--accent-cyan);
+}
+
+.tech-universe__proof-block {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 1.1rem;
+}
+
+.tech-universe__proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tech-universe__proof-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3em 0.8em;
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-pill);
+  color: var(--text-main);
+  background: rgba(3, 5, 10, 0.55);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-shadow: none;
+  backdrop-filter: blur(10px);
+  transition: border-color 0.28s ease, color 0.28s ease, background 0.28s ease;
+}
+
+.tech-universe__proof-pill:hover,
+.tech-universe__proof-pill:focus-visible {
+  border-color: var(--sw-border-volt);
+  color: var(--sw-accent-volt);
+  background: rgba(3, 5, 10, 0.78);
+}
+
+.tech-universe__hint {
+  margin: 0;
+  padding: 0.85rem 1.1rem;
+  color: rgba(240, 240, 240, 0.62);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
 }
 
 @media (max-width: 1180px) {

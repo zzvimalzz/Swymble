@@ -1,0 +1,127 @@
+/* -------------------------------------------------------------------------- */
+/* MOBILE HOME — "WORK WITH ME" studio section (services, process, CTA)       */
+/* -------------------------------------------------------------------------- */
+
+.mobile-studio-wrapper {
+  width: 100%;
+  padding: 4rem 1.2rem 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-studio-wrapper .section-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.mobile-studio-wrapper .section-header h2 {
+  font-family: var(--sw-font-logo);
+  font-size: 4.5rem;
+  margin: 0;
+  letter-spacing: 2px;
+  color: var(--sw-text-main);
+  line-height: 1;
+}
+
+.mobile-process-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  padding-bottom: 3rem;
+}
+
+.mobile-process-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.mobile-process-number {
+  flex: 0 0 auto;
+  font-family: var(--sw-font-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--sw-accent-volt);
+  line-height: 1.2;
+  min-width: 3ch;
+}
+
+.mobile-process-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.mobile-process-title {
+  font-family: var(--sw-font-logo);
+  font-size: 1.5rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--sw-text-main);
+  line-height: 1.1;
+}
+
+.mobile-process-desc {
+  font-family: var(--sw-font-mono);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--sw-text-muted);
+  margin: 0;
+}
+
+.mobile-studio-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.9rem 1.5rem;
+  background: var(--sw-accent-volt);
+  color: var(--sw-bg-ink);
+  font-family: var(--sw-font-mono);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--sw-radius-pill);
+  cursor: pointer;
+  transition: transform var(--sw-motion-fast) var(--sw-ease-standard),
+    background var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.mobile-studio-cta:active {
+  background: #cfdd03;
+  transform: scale(0.98);
+}
+
+/* -------------------------------------------------------------------------- */
+/* MOBILE PROJECTS — outcomes checklist (flipped card) + scannable index      */
+/* -------------------------------------------------------------------------- */
+
+.card-outcomes {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.card-outcomes li {
+  position: relative;
+  padding-left: 1.4rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--sw-text-muted);
+}
+
+.card-outcomes li::before {
+  content: '+';
+  position: absolute;
+  left: 0;
+  color: var(--sw-accent-volt);
+  font-weight: 700;
+}
+
