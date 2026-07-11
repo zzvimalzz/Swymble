@@ -136,7 +136,7 @@ export default function MobileLabs() {
         </section>
       )}
 
-      <MobileSiteFooter />
+      <MobileSiteFooter className="mobile-site-footer--roomy" />
     </main>
   );
 }

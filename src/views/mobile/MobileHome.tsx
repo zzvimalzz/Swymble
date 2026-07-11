@@ -198,14 +198,13 @@ export default function MobileHome({
         <MobileStudio
           services={SWYMBLE_DATA.services}
           process={SWYMBLE_DATA.process}
-          onCta={() => onJumpToSection('contact-section')}
         />
       </section>
 
       <section
         className="mobile-section mobile-home-section"
         id="contact-section"
-        style={{ width: '100%', marginBottom: '7rem' }}
+        style={{ width: '100%', marginBottom: '3rem' }}
       >
         <MobileContact />
       </section>

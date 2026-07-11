@@ -102,7 +102,7 @@ export default function MobileBlog() {
         )}
       </section>
 
-      <MobileSiteFooter />
+      <MobileSiteFooter className="mobile-site-footer--roomy" />
     </main>
   );
 }

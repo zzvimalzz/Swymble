@@ -44,7 +44,7 @@ export default function MobileBlogPost() {
           <h1>Post Not Found</h1>
           <p>We could not find the article you are looking for.</p>
         </header>
-        <MobileSiteFooter />
+        <MobileSiteFooter className="mobile-site-footer--roomy" />
       </main>
     );
   }
@@ -213,7 +213,7 @@ export default function MobileBlogPost() {
         </section>
       )}
 
-      <MobileSiteFooter />
+      <MobileSiteFooter className="mobile-site-footer--roomy" />
     </main>
   );
 }

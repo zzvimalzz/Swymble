@@ -53,80 +53,274 @@ html {
 }
 
 .app-loading {
-  min-height: 100vh;
-  width: 100%;
-  display: grid;
-  place-items: center;
-  gap: 1.5rem;
-  background: var(--sw-bg-ink);
-}
-
-.app-loading-mark {
-  position: relative;
-  font-family: var(--sw-font-logo);
-  font-size: clamp(2.5rem, 8vw, 5rem);
-  line-height: 1;
-  letter-spacing: 0.04em;
-  color: var(--sw-text-main);
-}
-
-.app-loading-mark::before,
-.app-loading-mark::after {
-  content: attr(data-text);
-  position: absolute;
+  position: fixed;
   inset: 0;
+  z-index: var(--sw-z-cursor);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.25rem;
+  background: var(--sw-bg-ink);
+  opacity: 1;
+  transition: opacity 0.5s var(--sw-ease-standard);
+}
+
+.app-loading--exit {
   opacity: 0;
+  pointer-events: none;
 }
 
-.app-loading-mark::before {
-  color: var(--sw-accent-neon);
-  transform: translate(-2px, 0);
-  animation: app-loading-flicker-neon 0.9s steps(1) infinite;
-}
-
-.app-loading-mark::after {
-  color: var(--sw-accent-cyan);
-  transform: translate(2px, 0);
-  animation: app-loading-flicker-cyan 0.9s steps(1) infinite;
-}
-
-.app-loading-track {
-  position: relative;
-  width: 120px;
-  height: 2px;
-  background: var(--sw-surface-faint);
-  overflow: hidden;
-}
-
-.app-loading-bar {
+.sw-visually-hidden {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -40%;
-  width: 40%;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.app-loading-logo {
+  width: clamp(140px, 28vw, 220px);
+  height: auto;
+  animation: app-loading-logo-pulse 2.4s var(--sw-ease-standard) infinite;
+}
+
+@keyframes app-loading-logo-pulse {
+  0%, 100% {
+    opacity: 0.82;
+    filter: drop-shadow(0 0 0 rgba(var(--sw-accent-volt-rgb), 0));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 14px rgba(var(--sw-accent-volt-rgb), 0.45));
+  }
+}
+
+/* Five-square loader, recolored from the reference implementation to cycle
+   through the brand accent trio instead of a single fixed color. */
+.loadingspinner {
+  --square: clamp(16px, 4vw, 22px);
+  --offset: clamp(18px, 5vw, 25px);
+  --duration: 2.4s;
+  --delay: 0.2s;
+  --timing-function: ease-in-out;
+  --in-duration: 0.4s;
+  --in-delay: 0.1s;
+  --in-timing-function: ease-out;
+  width: calc(3 * var(--offset) + var(--square));
+  height: calc(2 * var(--offset) + var(--square));
+  position: relative;
+}
+
+.loadingspinner div {
+  display: inline-block;
+  border: none;
+  border-radius: 3px;
+  width: var(--square);
+  height: var(--square);
+  position: absolute;
+  padding: 0;
+  margin: 0;
+}
+
+.loadingspinner #square1 {
+  left: calc(0 * var(--offset));
+  top: calc(0 * var(--offset));
+  background: var(--sw-accent-volt);
+  box-shadow: 0 0 10px rgba(var(--sw-accent-volt-rgb), 0.55);
+  animation: square1 var(--duration) var(--delay) var(--timing-function) infinite,
+    squarefadein var(--in-duration) calc(1 * var(--in-delay)) var(--in-timing-function) both;
+}
+
+.loadingspinner #square2 {
+  left: calc(0 * var(--offset));
+  top: calc(1 * var(--offset));
+  background: var(--sw-accent-neon);
+  box-shadow: 0 0 10px rgba(var(--sw-accent-neon-rgb), 0.55);
+  animation: square2 var(--duration) var(--delay) var(--timing-function) infinite,
+    squarefadein var(--in-duration) calc(1 * var(--in-delay)) var(--in-timing-function) both;
+}
+
+.loadingspinner #square3 {
+  left: calc(1 * var(--offset));
+  top: calc(1 * var(--offset));
   background: var(--sw-accent-cyan);
-  animation: app-loading-sweep 1.1s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(var(--sw-accent-cyan-rgb), 0.55);
+  animation: square3 var(--duration) var(--delay) var(--timing-function) infinite,
+    squarefadein var(--in-duration) calc(2 * var(--in-delay)) var(--in-timing-function) both;
 }
 
-@keyframes app-loading-flicker-neon {
-  0%, 78% { opacity: 0; }
-  80% { opacity: 0.35; }
-  83% { opacity: 0; }
-  92% { opacity: 0.22; }
-  95% { opacity: 0; }
+.loadingspinner #square4 {
+  left: calc(2 * var(--offset));
+  top: calc(1 * var(--offset));
+  background: var(--sw-accent-volt);
+  box-shadow: 0 0 10px rgba(var(--sw-accent-volt-rgb), 0.55);
+  animation: square4 var(--duration) var(--delay) var(--timing-function) infinite,
+    squarefadein var(--in-duration) calc(3 * var(--in-delay)) var(--in-timing-function) both;
 }
 
-@keyframes app-loading-flicker-cyan {
-  0%, 60% { opacity: 0; }
-  62% { opacity: 0.3; }
-  66% { opacity: 0; }
-  87% { opacity: 0.2; }
-  90% { opacity: 0; }
+.loadingspinner #square5 {
+  left: calc(3 * var(--offset));
+  top: calc(1 * var(--offset));
+  background: var(--sw-accent-neon);
+  box-shadow: 0 0 10px rgba(var(--sw-accent-neon-rgb), 0.55);
+  animation: square5 var(--duration) var(--delay) var(--timing-function) infinite,
+    squarefadein var(--in-duration) calc(4 * var(--in-delay)) var(--in-timing-function) both;
 }
 
-@keyframes app-loading-sweep {
-  0% { left: -40%; }
-  100% { left: 100%; }
+@keyframes square1 {
+  0% {
+    left: calc(0 * var(--offset));
+    top: calc(0 * var(--offset));
+  }
+  8.333% {
+    left: calc(0 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  100% {
+    left: calc(0 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+}
+
+@keyframes square2 {
+  0% {
+    left: calc(0 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  8.333% {
+    left: calc(0 * var(--offset));
+    top: calc(2 * var(--offset));
+  }
+  16.67% {
+    left: calc(1 * var(--offset));
+    top: calc(2 * var(--offset));
+  }
+  25.00% {
+    left: calc(1 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  83.33% {
+    left: calc(1 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  91.67% {
+    left: calc(1 * var(--offset));
+    top: calc(0 * var(--offset));
+  }
+  100% {
+    left: calc(0 * var(--offset));
+    top: calc(0 * var(--offset));
+  }
+}
+
+@keyframes square3 {
+  0%, 100% {
+    left: calc(1 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  16.67% {
+    left: calc(1 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  25.00% {
+    left: calc(1 * var(--offset));
+    top: calc(0 * var(--offset));
+  }
+  33.33% {
+    left: calc(2 * var(--offset));
+    top: calc(0 * var(--offset));
+  }
+  41.67% {
+    left: calc(2 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  66.67% {
+    left: calc(2 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  75.00% {
+    left: calc(2 * var(--offset));
+    top: calc(2 * var(--offset));
+  }
+  83.33% {
+    left: calc(1 * var(--offset));
+    top: calc(2 * var(--offset));
+  }
+  91.67% {
+    left: calc(1 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+}
+
+@keyframes square4 {
+  0% {
+    left: calc(2 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  33.33% {
+    left: calc(2 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  41.67% {
+    left: calc(2 * var(--offset));
+    top: calc(2 * var(--offset));
+  }
+  50.00% {
+    left: calc(3 * var(--offset));
+    top: calc(2 * var(--offset));
+  }
+  58.33% {
+    left: calc(3 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  100% {
+    left: calc(3 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+}
+
+@keyframes square5 {
+  0% {
+    left: calc(3 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  50.00% {
+    left: calc(3 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  58.33% {
+    left: calc(3 * var(--offset));
+    top: calc(0 * var(--offset));
+  }
+  66.67% {
+    left: calc(2 * var(--offset));
+    top: calc(0 * var(--offset));
+  }
+  75.00% {
+    left: calc(2 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+  100% {
+    left: calc(2 * var(--offset));
+    top: calc(1 * var(--offset));
+  }
+}
+
+@keyframes squarefadein {
+  0% {
+    transform: scale(0.75);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -137,19 +331,11 @@ html {
     scroll-behavior: auto !important;
   }
 
-  /* The global kill above still lets each animation "land" on its final keyframe,
-     which would freeze the loader bar off-canvas and the RGB-split flicker layers
-     mid-flash. Pin them to a deliberate static look instead. */
-  .app-loading-mark::before,
-  .app-loading-mark::after {
+  /* The global kill above still lets the logo pulse "land" mid-glow; pin it
+     to a calm static state instead of freezing on a half-lit frame. */
+  .app-loading-logo {
     animation: none !important;
-    opacity: 0 !important;
-  }
-
-  .app-loading-bar {
-    animation: none !important;
-    left: 0 !important;
-    width: 100% !important;
-    opacity: 0.6;
+    opacity: 1;
+    filter: none !important;
   }
 }

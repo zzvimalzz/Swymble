@@ -1,5 +1,5 @@
 /* -------------------------------------------------------------------------- */
-/* MOBILE HOME — "WORK WITH ME" studio section (services, process, CTA)       */
+/* MOBILE HOME — "WORK WITH ME" studio section (services, process)           */
 /* -------------------------------------------------------------------------- */
 
 .mobile-studio-wrapper {
@@ -27,7 +27,6 @@
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  padding-bottom: 3rem;
 }
 
 .mobile-process-step {
@@ -67,32 +66,6 @@
   line-height: 1.6;
   color: var(--sw-text-muted);
   margin: 0;
-}
-
-.mobile-studio-cta {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 48px;
-  padding: 0.9rem 1.5rem;
-  background: var(--sw-accent-volt);
-  color: var(--sw-bg-ink);
-  font-family: var(--sw-font-mono);
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  border: none;
-  border-radius: var(--sw-radius-pill);
-  cursor: pointer;
-  transition: transform var(--sw-motion-fast) var(--sw-ease-standard),
-    background var(--sw-motion-fast) var(--sw-ease-standard);
-}
-
-.mobile-studio-cta:active {
-  background: #cfdd03;
-  transform: scale(0.98);
 }
 
 /* -------------------------------------------------------------------------- */

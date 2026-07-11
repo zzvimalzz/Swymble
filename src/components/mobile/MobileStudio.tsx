@@ -5,10 +5,9 @@ import type { SwymbleProcessStep, SwymbleService } from '../../data/config';
 type MobileStudioProps = {
   services: SwymbleService[];
   process: SwymbleProcessStep[];
-  onCta: () => void;
 };
 
-export default function MobileStudio({ services, process, onCta }: MobileStudioProps) {
+export default function MobileStudio({ services, process }: MobileStudioProps) {
   return (
     <div className="mobile-studio-wrapper" id="studio">
       <div className="section-header">
@@ -53,10 +52,6 @@ export default function MobileStudio({ services, process, onCta }: MobileStudioP
           </Reveal>
         ))}
       </div>
-
-      <button type="button" className="mobile-studio-cta" onClick={onCta}>
-        LET&apos;S TALK
-      </button>
     </div>
   );
 }

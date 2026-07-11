@@ -586,6 +586,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .details-header h3 {

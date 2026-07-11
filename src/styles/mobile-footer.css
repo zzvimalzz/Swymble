@@ -2,18 +2,24 @@
   width: 100%;
   margin-top: 1.8rem;
   padding-top: 1rem;
-  /* This footer only renders on routes (blog, blog post, labs) that also show the
-     fixed back/scroll-to-top floating buttons stacked in the bottom-right corner.
-     Without this, scrolling to the true bottom of a short page puts that footer
-     meta line directly under the buttons (unreadable — see Task 4 QA sweep at
-     360px width on /blog). Reserve enough clearance for the tallest stack (menu
-     trigger + back + rocket, ~13.4rem from the bottom) plus a small buffer. */
-  padding-bottom: 14rem;
+  /* This footer always sits above the fixed menu-trigger button (and, on the
+     home page, the local scroll-to-top rocket) in the bottom-right corner.
+     Reserve enough clearance so the meta line doesn't land underneath them —
+     menu trigger alone tops out ~4.75rem from the bottom, plus the home
+     rocket sitting above it tops out ~9.25rem. Round up with a buffer. */
+  padding-bottom: 10rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: grid;
   justify-items: center;
   gap: 0.7rem;
   color: rgba(255, 255, 255, 0.62);
+}
+
+/* Blog/Blog-post/Labs routes additionally show a fixed "back" button
+   (via MobileFloatingControls) between the menu trigger and the rocket,
+   pushing the tallest stack up to ~13.4rem from the bottom. */
+.mobile-site-footer--roomy {
+  padding-bottom: 14rem;
 }
 
 .mobile-site-footer-logo {
