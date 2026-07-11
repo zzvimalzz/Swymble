@@ -466,7 +466,9 @@ function renderResult(d) {
     countryCode: d.geo?.countryCode || "",
     shareURL: d.shareURL
   });
-  document.getElementById("ticket-mount").appendChild(ticketEl);
+  const ticketMount = document.getElementById("ticket-mount");
+  ticketMount.appendChild(ticketEl);
+  fitToContainer(ticketMount, ticketEl);
   QRCode.toDataURL(d.shareURL, {
     margin: 1, width: 200, errorCorrectionLevel: "M",
     color: { dark: "#e8e4f4", light: "#0d0f20" }
@@ -478,9 +480,11 @@ function renderResult(d) {
 
   // certificate (front + back) — QR is filled in asynchronously
   const certView = document.getElementById("cert-view");
+  let fitCert = () => {};
   if (certView) {
     const cert = buildCertificate(d, placeLabel);
     certView.appendChild(cert);
+    fitCert = fitToContainer(cert, document.getElementById("cert-flip"));
     QRCode.toDataURL(d.shareURL, {
       margin: 1, width: 320, errorCorrectionLevel: "M",
       color: { dark: "#ddd8f0", light: "#060918" }
@@ -507,6 +511,7 @@ function renderResult(d) {
         flip.classList.remove("size-a4", "size-letter", "size-card");
         flip.classList.add("size-" + b.dataset.size);
         document.querySelectorAll("[data-size]").forEach((x) => x.classList.toggle("is-active", x === b));
+        fitCert();
       })
     );
   }
@@ -1031,6 +1036,35 @@ function slugify(s) {
   return String(s || "day").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "day";
 }
 
+/** Visually scales a fixed-design-width node (the ticket or certificate)
+ *  down to fit a narrower container, instead of letting it reflow at
+ *  different breakpoints — this is what keeps the ticket/certificate
+ *  looking identical on mobile and desktop. The node keeps its native
+ *  layout size (offsetWidth/offsetHeight), so downloads capture the same
+ *  canonical size regardless of the current on-screen scale. */
+function fitToContainer(container, target) {
+  if (!container || !target) return () => {};
+  const apply = () => {
+    const cw = container.clientWidth;
+    const naturalWidth = target.offsetWidth;
+    const naturalHeight = target.offsetHeight;
+    if (!cw || !naturalWidth) return;
+    const scale = Math.min(1, cw / naturalWidth);
+    target.style.transform = scale < 1 ? `scale(${scale})` : "";
+    container.style.height = `${Math.ceil(naturalHeight * scale)}px`;
+  };
+  // a plain window "resize" listener isn't enough: at the moment a ticket/
+  // certificate is first mounted, its section can still be mid page-
+  // transition (zero-size), so the initial synchronous apply() measures 0
+  // and a later viewport resize may never come — ResizeObserver re-fires
+  // as soon as the container actually gets its real size, too.
+  const ro = new ResizeObserver(apply);
+  ro.observe(container);
+  ro.observe(target);
+  apply();
+  return apply;
+}
+
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -1072,17 +1106,22 @@ async function renderNodeToCanvas(node, width, height, scale) {
 }
 
 async function saveTicketImage(ticketEl, name) {
-  const rect = ticketEl.getBoundingClientRect();
-  const canvas = await renderNodeToCanvas(ticketEl, rect.width, rect.height, Math.max(2, window.devicePixelRatio || 1));
+  // offsetWidth/offsetHeight are the node's native (unscaled) layout box —
+  // getBoundingClientRect() would return the shrunk size that
+  // fitToContainer's transform renders on narrow screens, so downloads
+  // would end up smaller/differently-shaped than the desktop ticket.
+  const width = ticketEl.offsetWidth;
+  const height = ticketEl.offsetHeight;
+  const canvas = await renderNodeToCanvas(ticketEl, width, height, Math.max(2, window.devicePixelRatio || 1));
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
   if (!blob) throw new Error("canvas produced no image data");
   downloadBlob(blob, `mybirth-ticket-${slugify(name)}.png`);
 }
 
 async function saveCertificatePDF(flipEl, name) {
-  const rect = flipEl.getBoundingClientRect();
-  const w = Math.round(rect.width);
-  const h = Math.round(rect.height);
+  // native (unscaled) layout size — see comment in saveTicketImage above
+  const w = flipEl.offsetWidth;
+  const h = flipEl.offsetHeight;
   const front = flipEl.querySelector(".cert-front");
   const back = flipEl.querySelector(".cert-back");
 
