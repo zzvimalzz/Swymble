@@ -36,9 +36,19 @@ export default function MobileTabletView() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isHomeRoute = homePaths.includes(location.pathname);
-  const isBlogRoute = location.pathname.startsWith('/blog');
-  const isLabsRoute = location.pathname === '/labs';
+  // GitHub Pages redirects a direct/refreshed load of a prerendered route (e.g. /labs) to
+  // its directory form (/labs/), since prerender-meta.mjs writes dist/<route>/index.html.
+  // React Router's own <Routes> matching tolerates the trailing slash fine, but the manual
+  // string comparisons below don't — normalize once so isHomeRoute/isBlogRoute/isLabsRoute
+  // (and nav highlighting) stay correct after a hard refresh instead of silently going false.
+  const pathname =
+    location.pathname.length > 1 && location.pathname.endsWith('/')
+      ? location.pathname.slice(0, -1)
+      : location.pathname;
+
+  const isHomeRoute = homePaths.includes(pathname);
+  const isBlogRoute = pathname.startsWith('/blog');
+  const isLabsRoute = pathname === '/labs';
   const hasRouteFloatingControls = isBlogRoute || isLabsRoute;
   const [scrolled, setScrolled] = useState(false);
   const [showRouteRocket, setShowRouteRocket] = useState(false);
@@ -50,7 +60,7 @@ export default function MobileTabletView() {
 
   const { activeSection, jumpToSection } = useMobileSectionNavigation({
     isHomeRoute,
-    pathname: location.pathname,
+    pathname,
     hash: location.hash,
     navigate,
   });
@@ -96,7 +106,7 @@ export default function MobileTabletView() {
 
   useEffect(() => {
     setIsThumbNavOpen(false);
-  }, [location.pathname, location.hash]);
+  }, [pathname, location.hash]);
 
   useEffect(() => {
     if (!isThumbNavOpen) {
@@ -140,8 +150,8 @@ export default function MobileTabletView() {
         route.mobileMode === 'home-section' && route.mobileSectionId
           ? isHomeRoute && activeSection === route.mobileSectionId
           : route.path === '/blog'
-            ? location.pathname.startsWith('/blog')
-            : location.pathname === route.path,
+            ? pathname.startsWith('/blog')
+            : pathname === route.path,
     };
 
     if (route.path === '/') {
@@ -188,13 +198,13 @@ export default function MobileTabletView() {
       return;
     }
 
-    if (location.pathname.startsWith('/blog/')) {
+    if (pathname.startsWith('/blog/')) {
       const category = new URLSearchParams(location.search).get('category');
       navigate(category ? `/blog?category=${encodeURIComponent(category)}` : '/blog');
       return;
     }
 
-    if (location.pathname === '/blog') {
+    if (pathname === '/blog') {
       navigate('/');
       return;
     }
