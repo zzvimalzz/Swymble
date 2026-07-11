@@ -14,12 +14,21 @@
  * 1. Workers & Pages → Create → paste this file's contents as a new Worker,
  *    e.g. name it `swymble-contact`.
  * 2. Settings → Variables → add:
- *      - Plaintext var  CONTACT_TO    = hello@swymble.com   (optional, this
- *                                        is the default if unset)
- *      - Plaintext var  CONTACT_FROM  = contact@swymble.com (REQUIRED — must
- *                                        be a mailbox/address on a domain
- *                                        that has Email Routing enabled,
- *                                        i.e. swymble.com)
+ *      - Plaintext var  CONTACT_TO          = hello@swymble.com (optional,
+ *                                              this is the default if unset).
+ *                                              Cosmetic only — this is what
+ *                                              shows up in the email's "To:"
+ *                                              header, it does NOT need to be
+ *                                              a verified destination address.
+ *      - Plaintext var  CONTACT_FROM        = contact@swymble.com (REQUIRED —
+ *                                              must be a mailbox/address on a
+ *                                              domain that has Email Routing
+ *                                              enabled, i.e. swymble.com)
+ *      - Plaintext var  CONTACT_DELIVER_TO  = (REQUIRED — see step 3 below;
+ *                                              defaults to CONTACT_TO if
+ *                                              unset, which will fail unless
+ *                                              CONTACT_TO happens to already
+ *                                              be a verified destination)
  * 3. Settings → Bindings → add:
  *      - KV Namespace binding, variable name `CONTACT_KV`.
  *        Create the namespace first under Storage & Databases → KV →
@@ -27,10 +36,18 @@
  *        here. If this binding is missing, the worker fails OPEN (it logs a
  *        warning and skips rate limiting) rather than breaking the form.
  *      - Email → "Send email" binding, variable name `CONTACT_EMAIL`,
- *        destination address = the same address as CONTACT_TO
- *        (hello@swymble.com). Cloudflare requires the destination address
- *        to be verified under Email → Email Routing → Destination
- *        addresses before send_email bindings can deliver to it.
+ *        destination address = the SAME address you set as CONTACT_DELIVER_TO
+ *        above. This must be a *verified* Destination Address (Email → Email
+ *        Routing → Destination Addresses — the address itself, confirmed via
+ *        the email Cloudflare sends it, not just a domain with a routing rule
+ *        pointing at it). A custom-domain alias like hello@swymble.com does
+ *        NOT qualify on its own even if it has an active routing rule —
+ *        routing rules govern *inbound* mail, not a Worker's send binding.
+ *        If your verified destination is a plain external mailbox (e.g. a
+ *        Gmail address from Email Routing setup), use that as both
+ *        CONTACT_DELIVER_TO and the binding's destination address; the email
+ *        will still visually read "To: hello@swymble.com" in the client
+ *        thanks to CONTACT_TO above.
  * 4. Zone → swymble.com → Email → Email Routing → make sure routing is
  *    turned ON for the zone (needed for any Email Worker to send, even
  *    though this worker doesn't route *inbound* mail — Email Routing must
@@ -53,12 +70,21 @@
  *      → copy the returned `id` into contact-worker.wrangler.toml under
  *        [[kv_namespaces]].
  * 2. Enable Email Routing on the swymble.com zone (dashboard: Email → Email
- *    Routing → Enable), and verify hello@swymble.com as a destination
- *    address (dashboard: Email → Email Routing → Destination addresses).
+ *    Routing → Enable), and verify your actual destination mailbox address
+ *    (dashboard: Email → Email Routing → Destination Addresses — this is
+ *    typically a plain external mailbox, not a swymble.com alias; a
+ *    hello@swymble.com-style address with only a routing rule does NOT
+ *    count as verified for a send_email binding's destination).
  *    Email Routing setup cannot currently be scripted with wrangler; it must
  *    be done once in the dashboard.
- * 3. wrangler secret put CONTACT_TO      (or leave unset to use the default)
- *    wrangler secret put CONTACT_FROM    (must be @swymble.com)
+ * 3. wrangler secret put CONTACT_TO           (cosmetic "To:" header only —
+ *                                              or leave unset to default to
+ *                                              hello@swymble.com)
+ *    wrangler secret put CONTACT_FROM         (must be @swymble.com)
+ *    wrangler secret put CONTACT_DELIVER_TO   (must be the verified
+ *                                              destination address from
+ *                                              step 2 — this is the actual
+ *                                              delivery target)
  *    — or set them as plain [vars] in the toml if they're not sensitive.
  * 4. wrangler deploy --config cloudflare/contact-worker.wrangler.toml
  *      This publishes the worker AND (per the toml's [[routes]] block)
@@ -281,7 +307,17 @@ function validate(payload) {
 // -----------------------------------------------------------------------------
 
 async function sendContactEmail(env, { name, project, email, ip, userAgent }) {
-  const to = env.CONTACT_TO || 'hello@swymble.com';
+  // Cloudflare's send_email binding only allows delivery to a *verified*
+  // Destination Address on the account (Email -> Email Routing -> Destination
+  // Addresses) — a custom-domain alias like hello@swymble.com does not qualify
+  // just because it has an active routing rule; routing rules govern inbound
+  // mail, not a Worker's outbound send binding. So the technical envelope
+  // recipient (CONTACT_DELIVER_TO) must be that verified address, while the
+  // "To:" header shown in the email body (CONTACT_TO) can still cosmetically
+  // read hello@swymble.com — the message will land in the verified inbox
+  // looking exactly like mail sent to the swymble.com address.
+  const displayTo = env.CONTACT_TO || 'hello@swymble.com';
+  const deliverTo = env.CONTACT_DELIVER_TO || displayTo;
   const from = env.CONTACT_FROM;
 
   if (!from) {
@@ -307,7 +343,7 @@ async function sendContactEmail(env, { name, project, email, ip, userAgent }) {
 
   const raw = [
     `From: "Swymble Contact" <${from}>`,
-    `To: ${to}`,
+    `To: ${displayTo}`,
     `Reply-To: ${email}`,
     `Subject: ${subject}`,
     `Date: ${date}`,
@@ -320,6 +356,6 @@ async function sendContactEmail(env, { name, project, email, ip, userAgent }) {
     '',
   ].join('\r\n');
 
-  const message = new EmailMessage(from, to, raw);
+  const message = new EmailMessage(from, deliverTo, raw);
   await env.CONTACT_EMAIL.send(message);
 }

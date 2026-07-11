@@ -13,13 +13,19 @@
 #   1. wrangler kv namespace create CONTACT_KV
 #        -> paste the returned "id" into the [[kv_namespaces]] block below.
 #   2. In the Cloudflare dashboard, enable Email Routing on the swymble.com
-#      zone and verify hello@swymble.com as a destination address
-#      (Email -> Email Routing -> Destination addresses). This step cannot
+#      zone and verify your actual destination mailbox
+#      (Email -> Email Routing -> Destination Addresses). This is typically
+#      a plain external mailbox, not a swymble.com alias — a hello@swymble.com
+#      -style address with only a routing rule pointing at it does NOT count
+#      as verified for a send_email binding's destination. This step cannot
 #      be done via wrangler/this file.
-#   3. Fill in CONTACT_TO / CONTACT_FROM under [vars] below (or use
-#      `wrangler secret put` instead if you'd rather not commit them here —
-#      neither is actually sensitive, but CONTACT_FROM must be an address
-#      on the swymble.com domain for Email Workers to send as).
+#   3. Fill in CONTACT_TO / CONTACT_FROM / CONTACT_DELIVER_TO under [vars]
+#      below (or use `wrangler secret put` instead if you'd rather not commit
+#      them here — none of the three is actually sensitive). CONTACT_FROM
+#      must be an address on the swymble.com domain; CONTACT_DELIVER_TO must
+#      be the verified destination address from step 2 (the actual delivery
+#      target — CONTACT_TO is cosmetic only, it just sets the "To:" header
+#      shown in the email body).
 #
 # `wrangler deploy` will publish the worker AND attach the [[routes]] entry
 # below to the swymble.com zone automatically. Because the site itself is
@@ -42,8 +48,9 @@ id = "REPLACE_WITH_KV_NAMESPACE_ID" # from `wrangler kv namespace create CONTACT
 
 [[send_email]]
 name = "CONTACT_EMAIL"
-destination_address = "hello@swymble.com" # must match a verified Email Routing destination
+destination_address = "REPLACE_WITH_VERIFIED_DESTINATION_ADDRESS" # must match a verified Email Routing destination address (Email -> Email Routing -> Destination Addresses), not just a swymble.com alias with a routing rule
 
 [vars]
-CONTACT_TO = "hello@swymble.com"
+CONTACT_TO = "hello@swymble.com" # cosmetic "To:" header only
 CONTACT_FROM = "contact@swymble.com" # must be on the swymble.com domain
+CONTACT_DELIVER_TO = "REPLACE_WITH_VERIFIED_DESTINATION_ADDRESS" # must match the send_email binding's destination_address above
