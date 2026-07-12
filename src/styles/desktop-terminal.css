@@ -1,0 +1,162 @@
+/* ---------------------------------------------------------------------------
+   TerminalBlock + Labs research-console chrome + sandbox overlay.
+--------------------------------------------------------------------------- */
+
+.terminal-block {
+  background: var(--sw-surface-terminal);
+  border: 1px solid var(--sw-border-hair);
+  border-radius: 8px;
+  padding: 1.1rem 1.4rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.terminal-line {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.terminal-line--prompt { color: var(--sw-accent-volt); }
+.terminal-line--ok { color: var(--sw-text-main); }
+.terminal-line--muted { color: var(--sw-text-muted); }
+
+.terminal-block--typed .terminal-line {
+  width: calc(var(--chars) * 1ch);
+  max-width: 100%;
+  animation: boot-type steps(var(--chars)) both;
+  animation-duration: calc(var(--chars) * 24ms);
+  animation-delay: var(--type-delay);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .terminal-block--typed .terminal-line {
+    animation: none !important;
+    width: auto !important;
+  }
+}
+
+/* --- Labs console ------------------------------------------------------------ */
+.labs-console-header {
+  margin-bottom: 2.5rem;
+}
+
+/* --- Sandbox row -------------------------------------------------------------- */
+.labs-sandbox {
+  margin-top: 4rem;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 1.1rem 1.4rem;
+  background: var(--sw-surface-terminal);
+  border: 1px solid var(--sw-border-hair);
+  border-radius: 8px;
+  font-family: var(--sw-font-mono);
+  font-size: 0.85rem;
+}
+
+.labs-sandbox-prompt {
+  color: var(--sw-accent-volt);
+}
+
+.labs-sandbox-run {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--sw-text-main);
+  font: inherit;
+  cursor: pointer;
+  position: relative;
+}
+
+.labs-sandbox-run::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: var(--sw-accent-volt);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--sw-t-quick) var(--sw-ease-standard);
+}
+
+.labs-sandbox-run:hover::after,
+.labs-sandbox-run:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.labs-sandbox-note {
+  color: var(--sw-text-muted);
+}
+
+/* --- Sandbox overlay (GlitchRunner in a window) ------------------------------- */
+.sandbox-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--sw-z-overlay);
+  background: rgba(0, 0, 0, 0.7);
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.sandbox-window {
+  width: min(960px, 100%);
+  max-height: calc(100vh - 4rem);
+  display: flex;
+  flex-direction: column;
+  background: var(--sw-surface-2);
+  border: 1px solid var(--sw-border-soft);
+  border-radius: 12px;
+  box-shadow: var(--sw-shadow-window);
+  overflow: hidden;
+}
+
+.sandbox-window-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--sw-border-hair);
+  font-family: var(--sw-font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--sw-text-main);
+}
+
+.sandbox-window-titlebar .system-window-glyph path {
+  stroke: rgba(var(--sw-accent-cyan-rgb), 0.55);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.sandbox-window-title { flex: 1; }
+
+.sandbox-close {
+  background: var(--sw-surface-1);
+  border: 1px solid var(--sw-border-strong);
+  border-radius: 6px;
+  color: var(--sw-text-muted);
+  font-family: var(--sw-font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+}
+
+.sandbox-close:hover {
+  color: var(--sw-accent-volt);
+  border-color: var(--sw-accent-volt);
+}
+
+.sandbox-window-body {
+  overflow: auto;
+  padding: 1rem;
+}
