@@ -60,7 +60,7 @@ const replaceCanonical = (html, href) => {
   return html.replace(pattern, (_match, pre, post) => `${pre}${escapeHtml(href)}${post}`);
 };
 
-const stampHtml = (baseHtml, { title, description, canonicalUrl, ogType, image }) => {
+const stampHtml = (baseHtml, { title, description, canonicalUrl, ogType, image, imageAlt }) => {
   let html = baseHtml;
   html = replaceTitle(html, title);
   html = replaceMetaContent(html, 'name', 'description', description);
@@ -70,10 +70,57 @@ const stampHtml = (baseHtml, { title, description, canonicalUrl, ogType, image }
   html = replaceMetaContent(html, 'property', 'og:description', description);
   html = replaceMetaContent(html, 'property', 'og:url', canonicalUrl);
   html = replaceMetaContent(html, 'property', 'og:image', image);
+  if (imageAlt) {
+    html = replaceMetaContent(html, 'property', 'og:image:alt', imageAlt);
+  }
   html = replaceMetaContent(html, 'name', 'twitter:title', title);
   html = replaceMetaContent(html, 'name', 'twitter:description', description);
   html = replaceMetaContent(html, 'name', 'twitter:image', image);
   return html;
+};
+
+// Blog posts additionally get article:published_time and the same BlogPosting/BreadcrumbList
+// JSON-LD that useRouteSeo.ts manages client-side, injected before </head>. This is the no-JS
+// fallback path — prerender-snapshot.mjs normally overwrites these files with the fully rendered
+// DOM (which already contains the hook's output), but if a snapshot fails this file is what
+// crawlers see.
+const injectArticleHead = (html, { title, description, canonicalUrl, image, datePublished, siteName, siteUrl }) => {
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: title,
+    description,
+    ...(datePublished ? { datePublished } : {}),
+    image,
+    url: canonicalUrl,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+    author: { '@type': 'Organization', name: siteName, url: siteUrl },
+    publisher: {
+      '@type': 'Organization',
+      name: siteName,
+      logo: { '@type': 'ImageObject', url: `${siteUrl}/images/icon-512.png` },
+    },
+  };
+  const breadcrumbsJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${siteUrl}/` },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${siteUrl}/blog` },
+      { '@type': 'ListItem', position: 3, name: title },
+    ],
+  };
+
+  const snippetLines = [];
+  if (datePublished) {
+    snippetLines.push(`    <meta property="article:published_time" content="${escapeHtml(datePublished)}" />`);
+  }
+  snippetLines.push(
+    `    <script type="application/ld+json" data-swymble-jsonld="article">${JSON.stringify(articleJsonLd)}</script>`,
+    `    <script type="application/ld+json" data-swymble-jsonld="breadcrumbs">${JSON.stringify(breadcrumbsJsonLd)}</script>`,
+  );
+
+  return html.replace('</head>', `${snippetLines.join('\n')}\n  </head>`);
 };
 
 const toAbsoluteImageUrl = (siteUrl, image, defaultImage) => {
@@ -134,12 +181,22 @@ const run = async () => {
     const canonicalUrl = `${siteUrl}${routePath}`;
     const image = toAbsoluteImageUrl(siteUrl, post.coverImage, defaultImage);
 
-    const html = stampHtml(baseHtml, {
+    let html = stampHtml(baseHtml, {
       title: `${post.title} | ${siteName} Blog`,
       description: post.summary,
       canonicalUrl,
       ogType: 'article',
       image,
+      imageAlt: post.title,
+    });
+    html = injectArticleHead(html, {
+      title: post.title,
+      description: post.summary,
+      canonicalUrl,
+      image,
+      datePublished: post.lastmod,
+      siteName,
+      siteUrl,
     });
 
     await writeRouteFile(routePath, html);

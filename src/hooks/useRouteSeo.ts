@@ -9,6 +9,10 @@ type SeoPayload = {
   image?: string;
   type?: 'website' | 'article';
   shouldIndex?: boolean;
+  /** ISO date (YYYY-MM-DD); only set for blog posts, drives article:published_time + JSON-LD. */
+  datePublished?: string;
+  /** Human title used in article JSON-LD/breadcrumbs (without the "| SWYMBLE Blog" suffix). */
+  articleTitle?: string;
 };
 
 const ensureMetaTag = (selector: string, attributes: Record<string, string>) => {
@@ -32,6 +36,33 @@ const setNamedMeta = (name: string, content: string) => {
 const setPropertyMeta = (property: string, content: string) => {
   const tag = ensureMetaTag(`meta[property="${property}"]`, { property });
   tag.setAttribute('content', content);
+};
+
+const removePropertyMeta = (property: string) => {
+  document.head.querySelector(`meta[property="${property}"]`)?.remove();
+};
+
+// Route-scoped JSON-LD blocks (article + breadcrumbs). The static Organization/WebSite blocks in
+// index.html are untouched; these carry a data attribute so navigation can swap/remove only the
+// blocks this hook owns. The prerender snapshot captures whatever is set here, so crawlers that
+// don't run JS still see the structured data on prerendered routes.
+const setRouteJsonLd = (id: string, data: object | null) => {
+  const selector = `script[data-swymble-jsonld="${id}"]`;
+  let tag = document.head.querySelector<HTMLScriptElement>(selector);
+
+  if (!data) {
+    tag?.remove();
+    return;
+  }
+
+  if (!tag) {
+    tag = document.createElement('script');
+    tag.type = 'application/ld+json';
+    tag.setAttribute('data-swymble-jsonld', id);
+    document.head.appendChild(tag);
+  }
+
+  tag.textContent = JSON.stringify(data);
 };
 
 const setCanonical = (url: string) => {
@@ -78,6 +109,8 @@ const buildSeoPayload = (pathname: string): SeoPayload => {
         image: post.coverImage ? toAbsoluteUrl(post.coverImage) : DEFAULT_SEO_IMAGE,
         type: 'article',
         shouldIndex: true,
+        datePublished: post.date,
+        articleTitle: post.title,
       };
     }
   }
@@ -128,5 +161,42 @@ export function useRouteSeo() {
     setPropertyMeta('og:description', payload.description);
     setPropertyMeta('og:url', canonicalUrl);
     setPropertyMeta('og:image', imageUrl);
+    setPropertyMeta(
+      'og:image:alt',
+      payload.articleTitle ?? 'SWYMBLE wave logo: software studio, projects, experiments',
+    );
+
+    if (payload.type === 'article' && payload.datePublished) {
+      setPropertyMeta('article:published_time', payload.datePublished);
+      setRouteJsonLd('article', {
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: payload.articleTitle ?? payload.title,
+        description: payload.description,
+        datePublished: payload.datePublished,
+        image: imageUrl,
+        url: canonicalUrl,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+        author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+        publisher: {
+          '@type': 'Organization',
+          name: SITE_NAME,
+          logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/icon-512.png` },
+        },
+      });
+      setRouteJsonLd('breadcrumbs', {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE_URL}/blog` },
+          { '@type': 'ListItem', position: 3, name: payload.articleTitle ?? payload.title },
+        ],
+      });
+    } else {
+      removePropertyMeta('article:published_time');
+      setRouteJsonLd('article', null);
+      setRouteJsonLd('breadcrumbs', null);
+    }
   }, [pathname]);
 }
