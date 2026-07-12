@@ -1,4 +1,4 @@
-import type { SwymbleProcessStep } from './types';
+import type { SwymbleProcessStep } from '../types';
 
 // PROCESS SECTION (studio engagement steps, shown in "WORK WITH ME")
 // - step: two-digit step number string, e.g. '01'

@@ -1,4 +1,4 @@
-import type { SwymbleUniverseOrbit } from './types';
+import type { SwymbleUniverseOrbit } from '../types';
 
 // SWYMBLE UNIVERSE SECTION
 // - category: orbit shown around the core planet — a kind of work, not a tech stack

@@ -1,4 +1,4 @@
-import type { SwymbleWhatIDo } from './types';
+import type { SwymbleWhatIDo } from '../types';
 
 // WHAT I DO SECTION
 // - title: card title (usually uppercase)

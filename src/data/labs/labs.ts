@@ -1,5 +1,5 @@
-import type { SwymbleLab } from './types';
-import { createSubdomainUrl } from '../utils/siteUrls';
+import type { SwymbleLab } from '../types';
+import { createSubdomainUrl } from '../../utils/siteUrls';
 
 // LABS SECTION
 // Notes:

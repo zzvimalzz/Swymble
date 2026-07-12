@@ -1,4 +1,4 @@
-import type { SwymbleAbout } from './types';
+import type { SwymbleAbout } from '../types';
 
 // ABOUT SECTION
 // - title: section heading on the About page

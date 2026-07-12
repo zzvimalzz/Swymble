@@ -1,4 +1,4 @@
-import type { SwymbleSkillCategory } from './types';
+import type { SwymbleSkillCategory } from '../types';
 
 // TECH PLANET SECTION
 // - category: orbital domain shown around the core planet

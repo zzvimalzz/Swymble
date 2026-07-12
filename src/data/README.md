@@ -1,5 +1,26 @@
 # Data Guide
 
+## Directory map
+
+Content files are grouped by the page (or site-wide concern) they feed. `config.ts` is still the
+single aggregation point — everything below is assembled into `SWYMBLE_DATA` there, and all types
+live in `types.ts`.
+
+| Folder | Files | Feeds |
+|---|---|---|
+| `site/` | `branding.ts`, `socials.ts` | site-wide brand copy and social links |
+| `home/` | `whatido.ts`, `latestupdates.ts`, `universe.ts` | home focus cards, latest updates, desktop 3D universe |
+| `studio/` | `services.ts`, `process.ts` | "WORK WITH ME" services and engagement process |
+| `projects/` | `projects.ts` | project cards |
+| `about/` | `about.ts`, `techplanet.ts` | about copy and the tech planet stack strip |
+| `labs/` | `labs.ts` | labs entries |
+| `blog/` | `meta.ts`, `posts/` | blog categories and one file per post |
+| `subdomains/` | one folder per subdomain site | static/app subdomain sources (see subdomains/README.md) |
+
+`blog/` and `subdomains/` paths are load-bearing: `scripts/lib/route-data.mjs` regex-reads
+`blog/posts/*.ts`, and `vite.config.ts` + `scripts/lib/subdomains.mjs` scan `subdomains/*` —
+don't move those without updating the scripts.
+
 ## Branding
 ```ts
 export const SWYMBLE_BRANDING = {

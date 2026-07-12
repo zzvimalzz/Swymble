@@ -1,4 +1,4 @@
-import type { SwymbleLatestUpdateCard } from './types';
+import type { SwymbleLatestUpdateCard } from '../types';
 
 // LATEST UPDATES DATA GUIDE
 // - This array controls the manual cards in the Latest Updates carousel.

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 import MobileSiteFooter from '../../components/mobile/MobileSiteFooter';
 import SmartImage from '../../components/SmartImage';
-import { SWYMBLE_LABS } from '../../data/labs';
+import { SWYMBLE_DATA } from '../../data/config';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import { isMailtoLink } from '../../utils/mailto';
 
@@ -33,7 +33,7 @@ function renderLabAction(href: string, label: string, className: string) {
 }
 
 export default function MobileLabs() {
-  const visibleLabs = SWYMBLE_LABS.filter((lab) => lab.visibility !== 'private');
+  const visibleLabs = SWYMBLE_DATA.labs.filter((lab) => lab.visibility !== 'private');
   const [activeLabId, setActiveLabId] = useState(() => {
     const storedId = window.sessionStorage.getItem(ACTIVE_LAB_STORAGE_KEY);
     if (storedId && visibleLabs.some((lab) => lab.id === storedId)) {

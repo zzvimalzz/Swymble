@@ -1,4 +1,4 @@
-import type { SwymbleProject } from './types';
+import type { SwymbleProject } from '../types';
 
 // PROJECTS SECTION
 // Required fields:

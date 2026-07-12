@@ -1,32 +1,32 @@
-import { SWYMBLE_ABOUT } from './about';
+import { SWYMBLE_ABOUT } from './about/about';
+import { SWYMBLE_TECH_PLANET } from './about/techplanet';
 import { SWYMBLE_BLOG } from './blog';
-import { SWYMBLE_BRANDING } from './branding';
-import { SWYMBLE_LABS } from './labs';
-import { SWYMBLE_LATEST_UPDATES } from './latestupdates';
-import { SWYMBLE_PROCESS } from './process';
-import { SWYMBLE_PROJECTS } from './projects';
-import { SWYMBLE_SERVICES } from './services';
-import { SWYMBLE_SOCIALS } from './socials';
-import { SWYMBLE_TECH_PLANET } from './techplanet';
-import { SWYMBLE_UNIVERSE } from './universe';
-import { SWYMBLE_WHAT_I_DO } from './whatido';
+import { SWYMBLE_LATEST_UPDATES } from './home/latestupdates';
+import { SWYMBLE_UNIVERSE } from './home/universe';
+import { SWYMBLE_WHAT_I_DO } from './home/whatido';
+import { SWYMBLE_LABS } from './labs/labs';
+import { SWYMBLE_PROJECTS } from './projects/projects';
+import { SWYMBLE_BRANDING } from './site/branding';
+import { SWYMBLE_SOCIALS } from './site/socials';
+import { SWYMBLE_PROCESS } from './studio/process';
+import { SWYMBLE_SERVICES } from './studio/services';
 import type { SwymbleData } from './types';
 
 export * from './types';
 
 // DATA MAP (where to edit each section)
-// - branding: branding.ts
-// - home focus cards: whatido.ts
-// - studio services: services.ts
-// - studio process: process.ts
-// - projects: projects.ts
-// - latest updates: latestupdates.ts
-// - about: about.ts
-// - labs: labs.ts
+// - branding: site/branding.ts
+// - socials: site/socials.ts
+// - home focus cards: home/whatido.ts
+// - latest updates: home/latestupdates.ts
+// - swymble universe (desktop 3D scene): home/universe.ts
+// - studio services: studio/services.ts
+// - studio process: studio/process.ts
+// - projects: projects/projects.ts
+// - about: about/about.ts
+// - tech planet (About page stack strip): about/techplanet.ts
+// - labs: labs/labs.ts
 // - blog: blog/
-// - tech planet (About page stack strip): techplanet.ts
-// - swymble universe (desktop 3D scene): universe.ts
-// - socials: socials.ts
 export const SWYMBLE_DATA: SwymbleData = {
   name: SWYMBLE_BRANDING.name,
   tagline: SWYMBLE_BRANDING.tagline,

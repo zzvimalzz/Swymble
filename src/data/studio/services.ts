@@ -1,4 +1,4 @@
-import type { SwymbleService } from './types';
+import type { SwymbleService } from '../types';
 
 // SERVICES SECTION (studio offering, shown in "WORK WITH ME")
 // - title: card title (usually uppercase)

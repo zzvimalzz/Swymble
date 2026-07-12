@@ -1,5 +1,5 @@
 import { Github, Mail, MessageCircleMore } from 'lucide-react';
-import type { SwymbleSocial } from './types';
+import type { SwymbleSocial } from '../types';
 
 // SOCIAL LINKS SECTION
 // - id: unique short key
