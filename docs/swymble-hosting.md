@@ -84,15 +84,27 @@ carries a `CNAME` file naming that domain, which
 `scripts/lib/subdomains.mjs` reads so generated SEO files use the right
 host.
 
-One-time Cloudflare setup (full steps in the header comment of
-`cloudflare/watchpaintdry-worker.js`):
+The Worker (`watchpaintdry-site`) is deployed via wrangler — config in
+`cloudflare/watchpaintdry-worker.wrangler.toml`:
 
-1. Add the `watchpaintdry.net` zone to Cloudflare (update nameservers at
-   the registrar; SSL is handled by Cloudflare from then on).
-2. Create a Worker from `cloudflare/watchpaintdry-worker.js`.
-3. Add proxied DNS records for `@` and `www`, and attach routes
-   `watchpaintdry.net/*` and `www.watchpaintdry.net/*` to the Worker.
-4. Verify the site, then disable GitHub Pages on the old standalone
+```bash
+npx wrangler deploy --config cloudflare/watchpaintdry-worker.wrangler.toml
+```
+
+It is live at https://watchpaintdry-site.zzvimalzz.workers.dev, which serves
+content directly (no canonical redirect) so the deployment can be previewed
+before the domain is attached.
+
+Domain cutover (in this order, so the live site never breaks):
+
+1. Push/deploy swymble `main` so `dist/subdomains/watchpaintdry/` is live on
+   GitHub Pages — verify https://watchpaintdry-site.zzvimalzz.workers.dev/
+   serves the site.
+2. Add the `watchpaintdry.net` zone to Cloudflare (update nameservers at the
+   registrar; SSL is handled by Cloudflare from then on).
+3. Uncomment the `routes` block in the wrangler toml and redeploy — wrangler
+   attaches both custom domains and creates the DNS records automatically.
+4. Verify the domain, then disable GitHub Pages on the old standalone
    `watchpaintdry` repo so the domain has a single deployment source.
 
 Behavior:

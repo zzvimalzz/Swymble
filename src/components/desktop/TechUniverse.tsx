@@ -114,10 +114,26 @@ export default function TechUniverse({ skills }: TechUniverseProps) {
     return null;
   }
 
+  // No WebGL context (GPU-less headless browsers, remote desktops, hardened configs): render
+  // the same information as a flat map instead of a 3D scene, so nothing is lost — this is also
+  // what non-JS-rendering crawlers see in prerender snapshots taken on GPU-less CI runners.
   if (webglFailed) {
     return (
-      <div className="tech-universe tech-universe--loading">
-        This browser can't create a WebGL context, so the 3D universe stays grounded here.
+      <div className="tech-universe tech-universe--fallback">
+        <p className="tech-universe-fallback-note">
+          This browser can't create a WebGL context, so here is the universe as a flat map.
+        </p>
+        <ul className="tech-universe-fallback-grid">
+          {skills.map((category) => (
+            <li key={category.category} className="tech-universe-fallback-orbit">
+              <h3>{category.category}</h3>
+              {category.context && <p className="tech-universe-fallback-context">{category.context}</p>}
+              <p className="tech-universe-fallback-items">
+                {category.items.map((item) => item.name).join(' · ')}
+              </p>
+            </li>
+          ))}
+        </ul>
       </div>
     );
   }

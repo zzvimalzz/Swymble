@@ -1,0 +1,32 @@
+# Dependency bumps arrive as reviewable PRs instead of drifting in with unrelated work
+# (a silent framer-motion 12.35→12.38 bump previously shipped alongside a feature commit).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: ['minor', 'patch']
+
+  - package-ecosystem: npm
+    directory: /src/data/subdomains/mybirth
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: ['minor', 'patch']
+
+  - package-ecosystem: npm
+    directory: /src/data/subdomains/what2watch
+    schedule:
+      interval: weekly
+    groups:
+      minor-and-patch:
+        update-types: ['minor', 'patch']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

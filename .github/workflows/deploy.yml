@@ -44,8 +44,20 @@ jobs:
       - name: Install what2watch dependencies
         run: npm ci --prefix src/data/subdomains/what2watch
 
+      - name: Run data-integrity tests
+        run: npm test
+
       - name: Build site
         run: npm run build
+
+      # Report-only Lighthouse audit of the built pages (results land in the job log with a
+      # temporary public report URL). continue-on-error keeps flaky runners from blocking deploys.
+      - name: Lighthouse audit
+        uses: treosh/lighthouse-ci-action@v12
+        continue-on-error: true
+        with:
+          configPath: .lighthouserc.json
+          uploadArtifacts: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

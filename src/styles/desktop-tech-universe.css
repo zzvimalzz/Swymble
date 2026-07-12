@@ -51,6 +51,56 @@
   text-transform: uppercase;
 }
 
+/* Flat-map fallback rendered when the browser can't create a WebGL context — same panel
+   footprint as the 3D scene so the section never shifts layout. */
+.tech-universe--fallback {
+  display: block;
+  min-height: min(860px, 92vh);
+  padding: 4rem clamp(2rem, 6vw, 6rem);
+}
+
+.tech-universe-fallback-note {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(240, 240, 240, 0.6);
+  margin-bottom: 3rem;
+}
+
+.tech-universe-fallback-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem 3rem;
+  padding: 0;
+  margin: 0;
+}
+
+.tech-universe-fallback-orbit h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.tech-universe-fallback-context {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--sw-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.tech-universe-fallback-items {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: rgba(240, 240, 240, 0.82);
+}
+
 .tech-universe__canvas {
   display: block;
   width: 100%;

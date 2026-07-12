@@ -1,0 +1,21 @@
+# Wrangler config for the WatchPaintDry domain-routing Worker.
+# Deploy from the repo root:
+#   npx wrangler deploy --config cloudflare/watchpaintdry-worker.wrangler.toml
+#
+# `workers_dev = true` keeps the watchpaintdry-site.zzvimalzz.workers.dev preview URL live
+# (the Worker serves content there instead of redirecting, see the worker source).
+name = "watchpaintdry-site"
+main = "watchpaintdry-worker.js"
+compatibility_date = "2026-07-01"
+workers_dev = true
+
+# CUTOVER STEP — deliberately commented out until the swymble deploy that contains
+# dist/subdomains/watchpaintdry/ is live on GitHub Pages. Attaching these flips the live
+# watchpaintdry.net DNS to this Worker; done early, the domain would serve 404s.
+# When ready: uncomment, ensure the watchpaintdry.net zone is on this Cloudflare account,
+# and redeploy — wrangler creates the DNS records automatically. Then disable GitHub Pages
+# on the old standalone repo.
+# routes = [
+#   { pattern = "watchpaintdry.net", custom_domain = true },
+#   { pattern = "www.watchpaintdry.net", custom_domain = true },
+# ]

@@ -15,7 +15,8 @@
     "build:mybirth": "npm --prefix src/data/subdomains/mybirth run build",
     "build:what2watch": "npm --prefix src/data/subdomains/what2watch run build",
     "build": "npm run build:main && npm run build:mybirth && npm run build:what2watch",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "@fontsource/anton": "^5.2.7",
@@ -37,7 +38,8 @@
     "concurrently": "^10.0.3",
     "puppeteer": "^25.3.0",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=24.14.0 <25"
