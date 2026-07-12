@@ -114,243 +114,94 @@ html {
   border: 0;
 }
 
-.app-loading-logo {
-  width: clamp(140px, 28vw, 220px);
+/* ---------------------------------------------------------------------------
+   Boot sequence — the restyled loader. Wave glyph (the totem, oscillating in
+   cyan: system light), three mono lines typed via CSS steps(), and a volt
+   progress hairline that completes when content is genuinely ready.
+--------------------------------------------------------------------------- */
+.boot-glyph {
+  width: clamp(56px, 8vw, 72px);
   height: auto;
-  animation: app-loading-logo-pulse 2.4s var(--sw-ease-standard) infinite;
+  overflow: visible;
 }
 
-@keyframes app-loading-logo-pulse {
-  0%, 100% {
-    opacity: 0.82;
-    filter: drop-shadow(0 0 0 rgba(var(--sw-accent-volt-rgb), 0));
-  }
-  50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 14px rgba(var(--sw-accent-volt-rgb), 0.45));
-  }
+.boot-glyph path {
+  stroke: var(--sw-accent-cyan);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.85;
+  animation: boot-glyph-drift 2.2s var(--sw-ease-standard) infinite;
 }
 
-/* Five-square loader, recolored from the reference implementation to cycle
-   through the brand accent trio instead of a single fixed color. */
-.loadingspinner {
-  --square: clamp(16px, 4vw, 22px);
-  --offset: clamp(18px, 5vw, 25px);
-  --duration: 2.4s;
-  --delay: 0.2s;
-  --timing-function: ease-in-out;
-  --in-duration: 0.4s;
-  --in-delay: 0.1s;
-  --in-timing-function: ease-out;
-  width: calc(3 * var(--offset) + var(--square));
-  height: calc(2 * var(--offset) + var(--square));
+.boot-glyph path:nth-child(2) { animation-delay: 0.18s; opacity: 0.6; }
+.boot-glyph path:nth-child(3) { animation-delay: 0.36s; opacity: 0.4; }
+
+@keyframes boot-glyph-drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.boot-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-height: 4.2rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  color: var(--sw-text-muted);
+}
+
+.boot-line {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  width: calc(var(--chars) * 1ch);
+  animation: boot-type steps(var(--chars)) both;
+  animation-duration: calc(var(--chars) * 24ms);
+}
+
+.boot-line:nth-child(2) { animation-delay: 0.3s; }
+.boot-line:nth-child(3) { animation-delay: 0.62s; color: var(--sw-text-main); }
+
+@keyframes boot-type {
+  from { width: 0; }
+  to { width: calc(var(--chars) * 1ch); }
+}
+
+/* Fast boot (repeat visit / headless): no typing, everything present at once. */
+.app-loading--fast .boot-line {
+  animation: none;
+  width: calc(var(--chars) * 1ch);
+}
+
+.boot-progress {
+  width: min(220px, 40vw);
+  height: 2px;
+  background: var(--sw-surface-3);
+  border-radius: 999px;
+  overflow: hidden;
   position: relative;
 }
 
-.loadingspinner div {
-  display: inline-block;
-  border: none;
-  border-radius: 3px;
-  width: var(--square);
-  height: var(--square);
+.boot-progress::after {
+  content: '';
   position: absolute;
-  padding: 0;
-  margin: 0;
-}
-
-.loadingspinner #square1 {
-  left: calc(0 * var(--offset));
-  top: calc(0 * var(--offset));
+  inset: 0;
   background: var(--sw-accent-volt);
-  box-shadow: 0 0 10px rgba(var(--sw-accent-volt-rgb), 0.55);
-  animation: square1 var(--duration) var(--delay) var(--timing-function) infinite,
-    squarefadein var(--in-duration) calc(1 * var(--in-delay)) var(--in-timing-function) both;
+  transform-origin: left center;
+  transform: scaleX(0.15);
+  animation: boot-progress-creep 1.4s var(--sw-ease-out-expo) forwards;
 }
 
-.loadingspinner #square2 {
-  left: calc(0 * var(--offset));
-  top: calc(1 * var(--offset));
-  background: var(--sw-accent-neon);
-  box-shadow: 0 0 10px rgba(var(--sw-accent-neon-rgb), 0.55);
-  animation: square2 var(--duration) var(--delay) var(--timing-function) infinite,
-    squarefadein var(--in-duration) calc(1 * var(--in-delay)) var(--in-timing-function) both;
+@keyframes boot-progress-creep {
+  to { transform: scaleX(0.8); }
 }
 
-.loadingspinner #square3 {
-  left: calc(1 * var(--offset));
-  top: calc(1 * var(--offset));
-  background: var(--sw-accent-cyan);
-  box-shadow: 0 0 10px rgba(var(--sw-accent-cyan-rgb), 0.55);
-  animation: square3 var(--duration) var(--delay) var(--timing-function) infinite,
-    squarefadein var(--in-duration) calc(2 * var(--in-delay)) var(--in-timing-function) both;
-}
-
-.loadingspinner #square4 {
-  left: calc(2 * var(--offset));
-  top: calc(1 * var(--offset));
-  background: var(--sw-accent-volt);
-  box-shadow: 0 0 10px rgba(var(--sw-accent-volt-rgb), 0.55);
-  animation: square4 var(--duration) var(--delay) var(--timing-function) infinite,
-    squarefadein var(--in-duration) calc(3 * var(--in-delay)) var(--in-timing-function) both;
-}
-
-.loadingspinner #square5 {
-  left: calc(3 * var(--offset));
-  top: calc(1 * var(--offset));
-  background: var(--sw-accent-neon);
-  box-shadow: 0 0 10px rgba(var(--sw-accent-neon-rgb), 0.55);
-  animation: square5 var(--duration) var(--delay) var(--timing-function) infinite,
-    squarefadein var(--in-duration) calc(4 * var(--in-delay)) var(--in-timing-function) both;
-}
-
-@keyframes square1 {
-  0% {
-    left: calc(0 * var(--offset));
-    top: calc(0 * var(--offset));
-  }
-  8.333% {
-    left: calc(0 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  100% {
-    left: calc(0 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-}
-
-@keyframes square2 {
-  0% {
-    left: calc(0 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  8.333% {
-    left: calc(0 * var(--offset));
-    top: calc(2 * var(--offset));
-  }
-  16.67% {
-    left: calc(1 * var(--offset));
-    top: calc(2 * var(--offset));
-  }
-  25.00% {
-    left: calc(1 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  83.33% {
-    left: calc(1 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  91.67% {
-    left: calc(1 * var(--offset));
-    top: calc(0 * var(--offset));
-  }
-  100% {
-    left: calc(0 * var(--offset));
-    top: calc(0 * var(--offset));
-  }
-}
-
-@keyframes square3 {
-  0%, 100% {
-    left: calc(1 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  16.67% {
-    left: calc(1 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  25.00% {
-    left: calc(1 * var(--offset));
-    top: calc(0 * var(--offset));
-  }
-  33.33% {
-    left: calc(2 * var(--offset));
-    top: calc(0 * var(--offset));
-  }
-  41.67% {
-    left: calc(2 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  66.67% {
-    left: calc(2 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  75.00% {
-    left: calc(2 * var(--offset));
-    top: calc(2 * var(--offset));
-  }
-  83.33% {
-    left: calc(1 * var(--offset));
-    top: calc(2 * var(--offset));
-  }
-  91.67% {
-    left: calc(1 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-}
-
-@keyframes square4 {
-  0% {
-    left: calc(2 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  33.33% {
-    left: calc(2 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  41.67% {
-    left: calc(2 * var(--offset));
-    top: calc(2 * var(--offset));
-  }
-  50.00% {
-    left: calc(3 * var(--offset));
-    top: calc(2 * var(--offset));
-  }
-  58.33% {
-    left: calc(3 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  100% {
-    left: calc(3 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-}
-
-@keyframes square5 {
-  0% {
-    left: calc(3 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  50.00% {
-    left: calc(3 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  58.33% {
-    left: calc(3 * var(--offset));
-    top: calc(0 * var(--offset));
-  }
-  66.67% {
-    left: calc(2 * var(--offset));
-    top: calc(0 * var(--offset));
-  }
-  75.00% {
-    left: calc(2 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-  100% {
-    left: calc(2 * var(--offset));
-    top: calc(1 * var(--offset));
-  }
-}
-
-@keyframes squarefadein {
-  0% {
-    transform: scale(0.75);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.boot-progress--done::after {
+  animation: none;
+  transform: scaleX(1);
+  transition: transform var(--sw-t-quick) var(--sw-ease-standard);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -361,11 +212,18 @@ html {
     scroll-behavior: auto !important;
   }
 
-  /* The global kill above still lets the logo pulse "land" mid-glow; pin it
-     to a calm static state instead of freezing on a half-lit frame. */
-  .app-loading-logo {
+  /* Boot under reduced motion: lines fully typed, glyph still, bar full. */
+  .boot-line {
     animation: none !important;
-    opacity: 1;
-    filter: none !important;
+    width: calc(var(--chars) * 1ch) !important;
+  }
+
+  .boot-glyph path {
+    animation: none !important;
+  }
+
+  .boot-progress::after {
+    animation: none !important;
+    transform: scaleX(1) !important;
   }
 }

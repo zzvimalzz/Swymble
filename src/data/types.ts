@@ -24,6 +24,21 @@ export type SwymbleProject = {
   testimonial?: { quote: string; author: string };
 };
 
+export type SwymblePositioningStat = {
+  id: string;
+  label: string;
+  value: number;
+  suffix?: string;
+};
+
+export type SwymblePositioning = {
+  /** The claim, as paragraphs. If statementLink is set, its label text is rendered
+   *  as a link wherever it appears inside a paragraph. */
+  statement: string[];
+  statementLink?: { label: string; href: string };
+  stats: SwymblePositioningStat[];
+};
+
 export type SwymbleService = {
   id: string;
   title: string;
@@ -157,6 +172,7 @@ export type SwymbleData = {
   marquee: string;
   contactIntro: string;
   whatIDo: SwymbleWhatIDo[];
+  positioning: SwymblePositioning;
   services: SwymbleService[];
   process: SwymbleProcessStep[];
   projects: SwymbleProject[];

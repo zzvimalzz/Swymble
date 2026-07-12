@@ -3,6 +3,7 @@ import { SWYMBLE_TECH_STACK } from './about/techstack';
 import { SWYMBLE_BLOG } from './blog';
 import { SWYMBLE_BRANDING } from './home/branding';
 import { SWYMBLE_LATEST_UPDATES } from './home/latestupdates';
+import { SWYMBLE_POSITIONING } from './home/positioning';
 import { SWYMBLE_PROCESS } from './home/process';
 import { SWYMBLE_SERVICES } from './home/services';
 import { SWYMBLE_SOCIALS } from './home/socials';
@@ -33,6 +34,7 @@ export const SWYMBLE_DATA: SwymbleData = {
   marquee: SWYMBLE_BRANDING.marquee,
   contactIntro: SWYMBLE_BRANDING.contactIntro,
   whatIDo: SWYMBLE_WHAT_I_DO,
+  positioning: SWYMBLE_POSITIONING,
   services: SWYMBLE_SERVICES,
   process: SWYMBLE_PROCESS,
   projects: SWYMBLE_PROJECTS,

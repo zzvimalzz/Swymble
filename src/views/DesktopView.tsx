@@ -85,7 +85,7 @@ export default function DesktopView() {
   // without adding a matching entry below is a TypeScript compile error — that's the guarantee
   // that stops the desktop view from drifting out of sync with the central route table again.
   const desktopRouteElements: DesktopRouteElements = {
-    '/': <DesktopHome baseUrl={baseUrl} heroY={heroY} heroOpacity={heroOpacity} />,
+    '/': <DesktopHome heroY={heroY} heroOpacity={heroOpacity} />,
     '/projects': <DesktopProjects />,
     '/labs': <DesktopLabs />,
     '/contact': <DesktopContact />,

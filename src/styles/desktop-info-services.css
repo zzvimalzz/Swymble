@@ -4,7 +4,8 @@
   flex-direction: column;
   padding: 0;
   width: 100%;
-  margin-top: 10rem;
+  /* was 10rem — part of the dead-scroll audit finding; chapters breathe at 6rem */
+  margin-top: 6rem;
 }
 
 .info-column {
@@ -72,7 +73,8 @@
 
 /* Home Focus Grid */
 .layout-content {
-  padding: 10rem 5vw;
+  /* vertical was 10rem — tightened as part of the dead-scroll fix */
+  padding: 7rem 5vw 8rem;
   max-width: 1400px;
   margin: 0 auto;
 }

@@ -1,0 +1,156 @@
+/* ---------------------------------------------------------------------------
+   Homepage chapters (Swymble OS): hero status row, StatusLine readout, and the
+   positioning chapter (claim + derived counters) that replaced the old
+   "What You'll Find Here" self-description cards.
+--------------------------------------------------------------------------- */
+
+/* --- StatusLine (shared system readout) ----------------------------------- */
+.status-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0;
+  font-family: var(--sw-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+}
+
+.status-line-sep {
+  opacity: 0.5;
+}
+
+.status-line-available {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--sw-text-main);
+}
+
+.status-line-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--sw-accent-volt);
+  box-shadow: 0 0 8px rgba(var(--sw-accent-volt-rgb), 0.6);
+  animation: status-led-breathe 2s ease-in-out infinite;
+}
+
+@keyframes status-led-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* --- Hero status row ------------------------------------------------------- */
+.hero-status-row {
+  position: absolute;
+  left: clamp(1.5rem, 4vw, 3rem);
+  right: clamp(1.5rem, 4vw, 3rem);
+  bottom: clamp(1.5rem, 4vh, 3rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  z-index: 2;
+}
+
+.hero-scroll-cue {
+  font-family: var(--sw-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  color: var(--sw-text-muted);
+  white-space: nowrap;
+}
+
+.hero-scroll-cue-arrow {
+  display: inline-block;
+  animation: hero-scroll-cue-bob 2s ease-in-out infinite;
+}
+
+@keyframes hero-scroll-cue-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+/* --- Chapter 02: positioning ----------------------------------------------- */
+.positioning-section {
+  padding: var(--sw-s-6) 0 var(--sw-s-9);
+}
+
+.positioning-statement {
+  max-width: 56ch;
+}
+
+.positioning-statement p {
+  margin: 0 0 1.4rem;
+  font-family: var(--sw-font-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.4rem);
+  line-height: 1.28;
+  letter-spacing: -0.005em;
+  color: var(--sw-text-main);
+  text-wrap: balance;
+}
+
+.positioning-statement p + p {
+  font-family: var(--sw-font-human);
+  font-weight: 400;
+  font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.3rem);
+  line-height: 1.7;
+  letter-spacing: 0;
+  color: var(--sw-text-muted);
+}
+
+.positioning-statement a {
+  color: var(--sw-text-main);
+  text-decoration: underline;
+  text-decoration-color: var(--sw-accent-volt);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+  transition: color var(--sw-t-instant) var(--sw-ease-standard);
+}
+
+.positioning-statement a:hover {
+  color: var(--sw-accent-volt);
+}
+
+.positioning-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin: var(--sw-s-8) 0 0;
+  padding: var(--sw-s-6) 0 0;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.positioning-stat {
+  display: flex;
+  flex-direction: column-reverse; /* value above label, without lying to AT order */
+  gap: 0.6rem;
+}
+
+.positioning-stat-value {
+  margin: 0;
+  font-family: var(--sw-font-logo);
+  font-size: clamp(3rem, 2rem + 3vw, 4.5rem);
+  line-height: 1;
+  color: var(--sw-text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+.positioning-stat-label {
+  font-family: var(--sw-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+}
+
+@media screen and (max-width: 1023px) {
+  .positioning-stats {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}

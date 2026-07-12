@@ -1,26 +1,30 @@
-import { motion, MotionValue } from 'framer-motion';
+import { MotionValue } from 'framer-motion';
 import { lazy, Suspense, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import SmartImage from '../../components/SmartImage';
+import { useLocation } from 'react-router-dom';
 import DesktopContactSection from '../../components/desktop/DesktopContactSection';
 import ParallaxMarquee from '../../components/desktop/ParallaxMarquee';
 import ProcessRail from '../../components/desktop/ProcessRail';
 import ProximityCard from '../../components/desktop/ProximityCard';
 import { SWYMBLE_DATA } from '../../data/config';
-import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import { useNearViewport } from '../../hooks/useNearViewport';
+import Chapter01HeroConsole from './home/Chapter01HeroConsole';
+import Chapter02Positioning from './home/Chapter02Positioning';
+import Chapter03ShippedWorkspace from './home/Chapter03ShippedWorkspace';
 import '../../styles/desktop-studio.css';
 
 const TechUniverse = lazy(() => import('../../components/desktop/TechUniverse'));
 
+// Descriptive fallback while the 3D scene loads/mounts — indexable prose instead of
+// a bare "calibrating" placeholder (crawlers snapshot whatever is in the DOM here).
+const UNIVERSE_FALLBACK =
+  'The Swymble Universe: client work, labs experiments, writing, and the engineer behind them, mapped as orbits around one planet.';
+
 type DesktopHomeProps = {
-  baseUrl: string;
   heroY: MotionValue<number>;
   heroOpacity: MotionValue<number>;
 };
 
-export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHomeProps) {
-  const navigate = useNavigate();
+export default function DesktopHome({ heroY, heroOpacity }: DesktopHomeProps) {
   const location = useLocation();
   const { ref: techSectionRef, hasBeenNear: shouldMountTechUniverse } = useNearViewport<HTMLDivElement>('600px');
 
@@ -41,92 +45,14 @@ export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHome
 
   return (
     <>
-      <motion.section className="hero-section" style={{ y: heroY, opacity: heroOpacity }}>
-        <div className="hero-bg-logo" aria-hidden="true">
-          <img
-            src={`${baseUrl}images/white-logo.png`}
-            alt=""
-            loading="eager"
-            fetchPriority="high"
-            width={980}
-            height={342}
-          />
-        </div>
-
-        <h1
-          className="hero-title glitch-mega"
-          data-text={SWYMBLE_DATA.name}
-          data-cursor="hover"
-        >
-          {SWYMBLE_DATA.name}
-        </h1>
-
-        <motion.p
-          className="hero-tagline"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-        >
-          {SWYMBLE_DATA.tagline}
-        </motion.p>
-      </motion.section>
+      <Chapter01HeroConsole heroY={heroY} heroOpacity={heroOpacity} />
 
       <ParallaxMarquee text={SWYMBLE_DATA.marquee} />
 
       <section className="layout-content">
-        <div className="section-header">
-          <h2>What You'll Find Here</h2>
-        </div>
+        <Chapter02Positioning />
 
-        <div className="focus-grid">
-          {SWYMBLE_DATA.whatIDo.map((service, index) => (
-            <ProximityCard key={service.title} service={service} index={index} />
-          ))}
-        </div>
-
-        <div className="work-carousel-section">
-          <div className="section-header">
-            <h2>PROJECTS</h2>
-          </div>
-
-          <div className={`carousel-container ${SWYMBLE_DATA.projects.length <= 3 ? 'grid-mode' : ''}`}>
-            <div className={`carousel-inner ${SWYMBLE_DATA.projects.length <= 3 ? 'grid-mode' : ''}`}>
-              {SWYMBLE_DATA.projects.map((workItem, index) => {
-                const projectId = workItem.title.replace(/\s+/g, '-').toLowerCase();
-                const categoryAccentStyle = getCategoryAccentStyle(workItem.category, workItem.categoryColor);
-                return (
-                  <motion.div
-                    key={workItem.title}
-                    className="carousel-card"
-                    data-cursor="hover"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true, margin: '50px' }}
-                    transition={{ delay: index * 0.1, duration: 0.5 }}
-                    onClick={() => navigate(`/projects#${projectId}`)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className="carousel-image-wrapper">
-                      <SmartImage
-                        src={workItem.image}
-                        alt={workItem.title}
-                        className="carousel-image"
-                        draggable="false"
-                      />
-                    </div>
-                    <div className="carousel-info">
-                      <h3 className="w-client">{workItem.title}</h3>
-                      <div className="carousel-meta">
-                        <span className="w-category category-accent-text" style={categoryAccentStyle}>{workItem.category}</span>
-                        {workItem.client && <span className="w-impact">{workItem.client}</span>}
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        <Chapter03ShippedWorkspace />
 
         <div className="studio-section">
           <div className="section-header">
@@ -149,11 +75,11 @@ export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHome
             </div>
 
             {shouldMountTechUniverse ? (
-              <Suspense fallback={<div className="tech-universe tech-universe--loading">Calibrating the universe...</div>}>
+              <Suspense fallback={<div className="tech-universe tech-universe--loading">{UNIVERSE_FALLBACK}</div>}>
                 <TechUniverse skills={SWYMBLE_DATA.universe} />
               </Suspense>
             ) : (
-              <div className="tech-universe tech-universe--loading">Calibrating the universe...</div>
+              <div className="tech-universe tech-universe--loading">{UNIVERSE_FALLBACK}</div>
             )}
           </div>
         </div>
