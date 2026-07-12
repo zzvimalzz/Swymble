@@ -91,21 +91,23 @@ The Worker (`watchpaintdry-site`) is deployed via wrangler — config in
 npx wrangler deploy --config cloudflare/watchpaintdry-worker.wrangler.toml
 ```
 
-It is live at https://watchpaintdry-site.zzvimalzz.workers.dev, which serves
-content directly (no canonical redirect) so the deployment can be previewed
-before the domain is attached.
+Deployed and live (cutover completed 2026-07-12):
 
-Domain cutover (in this order, so the live site never breaks):
+- https://www.watchpaintdry.net/ — served by the Worker from the monorepo build.
+- https://watchpaintdry.net/* — 301s to the www host (canonical form).
+- https://watchpaintdry-site.zzvimalzz.workers.dev — preview URL; serves content
+  directly (no canonical redirect) so a new deployment can be checked before or
+  without touching the domain.
 
-1. Push/deploy swymble `main` so `dist/subdomains/watchpaintdry/` is live on
-   GitHub Pages — verify https://watchpaintdry-site.zzvimalzz.workers.dev/
-   serves the site.
-2. Add the `watchpaintdry.net` zone to Cloudflare (update nameservers at the
-   registrar; SSL is handled by Cloudflare from then on).
-3. Uncomment the `routes` block in the wrangler toml and redeploy — wrangler
-   attaches both custom domains and creates the DNS records automatically.
-4. Verify the domain, then disable GitHub Pages on the old standalone
-   `watchpaintdry` repo so the domain has a single deployment source.
+The Worker uses **zone routes**, not custom domains: the zone's pre-existing
+proxied DNS records (still pointing at the old GitHub Pages deployment) stay in
+place and the Worker intercepts in front of them. Cloudflare refuses custom
+domains while those records exist (API error 100117), and keeping them means
+deleting the Worker cleanly falls back to whatever the DNS points at.
+
+Remaining manual step: disable GitHub Pages on the old standalone
+`watchpaintdry` repo (repo Settings → Pages) so the domain has a single
+deployment source, then archive that repo.
 
 Behavior:
 
