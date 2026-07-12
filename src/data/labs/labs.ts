@@ -51,7 +51,7 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     title: 'MYBIRTH',
     category: 'BIRTH ARCHIVE',
     categoryColor: '#74e3d0',
-    image: '/images/mybirth_mark.svg',
+    image: '/images/mybirth_logo.png',
     status: 'Live',
     visibility: 'public',
     publicSummary:

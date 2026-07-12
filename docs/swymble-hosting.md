@@ -105,9 +105,8 @@ place and the Worker intercepts in front of them. Cloudflare refuses custom
 domains while those records exist (API error 100117), and keeping them means
 deleting the Worker cleanly falls back to whatever the DNS points at.
 
-Remaining manual step: disable GitHub Pages on the old standalone
-`watchpaintdry` repo (repo Settings → Pages) so the domain has a single
-deployment source, then archive that repo.
+The old standalone `watchpaintdry` repo has been archived (2026-07-12) — this
+repo is the domain's single deployment source.
 
 Behavior:
 
