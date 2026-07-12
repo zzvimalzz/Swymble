@@ -1,0 +1,210 @@
+/* ---------------------------------------------------------------------------
+   Command palette (⌘K) — one of the two sanctioned glass surfaces.
+   Volt marks the selected row (your touch); everything else stays quiet.
+--------------------------------------------------------------------------- */
+
+.palette-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--sw-z-overlay);
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 20vh;
+}
+
+.palette-window {
+  width: min(640px, calc(100vw - 2rem));
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(7, 10, 14, 0.72);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid var(--sw-border-soft);
+  border-radius: 12px;
+  box-shadow: var(--sw-shadow-window), var(--sw-glow-cyan-soft);
+  overflow: hidden;
+  animation: palette-open var(--sw-t-instant) var(--sw-ease-out-expo);
+}
+
+@keyframes palette-open {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.palette-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1rem;
+  height: 56px;
+  border-bottom: 1px solid var(--sw-border-hair);
+  flex: none;
+}
+
+.palette-caret {
+  color: var(--sw-accent-volt);
+  font-family: var(--sw-font-mono);
+  animation: palette-caret-blink 1s steps(2) infinite;
+}
+
+@keyframes palette-caret-blink {
+  50% { opacity: 0; }
+}
+
+.palette-input {
+  flex: 1;
+  background: none;
+  border: 0;
+  outline: none;
+  color: var(--sw-text-main);
+  font-family: var(--sw-font-mono);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+
+.palette-input::placeholder {
+  color: var(--sw-text-muted);
+}
+
+.palette-esc {
+  background: var(--sw-surface-1);
+  border: 1px solid var(--sw-border-strong);
+  border-radius: 6px;
+  color: var(--sw-text-muted);
+  font-family: var(--sw-font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+}
+
+.palette-esc:hover {
+  color: var(--sw-accent-volt);
+  border-color: var(--sw-accent-volt);
+}
+
+.palette-results {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.palette-group-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.palette-group-label {
+  display: block;
+  padding: 0.5rem 1rem 0.25rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--sw-text-muted);
+}
+
+.palette-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 1rem;
+  height: 44px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+
+.palette-option.is-active {
+  background: var(--sw-surface-3);
+  border-left-color: var(--sw-accent-volt);
+}
+
+.palette-option-title {
+  font-family: var(--sw-font-mono);
+  font-size: 0.85rem;
+  color: var(--sw-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.palette-option-meta {
+  font-family: var(--sw-font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--sw-text-muted);
+  white-space: nowrap;
+}
+
+.palette-empty {
+  padding: 1.5rem 1rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.8rem;
+  color: var(--sw-text-muted);
+}
+
+.palette-status {
+  flex: none;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid var(--sw-border-hair);
+  font-family: var(--sw-font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--sw-text-muted);
+}
+
+/* --- System bar additions (nav chip + availability) ------------------------ */
+.nav-palette-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: 1px solid var(--sw-border-strong);
+  border-radius: 6px;
+  color: var(--sw-text-muted);
+  font-family: var(--sw-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+  transition:
+    color var(--sw-t-instant) var(--sw-ease-standard),
+    border-color var(--sw-t-instant) var(--sw-ease-standard);
+}
+
+.nav-palette-chip:hover {
+  color: var(--sw-accent-volt);
+  border-color: var(--sw-accent-volt);
+}
+
+.nav-availability {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--sw-text-muted);
+  white-space: nowrap;
+}
+
+.nav-availability-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--sw-accent-volt);
+  box-shadow: 0 0 8px rgba(var(--sw-accent-volt-rgb), 0.6);
+  animation: status-led-breathe 2s ease-in-out infinite;
+}
+
+@media screen and (max-width: 1279px) {
+  .nav-availability {
+    display: none;
+  }
+}

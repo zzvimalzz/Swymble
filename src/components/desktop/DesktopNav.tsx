@@ -5,9 +5,12 @@ import '../../styles/desktop-nav.css';
 
 type DesktopNavProps = {
   brandName: string;
+  onOpenPalette?: () => void;
 };
 
-export default function DesktopNav({ brandName }: DesktopNavProps) {
+const isMac = typeof navigator !== 'undefined' && /Mac|iP(hone|ad|od)/.test(navigator.platform);
+
+export default function DesktopNav({ brandName, onOpenPalette }: DesktopNavProps) {
   const [isCompact, setIsCompact] = useState(false);
 
   useEffect(() => {
@@ -32,6 +35,23 @@ export default function DesktopNav({ brandName }: DesktopNavProps) {
       </div>
 
       <div className="nav-links">
+        <span className="nav-availability">
+          <span className="nav-availability-led" aria-hidden="true" />
+          AVAILABLE
+        </span>
+
+        {onOpenPalette && (
+          <button
+            type="button"
+            className="nav-palette-chip"
+            onClick={onOpenPalette}
+            aria-label="Open command palette"
+            data-cursor="hover"
+          >
+            {isMac ? '⌘' : 'CTRL'} K
+          </button>
+        )}
+
         {standardRoutes.map((route) => (
           <NavLink
             key={route.path}

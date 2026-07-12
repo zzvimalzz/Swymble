@@ -7,12 +7,14 @@ import {
   useTransform,
 } from 'framer-motion';
 import { Rocket } from 'lucide-react';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import DesktopFooter from '../components/desktop/DesktopFooter';
 import DesktopNav from '../components/desktop/DesktopNav';
 import GlitchCursor from '../components/desktop/GlitchCursor';
+
+const CommandPalette = lazy(() => import('../components/system/CommandPalette'));
 import DesktopHome from './desktop/DesktopHome';
 import DesktopProjects from './desktop/DesktopProjects';
 import DesktopAbout from './desktop/DesktopAbout';
@@ -50,6 +52,34 @@ export default function DesktopView() {
   const location = useLocation();
 
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const closePalette = useCallback(() => setPaletteOpen(false), []);
+
+  // Global palette shortcuts: ⌘K / Ctrl+K anywhere, '/' when no field is focused.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      if ((event.metaKey || event.ctrlKey) && key === 'k') {
+        event.preventDefault();
+        setPaletteOpen((open) => !open);
+        return;
+      }
+      if (key === '/' && !event.metaKey && !event.ctrlKey && !event.altKey) {
+        const target = event.target as HTMLElement | null;
+        const inField =
+          target instanceof HTMLInputElement ||
+          target instanceof HTMLTextAreaElement ||
+          target?.isContentEditable;
+        if (!inField) {
+          event.preventDefault();
+          setPaletteOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   // True only during the very first render — used to skip the page-transition fade on
   // initial load (the app loader already covers it) without disabling anything else.
@@ -99,7 +129,13 @@ export default function DesktopView() {
 
       <div className="bg-grid" aria-hidden="true" />
 
-      <DesktopNav brandName={SWYMBLE_DATA.name} />
+      <DesktopNav brandName={SWYMBLE_DATA.name} onOpenPalette={() => setPaletteOpen(true)} />
+
+      {paletteOpen && (
+        <Suspense fallback={null}>
+          <CommandPalette onClose={closePalette} />
+        </Suspense>
+      )}
 
       <main id="main-content">
         {/* initial={false} must live on the wrapper div, NOT on AnimatePresence: there it
