@@ -1,0 +1,140 @@
+[
+  {
+    "minMinutes": 0,
+    "maxMinutes": 1,
+    "emoji": "👶",
+    "title": "Paint Newbie"
+  },
+  {
+    "minMinutes": 1,
+    "maxMinutes": 3,
+    "emoji": "🎨",
+    "title": "Brush Beginner"
+  },
+  {
+    "minMinutes": 3,
+    "maxMinutes": 5,
+    "emoji": "🖌️",
+    "title": "Drying Dabbler"
+  },
+  {
+    "minMinutes": 5,
+    "maxMinutes": 10,
+    "emoji": "🌟",
+    "title": "Getting There"
+  },
+  {
+    "minMinutes": 10,
+    "maxMinutes": 15,
+    "emoji": "😌",
+    "title": "Chill Watcher"
+  },
+  {
+    "minMinutes": 15,
+    "maxMinutes": 20,
+    "emoji": "⭐",
+    "title": "Dedicated Observer"
+  },
+  {
+    "minMinutes": 20,
+    "maxMinutes": 30,
+    "emoji": "🧘",
+    "title": "Zen Master"
+  },
+  {
+    "minMinutes": 30,
+    "maxMinutes": 45,
+    "emoji": "💎",
+    "title": "Paint Whisperer"
+  },
+  {
+    "minMinutes": 45,
+    "maxMinutes": 60,
+    "emoji": "🏆",
+    "title": "Drying Expert"
+  },
+  {
+    "minMinutes": 60,
+    "maxMinutes": 90,
+    "emoji": "👑",
+    "title": "Paint Royalty"
+  },
+  {
+    "minMinutes": 90,
+    "maxMinutes": 120,
+    "emoji": "🦉",
+    "title": "Wise Watcher"
+  },
+  {
+    "minMinutes": 120,
+    "maxMinutes": 180,
+    "emoji": "🧙",
+    "title": "Time Wizard"
+  },
+  {
+    "minMinutes": 180,
+    "maxMinutes": 240,
+    "emoji": "🎖️",
+    "title": "Legendary Patience"
+  },
+  {
+    "minMinutes": 240,
+    "maxMinutes": 360,
+    "emoji": "🌌",
+    "title": "Cosmic Observer"
+  },
+  {
+    "minMinutes": 360,
+    "maxMinutes": 480,
+    "emoji": "🗿",
+    "title": "Stone Statue"
+  },
+  {
+    "minMinutes": 480,
+    "maxMinutes": 720,
+    "emoji": "⏳",
+    "title": "Time Itself"
+  },
+  {
+    "minMinutes": 720,
+    "maxMinutes": 1440,
+    "emoji": "🌟",
+    "title": "All-Nighter Achiever"
+  },
+  {
+    "minMinutes": 1440,
+    "maxMinutes": 2880,
+    "emoji": "🦾",
+    "title": "Unstoppable Force"
+  },
+  {
+    "minMinutes": 2880,
+    "maxMinutes": 4320,
+    "emoji": "👽",
+    "title": "Not Human"
+  },
+  {
+    "minMinutes": 4320,
+    "maxMinutes": 10080,
+    "emoji": "🛸",
+    "title": "Alien Life Form"
+  },
+  {
+    "minMinutes": 10080,
+    "maxMinutes": 43200,
+    "emoji": "🔮",
+    "title": "Immortal Being"
+  },
+  {
+    "minMinutes": 43200,
+    "maxMinutes": 525600,
+    "emoji": "∞",
+    "title": "Eternal Watcher"
+  },
+  {
+    "minMinutes": 525600,
+    "maxMinutes": 999999999,
+    "emoji": "🌌",
+    "title": "Transcendent Entity"
+  }
+]

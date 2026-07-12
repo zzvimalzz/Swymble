@@ -1,0 +1,162 @@
+[
+  {
+    "id": "first_visit",
+    "name": "First Glimpse",
+    "description": "Visit the site for the first time",
+    "icon": "👀",
+    "requirement": {
+      "type": "visits",
+      "value": 1
+    }
+  },
+  {
+    "id": "first_click",
+    "name": "Curious Clicker",
+    "description": "Click the paint wall",
+    "icon": "👆",
+    "requirement": {
+      "type": "clicks",
+      "value": 1
+    }
+  },
+  {
+    "id": "one_minute",
+    "name": "Minute Master",
+    "description": "Watch for 1 minute",
+    "icon": "⏱️",
+    "requirement": {
+      "type": "session",
+      "value": 1
+    }
+  },
+  {
+    "id": "five_minutes",
+    "name": "Five Alive",
+    "description": "Watch for 5 minutes",
+    "icon": "🌟",
+    "requirement": {
+      "type": "session",
+      "value": 5
+    }
+  },
+  {
+    "id": "ten_minutes",
+    "name": "Dedicated Watcher",
+    "description": "Watch for 10 minutes",
+    "icon": "⭐",
+    "requirement": {
+      "type": "session",
+      "value": 10
+    }
+  },
+  {
+    "id": "thirty_minutes",
+    "name": "Half Hour Hero",
+    "description": "Watch for 30 minutes",
+    "icon": "💎",
+    "requirement": {
+      "type": "session",
+      "value": 30
+    }
+  },
+  {
+    "id": "one_hour",
+    "name": "Hour of Power",
+    "description": "Watch for 1 hour",
+    "icon": "🏆",
+    "requirement": {
+      "type": "session",
+      "value": 60
+    }
+  },
+  {
+    "id": "click_10",
+    "name": "Tap Master",
+    "description": "Click 10 times",
+    "icon": "👏",
+    "requirement": {
+      "type": "clicks",
+      "value": 10
+    }
+  },
+  {
+    "id": "click_50",
+    "name": "Click Fanatic",
+    "description": "Click 50 times",
+    "icon": "🔥",
+    "requirement": {
+      "type": "clicks",
+      "value": 50
+    }
+  },
+  {
+    "id": "click_100",
+    "name": "Century Clicker",
+    "description": "Click 100 times",
+    "icon": "💯",
+    "requirement": {
+      "type": "clicks",
+      "value": 100
+    }
+  },
+  {
+    "id": "visit_5",
+    "name": "Regular Visitor",
+    "description": "Visit 5 times",
+    "icon": "🚪",
+    "requirement": {
+      "type": "visits",
+      "value": 5
+    }
+  },
+  {
+    "id": "visit_10",
+    "name": "Frequent Flyer",
+    "description": "Visit 10 times",
+    "icon": "✈️",
+    "requirement": {
+      "type": "visits",
+      "value": 10
+    }
+  },
+  {
+    "id": "visit_25",
+    "name": "Paint Devotee",
+    "description": "Visit 25 times",
+    "icon": "🙏",
+    "requirement": {
+      "type": "visits",
+      "value": 25
+    }
+  },
+  {
+    "id": "two_hours",
+    "name": "Marathon Watcher",
+    "description": "Watch for 2 hours",
+    "icon": "🏃",
+    "requirement": {
+      "type": "session",
+      "value": 120
+    }
+  },
+  {
+    "id": "three_hours",
+    "name": "Paint Philosopher",
+    "description": "Watch for 3 hours",
+    "icon": "🧙",
+    "requirement": {
+      "type": "session",
+      "value": 180
+    }
+  },
+  {
+    "id": "click_500",
+    "name": "Unstoppable Clicker",
+    "description": "Click 500 times",
+    "icon": "⚡",
+    "requirement": {
+      "type": "clicks",
+      "value": 500
+    }
+  }
+]
