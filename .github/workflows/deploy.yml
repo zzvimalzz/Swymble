@@ -49,6 +49,9 @@ jobs:
 
       - name: Build site
         run: npm run build
+        env:
+          # Surfaces the real commit in StatusLine/footer readouts (utils/buildInfo.ts).
+          VITE_COMMIT: ${{ github.sha }}
 
       # Report-only Lighthouse audit of the built pages (results land in the job log with a
       # temporary public report URL). continue-on-error keeps flaky runners from blocking deploys.

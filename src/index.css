@@ -29,6 +29,36 @@ html {
   outline-offset: 3px;
 }
 
+/* Selecting text is touching it — volt is the touch channel. */
+::selection {
+  background: var(--sw-accent-volt);
+  color: var(--sw-bg-ink);
+}
+
+/* System-styled scrollbar: part of the OS chrome, volt only under the hand. */
+html {
+  scrollbar-color: var(--sw-surface-3) var(--sw-bg-ink);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--sw-bg-ink);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sw-surface-3);
+  border-radius: 999px;
+  border: 2px solid var(--sw-bg-ink);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sw-accent-volt);
+}
+
 .skip-link {
   position: fixed;
   top: -100%;

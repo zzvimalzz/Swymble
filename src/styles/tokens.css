@@ -1,6 +1,9 @@
 :root {
   /* -------------------------------------------------------------------------- */
   /* COLORS                                                                      */
+  /* Accent doctrine (Swymble OS): volt = touch (anything interactive), cyan =   */
+  /* light (system effects, glow, data), neon = live/alert status. Volt is the   */
+  /* brand signature — cyan must never appear on a clickable affordance.         */
   /* -------------------------------------------------------------------------- */
   --sw-bg-ink: #050505;
   --sw-bg-void: #000000;
@@ -8,22 +11,40 @@
   --sw-text-muted: #a7a7a7;
   --sw-line-muted: #4a4a4a;
   --sw-accent-volt: #EFFF04;
+  --sw-accent-volt-bright: #F4FF3D;
+  --sw-accent-volt-pressed: #D9E800;
   --sw-accent-neon: #FF003C;
   --sw-accent-cyan: #00F0FF;
+  --sw-accent-electric: #2F6BFF;
 
   /* RGB triplet helpers (for rgba() composition) */
   --sw-accent-volt-rgb: 239, 255, 4;
   --sw-accent-neon-rgb: 255, 0, 60;
   --sw-accent-cyan-rgb: 0, 240, 255;
+  --sw-accent-electric-rgb: 47, 107, 255;
 
   /* -------------------------------------------------------------------------- */
   /* SURFACES / BORDERS                                                          */
+  /* Surface ladder: panels sit on ink, windows on panels, raised on windows.    */
   /* -------------------------------------------------------------------------- */
+  --sw-border-hair: rgba(255, 255, 255, 0.08);
   --sw-border-soft: rgba(255, 255, 255, 0.12);
+  --sw-border-strong: rgba(255, 255, 255, 0.18);
   --sw-border-volt: rgba(239, 255, 4, 0.34);
   --sw-surface-faint: rgba(255, 255, 255, 0.05);
   --sw-surface-strong: rgba(255, 255, 255, 0.09);
+  --sw-surface-1: #0b0f14;
+  --sw-surface-2: #0d1420;
+  --sw-surface-3: #151c26;
+  --sw-surface-terminal: #07090c;
   --sw-shadow-panel: 0 0.8rem 2.2rem rgba(0, 0, 0, 0.52);
+  --sw-shadow-window: 0 1rem 3rem rgba(0, 0, 0, 0.6);
+
+  /* Glow set — cyan glows belong to the system (LEDs, canvas, data), never to
+     buttons/links; volt glow is reserved for focus/hover on touchable things. */
+  --sw-glow-cyan-soft: 0 0 24px rgba(var(--sw-accent-cyan-rgb), 0.15);
+  --sw-glow-cyan-strong: 0 0 40px rgba(var(--sw-accent-cyan-rgb), 0.25);
+  --sw-glow-volt-focus: 0 0 0 2px var(--sw-bg-ink), 0 0 0 4px var(--sw-accent-volt);
 
   /* -------------------------------------------------------------------------- */
   /* RADII                                                                       */
@@ -34,19 +55,41 @@
 
   /* -------------------------------------------------------------------------- */
   /* TYPOGRAPHY                                                                  */
+  /* Four voices: logo/poster (Anton), product (Syne), human (Plex — all         */
+  /* long-form reading), machine (JetBrains Mono — status, labels, terminal).    */
   /* -------------------------------------------------------------------------- */
-  --sw-font-logo: 'Anton', sans-serif;
+  --sw-font-logo: 'Anton', 'Arial Narrow', sans-serif;
   --sw-font-display: 'Syne', sans-serif;
+  --sw-font-human: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
   --sw-font-mono: 'JetBrains Mono', monospace;
 
   /* -------------------------------------------------------------------------- */
   /* MOTION                                                                      */
+  /* Duration tokens mirror src/components/motion/motionTokens.ts — change both. */
   /* -------------------------------------------------------------------------- */
   --sw-motion-fast: 0.2s;
   --sw-motion-med: 0.35s;
   --sw-motion-slow: 0.7s;
+  --sw-t-instant: 120ms;
+  --sw-t-quick: 240ms;
+  --sw-t-scene: 420ms;
+  --sw-t-hero: 700ms;
   --sw-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
   --sw-ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --sw-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* -------------------------------------------------------------------------- */
+  /* SPACING (4px base)                                                          */
+  /* -------------------------------------------------------------------------- */
+  --sw-s-2: 0.5rem;
+  --sw-s-3: 0.75rem;
+  --sw-s-4: 1rem;
+  --sw-s-5: 1.5rem;
+  --sw-s-6: 2rem;
+  --sw-s-7: 3rem;
+  --sw-s-8: 4rem;
+  --sw-s-9: 6rem;
+  --sw-s-10: 8rem;
 
   /* -------------------------------------------------------------------------- */
   /* Z-INDEX                                                                     */

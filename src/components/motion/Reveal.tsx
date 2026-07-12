@@ -1,8 +1,14 @@
 import { motion } from 'framer-motion';
 import type { CSSProperties, ReactNode } from 'react';
+import { EASE, MOTION, STAGGER_CAP } from './motionTokens';
 
-/** Index-based stagger delay (seconds) shared by list-style Reveal usages. */
-export const REVEAL_STAGGER = 0.12;
+/** Index-based stagger delay (seconds) shared by list-style Reveal usages.
+ *  Capped: siblings past STAGGER_CAP arrive together instead of queuing. */
+export const REVEAL_STAGGER = 0.08;
+
+export function revealDelay(index: number): number {
+  return Math.min(index, STAGGER_CAP - 1) * REVEAL_STAGGER;
+}
 
 type RevealAs = 'div' | 'section' | 'article' | 'li';
 
@@ -21,7 +27,7 @@ type RevealProps = {
   id?: string;
 };
 
-const REVEAL_EASE = [0.2, 0.8, 0.2, 1] as const;
+const REVEAL_EASE = EASE.standard;
 
 const REVEAL_COMPONENTS = {
   div: motion.div,
@@ -33,7 +39,7 @@ const REVEAL_COMPONENTS = {
 export default function Reveal({
   children,
   delay = 0,
-  y = 32,
+  y = 24,
   x = 0,
   once = true,
   margin = '-60px',
@@ -52,7 +58,7 @@ export default function Reveal({
       initial={{ opacity: 0, y, x }}
       whileInView={{ opacity: 1, y: 0, x: 0 }}
       viewport={{ once, margin }}
-      transition={{ delay, duration: 0.6, ease: REVEAL_EASE }}
+      transition={{ delay, duration: MOTION.scene, ease: REVEAL_EASE }}
     >
       {children}
     </MotionComponent>
