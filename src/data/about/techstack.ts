@@ -1,6 +1,6 @@
 import type { SwymbleSkillCategory } from '../types';
 
-// TECH PLANET SECTION
+// TECH STACK SECTION (About page stack strip)
 // - category: orbital domain shown around the core planet
 // - context: short copy shown when the orbit is focused
 // - proof: "SEEN IN" links shown when the category/item is focused — real projects, labs, or
@@ -10,7 +10,7 @@ import type { SwymbleSkillCategory } from '../types';
 // - items[].name: moon label shown in the scene and hover tooltip
 // - items[].color: hex color used for moon glow and orbit accents
 // - items[].moonModelId: optional model pin; valid ids are moon-01 through moon-08
-export const SWYMBLE_TECH_PLANET: SwymbleSkillCategory[] = [
+export const SWYMBLE_TECH_STACK: SwymbleSkillCategory[] = [
   {
     category: 'LANGUAGES',
     context: 'Core syntax, type systems, and everyday problem solving.',
