@@ -724,9 +724,10 @@
      and off-center. Scale down at narrow widths so the longest word always fits. */
   font-size: clamp(1.9rem, 6vw + 0.8rem, 3.2rem);
   margin: 0 0 1rem;
-  letter-spacing: 1px;
+  letter-spacing: 0.03em;
   color: #ffffff;
-  line-height: 1;
+  /* A touch of leading keeps stacked uppercase lines ("SOFTWARE ENGINEERING") from touching. */
+  line-height: 1.08;
 }
 
 .service-desc {

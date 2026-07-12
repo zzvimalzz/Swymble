@@ -10,6 +10,8 @@ type RevealProps = {
   children: ReactNode;
   delay?: number;
   y?: number;
+  /** Optional horizontal entrance offset (px) for diagonal reveals; 0 keeps the classic rise. */
+  x?: number;
   once?: boolean;
   margin?: string;
   className?: string;
@@ -32,6 +34,7 @@ export default function Reveal({
   children,
   delay = 0,
   y = 32,
+  x = 0,
   once = true,
   margin = '-60px',
   className,
@@ -46,8 +49,8 @@ export default function Reveal({
       id={id}
       className={className}
       style={style}
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y, x }}
+      whileInView={{ opacity: 1, y: 0, x: 0 }}
       viewport={{ once, margin }}
       transition={{ delay, duration: 0.6, ease: REVEAL_EASE }}
     >

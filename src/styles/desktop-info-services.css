@@ -181,9 +181,13 @@
 
 .service-card-title {
   font-family: var(--font-display);
+  /* Syne 700 (loaded in main.tsx) instead of the h3-default 700→800 fallback snap: the 800 cut's
+     closed counters plus near-solid leading made uppercase titles clot at this size. Slightly
+     open tracking and leading finish the job — uppercase needs more of both than mixed case. */
+  font-weight: 700;
   font-size: clamp(1.55rem, 1.4rem + 0.85vw, 1.95rem);
-  line-height: 1.02;
-  letter-spacing: 0.02em;
+  line-height: 1.14;
+  letter-spacing: 0.045em;
   max-width: 10ch;
   margin: 0 auto 1.75rem;
   text-transform: uppercase;

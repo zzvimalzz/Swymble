@@ -1,10 +1,10 @@
 import { motion, MotionValue } from 'framer-motion';
 import { lazy, Suspense, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Reveal from '../../components/motion/Reveal';
 import SmartImage from '../../components/SmartImage';
 import DesktopContactSection from '../../components/desktop/DesktopContactSection';
 import ParallaxMarquee from '../../components/desktop/ParallaxMarquee';
+import ProcessRail from '../../components/desktop/ProcessRail';
 import ProximityCard from '../../components/desktop/ProximityCard';
 import { SWYMBLE_DATA } from '../../data/config';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
@@ -139,21 +139,7 @@ export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHome
             ))}
           </div>
 
-          <div className="process-rail">
-            {SWYMBLE_DATA.process.map((step, index) => (
-              <Reveal
-                key={step.id}
-                className="process-step"
-                y={24}
-                margin="-80px"
-                delay={index * 0.12}
-              >
-                <span className="process-step-number">{step.step}</span>
-                <h3 className="process-step-title">{step.title}</h3>
-                <p className="process-step-desc">{step.desc}</p>
-              </Reveal>
-            ))}
-          </div>
+          <ProcessRail process={SWYMBLE_DATA.process} />
         </div>
 
         <div className="info-row" ref={techSectionRef}>

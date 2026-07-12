@@ -85,7 +85,7 @@ export default function TechUniverse({ skills }: TechUniverseProps) {
     setActiveTech({ category: '' });
   }, []);
 
-  useTechUniverseScene(canvasRef, {
+  const webglFailed = useTechUniverseScene(canvasRef, {
     skills,
     activeTechRef,
     focusedCategoryRef,
@@ -112,6 +112,14 @@ export default function TechUniverse({ skills }: TechUniverseProps) {
 
   if (!skills.length) {
     return null;
+  }
+
+  if (webglFailed) {
+    return (
+      <div className="tech-universe tech-universe--loading">
+        This browser can't create a WebGL context, so the 3D universe stays grounded here.
+      </div>
+    );
   }
 
   return (

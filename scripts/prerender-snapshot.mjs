@@ -106,6 +106,41 @@ const snapshotRoute = async (page, baseUrl, routePath) => {
     { timeout: SNAPSHOT_TIMEOUT_MS },
   );
 
+  // Scroll through the page before capturing: entrance animations are viewport-triggered
+  // (whileInView, once: true), so without this pass every below-fold section would be
+  // frozen into the snapshot at opacity 0 with its entrance transform still applied.
+  // Sweeping to the bottom fires them all; they settle at full opacity and stay there.
+  await page.evaluate(async () => {
+    const step = Math.max(200, Math.floor(window.innerHeight * 0.7));
+    for (let y = 0; y <= document.body.scrollHeight; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    }
+    window.scrollTo(0, 0);
+  });
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  // The sweep mounts lazy below-fold sections; if one of them throws (a browser feature this
+  // headless environment lacks), React unmounts the whole root and content() would capture an
+  // empty shell. In that case reload and capture without sweeping — below-fold entrances stay
+  // at their pre-animation state in that snapshot, but all text content is present.
+  const stillRendered = await page.evaluate(
+    () => (document.querySelector('#main-content')?.textContent ?? '').trim().length > 40,
+  );
+
+  if (!stillRendered) {
+    console.warn(`[prerender-snapshot] ${routePath}: app unmounted during scroll sweep — recapturing without sweep.`);
+    await page.goto(url, { waitUntil: 'networkidle0', timeout: SNAPSHOT_TIMEOUT_MS });
+    await page.waitForFunction(
+      () => {
+        const loaderGone = !document.querySelector('.app-loading');
+        const main = document.querySelector('#main-content');
+        return loaderGone && (main?.textContent ?? '').trim().length > 40;
+      },
+      { timeout: SNAPSHOT_TIMEOUT_MS },
+    );
+  }
+
   const html = await page.content();
   await writeRouteFile(routePath, html);
 };

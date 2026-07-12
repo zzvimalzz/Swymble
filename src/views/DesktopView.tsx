@@ -51,6 +51,13 @@ export default function DesktopView() {
 
   const [showScrollTop, setShowScrollTop] = useState(false);
 
+  // True only during the very first render — used to skip the page-transition fade on
+  // initial load (the app loader already covers it) without disabling anything else.
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    isFirstRender.current = false;
+  }, []);
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { scrollYProgress } = useScroll({ target: containerRef });
@@ -95,10 +102,16 @@ export default function DesktopView() {
       <DesktopNav brandName={SWYMBLE_DATA.name} />
 
       <main id="main-content">
-        <AnimatePresence mode="wait" initial={false}>
+        {/* initial={false} must live on the wrapper div, NOT on AnimatePresence: there it
+            sets PresenceContext.initial=false for the whole route subtree on first load,
+            which silently suppresses every descendant's `initial` — all whileInView
+            entrance animations (focus cards, project carousel, process rail) rendered
+            pre-completed on first visit. Skipping just the wrapper's own fade keeps the
+            original intent (no double-fade behind the app loader) without that side effect. */}
+        <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, y: 14 }}
+            initial={isFirstRender.current ? false : { opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={PAGE_TRANSITION}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import * as THREE from 'three';
 import type { SwymbleSkillCategory, SwymbleSkillItem } from '../../data/types';
 import { setCursorHover } from './GlitchCursor';
@@ -111,13 +111,27 @@ export const useTechUniverseScene = (
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   { skills, activeTechRef, focusedCategoryRef, focusedItemRef, setActiveTech, setTooltip, onSelectItem, onSelectCategory, onClearFocus }: UseTechUniverseSceneOptions,
 ) => {
+  // WebGLRenderer construction throws when no WebGL context is available (GPU-less headless
+  // browsers, remote desktops, hardened browser configs). Left uncaught, that error unmounts
+  // the entire React root the moment this section scrolls into view — so it's caught here and
+  // reported back, letting the component swap in a non-3D fallback instead.
+  const [webglFailed, setWebglFailed] = useState(false);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    } catch (error) {
+      console.warn('[tech-universe] WebGL context unavailable — skipping the 3D scene.', error);
+      setWebglFailed(true);
+      return;
+    }
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(CAMERA_FOV, 1, 0.1, 100);
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     const universeGroup = new THREE.Group();
     const moonRecords: MoonRecord[] = [];
     const orbitRecords: OrbitRecord[] = [];
@@ -521,4 +535,6 @@ export const useTechUniverseScene = (
       renderer.dispose();
     };
   }, [activeTechRef, canvasRef, focusedCategoryRef, focusedItemRef, setActiveTech, setTooltip, skills, onSelectItem, onSelectCategory, onClearFocus]);
+
+  return webglFailed;
 };

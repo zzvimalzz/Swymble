@@ -40,7 +40,8 @@ export default function MobileStudio({ services, process }: MobileStudioProps) {
           <Reveal
             key={step.id}
             className="mobile-process-step"
-            y={24}
+            y={28}
+            x={-20}
             margin="-50px"
             delay={idx * 0.1}
           >
