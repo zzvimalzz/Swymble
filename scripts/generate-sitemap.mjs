@@ -1,23 +1,18 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { ROOT_DIR, loadRouteData, loadBlogPosts } from './lib/route-data.mjs';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const ROOT_DIR = path.resolve(__dirname, '..');
-
-const SITE_URL = 'https://swymble.com';
-const POSTS_DIR = path.join(ROOT_DIR, 'src', 'data', 'blog', 'posts');
 const OUTPUT_PATH = path.join(ROOT_DIR, 'public', 'sitemap.xml');
 
-const STATIC_ROUTES = [
-  { path: '/', changefreq: 'weekly', priority: '1.0' },
-  { path: '/projects', changefreq: 'monthly', priority: '0.8' },
-  { path: '/labs', changefreq: 'weekly', priority: '0.8' },
-  { path: '/contact', changefreq: 'monthly', priority: '0.8' },
-  { path: '/about', changefreq: 'monthly', priority: '0.7' },
-  { path: '/blog', changefreq: 'weekly', priority: '0.8' },
-];
+const STATIC_ROUTE_META = {
+  '/': { changefreq: 'weekly', priority: '1.0' },
+  '/projects': { changefreq: 'monthly', priority: '0.8' },
+  '/labs': { changefreq: 'weekly', priority: '0.8' },
+  '/contact': { changefreq: 'monthly', priority: '0.8' },
+  '/about': { changefreq: 'monthly', priority: '0.7' },
+  '/blog': { changefreq: 'weekly', priority: '0.8' },
+};
+const DEFAULT_ROUTE_META = { changefreq: 'monthly', priority: '0.6' };
 
 const escapeXml = (value) =>
   value
@@ -26,22 +21,6 @@ const escapeXml = (value) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
-
-const normalizeDate = (value) => {
-  if (!value) return null;
-  const trimmed = value.trim();
-  return /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? trimmed : null;
-};
-
-const parsePostFile = (fileContent, fallbackId) => {
-  const idMatch = fileContent.match(/\bid\s*:\s*['"`]([^'"`]+)['"`]/);
-  const dateMatch = fileContent.match(/\bdate\s*:\s*['"`](\d{4}-\d{2}-\d{2})['"`]/);
-
-  return {
-    id: (idMatch?.[1] ?? fallbackId).trim(),
-    lastmod: normalizeDate(dateMatch?.[1] ?? null),
-  };
-};
 
 const buildUrlNode = ({ loc, changefreq, priority, lastmod }) => {
   const lines = ['  <url>', `    <loc>${escapeXml(loc)}</loc>`];
@@ -62,58 +41,34 @@ const buildUrlNode = ({ loc, changefreq, priority, lastmod }) => {
   return lines.join('\n');
 };
 
-const toAbsoluteUrl = (routePath) => {
-  if (routePath === '/') {
-    return `${SITE_URL}/`;
-  }
-
-  return `${SITE_URL}${routePath}`;
-};
-
-const getBlogRoutes = async () => {
-  const entries = await fs.readdir(POSTS_DIR, { withFileTypes: true });
-  const postFiles = entries
-    .filter((entry) => entry.isFile())
-    .map((entry) => entry.name)
-    .filter((fileName) => fileName.endsWith('.ts') && fileName !== 'index.ts')
-    .sort();
-
-  const routes = [];
-
-  for (const fileName of postFiles) {
-    const filePath = path.join(POSTS_DIR, fileName);
-    const fileContent = await fs.readFile(filePath, 'utf8');
-    const fallbackId = fileName.replace(/\.ts$/, '');
-    const postMeta = parsePostFile(fileContent, fallbackId);
-
-    routes.push({
-      path: `/blog/${postMeta.id}`,
-      changefreq: 'monthly',
-      priority: '0.7',
-      lastmod: postMeta.lastmod,
-    });
-  }
-
-  return routes;
-};
+const toAbsoluteUrl = (siteUrl, routePath) => (routePath === '/' ? `${siteUrl}/` : `${siteUrl}${routePath}`);
 
 const generateSitemapXml = async () => {
-  const blogRoutes = await getBlogRoutes();
-  const allRoutes = [...STATIC_ROUTES, ...blogRoutes];
+  const [{ siteUrl, routes }, blogPosts] = await Promise.all([loadRouteData(), loadBlogPosts()]);
 
-  const xmlNodes = allRoutes.map((route) =>
+  // SITE_ROUTES is the single source of truth (src/routes.ts) — adding a page there and setting
+  // shouldIndex: true is enough for it to show up here automatically, no separate list to update.
+  const pageNodes = routes
+    .filter((route) => route.shouldIndex !== false)
+    .map((route) => {
+      const meta = STATIC_ROUTE_META[route.path] ?? DEFAULT_ROUTE_META;
+      return buildUrlNode({ loc: toAbsoluteUrl(siteUrl, route.path), ...meta });
+    });
+
+  const blogNodes = blogPosts.map((post) =>
     buildUrlNode({
-      loc: toAbsoluteUrl(route.path),
-      changefreq: route.changefreq,
-      priority: route.priority,
-      lastmod: route.lastmod,
-    })
+      loc: toAbsoluteUrl(siteUrl, `/blog/${post.id}`),
+      changefreq: 'monthly',
+      priority: '0.7',
+      lastmod: post.lastmod,
+    }),
   );
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ...xmlNodes,
+    ...pageNodes,
+    ...blogNodes,
     '</urlset>',
     '',
   ].join('\n');

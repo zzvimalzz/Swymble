@@ -1,0 +1,16 @@
+# MyBirth
+
+> MyBirth turns a name, birth date, and birthplace into a cinematic
+> archive of the moon, weather, headlines, music, film, and symbols
+> from the day someone arrived.
+
+Enter a name, date, and place of birth to generate a personalized,
+single-page record: moon phase and illumination, historical weather,
+that day's top headlines, the era's music and film, and other
+symbolic details tied to the date and location.
+
+MyBirth is a Swymble build. Site: https://swymble.com
+
+## Contact
+
+Email: hello@swymble.com

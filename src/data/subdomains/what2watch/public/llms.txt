@@ -1,0 +1,17 @@
+# what2watch
+
+> A living wall of movies and shows packed into a single screen: an
+> interactive, force-directed voronoi visualization for exploring tens
+> of thousands of films and series instead of scrolling a recommendation
+> feed.
+
+what2watch renders a large catalog of movies and TV shows as a
+force-directed voronoi diagram in the browser (WebGL). Users explore
+by panning and clicking through the layout rather than searching a
+list. Data is sourced from TMDB and TVmaze.
+
+what2watch is a Swymble Labs experiment. Site: https://swymble.com
+
+## Contact
+
+Email: hello@swymble.com

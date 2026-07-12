@@ -23,6 +23,15 @@ tools, and client projects.
 Company profile sites, product builds, and AI-powered systems, delivered
 with enterprise-grade discipline drawn from fintech production work.
 
+## Related builds (subdomains)
+
+- https://mybirth.swymble.com : MyBirth. Turns a name, birth date, and
+  birthplace into a cinematic archive of the moon, weather, headlines,
+  music, film, and symbols from that day.
+- https://what2watch.swymble.com : what2watch. An interactive
+  force-directed voronoi visualization for exploring tens of thousands
+  of movies and shows, a Swymble Labs experiment.
+
 ## Contact
 
 Email: hello@swymble.com
