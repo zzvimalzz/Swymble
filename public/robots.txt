@@ -36,4 +36,5 @@ Allow: /
 
 Sitemap: https://swymble.com/sitemap.xml
 Sitemap: https://mybirth.swymble.com/sitemap.xml
+Sitemap: https://www.watchpaintdry.net/sitemap.xml
 Sitemap: https://what2watch.swymble.com/sitemap.xml

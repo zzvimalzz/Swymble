@@ -1,0 +1,19 @@
+# Watch Paint Dry
+
+> Watch Paint Dry (www.watchpaintdry.net) is a deliberately pointless,
+> deeply relaxing web toy: a wall of fresh pink paint, a timer that tracks
+> how long you have been staring at it, and achievements for your patience.
+
+The whole site is one interactive screen. Paint the wall, watch it dry,
+listen to optional ambient audio, and climb patience levels from Beginner
+upward. Stats (longest session, total visits, clicks) and unlockable
+achievements are stored locally in the browser — there are no accounts
+and no tracking.
+
+Watch Paint Dry is part of SWYMBLE Labs, the experiments arm of the
+SWYMBLE software studio.
+
+## Contact
+
+Site: https://swymble.com
+Labs: https://swymble.com/labs

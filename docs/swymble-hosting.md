@@ -74,6 +74,37 @@ cross-origin isolation headers (COOP/COEP) are added — GitHub Pages cannot
 set them, but the Worker could inject them on responses if multithreading is
 ever needed. The current presets run fine without it.
 
+## Cloudflare setup for Watch Paint Dry (custom domain)
+
+Watch Paint Dry lives in this repo as a plain static subdomain folder
+(`src/data/subdomains/watchpaintdry/`, copied to
+`dist/subdomains/watchpaintdry/` on build) but is served on its own domain,
+`www.watchpaintdry.net`, instead of a swymble.com subdomain. The folder
+carries a `CNAME` file naming that domain, which
+`scripts/lib/subdomains.mjs` reads so generated SEO files use the right
+host.
+
+One-time Cloudflare setup (full steps in the header comment of
+`cloudflare/watchpaintdry-worker.js`):
+
+1. Add the `watchpaintdry.net` zone to Cloudflare (update nameservers at
+   the registrar; SSL is handled by Cloudflare from then on).
+2. Create a Worker from `cloudflare/watchpaintdry-worker.js`.
+3. Add proxied DNS records for `@` and `www`, and attach routes
+   `watchpaintdry.net/*` and `www.watchpaintdry.net/*` to the Worker.
+4. Verify the site, then disable GitHub Pages on the old standalone
+   `watchpaintdry` repo so the domain has a single deployment source.
+
+Behavior:
+
+- `https://watchpaintdry.net/*` 301-redirects to `https://www.watchpaintdry.net/*` (canonical host).
+- `https://www.watchpaintdry.net/` fetches `https://swymble.com/subdomains/watchpaintdry/index.html`.
+- `robots.txt`, `sitemap.xml`, `llms.txt`, and `preview.png` are served the same way from the folder.
+
+Until the Worker is live, the old standalone repo's GitHub Pages
+deployment keeps serving the domain — nothing breaks during the
+transition.
+
 ## When to move to AWS
 
 Do not move to AWS just for the current static site.

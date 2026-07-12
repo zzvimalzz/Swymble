@@ -23,13 +23,27 @@ const fileExists = async (filePath) => {
 
 const isAppSubdomain = (subdomainRoot) => fileExists(path.join(subdomainRoot, 'package.json'));
 
+// A subdomain folder can carry a CNAME file (GitHub Pages convention, kept when a site is
+// merged in from its own repo) naming the custom domain it is served on — e.g. watchpaintdry
+// lives at www.watchpaintdry.net, not watchpaintdry.swymble.com. That domain is what scaffolded
+// SEO files and robots.txt sitemap listings must use.
+const resolveDomain = async (name, subdomainRoot) => {
+  const cnamePath = path.join(subdomainRoot, 'CNAME');
+
+  if (await fileExists(cnamePath)) {
+    const firstLine = (await fs.readFile(cnamePath, 'utf8')).trim().split(/\r?\n/)[0]?.trim();
+    if (firstLine) return firstLine;
+  }
+
+  return `${name}.swymble.com`;
+};
+
 const seoFilesRoot = async (subdomainRoot) => {
   const publicDir = path.join(subdomainRoot, 'public');
   return (await isAppSubdomain(subdomainRoot)) ? publicDir : subdomainRoot;
 };
 
-const scaffoldPlainSubdomainSeoFiles = async (name, filesRoot) => {
-  const domain = `${name}.swymble.com`;
+const scaffoldPlainSubdomainSeoFiles = async (name, filesRoot, domain) => {
   const robotsPath = path.join(filesRoot, 'robots.txt');
   const sitemapPath = path.join(filesRoot, 'sitemap.xml');
   const llmsPath = path.join(filesRoot, 'llms.txt');
@@ -105,18 +119,19 @@ export const discoverSubdomains = async () => {
     const subdomainRoot = path.join(SUBDOMAINS_ROOT, name);
     const isApp = await isAppSubdomain(subdomainRoot);
     const filesRoot = await seoFilesRoot(subdomainRoot);
+    const domain = await resolveDomain(name, subdomainRoot);
 
     if (!isApp) {
-      await scaffoldPlainSubdomainSeoFiles(name, filesRoot);
+      await scaffoldPlainSubdomainSeoFiles(name, filesRoot, domain);
     }
 
     const robotsPath = path.join(filesRoot, 'robots.txt');
     const robotsContent = (await fileExists(robotsPath)) ? await fs.readFile(robotsPath, 'utf8') : '';
-    const sitemapUrl = extractSitemapUrl(robotsContent) ?? `https://${name}.swymble.com/sitemap.xml`;
+    const sitemapUrl = extractSitemapUrl(robotsContent) ?? `https://${domain}/sitemap.xml`;
 
     results.push({
       name,
-      domain: `${name}.swymble.com`,
+      domain,
       filesRoot,
       sitemapUrl,
       isApp,

@@ -51,6 +51,18 @@ Some subdomains can be full app sources inside this folder instead of plain stat
 
 If the folder exists, the dev server automatically serves that site on the matching localhost subdomain. No app code changes are required.
 
+## Custom-domain sites
+
+A folder here doesn't have to be served on a `*.swymble.com` subdomain. If it
+carries a `CNAME` file (GitHub Pages convention) naming a custom domain,
+`scripts/lib/subdomains.mjs` uses that domain when scaffolding/reading its SEO
+files, and a Cloudflare Worker on that domain's zone routes requests to
+`/subdomains/<name>/` on the swymble.com origin.
+
+`watchpaintdry/` is the reference example: it lives at
+`https://www.watchpaintdry.net/`, routed by
+`cloudflare/watchpaintdry-worker.js` (setup steps in that file's header).
+
 ## Multi-page sites
 
 You can add more pages inside the same folder, for example:

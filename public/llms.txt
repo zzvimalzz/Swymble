@@ -31,6 +31,10 @@ with enterprise-grade discipline drawn from fintech production work.
 - https://what2watch.swymble.com : what2watch. An interactive
   force-directed voronoi visualization for exploring tens of thousands
   of movies and shows, a Swymble Labs experiment.
+- https://www.watchpaintdry.net : Watch Paint Dry. A deliberately
+  pointless relaxation toy — a wall of fresh paint, a staring timer,
+  and achievements for patience — served from this repo on its own
+  domain as a Swymble Labs experiment.
 
 ## Contact
 
