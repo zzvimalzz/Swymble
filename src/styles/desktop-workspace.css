@@ -1,0 +1,239 @@
+/* ---------------------------------------------------------------------------
+   Shipped workspace (homepage chapter 03) + SystemWindow chrome.
+   Honest OS chrome: wave glyph, mono title, real status LED — no fake buttons.
+   Doctrine: volt appears only under the hand (hover underline); the LEDs and
+   any glow are the system's light.
+--------------------------------------------------------------------------- */
+
+.workspace-section {
+  margin-top: var(--sw-s-9);
+}
+
+.workspace-readout {
+  font-family: var(--sw-font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  color: var(--sw-text-muted);
+  text-transform: lowercase;
+}
+
+.workspace-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1.5rem;
+}
+
+/* Featured windows span half the row; standard windows a third. */
+.workspace-window {
+  grid-column: span 2;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.workspace-window--featured {
+  grid-column: span 3;
+}
+
+@media screen and (max-width: 1279px) {
+  .workspace-window,
+  .workspace-window--featured {
+    grid-column: span 3;
+  }
+}
+
+/* --- SystemWindow chrome --------------------------------------------------- */
+.system-window {
+  display: flex;
+  flex-direction: column;
+  background: var(--sw-surface-2);
+  border: 1px solid var(--sw-border-soft);
+  border-radius: 12px;
+  box-shadow: var(--sw-shadow-window);
+  overflow: hidden;
+  height: 100%;
+  transition:
+    border-color var(--sw-t-instant) var(--sw-ease-standard),
+    transform var(--sw-t-instant) var(--sw-ease-standard);
+}
+
+.workspace-window:hover .system-window,
+.workspace-window:focus-visible .system-window {
+  border-color: var(--sw-border-strong);
+  transform: translateY(-2px);
+}
+
+.system-window-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--sw-border-hair);
+  position: relative;
+}
+
+/* Volt underline slides in under the title bar on hover — your touch. */
+.system-window-titlebar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--sw-accent-volt);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--sw-t-quick) var(--sw-ease-standard);
+}
+
+.workspace-window:hover .system-window-titlebar::after,
+.workspace-window:focus-visible .system-window-titlebar::after {
+  transform: scaleX(1);
+}
+
+.system-window-glyph {
+  width: 20px;
+  height: 10px;
+  flex: none;
+}
+
+.system-window-glyph path {
+  stroke: rgba(var(--sw-accent-cyan-rgb), 0.55);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.system-window-title {
+  flex: 1;
+  font-family: var(--sw-font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sw-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.system-window-preview {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: var(--sw-surface-1);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.workspace-window-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 1.25rem;
+  box-sizing: border-box;
+}
+
+.system-window--featured .system-window-preview {
+  aspect-ratio: 16 / 9;
+}
+
+/* Redaction: scanlines + access line. Secrecy as set-dressing. */
+.system-window-redaction {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(var(--sw-accent-cyan-rgb), 0.05) 0px,
+      rgba(var(--sw-accent-cyan-rgb), 0.05) 2px,
+      transparent 2px,
+      transparent 5px
+    ),
+    rgba(5, 5, 5, 0.72);
+}
+
+.system-window-access {
+  font-family: var(--sw-font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--sw-text-main);
+  border: 1px solid var(--sw-border-strong);
+  padding: 0.5rem 0.9rem;
+  background: rgba(5, 5, 5, 0.8);
+}
+
+.system-window--redacted .workspace-window-image {
+  filter: grayscale(0.6) brightness(0.7);
+}
+
+.system-window-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1rem;
+  border-top: 1px solid var(--sw-border-hair);
+}
+
+.system-window-category {
+  font-family: var(--sw-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+}
+
+.system-window-meta {
+  font-family: var(--sw-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--sw-text-muted);
+  white-space: nowrap;
+}
+
+/* --- StatusLED -------------------------------------------------------------- */
+.status-led {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: var(--sw-text-muted);
+  white-space: nowrap;
+}
+
+.status-led-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  flex: none;
+}
+
+/* Live = neon pulse (genuinely running); dev = cyan steady (the system is
+   working on it); private = muted hollow. Never colour-only — label always on. */
+.status-led.is-live .status-led-dot {
+  background: var(--sw-accent-neon);
+  box-shadow: 0 0 8px rgba(var(--sw-accent-neon-rgb), 0.6);
+  animation: status-led-breathe 2s ease-in-out infinite;
+}
+
+.status-led.is-dev .status-led-dot {
+  background: var(--sw-accent-cyan);
+  box-shadow: 0 0 6px rgba(var(--sw-accent-cyan-rgb), 0.4);
+}
+
+.status-led.is-private .status-led-dot {
+  background: transparent;
+  border: 1.5px solid var(--sw-text-muted);
+}

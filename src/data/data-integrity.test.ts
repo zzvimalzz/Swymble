@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SWYMBLE_DATA } from './config';
+import { SWYMBLE_SHIPPED } from './shipped';
 
 // Content lives in plain TS files edited by hand — these tests catch the mistakes a
 // typechecker can't: duplicate ids/anchors, malformed dates, dangling category references,
@@ -67,6 +68,37 @@ describe('blog', () => {
       for (const category of post.categories) {
         expect(known.has(category), `post ${post.id} category "${category}"`).toBe(true);
       }
+    }
+  });
+});
+
+describe('shipped (unified projects + labs model)', () => {
+  it('has unique ids', () => {
+    const ids = SWYMBLE_SHIPPED.map((item) => item.id);
+    expect(uniqueCount(ids)).toBe(ids.length);
+  });
+
+  it('has resolvable hrefs (internal route or full URL)', () => {
+    for (const item of SWYMBLE_SHIPPED) {
+      expect(item.href.url, `shipped ${item.id} href`).toMatch(/^(\/|https?:\/\/)/);
+      if (item.href.external) {
+        expect(item.href.url, `shipped ${item.id} external href`).toMatch(/^https?:\/\//);
+      }
+    }
+  });
+
+  it('uses public-root image paths', () => {
+    for (const item of SWYMBLE_SHIPPED) {
+      expect(item.image, `shipped ${item.id} image`).toMatch(/^\//);
+      if (item.poster) {
+        expect(item.poster, `shipped ${item.id} poster`).toMatch(/^\//);
+      }
+    }
+  });
+
+  it('never marks restricted work as featured-with-external-launch', () => {
+    for (const item of SWYMBLE_SHIPPED.filter((entry) => entry.restricted)) {
+      expect(item.href.external, `shipped ${item.id} restricted launch`).toBe(false);
     }
   });
 });
