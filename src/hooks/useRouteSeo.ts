@@ -93,9 +93,20 @@ const buildSeoPayload = (pathname: string): SeoPayload => {
 export function useRouteSeo() {
   const location = useLocation();
 
+  // GitHub Pages 301-redirects a direct/refreshed load of a prerendered route (e.g. /about) to
+  // its directory form (/about/), since prerender-meta.mjs writes dist/<route>/index.html.
+  // React Router's own matching tolerates the trailing slash fine, but findSiteRoute's exact
+  // string comparison doesn't — without normalizing, every non-home route would fail to match,
+  // fall through to the "Page Not Found" payload, and get stamped noindex after render (see
+  // MobileTabletView.tsx for the same fix applied to its own path comparisons).
+  const pathname =
+    location.pathname.length > 1 && location.pathname.endsWith('/')
+      ? location.pathname.slice(0, -1)
+      : location.pathname;
+
   useEffect(() => {
-    const payload = buildSeoPayload(location.pathname);
-    const canonicalUrl = toAbsoluteUrl(location.pathname === '' ? '/' : location.pathname);
+    const payload = buildSeoPayload(pathname);
+    const canonicalUrl = toAbsoluteUrl(pathname === '' ? '/' : pathname);
     const imageUrl = payload.image ?? DEFAULT_SEO_IMAGE;
     const robotsContent = payload.shouldIndex
       ? 'index, follow, max-image-preview:large'
@@ -117,5 +128,5 @@ export function useRouteSeo() {
     setPropertyMeta('og:description', payload.description);
     setPropertyMeta('og:url', canonicalUrl);
     setPropertyMeta('og:image', imageUrl);
-  }, [location.pathname]);
+  }, [pathname]);
 }
