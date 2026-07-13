@@ -1,40 +1,28 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SmartImage from '../../../components/SmartImage';
 import SystemWindow from '../../../components/system/SystemWindow';
-import { EASE, MOTION } from '../../../components/motion/motionTokens';
-import { staggerDelay } from '../../../components/motion/motionTokens';
-import { SHIPPED_LIVE_COUNT, SHIPPED_WORKSPACE } from '../../../data/shipped';
+import { EASE, MOTION, staggerDelay } from '../../../components/motion/motionTokens';
+import { SHIPPED_LIVE_COUNT, SWYMBLE_SHIPPED } from '../../../data/shipped';
 import type { SwymbleShippedItem } from '../../../data/shipped';
 
 /**
- * Chapter 03 — the shipped workspace. Client work and lab products on one proof
- * surface: real products in SystemWindow chrome. Windows enter slightly fanned
- * (rotated/offset) and settle into the grid — the workspace being arranged for
- * you — then hold still so it scans like a grid and behaves like apps.
- * Restricted work (CORTEX, Territory) renders redacted: secrecy as theatre,
- * not absence.
+ * Chapter 03 — NOW RUNNING. Three live products in window chrome — one glance
+ * of evidence, not a catalogue. The full project/lab catalogues live on their
+ * own pages; the journey row below is the door. (The six-window workspace was
+ * cut in the Phase-6 pacing review: the homepage carries identity and story,
+ * the catalogue carries depth.)
  */
 
-function windowEntrance(index: number, reduced: boolean) {
-  if (reduced) {
-    return {
-      initial: { opacity: 0 },
-      whileInView: { opacity: 1 },
-    };
-  }
+const STRIP_SIZE = 3;
 
-  const fanRotation = index % 2 === 0 ? -2 : 2;
-  return {
-    initial: { opacity: 0, y: 32, rotate: fanRotation },
-    whileInView: { opacity: 1, y: 0, rotate: 0 },
-  };
-}
+const stripItems = SWYMBLE_SHIPPED
+  .filter((item) => item.status === 'Live' && !item.restricted && item.kind !== 'client')
+  .slice(0, STRIP_SIZE);
 
-function WorkspaceWindow({ item, index }: { item: SwymbleShippedItem; index: number }) {
+function StripWindow({ item, index }: { item: SwymbleShippedItem; index: number }) {
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
-  const entrance = windowEntrance(index, prefersReducedMotion ?? false);
 
   const open = () => {
     if (item.href.external) {
@@ -44,16 +32,15 @@ function WorkspaceWindow({ item, index }: { item: SwymbleShippedItem; index: num
     navigate(item.href.url);
   };
 
-  const meta = item.client ?? (item.updatedAt ? `UPD ${item.updatedAt.toUpperCase()}` : undefined);
-
   return (
     <motion.button
       type="button"
-      className={`workspace-window ${item.featured ? 'workspace-window--featured' : ''}`.trim()}
+      className="workspace-window"
       data-cursor="hover"
       onClick={open}
       aria-label={`Open ${item.title}${item.href.external ? ' (opens in new tab)' : ''}`}
-      {...entrance}
+      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 28 }}
+      whileInView={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ delay: staggerDelay(index), duration: MOTION.scene, ease: EASE.outExpo }}
     >
@@ -62,9 +49,7 @@ function WorkspaceWindow({ item, index }: { item: SwymbleShippedItem; index: num
         status={item.status}
         category={item.category}
         categoryColor={item.categoryColor}
-        meta={meta}
-        redacted={item.restricted}
-        size={item.featured ? 'featured' : 'standard'}
+        meta={item.updatedAt ? `UPD ${item.updatedAt.toUpperCase()}` : undefined}
       >
         <SmartImage src={item.poster ?? item.image} alt="" className="workspace-window-image" draggable="false" />
       </SystemWindow>
@@ -74,16 +59,25 @@ function WorkspaceWindow({ item, index }: { item: SwymbleShippedItem; index: num
 
 export default function Chapter03ShippedWorkspace() {
   return (
-    <section className="workspace-section" aria-label="Shipped work">
+    <section className="workspace-section" aria-label="Live products">
       <div className="section-header">
-        <h2>SHIPPED</h2>
-        <span className="workspace-readout">~/workspace · {SHIPPED_LIVE_COUNT} running</span>
+        <h2>NOW RUNNING</h2>
+        <span className="workspace-readout">{SHIPPED_LIVE_COUNT} live products</span>
       </div>
 
       <div className="workspace-grid">
-        {SHIPPED_WORKSPACE.map((item, index) => (
-          <WorkspaceWindow key={item.id} item={item} index={index} />
+        {stripItems.map((item, index) => (
+          <StripWindow key={item.id} item={item} index={index} />
         ))}
+      </div>
+
+      <div className="workspace-journeys">
+        <Link to="/projects" className="workspace-journey" data-cursor="hover">
+          <span aria-hidden="true">›</span> CLIENT WORK
+        </Link>
+        <Link to="/labs" className="workspace-journey" data-cursor="hover">
+          <span aria-hidden="true">›</span> ENTER THE LAB
+        </Link>
       </div>
     </section>
   );

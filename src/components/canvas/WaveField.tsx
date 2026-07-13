@@ -78,8 +78,9 @@ export default function WaveField({ variant = 'hero', className }: WaveFieldProp
       return () => window.removeEventListener('resize', onResize);
     }
 
-    // Particle count scales with viewport but stays bounded.
-    const count = Math.min(1200, Math.max(400, Math.floor(window.innerWidth * 0.6)));
+    // Particle count scales with viewport but stays bounded. Tuned down in the
+    // Phase-6 polish pass: fewer, softer particles read as water, not static.
+    const count = Math.min(850, Math.max(320, Math.floor(window.innerWidth * 0.45)));
     const px = new Float32Array(count);
     const py = new Float32Array(count);
     const phase = new Float32Array(count);
@@ -114,7 +115,8 @@ export default function WaveField({ variant = 'hero', className }: WaveFieldProp
     const frame = () => {
       t += 0.008;
       // Trail fade — ink-coloured wash so trails dissolve into the ground.
-      ctx.fillStyle = 'rgba(5, 5, 5, 0.16)';
+      // Higher alpha = shorter, calmer trails (the scratchy look was streaks).
+      ctx.fillStyle = 'rgba(5, 5, 5, 0.24)';
       ctx.fillRect(0, 0, width, height);
 
       for (let i = 0; i < count; i++) {
@@ -145,7 +147,7 @@ export default function WaveField({ variant = 'hero', className }: WaveFieldProp
 
         const deep = i % 7 === 0;
         const [r, g, b] = deep ? ELECTRIC : CYAN;
-        const alpha = deep ? 0.5 : 0.22 + (speed[i] - 0.4) * 0.4;
+        const alpha = deep ? 0.4 : 0.16 + (speed[i] - 0.4) * 0.3;
         ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
         ctx.fillRect(px[i], py[i], 1.6, 1.6);
       }

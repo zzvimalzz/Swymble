@@ -3,7 +3,7 @@ import { ChevronDown, Newspaper } from 'lucide-react';
 import { useEffect, useMemo, useState, type CSSProperties, type MutableRefObject, type PointerEvent as ReactPointerEvent } from 'react';
 
 import MobileContact from '../../components/mobile/MobileContact';
-import MobileFocus from '../../components/mobile/MobileFocus';
+import MobilePositioning from '../../components/mobile/MobilePositioning';
 import MobileProjects from '../../components/mobile/MobileProjects';
 import MobileStudio from '../../components/mobile/MobileStudio';
 import { SWYMBLE_DATA } from '../../data/config';
@@ -160,7 +160,7 @@ export default function MobileHome({
       </header>
 
       <section className="mobile-section mobile-home-section" id="focus-section" style={{ width: '100%' }}>
-        <MobileFocus whatIDo={SWYMBLE_DATA.whatIDo} />
+        <MobilePositioning />
       </section>
 
       <section id="latest-updates" className="mobile-latest-updates mobile-home-section" aria-label="Latest updates">

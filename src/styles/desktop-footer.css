@@ -13,9 +13,10 @@
   z-index: 10;
 }
 
+/* Quiet conclusion: the sea is a coda, not another full section. */
 .finale-sea {
   position: relative;
-  height: clamp(280px, 40vh, 460px);
+  height: clamp(180px, 26vh, 300px);
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -34,12 +35,12 @@
   position: relative;
   z-index: 1;
   font-family: var(--sw-font-logo);
-  font-size: clamp(5rem, 16vw, 15rem);
+  font-size: clamp(3.5rem, 10vw, 8.5rem);
   line-height: 0.9;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: transparent;
-  -webkit-text-stroke: 1.5px rgba(240, 240, 240, 0.55);
+  -webkit-text-stroke: 1.5px rgba(240, 240, 240, 0.5);
   user-select: none;
   pointer-events: none;
 }

@@ -17,15 +17,14 @@
   text-transform: lowercase;
 }
 
+/* Three live products, one glance — the catalogue lives on its own pages. */
 .workspace-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 }
 
-/* Featured windows span half the row; standard windows a third. */
 .workspace-window {
-  grid-column: span 2;
   display: block;
   width: 100%;
   padding: 0;
@@ -37,15 +36,51 @@
   color: inherit;
 }
 
-.workspace-window--featured {
-  grid-column: span 3;
+@media screen and (max-width: 1279px) {
+  .workspace-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-@media screen and (max-width: 1279px) {
-  .workspace-window,
-  .workspace-window--featured {
-    grid-column: span 3;
-  }
+/* Journey row: the doors to the catalogues. */
+.workspace-journeys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+  margin-top: 2.5rem;
+}
+
+.workspace-journey {
+  font-family: var(--sw-font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--sw-text-main);
+  text-decoration: none;
+  position: relative;
+}
+
+.workspace-journey span {
+  color: var(--sw-accent-volt);
+  margin-right: 0.35rem;
+}
+
+.workspace-journey::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 2px;
+  background: var(--sw-accent-volt);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--sw-t-quick) var(--sw-ease-standard);
+}
+
+.workspace-journey:hover::after,
+.workspace-journey:focus-visible::after {
+  transform: scaleX(1);
 }
 
 /* --- SystemWindow chrome --------------------------------------------------- */

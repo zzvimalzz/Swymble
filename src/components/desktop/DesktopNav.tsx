@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import WaveGlyph from '../system/WaveGlyph';
 import { DESKTOP_NAV_ROUTES } from '../../routes';
 import '../../styles/desktop-nav.css';
 
 type DesktopNavProps = {
   brandName: string;
-  onOpenPalette?: () => void;
 };
 
-const isMac = typeof navigator !== 'undefined' && /Mac|iP(hone|ad|od)/.test(navigator.platform);
-
-export default function DesktopNav({ brandName, onOpenPalette }: DesktopNavProps) {
+export default function DesktopNav({ brandName }: DesktopNavProps) {
   const [isCompact, setIsCompact] = useState(false);
 
   useEffect(() => {
@@ -31,27 +29,13 @@ export default function DesktopNav({ brandName, onOpenPalette }: DesktopNavProps
   return (
     <nav className={`desktop-nav ${isCompact ? 'is-compact' : ''}`.trim()}>
       <div className="nav-brand">
-        <Link to="/">{brandName}</Link>
+        <Link to="/">
+          <WaveGlyph className="nav-brand-glyph" />
+          {brandName}
+        </Link>
       </div>
 
       <div className="nav-links">
-        <span className="nav-availability">
-          <span className="nav-availability-led" aria-hidden="true" />
-          AVAILABLE
-        </span>
-
-        {onOpenPalette && (
-          <button
-            type="button"
-            className="nav-palette-chip"
-            onClick={onOpenPalette}
-            aria-label="Open command palette"
-            data-cursor="hover"
-          >
-            {isMac ? '⌘' : 'CTRL'} K
-          </button>
-        )}
-
         {standardRoutes.map((route) => (
           <NavLink
             key={route.path}

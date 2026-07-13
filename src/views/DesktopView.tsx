@@ -128,7 +128,9 @@ export default function DesktopView() {
 
       <div className="bg-grid" aria-hidden="true" />
 
-      <DesktopNav brandName={SWYMBLE_DATA.name} onOpenPalette={() => setPaletteOpen(true)} />
+      {/* The palette stays a keyboard-only power feature (⌘K / Ctrl+K / '/') —
+          advertising it in the nav read as developer tooling, not product. */}
+      <DesktopNav brandName={SWYMBLE_DATA.name} />
 
       {paletteOpen && (
         <Suspense fallback={null}>

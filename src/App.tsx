@@ -3,7 +3,6 @@ import { MotionConfig } from 'framer-motion';
 import { BrowserRouter } from 'react-router-dom';
 import { useDeviceView } from './hooks/useDeviceView';
 import { useRouteSeo } from './hooks/useRouteSeo';
-import { BUILD_COMMIT } from './utils/buildInfo';
 
 const DesktopView = lazy(() => import('./views/DesktopView'));
 const MobileTabletView = lazy(() => import('./views/MobileTabletView'));
@@ -39,7 +38,7 @@ function markBooted(): void {
 // get instant text; `fast` (repeat visits, headless) skips the typing entirely.
 function BootLoader({ fadingOut, fast }: { fadingOut: boolean; fast: boolean }) {
   const lines = [
-    `swymble-os · build ${BUILD_COMMIT}`,
+    'swymble-os',
     'mounting interface … ok',
     'ready.',
   ];

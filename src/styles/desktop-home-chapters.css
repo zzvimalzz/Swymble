@@ -44,8 +44,58 @@
 }
 
 /* --- Hero wave field -------------------------------------------------------- */
+/* Radial mask keeps the sea calm behind the wordmark and alive at the edges —
+   the field frames the brand instead of competing with it. */
 .hero-field {
   z-index: 1;
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 46%, transparent 20%, black 70%);
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 46%, transparent 20%, black 70%);
+}
+
+/* --- Nav brand glyph ---------------------------------------------------------- */
+.nav-brand-glyph {
+  width: 26px;
+  height: 13px;
+  margin-right: 0.55rem;
+  vertical-align: baseline;
+  color: var(--sw-text-main);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  flex: none;
+}
+
+.nav-brand a {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* --- Back-to-top rocket -------------------------------------------------------- */
+.scroll-top-btn {
+  position: fixed;
+  right: clamp(1rem, 2.5vw, 2rem);
+  bottom: clamp(1rem, 2.5vw, 2rem);
+  z-index: var(--sw-z-floating);
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  background: var(--sw-surface-2);
+  border: 1px solid var(--sw-border-strong);
+  border-radius: 999px;
+  color: var(--sw-text-main);
+  cursor: pointer;
+  box-shadow: var(--sw-shadow-panel);
+  transition:
+    color var(--sw-t-instant) var(--sw-ease-standard),
+    border-color var(--sw-t-instant) var(--sw-ease-standard),
+    transform var(--sw-t-instant) var(--sw-ease-standard);
+}
+
+.scroll-top-btn:hover,
+.scroll-top-btn:focus-visible {
+  color: var(--sw-accent-volt);
+  border-color: var(--sw-accent-volt);
+  transform: translateY(-2px);
 }
 
 .hero-section .hero-title,

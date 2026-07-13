@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import StatusLED from './StatusLED';
+import WaveGlyph from './WaveGlyph';
 
 /**
  * SystemWindow — the universal Swymble OS content frame. Honest chrome only:
@@ -25,13 +26,7 @@ type SystemWindowProps = {
 };
 
 export function windowGlyph() {
-  return (
-    <svg className="system-window-glyph" viewBox="0 0 64 32" aria-hidden="true" fill="none">
-      <path d="M2 9 C 18 1, 34 17, 62 7" />
-      <path d="M2 17 C 20 9, 36 25, 62 15" />
-      <path d="M2 25 C 22 17, 38 33, 62 23" />
-    </svg>
-  );
+  return <WaveGlyph className="system-window-glyph" />;
 }
 
 export default function SystemWindow({

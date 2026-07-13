@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import WaveField from '../canvas/WaveField';
 import { DESKTOP_NAV_ROUTES } from '../../routes';
-import { BUILD_COMMIT, SWYMBLE_BASE_LOCATION } from '../../utils/buildInfo';
+import { SWYMBLE_BASE_LOCATION } from '../../utils/buildInfo';
 
 /**
  * FinaleExperience — the site ends on purpose. The sea returns full-width,
@@ -41,7 +41,7 @@ export default function DesktopFooter({ brandName }: DesktopFooterProps) {
         </div>
 
         <span className="finale-stamp">
-          © {new Date().getFullYear()} {brandName} · {SWYMBLE_BASE_LOCATION} · BUILD {BUILD_COMMIT.toUpperCase()}
+          © {new Date().getFullYear()} {brandName} · {SWYMBLE_BASE_LOCATION}
         </span>
       </div>
     </footer>

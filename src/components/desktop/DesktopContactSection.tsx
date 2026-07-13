@@ -35,10 +35,10 @@ export default function DesktopContactSection({ headline = "LET'S TALK" }: Deskt
   return (
     <motion.div
       className="footer-cta"
-      initial={{ opacity: 0, scale: 0.9 }}
-      whileInView={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="footer-grid">
         <div id="work-with-me" className="form-container">

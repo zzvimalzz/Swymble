@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
-import { BUILD_COMMIT, SWYMBLE_BASE_LOCATION, formatMalaysiaTime } from '../../utils/buildInfo';
+import { SWYMBLE_BASE_LOCATION, formatMalaysiaTime } from '../../utils/buildInfo';
 
 /**
- * StatusLine — honest system chrome. Every value rendered here is true:
- * real base location, a live MYT clock, the actual build hash (or 'dev'),
- * and the availability state that also drives the footer.
+ * StatusLine — quiet, true grounding: where Swymble is and what time it is
+ * there. No build hashes or telemetry in visitor-facing chrome — that read
+ * as internal tooling. Availability appears only in the contact context
+ * (compact variant), where it actually informs a decision.
  */
 
 type StatusLineProps = {
-  /** hero: full readout · compact: place + availability only */
+  /** hero: place + live MYT time · compact: place + availability (contact) */
   variant?: 'hero' | 'compact';
   className?: string;
 };
@@ -24,19 +25,15 @@ export default function StatusLine({ variant = 'hero', className }: StatusLinePr
   return (
     <p className={`status-line ${className ?? ''}`.trim()}>
       <span className="status-line-item">{SWYMBLE_BASE_LOCATION}</span>
-      {variant === 'hero' && (
-        <>
-          <span className="status-line-sep" aria-hidden="true">·</span>
-          <span className="status-line-item">{time} MYT</span>
-          <span className="status-line-sep" aria-hidden="true">·</span>
-          <span className="status-line-item">BUILD {BUILD_COMMIT.toUpperCase()}</span>
-        </>
-      )}
       <span className="status-line-sep" aria-hidden="true">·</span>
-      <span className="status-line-item status-line-available">
-        <span className="status-line-led" aria-hidden="true" />
-        AVAILABLE
-      </span>
+      {variant === 'hero' ? (
+        <span className="status-line-item">{time} MYT</span>
+      ) : (
+        <span className="status-line-item status-line-available">
+          <span className="status-line-led" aria-hidden="true" />
+          AVAILABLE
+        </span>
+      )}
     </p>
   );
 }
