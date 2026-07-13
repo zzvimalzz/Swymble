@@ -1,4 +1,5 @@
 import { motion, MotionValue } from 'framer-motion';
+import WaveField from '../../../components/canvas/WaveField';
 import StatusLine from '../../../components/system/StatusLine';
 import { MOTION, EASE } from '../../../components/motion/motionTokens';
 import { SWYMBLE_DATA } from '../../../data/config';
@@ -18,6 +19,8 @@ type Chapter01HeroConsoleProps = {
 export default function Chapter01HeroConsole({ heroY, heroOpacity }: Chapter01HeroConsoleProps) {
   return (
     <motion.section className="hero-section" style={{ y: heroY, opacity: heroOpacity }}>
+      <WaveField variant="hero" className="hero-field" />
+
       <h1
         className="hero-title glitch-mega"
         data-text={SWYMBLE_DATA.name}

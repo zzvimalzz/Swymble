@@ -15,6 +15,14 @@ export default function DesktopNotFound() {
           404
         </motion.h1>
         <motion.p
+          className="not-found-fault"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+        >
+          SEGMENTATION FAULT (core dumped)
+        </motion.p>
+        <motion.p
           className="not-found-message"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

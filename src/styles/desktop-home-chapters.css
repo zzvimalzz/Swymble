@@ -43,6 +43,17 @@
   50% { opacity: 0.55; }
 }
 
+/* --- Hero wave field -------------------------------------------------------- */
+.hero-field {
+  z-index: 1;
+}
+
+.hero-section .hero-title,
+.hero-section .hero-tagline {
+  position: relative;
+  z-index: 2;
+}
+
 /* --- Hero status row ------------------------------------------------------- */
 .hero-status-row {
   position: absolute;
@@ -153,4 +164,34 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+}
+
+/* --- Contact availability block (FIND ME column) ---------------------------- */
+.contact-availability {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.contact-reply-note {
+  margin: 0;
+  font-family: var(--sw-font-human);
+  font-size: 0.95rem;
+  color: var(--sw-text-muted);
+}
+
+/* --- Contact submit ACK state ----------------------------------------------- */
+.submit-btn--ack {
+  background: var(--sw-accent-volt) !important;
+  color: var(--sw-bg-ink) !important;
+}
+
+/* --- 404 fault line ----------------------------------------------------------- */
+.not-found-fault {
+  margin: 0 0 0.75rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  color: var(--sw-accent-neon);
 }

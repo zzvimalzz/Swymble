@@ -48,7 +48,6 @@ function RouteTransitionFrame({ children }: { children: ReactNode }) {
 }
 
 export default function DesktopView() {
-  const baseUrl = import.meta.env.BASE_URL;
   const location = useLocation();
 
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -171,7 +170,7 @@ export default function DesktopView() {
         </AnimatePresence>
       </main>
 
-      <DesktopFooter baseUrl={baseUrl} brandName={SWYMBLE_DATA.name} />
+      <DesktopFooter brandName={SWYMBLE_DATA.name} />
 
       <AnimatePresence>
         {showScrollTop && (

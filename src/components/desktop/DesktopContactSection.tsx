@@ -1,7 +1,16 @@
 import { motion } from 'framer-motion';
+import StatusLine from '../system/StatusLine';
 import { SWYMBLE_DATA } from '../../data/config';
 import { useContactForm } from '../../hooks/useContactForm';
 import { isMailtoLink } from '../../utils/mailto';
+
+// Machine-voice submit states: the button itself acknowledges receipt.
+const SUBMIT_LABEL: Record<string, string> = {
+  idle: 'SEND MESSAGE',
+  sending: 'TRANSMITTING…',
+  success: 'ACK ✓ MESSAGE QUEUED',
+  error: 'SEND MESSAGE',
+};
 
 type DesktopContactSectionProps = {
   headline?: string;
@@ -106,10 +115,10 @@ export default function DesktopContactSection({ headline = "LET'S TALK" }: Deskt
 
             <button
               type="submit"
-              className="submit-btn"
+              className={`submit-btn ${formStatus === 'success' ? 'submit-btn--ack' : ''}`.trim()}
               disabled={formStatus === 'sending'}
             >
-              {formStatus === 'sending' ? 'SENDING...' : 'SEND MESSAGE'}
+              {SUBMIT_LABEL[formStatus]}
             </button>
           </form>
         </div>
@@ -117,6 +126,11 @@ export default function DesktopContactSection({ headline = "LET'S TALK" }: Deskt
         <div className="find-me-container">
           <div className="section-header" style={{ marginBottom: '2rem' }}>
             <h2>FIND ME</h2>
+          </div>
+
+          <div className="contact-availability">
+            <StatusLine variant="compact" />
+            <p className="contact-reply-note">replies within 24 hours</p>
           </div>
 
           <div className="socials-list">
