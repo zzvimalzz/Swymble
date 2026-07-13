@@ -1,12 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
 
-export type SwymbleWhatIDo = {
-  title: string;
-  colorHex: string;
-  colorRgb: string;
-  desc: string;
-};
-
 export type SwymbleProject = {
   title: string;
   category: string;
@@ -156,7 +149,6 @@ export type SwymbleData = {
   tagline: string;
   marquee: string;
   contactIntro: string;
-  whatIDo: SwymbleWhatIDo[];
   services: SwymbleService[];
   process: SwymbleProcessStep[];
   projects: SwymbleProject[];

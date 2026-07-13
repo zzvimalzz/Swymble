@@ -2,7 +2,6 @@ import type { ReactElement } from 'react';
 
 export type MobileHomeSectionId =
   | 'top'
-  | 'focus-section'
   | 'projects'
   | 'studio-section'
   | 'latest-updates'

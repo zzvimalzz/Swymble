@@ -3,6 +3,8 @@ import { lazy, Suspense, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SmartImage from '../../components/SmartImage';
 import DesktopContactSection from '../../components/desktop/DesktopContactSection';
+import HeroField from '../../components/desktop/HeroField';
+import HeroWordmark from '../../components/desktop/HeroWordmark';
 import ParallaxMarquee from '../../components/desktop/ParallaxMarquee';
 import ProcessRail from '../../components/desktop/ProcessRail';
 import ProximityCard from '../../components/desktop/ProximityCard';
@@ -42,6 +44,8 @@ export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHome
   return (
     <>
       <motion.section className="hero-section" style={{ y: heroY, opacity: heroOpacity }}>
+        <HeroField />
+
         <div className="hero-bg-logo" aria-hidden="true">
           <img
             src={`${baseUrl}images/white-logo.png`}
@@ -55,10 +59,10 @@ export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHome
 
         <h1
           className="hero-title glitch-mega"
-          data-text={SWYMBLE_DATA.name}
           data-cursor="hover"
+          aria-label={SWYMBLE_DATA.name}
         >
-          {SWYMBLE_DATA.name}
+          <HeroWordmark text={SWYMBLE_DATA.name} />
         </h1>
 
         <motion.p
@@ -74,16 +78,6 @@ export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHome
       <ParallaxMarquee text={SWYMBLE_DATA.marquee} />
 
       <section className="layout-content">
-        <div className="section-header">
-          <h2>What You'll Find Here</h2>
-        </div>
-
-        <div className="focus-grid">
-          {SWYMBLE_DATA.whatIDo.map((service, index) => (
-            <ProximityCard key={service.title} service={service} index={index} />
-          ))}
-        </div>
-
         <div className="work-carousel-section">
           <div className="section-header">
             <h2>PROJECTS</h2>

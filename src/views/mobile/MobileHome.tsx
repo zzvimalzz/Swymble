@@ -3,14 +3,12 @@ import { ChevronDown, Newspaper } from 'lucide-react';
 import { useEffect, useMemo, useState, type CSSProperties, type MutableRefObject, type PointerEvent as ReactPointerEvent } from 'react';
 
 import MobileContact from '../../components/mobile/MobileContact';
-import MobileFocus from '../../components/mobile/MobileFocus';
 import MobileProjects from '../../components/mobile/MobileProjects';
 import MobileStudio from '../../components/mobile/MobileStudio';
 import { SWYMBLE_DATA } from '../../data/config';
 
 export type MobileHomeSectionId =
   | 'top'
-  | 'focus-section'
   | 'projects'
   | 'studio-section'
   | 'latest-updates'
@@ -147,21 +145,17 @@ export default function MobileHome({
         </h1>
 
         <a
-          href="#focus-section"
+          href="#latest-updates"
           className={`scroll-indicator ${scrolled ? 'hidden' : ''}`}
           onClick={(event) => {
             event.preventDefault();
-            onJumpToSection('focus-section');
+            onJumpToSection('latest-updates');
           }}
         >
           <span className="scroll-text">Scroll down</span>
           <ChevronDown className="scroll-arrow" size={32} />
         </a>
       </header>
-
-      <section className="mobile-section mobile-home-section" id="focus-section" style={{ width: '100%' }}>
-        <MobileFocus whatIDo={SWYMBLE_DATA.whatIDo} />
-      </section>
 
       <section id="latest-updates" className="mobile-latest-updates mobile-home-section" aria-label="Latest updates">
         <div className="section-header">

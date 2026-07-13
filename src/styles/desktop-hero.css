@@ -1,0 +1,200 @@
+.hero-section {
+  min-height: 100vh;
+  padding-top: 6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ambient background field: canvas starfield/constellation + CSS nebula glow. Sits
+   behind the logo watermark and wordmark, ahead of the page's persistent .bg-grid. */
+.hero-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero-field-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+.hero-field-nebula {
+  position: absolute;
+  inset: -10%;
+  will-change: transform;
+  transform: translate3d(calc(var(--hero-parallax-x, 0) * 1px), calc(var(--hero-parallax-y, 0) * 1px), 0);
+}
+
+.hero-field-nebula::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.28;
+  bottom: 6%;
+  right: 10%;
+  width: 30vw;
+  height: 30vw;
+  background: radial-gradient(circle, rgba(var(--sw-accent-volt-rgb), 0.28), transparent 70%);
+}
+
+.hero-bg-logo {
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 95vw;
+  max-width: 1400px;
+  min-width: 600px;
+  height: auto;
+  opacity: 0.25;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+  filter: brightness(0) invert(1);
+}
+
+.hero-bg-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.hero-title {
+  font-family: var(--font-logo);
+  font-size: clamp(4rem, 15vw, 15rem);
+  line-height: 0.8;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin: 0;
+  position: relative;
+  display: inline-block;
+  color: var(--text-main);
+  text-align: center;
+  z-index: 2;
+}
+
+.glitch-mega {
+  animation: main-glitch 4s infinite;
+}
+
+.hero-title:hover {
+  animation: main-glitch 0.2s infinite;
+  text-shadow: 5px 5px 0px var(--accent-neon), -5px -5px 0px var(--accent-volt), 0px 5px 0px var(--accent-cyan);
+}
+
+@keyframes main-glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes glitch-anim-1 {
+  0% { clip-path: inset(20% 0 80% 0); transform: translate(-4px, 4px); }
+  10% { clip-path: inset(10% 0 30% 0); transform: translate(4px, -4px); }
+  20% { clip-path: inset(60% 0 10% 0); transform: translate(-4px, 4px); }
+  30% { clip-path: inset(30% 0 50% 0); transform: translate(0, 4px); }
+  40% { clip-path: inset(40% 0 50% 0); transform: translate(-4px, 0); }
+  50% { clip-path: inset(10% 0 60% 0); transform: translate(4px, -4px); }
+  60% { clip-path: inset(80% 0 5% 0); transform: translate(4px, -4px); }
+  70% { clip-path: inset(5% 0 80% 0); transform: translate(-4px, 4px); }
+  80% { clip-path: inset(10% 0 70% 0); transform: translate(-4px, 4px); }
+  90% { clip-path: inset(70% 0 10% 0); transform: translate(4px, 0); }
+  100% { clip-path: inset(30% 0 50% 0); transform: translate(4px, -4px); }
+}
+
+@keyframes glitch-anim-2 {
+  0% { clip-path: inset(10% 0 60% 0); transform: translate(4px, -4px); }
+  10% { clip-path: inset(80% 0 5% 0); transform: translate(-4px, 4px); }
+  20% { clip-path: inset(30% 0 20% 0); transform: translate(-4px, 4px); }
+  30% { clip-path: inset(10% 0 80% 0); transform: translate(4px, 0); }
+  40% { clip-path: inset(70% 0 10% 0); transform: translate(4px, -4px); }
+  50% { clip-path: inset(20% 0 50% 0); transform: translate(-4px, 4px); }
+  60% { clip-path: inset(20% 0 50% 0); transform: translate(-4px, 4px); }
+  70% { clip-path: inset(60% 0 20% 0); transform: translate(4px, -4px); }
+  80% { clip-path: inset(50% 0 30% 0); transform: translate(4px, -4px); }
+  90% { clip-path: inset(5% 0 80% 0); transform: translate(-4px, 0); }
+  100% { clip-path: inset(5% 0 80% 0); transform: translate(-4px, 4px); }
+}
+
+/* Per-letter magnetic wordmark (see HeroWordmark.tsx). Each letter's transform is
+   JS-owned, written directly to the DOM node each frame — same pattern as
+   GlitchCursor's position tracking — so no CSS transition is set here; a transition
+   would fight the spring physics driving the translate every frame. */
+.hero-wordmark {
+  display: inline-block;
+}
+
+.hero-letter {
+  display: inline-block;
+  position: relative;
+  will-change: transform;
+}
+
+/* Glitch duplicate layers live on each letter (not the whole word) so the RGB
+   ghosting rides along with that letter's own repulsion transform instead of
+   sitting behind it as a static silhouette of the full word. */
+.hero-letter::before,
+.hero-letter::after {
+  content: attr(data-letter);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.hero-letter::before {
+  color: var(--accent-neon);
+  z-index: -1;
+  animation: glitch-anim-1 2s infinite linear alternate-reverse;
+}
+
+.hero-letter::after {
+  color: var(--accent-volt);
+  z-index: -2;
+  animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+
+.hero-title:hover .hero-letter::before {
+  animation-duration: 0.2s;
+  opacity: 1;
+}
+
+.hero-title:hover .hero-letter::after {
+  animation-duration: 0.3s;
+  opacity: 1;
+}
+
+.hero-letter-space {
+  display: inline-block;
+  width: 0.22em;
+}
+
+/* Tagline: no box, no fill — hierarchy comes from wide tracking and a muted tone one
+   step down from the wordmark. */
+.hero-tagline {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: clamp(0.78rem, 1.3vw, 1.05rem);
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+  margin-top: 1.75rem;
+  max-width: min(720px, 88vw);
+  text-align: center;
+  line-height: 1.7;
+  z-index: 2;
+}

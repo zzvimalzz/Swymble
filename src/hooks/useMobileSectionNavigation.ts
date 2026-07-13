@@ -5,7 +5,6 @@ import { getMobileHomeSectionFromPath } from '../routes';
 
 const HOME_SECTIONS: MobileHomeSectionId[] = [
   'top',
-  'focus-section',
   'latest-updates',
   'projects',
   'studio-section',

@@ -2,8 +2,8 @@ import { motion, useMotionValue, useSpring } from 'framer-motion';
 import type { MotionStyle } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 
-// Structural shape needed by this card — both SwymbleWhatIDo and SwymbleService satisfy it,
-// so either data source can be rendered through the same proximity-tilt card.
+// Structural shape needed by this card, kept separate from SwymbleService so other
+// card-shaped data sources can be rendered through the same proximity-tilt card.
 export type ProximityCardCopy = {
   title: string;
   colorHex: string;

@@ -158,12 +158,6 @@ export default function MobileTabletView() {
       return [
         routeItem,
         {
-          key: 'home-focus',
-          label: 'Overview',
-          action: () => jumpToSection('focus-section'),
-          isActive: isHomeRoute && activeSection === 'focus-section',
-        },
-        {
           key: 'home-latest-updates',
           label: 'Latest Updates',
           action: () => jumpToSection('latest-updates'),

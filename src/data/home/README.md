@@ -8,7 +8,6 @@ visible.
 |---|---|
 | `branding.ts` | hero name/tagline, marquee text, contact intro |
 | `socials.ts` | social links (footer + contact) |
-| `whatido.ts` | "WHAT YOU'LL FIND HERE" focus cards |
 | `latestupdates.ts` | latest update cards |
 | `services.ts` | "WORK WITH ME" service cards |
 | `process.ts` | "WORK WITH ME" 01–04 process steps |
@@ -35,19 +34,6 @@ export const SWYMBLE_SOCIALS = [
 ];
 ```
 
-## whatido.ts — focus cards
-`colorHex`/`colorRgb` drive the card's hover glow; keep them the same color in both notations.
-```ts
-export const SWYMBLE_WHAT_I_DO = [
-  {
-    title: 'SOFTWARE ENGINEERING',
-    colorHex: '#EFFF04',
-    colorRgb: '239, 255, 4',
-    desc: 'Short descriptive sentence.',
-  },
-];
-```
-
 ## latestupdates.ts
 `ctaLabel`/`ctaHref` are optional — omit both for a card without a button.
 ```ts
@@ -64,7 +50,7 @@ export const SWYMBLE_LATEST_UPDATES = [
 ```
 
 ## services.ts — "WORK WITH ME" cards
-Same card shape as whatido, plus a unique `id`.
+`colorHex`/`colorRgb` drive the card's hover glow; keep them the same color in both notations.
 ```ts
 export const SWYMBLE_SERVICES = [
   {

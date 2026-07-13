@@ -7,7 +7,6 @@ import { SWYMBLE_PROCESS } from './home/process';
 import { SWYMBLE_SERVICES } from './home/services';
 import { SWYMBLE_SOCIALS } from './home/socials';
 import { SWYMBLE_UNIVERSE } from './home/universe';
-import { SWYMBLE_WHAT_I_DO } from './home/whatido';
 import { SWYMBLE_LABS } from './labs/labs';
 import { SWYMBLE_PROJECTS } from './projects/projects';
 import type { SwymbleData } from './types';
@@ -17,7 +16,6 @@ export * from './types';
 // DATA MAP (where to edit each section) — each folder has its own README with templates.
 // - branding (name/tagline/marquee, used site-wide): home/branding.ts
 // - socials (footer/contact, used site-wide): home/socials.ts
-// - home focus cards: home/whatido.ts
 // - latest updates: home/latestupdates.ts
 // - swymble universe (desktop 3D scene): home/universe.ts
 // - studio services (WORK WITH ME): home/services.ts
@@ -32,7 +30,6 @@ export const SWYMBLE_DATA: SwymbleData = {
   tagline: SWYMBLE_BRANDING.tagline,
   marquee: SWYMBLE_BRANDING.marquee,
   contactIntro: SWYMBLE_BRANDING.contactIntro,
-  whatIDo: SWYMBLE_WHAT_I_DO,
   services: SWYMBLE_SERVICES,
   process: SWYMBLE_PROCESS,
   projects: SWYMBLE_PROJECTS,
