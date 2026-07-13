@@ -1,0 +1,138 @@
+.techstack-section {
+  display: grid;
+  grid-template-columns: minmax(0, 660px) 1fr;
+  gap: 4rem;
+  align-items: center;
+  padding: 7rem 0 6rem;
+  margin-top: 2rem;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.techstack-left {
+  align-self: center;
+}
+
+.techstack-heading {
+  font-family: var(--font-mono);
+  font-size: clamp(2rem, 3.6vw, 2.8rem);
+  line-height: 1.25;
+  margin: 0 0 3rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.techstack-heading-lead {
+  font-weight: 400;
+  color: var(--sw-text-muted);
+}
+
+.techstack-heading-strong {
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.techstack-tools-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+  margin: 0 0 1rem;
+}
+
+.techstack-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  max-width: 100%;
+}
+
+/* A light plate behind every logo — most brand marks (GitHub, ChatGPT, Claude's
+   wordmark, etc.) are drawn in black or a dark color for use on light backgrounds,
+   so they'd disappear against this site's near-black surfaces without one. It also
+   gives the grayscale/color-on-hover swap below something consistent to read against,
+   regardless of what color a given logo turns out to be. */
+/* Size lives here — change width/height together to resize every chip. */
+.techstack-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 55px;
+  height: 55px;
+  border-radius: var(--sw-radius-card);
+  background: rgba(240, 240, 240, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s var(--sw-ease-standard), border-color 0.25s ease,
+    background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.techstack-chip-icon {
+  width: 100%;
+  height: 100%;
+  filter: grayscale(100%);
+  transition: filter 0.25s ease;
+}
+
+/* --chip-glow is set per chip in TechStackSection.tsx — one of the three brand
+   accents (volt/neon/cyan), assigned once at random per chip so the row isn't
+   monochrome on hover. Falls back to volt if the var is ever missing. */
+.techstack-chip:hover {
+  transform: translateY(-4px) scale(1.06);
+  border-color: var(--chip-glow, var(--accent-volt));
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 10px 28px -12px var(--chip-glow, var(--accent-volt));
+}
+
+.techstack-chip:hover .techstack-chip-icon {
+  filter: none;
+}
+
+.techstack-builds {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  list-style: none;
+  margin: 0 0 0 auto;
+  padding: 0;
+  width: 100%;
+  max-width: 420px;
+}
+
+.techstack-build-item {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.techstack-build-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--sw-surface-strong);
+  border: 1px solid var(--sw-border-soft);
+  color: var(--text-main);
+}
+
+.techstack-build-label {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+  color: var(--text-main);
+}
+
+@media (max-width: 1100px) {
+  .techstack-section {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .techstack-builds {
+    margin: 0;
+    max-width: 100%;
+  }
+}

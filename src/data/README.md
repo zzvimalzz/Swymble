@@ -8,7 +8,7 @@ point — every file below is assembled into `SWYMBLE_DATA` there — and all ty
 
 | Folder | Files | Feeds | Guide |
 |---|---|---|---|
-| `home/` | `branding.ts`, `socials.ts`, `latestupdates.ts`, `services.ts`, `process.ts`, `universe.ts` | homepage sections (branding and socials are also used site-wide in nav/footer) | [home/README.md](home/README.md) |
+| `home/` | `branding.ts`, `socials.ts`, `positioning.ts`, `latestupdates.ts`, `services.ts`, `process.ts`, `universe.ts` | homepage sections (branding and socials are also used site-wide in nav/footer) | [home/README.md](home/README.md) |
 | `projects/` | `projects.ts` | project cards | [projects/README.md](projects/README.md) |
 | `about/` | `about.ts`, `techstack.ts` | about copy and the tech stack strip | [about/README.md](about/README.md) |
 | `labs/` | `labs.ts` | labs entries | [labs/README.md](labs/README.md) |

@@ -1,0 +1,75 @@
+.positioning-section {
+  padding: 6rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem;
+}
+
+.positioning-statement {
+  max-width: 640px;
+}
+
+.positioning-statement h2 {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  line-height: 1.4;
+  color: var(--text-main);
+  margin: 0 0 1.5rem;
+}
+
+.positioning-statement p {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--sw-text-muted);
+  margin: 0;
+}
+
+.positioning-statement p + p {
+  margin-top: 1.25rem;
+}
+
+.positioning-link {
+  color: var(--sw-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--accent-volt);
+  transition: color 0.2s ease;
+}
+
+.positioning-link:hover {
+  color: var(--text-main);
+}
+
+.positioning-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  max-width: 640px;
+  column-gap: 2.5rem;
+  row-gap: 2rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.positioning-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.positioning-stat-value {
+  font-family: var(--font-logo);
+  font-size: clamp(3rem, 5vw, 4.5rem);
+  line-height: 1;
+  color: var(--text-main);
+}
+
+.positioning-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+}

@@ -8,6 +8,7 @@ visible.
 |---|---|
 | `branding.ts` | hero name/tagline, marquee text, contact intro |
 | `socials.ts` | social links (footer + contact) |
+| `positioning.ts` | homepage claim + shipped/lab/blog note counters |
 | `latestupdates.ts` | latest update cards |
 | `services.ts` | "WORK WITH ME" service cards |
 | `process.ts` | "WORK WITH ME" 01–04 process steps |
@@ -32,6 +33,27 @@ import { Github } from 'lucide-react';
 export const SWYMBLE_SOCIALS = [
   { id: 'gh', name: 'GITHUB', link: 'https://github.com/username', icon: Github },
 ];
+```
+
+## positioning.ts — claim + counters
+Replaces the old homepage "PROJECTS" carousel. `statement[0]` renders as the headline; the rest
+render as body paragraphs. `statementLink` (optional) turns its `label` into a link wherever that
+exact substring appears in a statement paragraph. `stats[].value` should stay wired to
+`.length` on the real data arrays (`projects.ts`/`labs.ts`/`blog/posts`) rather than a hand-typed
+number, so the counters can never drift out of sync with the content.
+```ts
+export const SWYMBLE_POSITIONING = {
+  statement: [
+    'Headline sentence.',
+    'Body paragraph, can mention a link label like watch paint dry.',
+  ],
+  statementLink: { label: 'watch paint dry', href: 'https://example.com' },
+  stats: [
+    { id: 'projects', label: 'SHIPPED & LIVE', value: SWYMBLE_PROJECTS.length },
+    { id: 'labs', label: 'IN THE LAB', value: SWYMBLE_LABS.length },
+    { id: 'notes', label: 'FIELD NOTES', value: SWYMBLE_BLOG_POSTS.length },
+  ],
+};
 ```
 
 ## latestupdates.ts

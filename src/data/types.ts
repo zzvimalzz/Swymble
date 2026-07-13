@@ -1,5 +1,30 @@
 import type { LucideIcon } from 'lucide-react';
 
+export type SwymbleStackTool = {
+  id: string;
+  name: string;
+  /** Path under /public, e.g. '/images/stack_icons/react.svg'. Logo should already
+   *  be in its real brand color — the chip shows it desaturated at rest and reveals
+   *  the color on hover. */
+  icon: string;
+};
+
+export type SwymbleBuildKind = {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+};
+
+export type SwymbleTechStack = {
+  /** Rendered muted/lighter, above headingLines. */
+  headingLead: string;
+  /** Rendered bold, one line each, below headingLead. */
+  headingLines: string[];
+  toolsLabel: string;
+  tools: SwymbleStackTool[];
+  builds: SwymbleBuildKind[];
+};
+
 export type SwymbleProject = {
   title: string;
   category: string;
@@ -144,11 +169,27 @@ export type SwymbleSocial = {
   icon: LucideIcon;
 };
 
+export type SwymblePositioningStat = {
+  id: string;
+  label: string;
+  value: number;
+};
+
+export type SwymblePositioning = {
+  /** First entry renders as the headline; the rest as body paragraphs. */
+  statement: string[];
+  /** If set and its label appears verbatim in a statement paragraph, that substring renders as a link. */
+  statementLink?: { label: string; href: string };
+  stats: SwymblePositioningStat[];
+};
+
 export type SwymbleData = {
   name: string;
   tagline: string;
   marquee: string;
   contactIntro: string;
+  positioning: SwymblePositioning;
+  techStack: SwymbleTechStack;
   services: SwymbleService[];
   process: SwymbleProcessStep[];
   projects: SwymbleProject[];
