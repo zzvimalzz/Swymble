@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import GlitchRunner from '../../components/games/glitch-runner/GlitchRunner';
+import BB8 from '../../components/games/bb8/BB8';
 
 export default function DesktopNotFound() {
   return (
@@ -43,7 +43,7 @@ export default function DesktopNotFound() {
           </Link>
         </motion.div>
 
-        <GlitchRunner />
+        <BB8 />
       </div>
     </section>
   );

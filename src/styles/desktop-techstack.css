@@ -23,12 +23,22 @@
 
 .techstack-heading-lead {
   font-weight: 400;
-  color: var(--sw-text-muted);
+  color: var(--accent-cyan);
 }
 
 .techstack-heading-strong {
   font-weight: 800;
   color: var(--text-main);
+}
+
+/* One highlighted word per line ("me" / "you") — alternating accents so the
+   two lines read as distinct beats instead of one flat block of bold text. */
+.techstack-heading-highlight-a {
+  color: var(--accent-volt);
+}
+
+.techstack-heading-highlight-b {
+  color: var(--accent-neon);
 }
 
 .techstack-tools-label {
@@ -54,6 +64,7 @@
    regardless of what color a given logo turns out to be. */
 /* Size lives here — change width/height together to resize every chip. */
 .techstack-chip {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,6 +75,42 @@
   border: 1px solid rgba(0, 0, 0, 0.08);
   transition: transform 0.25s var(--sw-ease-standard), border-color 0.25s ease,
     background-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Custom tooltip naming the chip on hover, instead of a slow native title attr. */
+.techstack-chip-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  background: var(--sw-text-main);
+  color: var(--sw-bg-ink);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition: opacity 0.2s ease, transform 0.2s var(--sw-ease-standard);
+  z-index: 5;
+}
+
+.techstack-chip-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--sw-text-main);
+}
+
+.techstack-chip:hover .techstack-chip-tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .techstack-chip-icon {
@@ -104,6 +151,9 @@
   gap: 1.25rem;
 }
 
+/* --build-glow is rolled to a fresh random accent on every onMouseEnter in
+   TechStackSection.tsx, so the hover pop isn't the same color twice in a row.
+   Only the icon and label react — the row itself stays inert. */
 .techstack-build-icon {
   display: flex;
   align-items: center;
@@ -115,6 +165,16 @@
   background: var(--sw-surface-strong);
   border: 1px solid var(--sw-border-soft);
   color: var(--text-main);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s ease,
+    border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+
+.techstack-build-item:hover .techstack-build-icon {
+  transform: scale(1.15) rotate(-10deg);
+  background: var(--build-glow, var(--accent-volt));
+  border-color: var(--build-glow, var(--accent-volt));
+  color: var(--sw-bg-ink);
+  box-shadow: 0 10px 24px -10px var(--build-glow, var(--accent-volt));
 }
 
 .techstack-build-label {
@@ -123,6 +183,12 @@
   font-size: 1.15rem;
   letter-spacing: 0.01em;
   color: var(--text-main);
+  transition: color 0.3s ease, letter-spacing 0.3s ease;
+}
+
+.techstack-build-item:hover .techstack-build-label {
+  color: var(--build-glow, var(--accent-volt));
+  letter-spacing: 0.03em;
 }
 
 @media (max-width: 1100px) {

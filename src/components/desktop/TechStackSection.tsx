@@ -34,16 +34,28 @@ export default function TechStackSection({ techStack }: TechStackSectionProps) {
     [tools],
   );
 
+  const pickBuildGlow = () => BRAND_GLOW_COLORS[Math.floor(Math.random() * BRAND_GLOW_COLORS.length)];
+
   return (
     <section className="techstack-section" aria-label="Tech stack and what I build">
       <Reveal className="techstack-left">
         <h2 className="techstack-heading">
           <span className="techstack-heading-lead">{headingLead}</span>
-          {headingLines.map((line) => (
-            <span key={line} className="techstack-heading-strong">
-              {line}
-            </span>
-          ))}
+          {headingLines.map((line, index) => {
+            const words = line.split(' ');
+            const lastWord = words.pop();
+            const rest = words.join(' ');
+            return (
+              <span key={line} className="techstack-heading-strong">
+                {rest ? `${rest} ` : ''}
+                <span
+                  className={`techstack-heading-highlight techstack-heading-highlight-${index % 2 === 0 ? 'a' : 'b'}`}
+                >
+                  {lastWord}
+                </span>
+              </span>
+            );
+          })}
         </h2>
 
         <div className="techstack-tools">
@@ -52,8 +64,11 @@ export default function TechStackSection({ techStack }: TechStackSectionProps) {
             {tools.map((tool, index) => {
               const chipStyle = { '--chip-glow': chipGlowColors[index] } as CSSProperties;
               return (
-                <span key={tool.id} className="techstack-chip" style={chipStyle} title={tool.name}>
+                <span key={tool.id} className="techstack-chip" style={chipStyle}>
                   <SmartImage src={tool.icon} alt={tool.name} className="techstack-chip-icon" padding="0.55rem" />
+                  <span className="techstack-chip-tooltip" aria-hidden="true">
+                    {tool.name}
+                  </span>
                 </span>
               );
             })}
@@ -71,7 +86,12 @@ export default function TechStackSection({ techStack }: TechStackSectionProps) {
         {builds.map((build) => {
           const Icon = build.icon;
           return (
-            <motion.li key={build.id} className="techstack-build-item" variants={buildItemVariants}>
+            <motion.li
+              key={build.id}
+              className="techstack-build-item"
+              variants={buildItemVariants}
+              onMouseEnter={(event) => event.currentTarget.style.setProperty('--build-glow', pickBuildGlow())}
+            >
               <span className="techstack-build-icon">
                 <Icon size={20} aria-hidden="true" />
               </span>

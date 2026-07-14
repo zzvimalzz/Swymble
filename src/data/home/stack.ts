@@ -26,6 +26,7 @@ export const SWYMBLE_TECH_STACK_SECTION: SwymbleTechStack = {
     { id: 'python', name: 'Python', icon: '/images/stack_icons/python.png' },
     { id: 'postgresql', name: 'PostgreSQL', icon: '/images/stack_icons/postgresql.png' },
     { id: 'mysql', name: 'MySQL', icon: '/images/stack_icons/mysql.png' },
+    { id: 'neo4j', name: 'Neo4j', icon: '/images/stack_icons/neo4j.png' },
     { id: 'docker', name: 'Docker', icon: '/images/stack_icons/docker.png' },
     { id: 'linux', name: 'Linux', icon: '/images/stack_icons/linux.png' },
     { id: 'github', name: 'GitHub', icon: '/images/stack_icons/github.png' },

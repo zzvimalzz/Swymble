@@ -1,0 +1,44 @@
+/* ── Animated BB-8 (404 page) — canvas drawn by bb8DrawBody.ts / bb8DrawHead.ts,
+   desert backdrop by bb8WorldDraw.ts. Full-bleed: same breakout technique as
+   .tech-universe-section (desktop-tech-universe.css) so the roll stage spans
+   the page edge-to-edge regardless of the 404 layout's max-width/padding —
+   safe because body/html already set overflow-x: hidden (see index.css). ── */
+.bb8 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  margin-top: 3rem;
+}
+
+.bb8__caption {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+}
+
+.bb8__stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.015);
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* Displayed size is set inline from BB8.tsx (canvas.style.width/height), matching
+   its internal drawing resolution 1:1 for crispness — this just centers it. */
+.bb8__canvas {
+  display: block;
+}
