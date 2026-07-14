@@ -25,7 +25,7 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     id: 'cortex',
     title: 'CORTEX',
     category: 'ARTIFICIAL INTELLIGENCE',
-    image: '/images/cortex_logo.png',
+    image: '/images/labs/cortex_logo.png',
     status: 'In Development',
     visibility: 'teaser',
     publicSummary:
@@ -101,7 +101,7 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     title: 'WATCH PAINT DRY',
     category: 'DIGITAL ZEN',
     categoryColor: '#f2aebf',
-    image: '/images/watchpaintdry_logo.png',
+    image: '/images/labs/watchpaintdry_logo.png',
     status: 'Live',
     visibility: 'public',
     publicSummary:
@@ -126,7 +126,7 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     title: 'TERRITORY',
     category: 'FITNESS & GAMING',
     categoryColor: 'red',
-    image: '/images/territory_logo.png',
+    image: '/images/labs/territory_logo.png',
     status: 'In Development',
     visibility: 'teaser',
     publicSummary:

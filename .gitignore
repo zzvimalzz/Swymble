@@ -7,23 +7,32 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies (covers nested subdomain apps: mybirth, what2watch)
 node_modules
+
+# Build output (root + per-subdomain builds copied into dist/)
 dist
 dist-ssr
 *.local
+*.tsbuildinfo
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-#Folders
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Folders
 /swymble_assets/
 
 # Env files
@@ -35,7 +44,7 @@ dist-ssr
 coverage/
 *.lcov
 
-#Instructions
+# Local instructions (kept out of this public repo)
 /.github/copilot-*
 .claude/
 CLAUDE.md
