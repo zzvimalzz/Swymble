@@ -54,3 +54,6 @@ storybook-static
 
 # vitest
 /coverage/
+
+# etl download caches
+etl/**/.cache/
