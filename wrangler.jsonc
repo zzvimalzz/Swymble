@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mymalaysia",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "observability": {
+    "enabled": true,
+  },
+  // Custom domain — attach once DNS on the swymble.com zone is ready:
+  // "routes": [{ "pattern": "mymalaysia.swymble.com", "custom_domain": true }]
+  //
+  // R2 binding for the data lake arrives with Milestone 8 (ETL):
+  // "r2_buckets": [{ "binding": "DATA", "bucket_name": "mymalaysia-data" }]
+}

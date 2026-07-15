@@ -1,0 +1,13 @@
+node_modules
+.next
+.open-next
+.wrangler
+out
+build
+coverage
+storybook-static
+playwright-report
+test-results
+package-lock.json
+public
+next-env.d.ts

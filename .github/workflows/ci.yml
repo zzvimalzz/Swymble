@@ -1,0 +1,49 @@
+# Continuous integration: every push and pull request must pass linting,
+# formatting, type checks, unit tests, a production build, and an e2e smoke
+# run against that build before it can merge.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E smoke (production build)
+        run: npm run e2e -- --project=chromium
