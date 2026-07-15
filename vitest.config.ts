@@ -30,6 +30,11 @@ export default defineConfig({
       {
         extends: true,
         plugins: [storybookTest({ configDir: path.join(dirname, ".storybook") })],
+        // aria-query (CJS, nested under @testing-library/dom) must be
+        // pre-bundled or its named exports break in the browser runner.
+        optimizeDeps: {
+          include: ["@testing-library/dom", "aria-query"],
+        },
         test: {
           name: "storybook",
           browser: {
