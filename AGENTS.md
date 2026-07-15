@@ -4,3 +4,31 @@
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
+
+# MyMalaysia
+
+Premium platform for exploring Malaysia through open public data. Production
+product under the Swymble brand — never a demo; no placeholder pages, no mock
+data presented as real.
+
+## Ground rules
+
+- Read [docs/architecture.md](docs/architecture.md) before adding files — it
+  is the folder contract (dependency direction, feature isolation, where
+  fetch is allowed). ADRs in [docs/adr/](docs/adr/) record decisions that are
+  not up for casual reversal: static-first (no DB/auth/FastAPI in v1),
+  MapLibre + PMTiles (no Mapbox), Cloudflare Workers hosting via OpenNext.
+- Files ≤ ~400 lines; split before 500.
+- No hardcoded internal routes or external endpoints in components — use
+  `src/config/`.
+- Every dataset shown in the UI carries source, licence, last-updated, and
+  quality status.
+- Design bar: Apple keynote × modern data journalism. No generic dashboards,
+  no gradient-blob hero cards, no filler marketing copy.
+
+## Commands
+
+`npm run dev` · `npm run lint` · `npm run typecheck` · `npm test` (Vitest
+unit) · `npm run e2e` (Playwright) · `npm run storybook` · `npm run build` ·
+`npm run preview` (Cloudflare Worker locally). CI runs all of them; husky +
+lint-staged guard commits.
