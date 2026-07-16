@@ -126,7 +126,7 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     title: 'MYMALAYSIA',
     category: 'OPEN DATA',
     categoryColor: '#6fa0e8',
-    image: '/images/labs/mymalaysia_logo.svg',
+    image: '/images/mymalaysia_logo.png',
     status: 'In Development',
     visibility: 'public',
     publicSummary:
