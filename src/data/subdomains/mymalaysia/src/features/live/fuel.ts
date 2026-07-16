@@ -63,3 +63,16 @@ export function latestWithDelta(rows: FuelPriceRow[]): FuelLatest | null {
 export function formatRmPerLitre(value: number): string {
   return `RM ${value.toFixed(2)}`;
 }
+
+/**
+ * BUDI95 (Budi Madani): the subsidised RON95 price for eligible Malaysians
+ * paying with MyKad, fixed by policy since 30 Sep 2025. The dataset above
+ * carries the unsubsidised market price; both are shown.
+ * Source: Ministry of Finance, budimadani.gov.my.
+ */
+export const BUDI95 = {
+  pricePerLitre: 1.99,
+  label: "BUDI95 · MyKad",
+  effective: "2025-09-30",
+  sourceUrl: "https://budimadani.gov.my",
+} as const;

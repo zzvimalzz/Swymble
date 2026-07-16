@@ -15,10 +15,11 @@
  */
 
 :root {
-  /* ---- brand ---- */
+  /* ---- brand (jalur gemilang tricolor + ink) ---- */
   --brand-selat: oklch(0.44 0.13 258);
   --brand-selat-bright: oklch(0.55 0.13 258);
-  --brand-songket: oklch(0.72 0.13 80);
+  --brand-songket: oklch(0.78 0.15 82);
+  --brand-merah: oklch(0.55 0.21 25);
   --brand-ink: oklch(0.2 0.015 260);
 
   /* ---- semantic surfaces & text ---- */
@@ -87,10 +88,11 @@
 }
 
 .dark {
-  /* ---- brand ---- */
+  /* ---- brand (jalur gemilang tricolor + ink) ---- */
   --brand-selat: oklch(0.72 0.12 255);
   --brand-selat-bright: oklch(0.78 0.11 252);
-  --brand-songket: oklch(0.8 0.13 85);
+  --brand-songket: oklch(0.82 0.15 85);
+  --brand-merah: oklch(0.66 0.19 25);
   --brand-ink: oklch(0.93 0.006 250);
 
   /* ---- semantic surfaces & text ---- */

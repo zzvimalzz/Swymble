@@ -8,18 +8,22 @@ import type { Map as MaplibreMap } from "maplibre-gl";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  bindBoundaryInteractions,
   easeToPitch,
   flyToBbox,
   MapView,
+  setChoroplethRamp,
   setChoroplethValues,
   setExtrusionHeights,
+  setExtrusionRamp,
   setExtrusionVisible,
   setLayerOpacity,
   setLayerVisible,
   setSelectionOutline,
+  setTransitData,
 } from "@/components/map";
-import { EXTRUSION_MAX_HEIGHT, LAYER_IDS } from "@/maps/style";
+import { fetchVehiclePositions, type TransitSnapshot } from "@/services/transit-client";
+import { useTheme } from "next-themes";
+import { EXTRUSION_MAX_HEIGHT, LAYER_IDS, MAP_COLORS } from "@/maps/style";
 import {
   DISTRICT_META,
   MALAYSIA_BBOX,
@@ -83,8 +87,10 @@ export function AtlasView() {
         state[dataLayer.id].visible = dataLayer.metric === initialParams.layer;
       }
     }
+    if (initialParams.transit) state.transit.visible = true;
     return state;
   });
+  const [transit, setTransit] = useState<TransitSnapshot | null>(null);
   const [yearByMetric, setYearByMetric] = useState<Partial<Record<MetricId, number>>>({});
   const [threeD, setThreeD] = useState(false);
   const [selection, setSelection] = useState<AtlasSelection>(() =>
@@ -95,10 +101,14 @@ export function AtlasView() {
   );
   const [searchOpen, setSearchOpen] = useState(false);
 
+  const { resolvedTheme } = useTheme();
+  const mapTheme = resolvedTheme === "dark" ? "dark" : "light";
+
   const activeDataLayer = useMemo(
     () => DATA_LAYERS.find((l) => layerState[l.id]?.visible) ?? null,
     [layerState],
   );
+  const transitVisible = layerState.transit?.visible ?? false;
   const activeSeries =
     activeDataLayer?.metric && data ? data.metrics[activeDataLayer.metric] : null;
   const activeYear =
@@ -141,16 +151,24 @@ export function AtlasView() {
   const onMapLoad = useCallback(
     (map: MaplibreMap) => {
       mapRef.current = map;
-      // One click model everywhere: districts are the interactive unit. Bind
-      // both the base fill and the choropleth so clicks land whichever is on.
-      for (const layerId of [LAYER_IDS.districtsFill, LAYER_IDS.districtsChoropleth]) {
-        bindBoundaryInteractions(
-          map,
-          "districts",
-          { onSelect: (feature) => selectDistrict(feature.id as number, false) },
-          layerId,
-        );
-      }
+      // Unified picking: query rendered features topmost-first so the 3D
+      // prisms are hit-tested against their real extruded geometry — at a
+      // pitched angle a tower must select ITS district, not whatever flat
+      // polygon hides behind it.
+      const pickableLayers = () =>
+        [
+          LAYER_IDS.districtsExtrusion,
+          LAYER_IDS.districtsChoropleth,
+          LAYER_IDS.districtsFill,
+        ].filter((id) => map.getLayer(id) && map.getLayoutProperty(id, "visibility") === "visible");
+      map.on("click", (event) => {
+        const feature = map.queryRenderedFeatures(event.point, { layers: pickableLayers() })[0];
+        if (feature?.id != null) selectDistrict(feature.id as number, false);
+      });
+      map.on("mousemove", (event) => {
+        const hit = map.queryRenderedFeatures(event.point, { layers: pickableLayers() }).length;
+        map.getCanvas().style.cursor = hit ? "pointer" : "";
+      });
       // Deep-linked state: fly there now that the camera exists.
       if (initialParams.state) {
         const state = STATE_META.find((s) => s.code === initialParams.state);
@@ -201,9 +219,10 @@ export function AtlasView() {
     const apply = () => {
       if (!map.getLayer(LAYER_IDS.districtsChoropleth)) return;
 
+      // Base + live layers: plain visibility/opacity from state.
       for (const layer of ATLAS_LAYERS) {
         const state = layerState[layer.id];
-        if (layer.kind === "base") {
+        if (layer.kind !== "data") {
           for (const engineLayer of layer.engineLayers) {
             setLayerVisible(map, engineLayer, state.visible);
             setLayerOpacity(map, engineLayer, state.opacity);
@@ -216,6 +235,14 @@ export function AtlasView() {
       setExtrusionVisible(map, Boolean(activeSeries) && threeD);
       if (activeDataLayer) {
         setLayerOpacity(map, LAYER_IDS.districtsChoropleth, layerState[activeDataLayer.id].opacity);
+        // Each data layer paints in its own hue — identity carried from the
+        // layer card through the map ramp and 3D prisms.
+        if (activeDataLayer.ramp) {
+          const ramp = activeDataLayer.ramp[mapTheme];
+          const colors = MAP_COLORS[mapTheme];
+          setChoroplethRamp(map, { ...ramp, land: colors.land });
+          setExtrusionRamp(map, { ...ramp, selected: colors.selected, hover: colors.landHover });
+        }
       }
 
       if (activeSeries && activeYear !== null) {
@@ -232,6 +259,9 @@ export function AtlasView() {
         }
       }
 
+      // Style reloads reset the transit source — re-seed the last snapshot.
+      if (transitVisible && transit) setTransitData(map, transit.collection);
+
       setSelectionOutline(map, selection?.kind === "district" ? selection.fid : null);
     };
 
@@ -240,7 +270,45 @@ export function AtlasView() {
     return () => {
       map.off("styledata", apply);
     };
-  }, [mapReady, layerState, activeDataLayer, activeSeries, activeYear, threeD, selection]);
+  }, [
+    mapReady,
+    layerState,
+    activeDataLayer,
+    activeSeries,
+    activeYear,
+    threeD,
+    selection,
+    mapTheme,
+    transit,
+    transitVisible,
+  ]);
+
+  // Live transit polling while the layer is on (30 s, matching upstream).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady || !transitVisible) return;
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const snapshot = await fetchVehiclePositions();
+        if (cancelled || !mapRef.current) return;
+        setTransitData(mapRef.current, snapshot.collection);
+        setTransit(snapshot);
+      } catch (error) {
+        console.error("transit poll failed:", error);
+      }
+    };
+    void poll();
+    const timer = setInterval(poll, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      setTransit(null);
+      if (mapRef.current) {
+        setTransitData(mapRef.current, { type: "FeatureCollection", features: [] });
+      }
+    };
+  }, [transitVisible, mapReady]);
 
   // Pitch only when the 3D toggle changes (never cancel other flights).
   const appliedPitchRef = useRef(false);
@@ -314,6 +382,7 @@ export function AtlasView() {
               <LayersPanel
                 layerState={layerState}
                 data={data}
+                transit={transit}
                 onToggle={toggleLayer}
                 onOpacity={setOpacity}
               />

@@ -1,7 +1,13 @@
-import type { Map as MaplibreMap, MapGeoJSONFeature } from "maplibre-gl";
+import type { GeoJSONSource, Map as MaplibreMap, MapGeoJSONFeature } from "maplibre-gl";
+import type { FeatureCollection } from "geojson";
 
 import { BOUNDARY_SOURCES, type BoundaryLevel } from "@/maps/sources";
-import { FILL_LAYER_BY_LEVEL, LAYER_IDS } from "@/maps/style";
+import {
+  EXTRUSION_MAX_HEIGHT,
+  FILL_LAYER_BY_LEVEL,
+  LAYER_IDS,
+  TRANSIT_SOURCE_ID,
+} from "@/maps/style";
 
 export type FeatureId = number;
 
@@ -167,6 +173,58 @@ export function setLayerOpacity(map: MaplibreMap, layerId: string, opacity: numb
   if (!layer) return;
   const prop = OPACITY_PROP_BY_TYPE[layer.type];
   if (prop) map.setPaintProperty(layerId, prop, opacity);
+}
+
+/**
+ * Repaints the choropleth's sequential ramp (per data layer identity).
+ * `land` is the no-data color; low/high span normalised 0..1 values.
+ */
+export function setChoroplethRamp(
+  map: MaplibreMap,
+  ramp: { low: string; high: string; land: string },
+): void {
+  if (!map.getLayer(LAYER_IDS.districtsChoropleth)) return;
+  map.setPaintProperty(LAYER_IDS.districtsChoropleth, "fill-color", [
+    "interpolate",
+    ["linear"],
+    ["coalesce", ["feature-state", "value"], -1],
+    -1,
+    ramp.land,
+    0,
+    ramp.low,
+    1,
+    ramp.high,
+  ]);
+}
+
+/** Repaints the 3D prism ramp, keeping selection/hover overrides intact. */
+export function setExtrusionRamp(
+  map: MaplibreMap,
+  ramp: { low: string; high: string; selected: string; hover: string },
+): void {
+  if (!map.getLayer(LAYER_IDS.districtsExtrusion)) return;
+  map.setPaintProperty(LAYER_IDS.districtsExtrusion, "fill-extrusion-color", [
+    "case",
+    ["boolean", ["feature-state", "selected"], false],
+    ramp.selected,
+    ["boolean", ["feature-state", "hover"], false],
+    ramp.hover,
+    [
+      "interpolate",
+      ["linear"],
+      ["coalesce", ["feature-state", "height"], 0],
+      0,
+      ramp.low,
+      EXTRUSION_MAX_HEIGHT,
+      ramp.high,
+    ],
+  ]);
+}
+
+/** Replaces the live transit vehicles on the map. */
+export function setTransitData(map: MaplibreMap, collection: FeatureCollection): void {
+  const source = map.getSource(TRANSIT_SOURCE_ID) as GeoJSONSource | undefined;
+  source?.setData(collection);
 }
 
 /** Moves the selection outline to one district (null clears it). */
