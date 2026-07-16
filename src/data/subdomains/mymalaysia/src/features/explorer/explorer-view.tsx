@@ -108,6 +108,7 @@ export function ExplorerView() {
 
   // 3D mode: prism visibility, metric-driven heights, pitched camera.
   // Re-applies after style reloads (theme switch wipes feature-state).
+  const appliedPitchRef = useRef(false);
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
@@ -130,7 +131,12 @@ export function ExplorerView() {
     };
 
     apply();
-    easeToPitch(map, threeD ? 55 : 0);
+    // Pitch only when the toggle actually changes — an unconditional easeTo
+    // would cancel in-flight camera flights (e.g. the deep-link state fly).
+    if (appliedPitchRef.current !== threeD) {
+      appliedPitchRef.current = threeD;
+      easeToPitch(map, threeD ? 55 : 0);
+    }
     map.on("styledata", apply);
     return () => {
       map.off("styledata", apply);

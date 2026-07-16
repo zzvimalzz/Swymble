@@ -11,6 +11,9 @@ const isStaticExport = process.env.NEXT_OUTPUT === "export";
 
 const nextConfig: NextConfig = {
   ...(isStaticExport ? { output: "export" as const, trailingSlash: true } : {}),
+  // Pin the workspace root: when this app runs as a swymble subtree, Next
+  // would otherwise infer the swymble repo root from its lockfile and warn.
+  turbopack: { root: process.cwd() },
   // Cloudflare Workers has no built-in Next.js image optimizer (and static
   // export forbids it). Site imagery is predominantly SVG/vector; revisit
   // with Cloudflare Images if raster photography ever becomes significant.
