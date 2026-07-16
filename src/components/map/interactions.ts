@@ -97,6 +97,21 @@ export function setDistrictStateFilter(map: MaplibreMap, stateCode: number | nul
   map.setFilter(LAYER_IDS.districtsExtrusion, f);
 }
 
+/**
+ * Dims every state except `exceptId` (used while a state is focused).
+ * Pass exceptId null to clear all muting.
+ */
+export function setMutedStates(
+  map: MaplibreMap,
+  allStateIds: ReadonlyArray<FeatureId>,
+  exceptId: FeatureId | null,
+): void {
+  const sourceId = BOUNDARY_SOURCES.states.id;
+  for (const id of allStateIds) {
+    map.setFeatureState({ source: sourceId, id }, { muted: exceptId !== null && id !== exceptId });
+  }
+}
+
 /** Shows/hides the 3D district prisms. */
 export function setExtrusionVisible(map: MaplibreMap, visible: boolean): void {
   map.setLayoutProperty(LAYER_IDS.districtsExtrusion, "visibility", visible ? "visible" : "none");
@@ -116,10 +131,13 @@ export function setExtrusionHeights(
   }
 }
 
-/** Toggles which boundary level is visible. Both stay loaded. */
-export function setBoundaryLevel(map: MaplibreMap, level: BoundaryLevel): void {
-  const showStates = level === "states" ? "visible" : "none";
-  const showDistricts = level === "districts" ? "visible" : "none";
+/**
+ * Toggles which boundary level is visible ("both" shows dimmed states as
+ * context beneath the focused districts). All levels stay loaded.
+ */
+export function setBoundaryLevel(map: MaplibreMap, level: BoundaryLevel | "both"): void {
+  const showStates = level === "states" || level === "both" ? "visible" : "none";
+  const showDistricts = level === "districts" || level === "both" ? "visible" : "none";
   map.setLayoutProperty(LAYER_IDS.statesFill, "visibility", showStates);
   map.setLayoutProperty(LAYER_IDS.statesLine, "visibility", showStates);
   map.setLayoutProperty(LAYER_IDS.districtsFill, "visibility", showDistricts);

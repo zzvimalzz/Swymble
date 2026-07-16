@@ -70,6 +70,14 @@ function boundaryFillColor(
 }
 
 /**
+ * Fill opacity driven by the "muted" feature-state: when a state is
+ * focused, the other states stay visible as dimmed context.
+ */
+function boundaryFillOpacity(): DataDrivenPropertyValueSpecification<number> {
+  return ["case", ["boolean", ["feature-state", "muted"], false], 0.35, 1];
+}
+
+/**
  * Builds the engine's style: a boundary-first data canvas (no street
  * basemap — deliberate, see docs/adr/0002). Both boundary levels are always
  * present; visibility is toggled by the layer system so switching levels
@@ -103,7 +111,10 @@ export function buildMapStyle(theme: MapTheme, initialLevel: BoundaryLevel): Sty
         type: "fill",
         source: BOUNDARY_SOURCES.states.id,
         layout: { visibility: initialLevel === "states" ? "visible" : "none" },
-        paint: { "fill-color": boundaryFillColor(colors) },
+        paint: {
+          "fill-color": boundaryFillColor(colors),
+          "fill-opacity": boundaryFillOpacity(),
+        },
       },
       {
         id: LAYER_IDS.statesLine,
@@ -142,14 +153,23 @@ export function buildMapStyle(theme: MapTheme, initialLevel: BoundaryLevel): Sty
         layout: { visibility: "none" },
         paint: {
           "fill-extrusion-height": ["coalesce", ["feature-state", "height"], 0],
+          // Selection/hover must win over the height ramp — otherwise the
+          // highlight only shows on the flat fill layer beneath the prism.
           "fill-extrusion-color": [
-            "interpolate",
-            ["linear"],
-            ["coalesce", ["feature-state", "height"], 0],
-            0,
-            colors.land,
-            EXTRUSION_MAX_HEIGHT,
+            "case",
+            ["boolean", ["feature-state", "selected"], false],
             colors.selected,
+            ["boolean", ["feature-state", "hover"], false],
+            colors.landHover,
+            [
+              "interpolate",
+              ["linear"],
+              ["coalesce", ["feature-state", "height"], 0],
+              0,
+              colors.land,
+              EXTRUSION_MAX_HEIGHT,
+              colors.selected,
+            ],
           ],
           "fill-extrusion-opacity": 0.9,
         },

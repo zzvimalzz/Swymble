@@ -5,6 +5,7 @@ export {
   setDistrictStateFilter,
   setExtrusionHeights,
   setExtrusionVisible,
+  setMutedStates,
   setSelectedFeature,
   type BoundaryEventHandlers,
   type FeatureId,

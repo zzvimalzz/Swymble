@@ -16,19 +16,22 @@ function prefersReducedMotion(): boolean {
 export function flyToBbox(
   map: MaplibreMap,
   bbox: Bbox,
-  options: { padding?: number; durationMs?: number } = {},
+  options: { padding?: number; durationMs?: number; maxZoom?: number } = {},
 ): void {
-  const { padding = 48, durationMs = duration.hero * 1000 } = options;
+  const { padding = 48, durationMs = duration.hero * 1000, maxZoom } = options;
   const bounds: [[number, number], [number, number]] = [
     [bbox[0], bbox[1]],
     [bbox[2], bbox[3]],
   ];
 
+  // maxZoom must be absent (not undefined) or MapLibre's zoom math NaNs out.
+  const zoomCap = maxZoom !== undefined ? { maxZoom } : {};
+
   if (prefersReducedMotion()) {
-    map.fitBounds(bounds, { padding, duration: 0 });
+    map.fitBounds(bounds, { padding, duration: 0, ...zoomCap });
     return;
   }
-  map.fitBounds(bounds, { padding, duration: durationMs, essential: false });
+  map.fitBounds(bounds, { padding, duration: durationMs, essential: false, ...zoomCap });
 }
 
 /** Eases the camera to a pitch/bearing (0/0 returns to plan view). */
