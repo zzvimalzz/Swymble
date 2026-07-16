@@ -1,5 +1,7 @@
 "use client";
 
+import { useTheme } from "next-themes";
+
 import { Sparkline } from "@/components/charts/sparkline";
 import { SourceAttribution } from "@/components/source-attribution";
 import { getDatasetManifest } from "@/services/dataset-registry";
@@ -8,7 +10,14 @@ import { formatPeople } from "@/lib/format";
 
 import { seriesForDistrict, stateSeries, type AtlasData } from "../atlas-data";
 import type { AtlasSelection } from "../atlas-state";
-import type { MetricId } from "../layer-registry";
+import { DATA_LAYERS, type MetricId } from "../layer-registry";
+
+/** Identity color for a metric row (mirrors the layer card + map ramp). */
+function useMetricAccent(): (metric: MetricId) => string | undefined {
+  const { resolvedTheme } = useTheme();
+  const theme = resolvedTheme === "dark" ? "dark" : "light";
+  return (metric) => DATA_LAYERS.find((l) => l.metric === metric)?.accent[theme];
+}
 
 interface InspectorPanelProps {
   selection: AtlasSelection;
@@ -17,6 +26,8 @@ interface InspectorPanelProps {
 }
 
 function MetricRow({ data, metric, fid }: { data: AtlasData; metric: MetricId; fid: number }) {
+  const accentFor = useMetricAccent();
+  const accent = accentFor(metric);
   const series = data.metrics[metric];
   const points = seriesForDistrict(series, fid);
   if (points.length === 0) {
@@ -30,13 +41,19 @@ function MetricRow({ data, metric, fid }: { data: AtlasData; metric: MetricId; f
   const last = points[points.length - 1];
   return (
     <div className="border-t border-border/60 py-3">
-      <dt className="text-xs tracking-wide text-muted-foreground uppercase">
+      <dt className="flex items-center gap-1.5 text-xs tracking-wide text-muted-foreground uppercase">
+        <span
+          className="inline-block size-2 rounded-full"
+          style={{ background: accent }}
+          aria-hidden
+        />
         {series.label} <span className="normal-case">· {last.year}</span>
       </dt>
       <dd className="mt-1 flex items-end justify-between gap-3">
         <span className="font-display text-2xl tabular">{series.format(last.value)}</span>
         <Sparkline
           points={points}
+          color={accent}
           ariaLabel={`${series.label} trend, ${points[0].year} to ${last.year}`}
         />
       </dd>

@@ -47,6 +47,17 @@ export const routes = {
 
 export type RouteId = keyof typeof routes;
 
+/**
+ * Header shortcuts into the Atlas's lenses. Deep links with query params —
+ * kept out of `routes` so the sitemap only carries canonical paths.
+ */
+export const NAV_LENSES: Array<{ label: string; href: string }> = [
+  { label: "Live", href: "/map?panel=live" },
+  { label: "Transit", href: "/map?layer=transit" },
+  { label: "Population", href: "/map?layer=population" },
+  { label: "Economy", href: "/map?layer=gdp" },
+];
+
 export const allRoutes: SiteRoute[] = Object.values(routes);
 export const navRoutes: SiteRoute[] = allRoutes.filter((r) => r.inNav);
 export const footerRoutes: SiteRoute[] = allRoutes.filter((r) => r.inFooter);

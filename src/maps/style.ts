@@ -54,7 +54,22 @@ export const LAYER_IDS = {
   districtsChoropleth: "districts-choropleth",
   districtsExtrusion: "districts-extrusion",
   selectionOutline: "selection-outline",
+  transitVehicles: "transit-vehicles",
 } as const;
+
+export const TRANSIT_SOURCE_ID = "transit-vehicles-source";
+
+/**
+ * Agency identity colors for live transit (categorical, both themes chosen
+ * for the dark ink and light paper alike; each pairs with a surface ring).
+ */
+export const TRANSIT_AGENCY_COLORS: Record<string, string> = {
+  ktmb: "#e0364e",
+  "rapid-bus-kl": "#12b5cb",
+  "rapid-bus-penang": "#2fb344",
+  "rapid-bus-kuantan": "#a06be0",
+};
+export const TRANSIT_FALLBACK_COLOR = "#8b93a3";
 
 /** Ceiling of the 3D prisms, in metres. Heights are set via feature-state. */
 export const EXTRUSION_MAX_HEIGHT = 150_000;
@@ -109,6 +124,10 @@ export function buildDataOverlay(
         type: "geojson",
         data: BOUNDARY_SOURCES.districts.url,
         promoteId: BOUNDARY_SOURCES.districts.promoteId,
+      },
+      [TRANSIT_SOURCE_ID]: {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
       },
     },
     layers: [
@@ -182,6 +201,28 @@ export function buildDataOverlay(
         paint: {
           "line-color": colors.selected,
           "line-width": 2.5,
+        },
+      },
+      // Live transit vehicles: agency-colored dots over everything else,
+      // fed by GTFS-Realtime via setData on an interval. Hidden until the
+      // transit layer is toggled on.
+      {
+        id: LAYER_IDS.transitVehicles,
+        type: "circle",
+        source: TRANSIT_SOURCE_ID,
+        layout: { visibility: "none" },
+        paint: {
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2.5, 10, 5, 14, 8],
+          // Flattened [key, color, …] pairs defeat the tuple type of the
+          // match expression — the shape is correct, assert it.
+          "circle-color": [
+            "match",
+            ["get", "agency"],
+            ...Object.entries(TRANSIT_AGENCY_COLORS).flat(),
+            TRANSIT_FALLBACK_COLOR,
+          ] as unknown as DataDrivenPropertyValueSpecification<string>,
+          "circle-stroke-color": colors.boundary,
+          "circle-stroke-width": 1.5,
         },
       },
       // 3D mode: district prisms. Heights arrive via feature-state (set from

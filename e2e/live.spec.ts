@@ -24,6 +24,15 @@ test.describe("live lens", () => {
       const city = decodeURIComponent(url.searchParams.get("contains") ?? "").split("@")[0];
       await route.fulfill({ json: weatherFixture(city || "Kuala Lumpur") });
     });
+    await page.route("https://api.frankfurter.dev/**", async (route) => {
+      await route.fulfill({
+        json: {
+          base: "MYR",
+          date: "2026-07-16",
+          rates: { USD: 0.235, EUR: 0.2, SGD: 0.3, GBP: 0.17, JPY: 35, CNY: 1.65 },
+        },
+      });
+    });
   });
 
   test("shows pump prices, the chart, and forecasts beside the map", async ({ page }) => {
@@ -32,11 +41,15 @@ test.describe("live lens", () => {
     // The map stays alive next to the panel.
     await expect(page.locator(".maplibregl-canvas")).toBeVisible({ timeout: 15_000 });
 
-    // Fuel tiles carry real artifact prices.
+    // Fuel tiles carry real artifact prices, plus the BUDI95 MyKad price.
     await expect(page.getByTestId("fuel-ron95")).toContainText(/RM \d\.\d{2}/, {
       timeout: 15_000,
     });
+    await expect(page.getByTestId("fuel-ron95")).toContainText("BUDI95");
     await expect(page.getByTestId("fuel-diesel")).toContainText(/vs last week|unchanged/);
+
+    // Ringgit reference rates from the (intercepted) FX feed.
+    await expect(page.getByTestId("fx-USD")).toContainText("RM 4.255", { timeout: 15_000 });
 
     // The chart renders with its table fallback.
     await expect(page.getByRole("img", { name: /Weekly fuel prices/ })).toBeVisible();

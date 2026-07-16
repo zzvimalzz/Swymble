@@ -1,4 +1,22 @@
 import { expect, test } from "@playwright/test";
+import GtfsRealtimeBindings from "gtfs-realtime-bindings";
+
+/** A one-vehicle GTFS-Realtime feed, encoded like the real upstream. */
+function transitFixture(lat: number, lng: number): Buffer {
+  const message = GtfsRealtimeBindings.transit_realtime.FeedMessage.create({
+    header: { gtfsRealtimeVersion: "2.0", timestamp: Math.floor(Date.now() / 1000) },
+    entity: [
+      {
+        id: "veh-1",
+        vehicle: {
+          position: { latitude: lat, longitude: lng, bearing: 45 },
+          trip: { routeId: "TEST" },
+        },
+      },
+    ],
+  });
+  return Buffer.from(GtfsRealtimeBindings.transit_realtime.FeedMessage.encode(message).finish());
+}
 
 // The Atlas: one persistent map with layers, inspector, timeline, search.
 test.describe("atlas", () => {
@@ -54,6 +72,32 @@ test.describe("atlas", () => {
       timeout: 15_000,
     });
     await expect(page.getByLabel("Inspector panel")).toContainText("Largest districts");
+  });
+
+  test("live transit layer polls the feed and reports per-agency counts", async ({ page }) => {
+    await page.route("https://api.data.gov.my/gtfs-realtime/**", async (route) => {
+      await route.fulfill({
+        contentType: "application/octet-stream",
+        body: transitFixture(3.14, 101.69),
+      });
+    });
+
+    await page.goto("/map?layer=transit");
+    await expect(page.locator(".maplibregl-canvas")).toBeVisible({ timeout: 15_000 });
+
+    // Transit layer is on via the deep link; each agency reports 1 vehicle.
+    await expect(page.getByTestId("layer-toggle-transit")).toHaveAttribute("data-state", "checked");
+    await expect(page.getByText("KTM trains")).toBeVisible();
+    await expect(page.getByText(/^updated/)).toBeVisible({ timeout: 15_000 });
+  });
+
+  test("dataset detail pages open from the data panel", async ({ page }) => {
+    await page.goto("/data/fuel-price");
+    await expect(page.getByRole("heading", { name: "Fuel prices" })).toBeVisible();
+    await expect(page.getByText("dependability tier A")).toBeVisible();
+    await expect(page.getByRole("img", { name: /Weekly fuel prices/ })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("legacy routes redirect into the atlas", async ({ page }) => {

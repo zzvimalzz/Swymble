@@ -15,6 +15,7 @@
   --color-brand-selat: var(--brand-selat);
   --color-brand-selat-bright: var(--brand-selat-bright);
   --color-brand-songket: var(--brand-songket);
+  --color-brand-merah: var(--brand-merah);
   --color-brand-ink: var(--brand-ink);
   --color-status-ok: var(--status-ok);
   --color-status-caution: var(--status-caution);
@@ -94,4 +95,15 @@
 
 @utility tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Jalur Gemilang signature: a thin tricolor rule used as an identity accent
+   (header top, panel headers, footer). */
+@utility tricolor-bar {
+  background: linear-gradient(
+    to right,
+    var(--brand-selat) 0 33.4%,
+    var(--brand-songket) 33.4% 66.7%,
+    var(--brand-merah) 66.7% 100%
+  );
 }

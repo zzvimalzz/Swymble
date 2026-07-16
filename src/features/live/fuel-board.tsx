@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp, Minus } from "lucide-react";
+import { ArrowDown, ArrowUp, IdCard, Minus } from "lucide-react";
+import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +14,8 @@ import type { QualityStatus } from "@/types/dataset";
 
 import { FuelChart } from "./fuel-chart";
 import {
+  BUDI95,
+  FUEL_COLORS,
   FUEL_RANGES,
   FUEL_SERIES,
   formatRmPerLitre,
@@ -60,6 +63,8 @@ export function FuelBoard({ narrow = false }: FuelBoardProps) {
   const [fuel, setFuel] = useState<FuelState | null>(null);
   const [fuelError, setFuelError] = useState(false);
   const [range, setRange] = useState<FuelRange>("3y");
+  const { resolvedTheme } = useTheme();
+  const colors = FUEL_COLORS[resolvedTheme === "dark" ? "dark" : "light"];
 
   useEffect(() => {
     let cancelled = false;
@@ -120,20 +125,46 @@ export function FuelBoard({ narrow = false }: FuelBoardProps) {
 
       <dl className={`mt-3 ${tileGrid} overflow-hidden rounded-lg border`}>
         {FUEL_SERIES.map((series) => (
-          <div key={series.id} className="bg-card p-4" data-testid={`fuel-${series.id}`}>
-            <dt className="text-xs tracking-wide text-muted-foreground uppercase">
+          <div
+            key={series.id}
+            className="border-l-4 bg-card p-4"
+            style={{ borderLeftColor: colors[series.id] }}
+            data-testid={`fuel-${series.id}`}
+          >
+            <dt
+              className="text-xs font-semibold tracking-wide uppercase"
+              style={{ color: colors[series.id] }}
+            >
               {series.label}
             </dt>
-            <dd className="mt-1 font-display text-2xl tabular">
+            <dd className="mt-1.5 font-display text-3xl font-semibold tabular">
               {formatRmPerLitre(latest.prices[series.id])}
               <span className="ml-1 text-sm font-normal text-muted-foreground">/litre</span>
             </dd>
             <dd className="mt-1.5">
               <Delta value={latest.deltas[series.id]} />
             </dd>
+            {series.id === "ron95" && (
+              <dd className="mt-2 flex items-center gap-1.5 text-xs font-medium text-status-ok">
+                <IdCard className="size-3.5" aria-hidden />
+                {BUDI95.label}: {formatRmPerLitre(BUDI95.pricePerLitre)}/litre
+              </dd>
+            )}
           </div>
         ))}
       </dl>
+      <p className="mt-2 text-xs text-muted-foreground">
+        BUDI95 is the subsidised RON95 price for eligible Malaysians via MyKad (
+        <a
+          href={BUDI95.sourceUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="underline underline-offset-4"
+        >
+          Budi Madani
+        </a>
+        , since {BUDI95.effective}); the tile shows the market price.
+      </p>
 
       <FuelChart rows={sliceRange(fuel.rows, range)} className="mt-6" />
 

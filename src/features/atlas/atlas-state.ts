@@ -18,6 +18,8 @@ export interface AtlasUrlParams {
   panel: AtlasPanel | null;
   /** Data layer (metric) to activate initially. */
   layer: MetricId | null;
+  /** Open with the live transit layer on. */
+  transit: boolean;
 }
 
 export function parseAtlasParams(searchParams: URLSearchParams): AtlasUrlParams {
@@ -28,5 +30,6 @@ export function parseAtlasParams(searchParams: URLSearchParams): AtlasUrlParams 
     state: Number.isInteger(state) && state > 0 ? state : null,
     panel: panel === "layers" || panel === "data" || panel === "live" ? panel : null,
     layer: layer === "population" || layer === "income" || layer === "gdp" ? layer : null,
+    transit: layer === "transit",
   };
 }

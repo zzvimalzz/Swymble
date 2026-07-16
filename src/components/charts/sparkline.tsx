@@ -4,6 +4,8 @@ interface SparklineProps {
   points: Array<{ year: number; value: number }>;
   /** Accessible description; the numbers also render as text next to it. */
   ariaLabel: string;
+  /** Series identity color (defaults to chart slot 1). */
+  color?: string;
   className?: string;
 }
 
@@ -15,7 +17,7 @@ const PAD = 4;
  * Inline trend line for inspector rows: 2px line, endpoint dot, no axes —
  * the surrounding row carries the actual figures.
  */
-export function Sparkline({ points, ariaLabel, className }: SparklineProps) {
+export function Sparkline({ points, ariaLabel, color, className }: SparklineProps) {
   if (points.length < 2) return null;
 
   const xs = points.map((p) => p.year);
@@ -42,12 +44,20 @@ export function Sparkline({ points, ariaLabel, className }: SparklineProps) {
       aria-label={ariaLabel}
       className={cn("h-10 w-full max-w-37", className)}
     >
-      <path d={d} fill="none" className="stroke-chart-1" strokeWidth={2} strokeLinejoin="round" />
+      <path
+        d={d}
+        fill="none"
+        className={color ? undefined : "stroke-chart-1"}
+        style={color ? { stroke: color } : undefined}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
       <circle
         cx={x(last.year)}
         cy={y(last.value)}
         r={3.5}
-        className="fill-chart-1 stroke-background"
+        className={color ? "stroke-background" : "fill-chart-1 stroke-background"}
+        style={color ? { fill: color } : undefined}
         strokeWidth={2}
       />
     </svg>

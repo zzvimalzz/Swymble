@@ -84,33 +84,101 @@ export function Facts() {
   );
 }
 
-const lenses = [
+interface LensFeature {
+  label: string;
+  status: "live" | "planned";
+}
+
+const lenses: Array<{
+  name: string;
+  href: string;
+  description: string;
+  features: LensFeature[];
+}> = [
   {
     name: "Layers",
+    href: "/map",
     description:
-      "Every dataset is a map layer — population, income, GDP, boundaries — with opacity, legends, and provenance. Compose your own view of Malaysia.",
+      "Every dataset is a map layer with its own color, legend, opacity, and provenance. Compose your own view of Malaysia.",
+    features: [
+      { label: "Population choropleth", status: "live" },
+      { label: "Median household income", status: "live" },
+      { label: "GDP by district", status: "live" },
+      { label: "3D data prisms", status: "live" },
+      { label: "Inflation by state", status: "planned" },
+      { label: "Land use", status: "planned" },
+      { label: "Flood & rainfall", status: "planned" },
+    ],
   },
   {
-    name: "Inspector",
+    name: "Transit",
+    href: "/map?layer=transit",
     description:
-      "Click any district and read it: population trend since the census, household income, economic output — charts beside the map, never instead of it.",
-  },
-  {
-    name: "Timeline",
-    description:
-      "Scrub through the years and watch the country change — the choropleth, the 3D prisms, and the figures move together.",
+      "Live vehicles on the map from the national GTFS-Realtime feed, refreshed every 30 seconds.",
+    features: [
+      { label: "KTM trains, live", status: "live" },
+      { label: "Rapid Bus KL · Penang · Kuantan, live", status: "live" },
+      { label: "MRT & LRT positions", status: "planned" },
+      { label: "Routes & stops", status: "planned" },
+    ],
   },
   {
     name: "Live",
-    description:
-      "Malaysia right now: prices at the pump and today's sky, alongside the map. Rates and transit join when the realtime proxy ships.",
+    href: "/map?panel=live",
+    description: "Malaysia right now, docked beside the map.",
+    features: [
+      { label: "Fuel prices incl. BUDI95", status: "live" },
+      { label: "MET forecasts, 8 cities", status: "live" },
+      { label: "Ringgit reference rates", status: "live" },
+      { label: "BNM official rates", status: "planned" },
+      { label: "Flood alerts", status: "planned" },
+    ],
   },
   {
-    name: "Search",
-    description:
-      "One box for states, districts, layers, and datasets. Pick a place and the camera flies there.",
+    name: "Inspector",
+    href: "/map",
+    description: "Click any district and read it — trends beside the map, never instead of it.",
+    features: [
+      { label: "Population · income · GDP trends", status: "live" },
+      { label: "State roll-ups", status: "live" },
+      { label: "Education & healthcare", status: "planned" },
+    ],
+  },
+  {
+    name: "Timeline",
+    href: "/map",
+    description: "Scrub the years; the map and figures move together.",
+    features: [
+      { label: "2020–2025 population", status: "live" },
+      { label: "2015–2020 GDP", status: "live" },
+      { label: "Back to 1970", status: "planned" },
+    ],
   },
 ];
+
+function FeatureChip({ feature }: { feature: LensFeature }) {
+  const live = feature.status === "live";
+  return (
+    <li
+      className={
+        live
+          ? "inline-flex items-center gap-1 rounded-full border border-status-ok/40 px-2.5 py-0.5 text-xs text-foreground"
+          : "inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-0.5 text-xs text-muted-foreground"
+      }
+    >
+      <span
+        className={
+          live
+            ? "size-1.5 rounded-full bg-status-ok"
+            : "size-1.5 rounded-full bg-muted-foreground/50"
+        }
+        aria-hidden
+      />
+      {feature.label}
+      {!live && <span className="sr-only">(planned)</span>}
+    </li>
+  );
+}
 
 export function ModulesPreview() {
   return (
@@ -118,17 +186,34 @@ export function ModulesPreview() {
       <ul className="divide-y divide-border/60">
         {lenses.map((lens, index) => (
           <Reveal as="li" key={lens.name} delay={index * 0.05}>
-            <div className="grid gap-2 py-8 sm:grid-cols-[12rem_1fr] sm:items-baseline sm:gap-8">
-              <h3 className="font-display text-2xl">{lens.name}</h3>
-              <p className="max-w-prose text-muted-foreground">{lens.description}</p>
+            <div className="grid gap-3 py-8 sm:grid-cols-[12rem_1fr] sm:gap-8">
+              <h3 className="font-display text-2xl">
+                <Link href={lens.href} className="transition-colors hover:text-brand-selat">
+                  {lens.name}
+                </Link>
+              </h3>
+              <div>
+                <p className="max-w-prose text-muted-foreground">{lens.description}</p>
+                <ul className="mt-3 flex flex-wrap gap-1.5">
+                  {lens.features.map((feature) => (
+                    <FeatureChip key={feature.label} feature={feature} />
+                  ))}
+                </ul>
+              </div>
             </div>
           </Reveal>
         ))}
       </ul>
-      <Reveal className="mt-8">
+      <Reveal className="mt-8 flex flex-wrap items-center gap-4">
         <Button asChild size="lg">
           <Link href={routes.map.path}>Open the map</Link>
         </Button>
+        <p className="text-xs text-muted-foreground">
+          <span className="mr-1 inline-block size-1.5 rounded-full bg-status-ok align-middle" />
+          live today ·{" "}
+          <span className="mr-1 inline-block size-1.5 rounded-full border border-dashed border-border align-middle" />
+          on the roadmap
+        </p>
       </Reveal>
     </Section>
   );

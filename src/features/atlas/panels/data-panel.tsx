@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +32,14 @@ export function DataPanel({ data }: DataPanelProps) {
           return (
             <li key={manifest.id} className="rounded-lg border border-border/60 p-3">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="text-sm font-medium">{manifest.title}</h3>
+                <h3 className="text-sm font-medium">
+                  <Link
+                    href={`/data/${manifest.id}`}
+                    className="underline-offset-4 hover:text-brand-selat hover:underline"
+                  >
+                    {manifest.title}
+                  </Link>
+                </h3>
                 <Badge variant="outline" className="shrink-0 font-mono text-[10px]">
                   tier {manifest.tier} · {manifest.cadence}
                 </Badge>

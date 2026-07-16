@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Search } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -17,39 +16,27 @@ import {
 import { useCommandPalette } from "@/components/layout/command-palette";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Wordmark } from "@/components/layout/wordmark";
-import { navRoutes } from "@/config/navigation";
+import { NAV_LENSES, navRoutes } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 
 function NavItems({ orientation }: { orientation: "horizontal" | "vertical" }) {
   const pathname = usePathname();
 
+  const items = [
+    ...navRoutes.map((route) => ({ key: route.id, label: route.label, href: route.path })),
+    ...NAV_LENSES.map((lens) => ({ key: lens.label, label: lens.label, href: lens.href })),
+  ];
+
   return (
     <>
-      {navRoutes.map((route) => {
-        const isActive = pathname === route.path || pathname.startsWith(`${route.path}/`);
-
-        if (route.status === "soon") {
-          return (
-            <span
-              key={route.id}
-              className={cn(
-                "inline-flex cursor-default items-center gap-1.5 text-sm text-muted-foreground/70",
-                orientation === "vertical" && "py-2 text-base",
-              )}
-              aria-disabled
-            >
-              {route.label}
-              <Badge variant="outline" className="px-1.5 py-0 text-[10px] font-normal">
-                soon
-              </Badge>
-            </span>
-          );
-        }
+      {items.map((item) => {
+        const basePath = item.href.split("?")[0];
+        const isActive = item.href.includes("?") ? false : pathname === basePath;
 
         const link = (
           <Link
-            key={route.id}
-            href={route.path}
+            key={item.key}
+            href={item.href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
               "rounded-sm text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
@@ -59,12 +46,12 @@ function NavItems({ orientation }: { orientation: "horizontal" | "vertical" }) {
                 : "text-muted-foreground hover:text-foreground",
             )}
           >
-            {route.label}
+            {item.label}
           </Link>
         );
 
         return orientation === "vertical" ? (
-          <SheetClose asChild key={route.id}>
+          <SheetClose asChild key={item.key}>
             {link}
           </SheetClose>
         ) : (
@@ -81,6 +68,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
+      <div className="h-0.75 tricolor-bar" aria-hidden />
       <div className="mx-auto flex h-14 max-w-[96rem] items-center gap-6 px-4 sm:px-6 lg:px-8">
         <Wordmark />
 

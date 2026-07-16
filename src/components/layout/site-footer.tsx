@@ -13,6 +13,7 @@ const dataSources = [
 export function SiteFooter() {
   return (
     <footer className="border-t border-border/60">
+      <div className="h-0.75 tricolor-bar" aria-hidden />
       <div className="mx-auto max-w-[96rem] px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-[1fr_auto_auto] md:gap-16">
           <div className="max-w-sm space-y-3">
