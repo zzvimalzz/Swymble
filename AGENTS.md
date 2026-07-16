@@ -17,7 +17,9 @@ data presented as real.
   is the folder contract (dependency direction, feature isolation, where
   fetch is allowed). ADRs in [docs/adr/](docs/adr/) record decisions that are
   not up for casual reversal: static-first (no DB/auth/FastAPI in v1),
-  MapLibre + PMTiles (no Mapbox), Cloudflare Workers hosting via OpenNext.
+  MapLibre + PMTiles (no Mapbox), Cloudflare Workers hosting via OpenNext,
+  and the map-first Atlas workspace (datasets become layers in
+  `src/features/atlas/layer-registry.ts`, never new sibling pages).
 - Files ≤ ~400 lines; split before 500.
 - No hardcoded internal routes or external endpoints in components — use
   `src/config/`.

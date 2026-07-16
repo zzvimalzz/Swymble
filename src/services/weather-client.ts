@@ -58,7 +58,17 @@ async function fetchCityForecast(city: string, today: string): Promise<CityForec
   )}@location__location_name&limit=7`;
   const response = await fetch(url);
   if (!response.ok) throw new Error(`HTTP ${response.status} for ${city}`);
-  const entries = forecastResponseSchema.parse(await response.json());
+  // Defensive parse: a rate-limited/empty upstream body must fail with
+  // context, never a bare "Unexpected end of JSON input".
+  const body = await response.text();
+  if (body.trim() === "") throw new Error(`empty response body for ${city} (${url})`);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    throw new Error(`malformed JSON for ${city}: ${body.slice(0, 120)}…`);
+  }
+  const entries = forecastResponseSchema.parse(parsed);
   // The contains-filter can match multiple locations; keep exact-name rows.
   const exact = entries.filter((e) => e.location.location_name === city);
   const entry = pickRelevantForecast(exact.length > 0 ? exact : entries, today);

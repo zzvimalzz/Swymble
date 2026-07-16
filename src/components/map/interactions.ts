@@ -20,8 +20,10 @@ export function bindBoundaryInteractions(
   map: MaplibreMap,
   level: BoundaryLevel,
   handlers: BoundaryEventHandlers = {},
+  /** Bind to a different layer over the same source (e.g. the choropleth). */
+  layerIdOverride?: string,
 ): () => void {
-  const layerId = FILL_LAYER_BY_LEVEL[level];
+  const layerId = layerIdOverride ?? FILL_LAYER_BY_LEVEL[level];
   const sourceId = BOUNDARY_SOURCES[level].id;
   let hoveredId: FeatureId | null = null;
 
@@ -129,6 +131,52 @@ export function setExtrusionHeights(
   for (const { id, height } of heights) {
     map.setFeatureState({ source: sourceId, id }, { height });
   }
+}
+
+/**
+ * Sets the choropleth layer's normalised values (0..1) via feature-state.
+ * Districts with null data get -1, which the ramp renders as plain land.
+ */
+export function setChoroplethValues(
+  map: MaplibreMap,
+  values: ReadonlyArray<{ id: FeatureId; value: number | null }>,
+): void {
+  const sourceId = BOUNDARY_SOURCES.districts.id;
+  for (const { id, value } of values) {
+    map.setFeatureState({ source: sourceId, id }, { value: value ?? -1 });
+  }
+}
+
+/** Shows/hides any engine layer by id. */
+export function setLayerVisible(map: MaplibreMap, layerId: string, visible: boolean): void {
+  if (!map.getLayer(layerId)) return;
+  map.setLayoutProperty(layerId, "visibility", visible ? "visible" : "none");
+}
+
+const OPACITY_PROP_BY_TYPE: Record<string, string> = {
+  fill: "fill-opacity",
+  line: "line-opacity",
+  "fill-extrusion": "fill-extrusion-opacity",
+  circle: "circle-opacity",
+  raster: "raster-opacity",
+};
+
+/** Sets a uniform opacity on any engine layer (0..1). */
+export function setLayerOpacity(map: MaplibreMap, layerId: string, opacity: number): void {
+  const layer = map.getLayer(layerId);
+  if (!layer) return;
+  const prop = OPACITY_PROP_BY_TYPE[layer.type];
+  if (prop) map.setPaintProperty(layerId, prop, opacity);
+}
+
+/** Moves the selection outline to one district (null clears it). */
+export function setSelectionOutline(map: MaplibreMap, fid: FeatureId | null): void {
+  if (!map.getLayer(LAYER_IDS.selectionOutline)) return;
+  map.setFilter(LAYER_IDS.selectionOutline, [
+    "==",
+    ["get", "fid"],
+    fid ?? -1,
+  ] as unknown as Parameters<typeof map.setFilter>[1]);
 }
 
 /**

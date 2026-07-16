@@ -32,6 +32,16 @@ Pages are static or ISR — regenerated on the ETL cadence, never per-request
 SSR for data pages. Interactive exploration happens client-side against
 versioned artifacts fetched from R2.
 
+## Information architecture (since ADR-0004)
+
+The product is **one map workspace** at `/map` (feature: `src/features/
+atlas/`): a single persistent MapLibre instance with lenses — Layers,
+Inspector, Timeline, Live, Search — instead of sibling pages. Datasets
+surface as layer objects in `src/features/atlas/layer-registry.ts`. The
+homepage stays as the editorial entry; `/explorer` and `/live` are redirect
+stubs. The map engine renders a flat data canvas today and upgrades to
+vector basemap + 3D terrain purely via env config (see ADR-0004).
+
 ## Folder contract
 
 Top level:
