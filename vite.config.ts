@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import fs from 'node:fs'
 import path from 'node:path'
 import react from '@vitejs/plugin-react'
@@ -221,6 +222,11 @@ function createStaticSubdomainPlugin(): Plugin {
 export default defineConfig({
   plugins: [react(), createStaticSubdomainPlugin()],
   base: '/',
+  test: {
+    // Subdomain apps run their own test suites (mymalaysia ships vitest
+    // tests of its own); this suite only covers the root site.
+    exclude: ['**/node_modules/**', '**/dist/**', 'src/data/subdomains/**'],
+  },
   server: {
     allowedHosts: ['.localhost'],
   },
