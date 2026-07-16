@@ -43,20 +43,47 @@ export const routes = {
     inNav: true,
     inFooter: true,
   },
+  live: {
+    id: "live",
+    path: "/live",
+    label: "Live",
+    description:
+      "Malaysia right now — pump prices with BUDI95, ringgit rates, and today's forecasts.",
+    status: "live",
+    inNav: true,
+    inFooter: true,
+  },
+  transit: {
+    id: "transit",
+    path: "/transit",
+    label: "Transit",
+    description:
+      "Live vehicles from the national GTFS-Realtime feed — KTM trains and Rapid buses, every 30 seconds.",
+    status: "live",
+    inNav: true,
+    inFooter: true,
+  },
+  population: {
+    id: "population",
+    path: "/population",
+    label: "Population",
+    description: "Who lives where — district populations since the 2020 Census.",
+    status: "live",
+    inNav: true,
+    inFooter: true,
+  },
+  economy: {
+    id: "economy",
+    path: "/economy",
+    label: "Economy",
+    description: "District GDP and household income — the national ledger by place.",
+    status: "live",
+    inNav: true,
+    inFooter: true,
+  },
 } as const satisfies Record<string, SiteRoute>;
 
 export type RouteId = keyof typeof routes;
-
-/**
- * Header shortcuts into the Atlas's lenses. Deep links with query params —
- * kept out of `routes` so the sitemap only carries canonical paths.
- */
-export const NAV_LENSES: Array<{ label: string; href: string }> = [
-  { label: "Live", href: "/map?panel=live" },
-  { label: "Transit", href: "/map?layer=transit" },
-  { label: "Population", href: "/map?layer=population" },
-  { label: "Economy", href: "/map?layer=gdp" },
-];
 
 export const allRoutes: SiteRoute[] = Object.values(routes);
 export const navRoutes: SiteRoute[] = allRoutes.filter((r) => r.inNav);

@@ -18,10 +18,22 @@ export interface ThemedColor {
   dark: string;
 }
 
+/**
+ * Heat ramp for magnitude on the map: low → mid → high stops
+ * (green → yellow → red — "more is hotter"), themed per surface. A
+ * multi-hue sequential is the deliberate "semantic heat" exception and
+ * always ships with the gradient legend in the layer card.
+ */
 export interface MetricRamp {
-  light: { low: string; high: string };
-  dark: { low: string; high: string };
+  light: { low: string; mid: string; high: string };
+  dark: { low: string; mid: string; high: string };
 }
+
+/** One heat scale for every metric — consistency beats per-layer ramps. */
+export const HEAT_RAMP: MetricRamp = {
+  light: { low: "#1f9d55", mid: "#e3a008", high: "#c81e1e" },
+  dark: { low: "#4ade80", mid: "#facc15", high: "#f05252" },
+};
 
 export interface AtlasLayerDef {
   id: string;
@@ -79,10 +91,7 @@ export const ATLAS_LAYERS: AtlasLayerDef[] = [
     engineLayers: [LAYER_IDS.districtsChoropleth],
     metric: "population",
     accent: { light: "#2f55a4", dark: "#8fb0f0" },
-    ramp: {
-      light: { low: "#dde6f6", high: "#1c3f8c" },
-      dark: { low: "#232c40", high: "#a5c2f7" },
-    },
+    ramp: HEAT_RAMP,
     datasetId: "population-district",
     defaultVisible: true,
     defaultOpacity: 0.85,
@@ -96,10 +105,7 @@ export const ATLAS_LAYERS: AtlasLayerDef[] = [
     engineLayers: [LAYER_IDS.districtsChoropleth],
     metric: "income",
     accent: { light: "#0d7d70", dark: "#4fd1c5" },
-    ramp: {
-      light: { low: "#d6f1ec", high: "#0b5f55" },
-      dark: { low: "#16302d", high: "#5fe3d4" },
-    },
+    ramp: HEAT_RAMP,
     datasetId: "household-income-district",
     defaultVisible: false,
     defaultOpacity: 0.85,
@@ -113,10 +119,7 @@ export const ATLAS_LAYERS: AtlasLayerDef[] = [
     engineLayers: [LAYER_IDS.districtsChoropleth],
     metric: "gdp",
     accent: { light: "#9a6200", dark: "#f2b23e" },
-    ramp: {
-      light: { low: "#fdecca", high: "#8a5800" },
-      dark: { low: "#3a2d10", high: "#f6c25e" },
-    },
+    ramp: HEAT_RAMP,
     datasetId: "gdp-district",
     defaultVisible: false,
     defaultOpacity: 0.85,

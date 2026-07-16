@@ -39,7 +39,9 @@ function RampLegend({
     <div className="mt-2">
       <div
         className="h-2 w-full rounded-full"
-        style={{ background: `linear-gradient(to right, ${ramp.low}, ${ramp.high})` }}
+        style={{
+          background: `linear-gradient(to right, ${ramp.low}, ${ramp.mid}, ${ramp.high})`,
+        }}
         aria-hidden
       />
       <div className="mt-1 flex justify-between font-mono text-[10px] text-muted-foreground">

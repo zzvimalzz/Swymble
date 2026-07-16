@@ -35,11 +35,9 @@ test.describe("live lens", () => {
     });
   });
 
-  test("shows pump prices, the chart, and forecasts beside the map", async ({ page }) => {
-    await page.goto("/map?panel=live");
-
-    // The map stays alive next to the panel.
-    await expect(page.locator(".maplibregl-canvas")).toBeVisible({ timeout: 15_000 });
+  test("the live page shows pump prices, the chart, rates, and forecasts", async ({ page }) => {
+    await page.goto("/live");
+    await expect(page.getByRole("heading", { name: /The week's numbers/ })).toBeVisible();
 
     // Fuel tiles carry real artifact prices, plus the BUDI95 MyKad price.
     await expect(page.getByTestId("fuel-ron95")).toContainText(/RM \d\.\d{2}/, {
@@ -60,9 +58,16 @@ test.describe("live lens", () => {
     await expect(page.getByTestId("weather-tile").first()).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("weather-tile")).toHaveCount(8);
 
-    // Attribution for the fuel dataset within the panel.
+    // Attribution for the fuel dataset within its section.
     await expect(
-      page.getByLabel("Live panel").getByRole("link", { name: "data.gov.my", exact: true }),
+      page
+        .getByRole("region", { name: "At the pump" })
+        .getByRole("link", { name: "data.gov.my", exact: true }),
     ).toBeVisible();
+
+    // The live lens also still docks inside the atlas.
+    await page.goto("/map?panel=live");
+    await expect(page.locator(".maplibregl-canvas")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("fuel-ron95")).toContainText("BUDI95", { timeout: 15_000 });
   });
 });
