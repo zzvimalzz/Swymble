@@ -16,7 +16,7 @@ export function Hero() {
   const item = reducedMotion ? fadeIn : fadeUp;
 
   return (
-    <section className="mx-auto max-w-7xl px-4 pt-20 pb-16 sm:px-6 sm:pt-28 lg:px-8">
+    <section className="mx-auto max-w-[96rem] px-4 pt-20 pb-16 sm:px-6 sm:pt-28 lg:px-8">
       <motion.div
         variants={staggerContainer(0.08)}
         initial="hidden"

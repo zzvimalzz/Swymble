@@ -22,7 +22,7 @@ function Section({
 }) {
   return (
     <section id={id} className={muted ? "bg-muted/40" : undefined}>
-      <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+      <div className="mx-auto max-w-[96rem] px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
         <Reveal>
           <p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">
             {eyebrow}
@@ -71,7 +71,7 @@ const facts = [
 export function Facts() {
   return (
     <div className="border-y border-border/60">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-4 sm:px-6 lg:grid-cols-4 lg:px-8">
+      <div className="mx-auto grid max-w-[96rem] grid-cols-2 gap-px px-4 sm:px-6 lg:grid-cols-4 lg:px-8">
         {facts.map((fact, index) => (
           <Reveal key={fact.label} delay={index * 0.06} className="py-10 lg:py-12">
             <div className="font-display text-5xl tabular sm:text-6xl">{fact.value}</div>

@@ -44,7 +44,11 @@ export const LAYER_IDS = {
   statesLine: "states-line",
   districtsFill: "districts-fill",
   districtsLine: "districts-line",
+  districtsExtrusion: "districts-extrusion",
 } as const;
+
+/** Ceiling of the 3D prisms, in metres. Heights are set via feature-state. */
+export const EXTRUSION_MAX_HEIGHT = 150_000;
 
 export const FILL_LAYER_BY_LEVEL: Record<BoundaryLevel, string> = {
   states: LAYER_IDS.statesFill,
@@ -126,6 +130,28 @@ export function buildMapStyle(theme: MapTheme, initialLevel: BoundaryLevel): Sty
         paint: {
           "line-color": colors.boundary,
           "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.5, 9, 1.25],
+        },
+      },
+      // 3D mode: district prisms. Heights arrive via feature-state (set from
+      // the active dataset), color ramps from land to the interface blue with
+      // height. Hidden until a view enables 3D.
+      {
+        id: LAYER_IDS.districtsExtrusion,
+        type: "fill-extrusion",
+        source: BOUNDARY_SOURCES.districts.id,
+        layout: { visibility: "none" },
+        paint: {
+          "fill-extrusion-height": ["coalesce", ["feature-state", "height"], 0],
+          "fill-extrusion-color": [
+            "interpolate",
+            ["linear"],
+            ["coalesce", ["feature-state", "height"], 0],
+            0,
+            colors.land,
+            EXTRUSION_MAX_HEIGHT,
+            colors.selected,
+          ],
+          "fill-extrusion-opacity": 0.9,
         },
       },
     ],

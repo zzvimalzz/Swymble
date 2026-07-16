@@ -91,8 +91,29 @@ export function setSelectedFeature(
  */
 export function setDistrictStateFilter(map: MaplibreMap, stateCode: number | null): void {
   const filter = stateCode === null ? null : (["==", ["get", "code_state"], stateCode] as const);
-  map.setFilter(LAYER_IDS.districtsFill, filter as Parameters<typeof map.setFilter>[1]);
-  map.setFilter(LAYER_IDS.districtsLine, filter as Parameters<typeof map.setFilter>[1]);
+  const f = filter as Parameters<typeof map.setFilter>[1];
+  map.setFilter(LAYER_IDS.districtsFill, f);
+  map.setFilter(LAYER_IDS.districtsLine, f);
+  map.setFilter(LAYER_IDS.districtsExtrusion, f);
+}
+
+/** Shows/hides the 3D district prisms. */
+export function setExtrusionVisible(map: MaplibreMap, visible: boolean): void {
+  map.setLayoutProperty(LAYER_IDS.districtsExtrusion, "visibility", visible ? "visible" : "none");
+}
+
+/**
+ * Sets each district prism's height (metres) via feature-state. Districts
+ * absent from `heights` fall back to 0.
+ */
+export function setExtrusionHeights(
+  map: MaplibreMap,
+  heights: ReadonlyArray<{ id: FeatureId; height: number }>,
+): void {
+  const sourceId = BOUNDARY_SOURCES.districts.id;
+  for (const { id, height } of heights) {
+    map.setFeatureState({ source: sourceId, id }, { height });
+  }
 }
 
 /** Toggles which boundary level is visible. Both stay loaded. */

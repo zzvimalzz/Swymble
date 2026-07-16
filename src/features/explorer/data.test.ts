@@ -4,6 +4,7 @@ import {
   buildGdpIndex,
   buildIncomeIndex,
   buildPopulationIndex,
+  computeExtrusionHeights,
   districtKey,
   formatPeople,
   formatRmMillions,
@@ -43,6 +44,29 @@ describe("explorer data joins", () => {
       { state: "Johor", district: "Kluang", year: 2020, sector: "p3", value: 4000 },
     ]);
     expect(gdp.get(districtKey("Johor", "Kluang"))).toEqual({ value: 9000, year: 2020 });
+  });
+
+  it("computes sqrt-normalised extrusion heights with missing data at 0", () => {
+    const population = buildPopulationIndex([
+      { state: "Johor", district: "Batu Pahat", year: 2025, population: 400 },
+      { state: "Johor", district: "Kluang", year: 2025, population: 100 },
+    ]);
+    const heights = computeExtrusionHeights(
+      "population",
+      { population, income: null, gdp: null },
+      [
+        { id: 101, stateCode: 1, name: "Batu Pahat" },
+        { id: 102, stateCode: 1, name: "Kluang" },
+        { id: 103, stateCode: 1, name: "Nowhere" },
+      ],
+      new Map([[1, "Johor"]]),
+      1000,
+    );
+    expect(heights).toEqual([
+      { id: 101, height: 1000 },
+      { id: 102, height: 500 },
+      { id: 103, height: 0 },
+    ]);
   });
 
   it("formats figures for display", () => {

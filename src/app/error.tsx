@@ -18,7 +18,7 @@ export default function ErrorPage({
   }, [error]);
 
   return (
-    <div className="mx-auto flex max-w-7xl flex-col items-start gap-6 px-4 py-24 sm:px-6 lg:px-8">
+    <div className="mx-auto flex max-w-[96rem] flex-col items-start gap-6 px-4 py-24 sm:px-6 lg:px-8">
       <p className="font-mono text-sm text-muted-foreground">Something broke</p>
       <h1 className="max-w-2xl text-4xl sm:text-5xl">
         An unexpected error<span className="text-brand-selat">.</span>

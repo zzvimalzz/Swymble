@@ -30,3 +30,12 @@ export function flyToBbox(
   }
   map.fitBounds(bounds, { padding, duration: durationMs, essential: false });
 }
+
+/** Eases the camera to a pitch/bearing (0/0 returns to plan view). */
+export function easeToPitch(map: MaplibreMap, pitch: number, bearing = 0): void {
+  if (prefersReducedMotion()) {
+    map.jumpTo({ pitch, bearing });
+    return;
+  }
+  map.easeTo({ pitch, bearing, duration: duration.hero * 1000 });
+}

@@ -102,6 +102,47 @@ export function latestFuelPrice(rows: FuelPriceRow[]): FuelPriceRow | null {
   return rows.length ? rows[rows.length - 1] : null;
 }
 
+export interface ExtrusionEntry {
+  id: number;
+  height: number;
+}
+
+/**
+ * Prism heights for 3D mode: the active metric's value per district,
+ * square-root normalised so dominant districts don't flatten everyone else,
+ * scaled to `maxHeight` metres.
+ */
+export function computeExtrusionHeights(
+  metric: MetricId,
+  indexes: {
+    population: Map<string, PopulationFigure> | null;
+    income: Map<string, IncomeFigure> | null;
+    gdp: Map<string, GdpFigure> | null;
+  },
+  districts: ReadonlyArray<{ id: number; stateCode: number; name: string }>,
+  stateNameByCode: ReadonlyMap<number, string>,
+  maxHeight: number,
+): ExtrusionEntry[] {
+  const valueFor = (key: string): number | null => {
+    if (metric === "population") return indexes.population?.get(key)?.value ?? null;
+    if (metric === "income") return indexes.income?.get(key)?.median ?? null;
+    return indexes.gdp?.get(key)?.value ?? null;
+  };
+
+  const raw = districts.map((district) => {
+    const stateName = stateNameByCode.get(district.stateCode) ?? "";
+    return { id: district.id, value: valueFor(districtKey(stateName, district.name)) };
+  });
+
+  const max = Math.max(0, ...raw.map((r) => r.value ?? 0));
+  if (max === 0) return raw.map((r) => ({ id: r.id, height: 0 }));
+
+  return raw.map((r) => ({
+    id: r.id,
+    height: r.value === null ? 0 : Math.round(Math.sqrt(r.value / max) * maxHeight),
+  }));
+}
+
 const number = new Intl.NumberFormat("en-MY");
 
 export function formatPeople(value: number): string {

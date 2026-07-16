@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 
 import { ExplorerView } from "@/features/explorer";
@@ -9,5 +10,11 @@ export const metadata: Metadata = {
 };
 
 export default function ExplorerPage() {
-  return <ExplorerView />;
+  return (
+    // Suspense boundary: ExplorerView reads search params (?state=) for
+    // deep links, which opts the subtree into client-side rendering.
+    <Suspense>
+      <ExplorerView />
+    </Suspense>
+  );
 }

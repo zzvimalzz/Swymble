@@ -35,6 +35,13 @@ describe("buildMapStyle", () => {
     expect(flippedById[LAYER_IDS.districtsFill].layout?.visibility).toBe("visible");
   });
 
+  it("ships the 3D extrusion layer hidden by default", () => {
+    const style = buildMapStyle("light", "states");
+    const extrusion = style.layers.find((l) => l.id === LAYER_IDS.districtsExtrusion);
+    expect(extrusion).toBeDefined();
+    expect(extrusion?.layout?.visibility).toBe("none");
+  });
+
   it("themes differ where it matters", () => {
     expect(MAP_COLORS.light.water).not.toBe(MAP_COLORS.dark.water);
     expect(MAP_COLORS.light.selected).not.toBe(MAP_COLORS.dark.selected);

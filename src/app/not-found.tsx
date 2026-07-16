@@ -5,7 +5,7 @@ import { routes } from "@/config/navigation";
 
 export default function NotFound() {
   return (
-    <div className="mx-auto flex max-w-7xl flex-col items-start gap-6 px-4 py-24 sm:px-6 lg:px-8">
+    <div className="mx-auto flex max-w-[96rem] flex-col items-start gap-6 px-4 py-24 sm:px-6 lg:px-8">
       <p className="font-mono text-sm text-muted-foreground">404 — uncharted territory</p>
       <h1 className="max-w-2xl text-4xl sm:text-5xl">
         This page isn&apos;t on the map<span className="text-brand-selat">.</span>

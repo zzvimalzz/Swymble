@@ -3,8 +3,10 @@ export {
   bindBoundaryInteractions,
   setBoundaryLevel,
   setDistrictStateFilter,
+  setExtrusionHeights,
+  setExtrusionVisible,
   setSelectedFeature,
   type BoundaryEventHandlers,
   type FeatureId,
 } from "./interactions";
-export { flyToBbox } from "./camera";
+export { easeToPitch, flyToBbox } from "./camera";
