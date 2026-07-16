@@ -36,7 +36,7 @@ export const routes = {
     path: "/explorer",
     label: "Explorer",
     description: "Interactive map of every state and district — population, economy, income.",
-    status: "soon",
+    status: "live",
     inNav: true,
     inFooter: true,
   },

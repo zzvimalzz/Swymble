@@ -85,6 +85,16 @@ export function setSelectedFeature(
   }
 }
 
+/**
+ * Restricts the district layers to one state's districts (null clears the
+ * filter). Used when drilling into a state.
+ */
+export function setDistrictStateFilter(map: MaplibreMap, stateCode: number | null): void {
+  const filter = stateCode === null ? null : (["==", ["get", "code_state"], stateCode] as const);
+  map.setFilter(LAYER_IDS.districtsFill, filter as Parameters<typeof map.setFilter>[1]);
+  map.setFilter(LAYER_IDS.districtsLine, filter as Parameters<typeof map.setFilter>[1]);
+}
+
 /** Toggles which boundary level is visible. Both stay loaded. */
 export function setBoundaryLevel(map: MaplibreMap, level: BoundaryLevel): void {
   const showStates = level === "states" ? "visible" : "none";
