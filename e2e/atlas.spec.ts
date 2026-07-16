@@ -100,13 +100,32 @@ test.describe("atlas", () => {
     });
   });
 
-  test("legacy routes redirect into the atlas", async ({ page }) => {
+  test("the legacy explorer route redirects into the atlas", async ({ page }) => {
     await page.goto("/explorer?state=12");
     await page.waitForURL("**/map?state=12");
     await expect(page.getByTestId("inspector-heading")).toHaveText("Sabah", { timeout: 15_000 });
+  });
 
-    await page.goto("/live");
-    await page.waitForURL("**/map?panel=live");
-    await expect(page.getByRole("heading", { name: "Live" })).toBeVisible();
+  test("module pages stand on their own", async ({ page }) => {
+    await page.route("https://api.data.gov.my/gtfs-realtime/**", async (route) => {
+      await route.fulfill({
+        contentType: "application/octet-stream",
+        body: transitFixture(3.14, 101.69),
+      });
+    });
+
+    await page.goto("/transit");
+    await expect(page.locator(".maplibregl-canvas")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("transit-total")).toContainText("4", { timeout: 15_000 });
+
+    await page.goto("/population");
+    await expect(page.getByRole("heading", { name: /Who lives where/ })).toBeVisible();
+    await expect(page.getByRole("table")).toContainText(/\d{1,3}(,\d{3})+/, { timeout: 15_000 });
+
+    await page.goto("/economy");
+    await expect(page.getByRole("heading", { name: /What Malaysia earns/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /GDP \(all sectors\)/ })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 });

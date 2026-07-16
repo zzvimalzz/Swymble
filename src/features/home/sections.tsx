@@ -112,7 +112,7 @@ const lenses: Array<{
   },
   {
     name: "Transit",
-    href: "/map?layer=transit",
+    href: "/transit",
     description:
       "Live vehicles on the map from the national GTFS-Realtime feed, refreshed every 30 seconds.",
     features: [
@@ -124,8 +124,8 @@ const lenses: Array<{
   },
   {
     name: "Live",
-    href: "/map?panel=live",
-    description: "Malaysia right now, docked beside the map.",
+    href: "/live",
+    description: "Malaysia right now — its own board, and a panel beside the map.",
     features: [
       { label: "Fuel prices incl. BUDI95", status: "live" },
       { label: "MET forecasts, 8 cities", status: "live" },

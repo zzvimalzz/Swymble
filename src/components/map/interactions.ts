@@ -181,7 +181,7 @@ export function setLayerOpacity(map: MaplibreMap, layerId: string, opacity: numb
  */
 export function setChoroplethRamp(
   map: MaplibreMap,
-  ramp: { low: string; high: string; land: string },
+  ramp: { low: string; mid: string; high: string; land: string },
 ): void {
   if (!map.getLayer(LAYER_IDS.districtsChoropleth)) return;
   map.setPaintProperty(LAYER_IDS.districtsChoropleth, "fill-color", [
@@ -192,6 +192,8 @@ export function setChoroplethRamp(
     ramp.land,
     0,
     ramp.low,
+    0.5,
+    ramp.mid,
     1,
     ramp.high,
   ]);
@@ -200,7 +202,7 @@ export function setChoroplethRamp(
 /** Repaints the 3D prism ramp, keeping selection/hover overrides intact. */
 export function setExtrusionRamp(
   map: MaplibreMap,
-  ramp: { low: string; high: string; selected: string; hover: string },
+  ramp: { low: string; mid: string; high: string; selected: string; hover: string },
 ): void {
   if (!map.getLayer(LAYER_IDS.districtsExtrusion)) return;
   map.setPaintProperty(LAYER_IDS.districtsExtrusion, "fill-extrusion-color", [
@@ -215,6 +217,8 @@ export function setExtrusionRamp(
       ["coalesce", ["feature-state", "height"], 0],
       0,
       ramp.low,
+      EXTRUSION_MAX_HEIGHT / 2,
+      ramp.mid,
       EXTRUSION_MAX_HEIGHT,
       ramp.high,
     ],

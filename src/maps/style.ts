@@ -18,8 +18,9 @@ export const MAP_COLORS: Record<
     selected: string;
     boundary: string;
     boundaryStrong: string;
-    /** Sequential choropleth ramp (magnitude): one hue, light → dark. */
+    /** Heat ramp for magnitude: low → mid → high (green → yellow → red). */
     rampLow: string;
+    rampMid: string;
     rampHigh: string;
   }
 > = {
@@ -30,18 +31,20 @@ export const MAP_COLORS: Record<
     selected: "#2f55a4",
     boundary: "#fbfbfc",
     boundaryStrong: "#9aa1b0",
-    rampLow: "#dde6f6",
-    rampHigh: "#1c3f8c",
+    rampLow: "#1f9d55",
+    rampMid: "#e3a008",
+    rampHigh: "#c81e1e",
   },
   dark: {
     water: "#14161d",
-    land: "#272b36",
-    landHover: "#33415e",
-    selected: "#8fb0f0",
-    boundary: "#14161d",
-    boundaryStrong: "#4a5060",
-    rampLow: "#232c40",
-    rampHigh: "#a5c2f7",
+    land: "#323848",
+    landHover: "#44507a",
+    selected: "#a5c2f7",
+    boundary: "#191c24",
+    boundaryStrong: "#5b6478",
+    rampLow: "#4ade80",
+    rampMid: "#facc15",
+    rampHigh: "#f05252",
   },
 };
 
@@ -147,8 +150,8 @@ export function buildDataOverlay(
         source: BOUNDARY_SOURCES.states.id,
         layout: { visibility: initialLevel === "states" ? "visible" : "none" },
         paint: {
-          "line-color": colors.boundary,
-          "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.75, 8, 1.5],
+          "line-color": colors.boundaryStrong,
+          "line-width": ["interpolate", ["linear"], ["zoom"], 4, 1, 8, 2],
         },
       },
       {
@@ -185,6 +188,8 @@ export function buildDataOverlay(
             colors.land,
             0,
             colors.rampLow,
+            0.5,
+            colors.rampMid,
             1,
             colors.rampHigh,
           ],
@@ -248,9 +253,11 @@ export function buildDataOverlay(
               ["linear"],
               ["coalesce", ["feature-state", "height"], 0],
               0,
-              colors.land,
+              colors.rampLow,
+              EXTRUSION_MAX_HEIGHT / 2,
+              colors.rampMid,
               EXTRUSION_MAX_HEIGHT,
-              colors.selected,
+              colors.rampHigh,
             ],
           ],
           "fill-extrusion-opacity": 0.9,

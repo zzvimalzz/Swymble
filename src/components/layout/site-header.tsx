@@ -16,22 +16,22 @@ import {
 import { useCommandPalette } from "@/components/layout/command-palette";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Wordmark } from "@/components/layout/wordmark";
-import { NAV_LENSES, navRoutes } from "@/config/navigation";
+import { navRoutes } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 
 function NavItems({ orientation }: { orientation: "horizontal" | "vertical" }) {
   const pathname = usePathname();
 
-  const items = [
-    ...navRoutes.map((route) => ({ key: route.id, label: route.label, href: route.path })),
-    ...NAV_LENSES.map((lens) => ({ key: lens.label, label: lens.label, href: lens.href })),
-  ];
+  const items = navRoutes.map((route) => ({
+    key: route.id,
+    label: route.label,
+    href: route.path,
+  }));
 
   return (
     <>
       {items.map((item) => {
-        const basePath = item.href.split("?")[0];
-        const isActive = item.href.includes("?") ? false : pathname === basePath;
+        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
         const link = (
           <Link
