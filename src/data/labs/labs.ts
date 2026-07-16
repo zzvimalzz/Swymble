@@ -122,6 +122,26 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     ],
   },
   {
+    id: 'mymalaysia',
+    title: 'MYMALAYSIA',
+    category: 'OPEN DATA',
+    categoryColor: '#6fa0e8',
+    image: '/images/labs/mymalaysia_logo.svg',
+    status: 'In Development',
+    visibility: 'public',
+    publicSummary:
+      'A premium platform for exploring Malaysia through official open data: an interactive map of all 16 states and 160 districts with population, income, and GDP — plus a 3D mode where districts rise by the numbers.',
+    safeHighlights: [
+      'Official sources only (OpenDOSM, data.gov.my, BNM), attributed under CC BY 4.0',
+      'MapLibre engine with drill-down selection and 3D data prisms',
+      'Self-refreshing data pipeline that opens reviewable update PRs',
+    ],
+    tags: ['Open Data', 'Maps', 'Public'],
+    updatedAt: 'Jul 2026',
+    // Add an OPEN MYMALAYSIA action (createSubdomainUrl('mymalaysia')) once
+    // the Cloudflare subdomain worker is wired and the site is reachable.
+  },
+  {
     id: 'territory',
     title: 'TERRITORY',
     category: 'FITNESS & GAMING',
