@@ -1,9 +1,10 @@
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/reveal";
 import { FEATURED_DATASETS } from "@/features/home/launch-datasets";
-import { navRoutes } from "@/config/navigation";
+import { routes } from "@/config/navigation";
 import { site } from "@/config/site";
 
 /** Shared section shell: consistent rhythm, optional muted ground. */
@@ -83,22 +84,52 @@ export function Facts() {
   );
 }
 
+const lenses = [
+  {
+    name: "Layers",
+    description:
+      "Every dataset is a map layer — population, income, GDP, boundaries — with opacity, legends, and provenance. Compose your own view of Malaysia.",
+  },
+  {
+    name: "Inspector",
+    description:
+      "Click any district and read it: population trend since the census, household income, economic output — charts beside the map, never instead of it.",
+  },
+  {
+    name: "Timeline",
+    description:
+      "Scrub through the years and watch the country change — the choropleth, the 3D prisms, and the figures move together.",
+  },
+  {
+    name: "Live",
+    description:
+      "Malaysia right now: prices at the pump and today's sky, alongside the map. Rates and transit join when the realtime proxy ships.",
+  },
+  {
+    name: "Search",
+    description:
+      "One box for states, districts, layers, and datasets. Pick a place and the camera flies there.",
+  },
+];
+
 export function ModulesPreview() {
   return (
-    <Section id="modules" eyebrow="Modules" title="One country, four ways in — to begin with.">
+    <Section id="workspace" eyebrow="One map" title="Not pages — lenses on the same map.">
       <ul className="divide-y divide-border/60">
-        {navRoutes.map((route, index) => (
-          <Reveal as="li" key={route.id} delay={index * 0.05}>
-            <div className="grid gap-2 py-8 sm:grid-cols-[12rem_1fr_auto] sm:items-baseline sm:gap-8">
-              <h3 className="font-display text-2xl">{route.label}</h3>
-              <p className="max-w-prose text-muted-foreground">{route.description}</p>
-              <Badge variant="outline" className="justify-self-start font-mono text-[10px]">
-                {route.status === "live" ? "live" : "in build"}
-              </Badge>
+        {lenses.map((lens, index) => (
+          <Reveal as="li" key={lens.name} delay={index * 0.05}>
+            <div className="grid gap-2 py-8 sm:grid-cols-[12rem_1fr] sm:items-baseline sm:gap-8">
+              <h3 className="font-display text-2xl">{lens.name}</h3>
+              <p className="max-w-prose text-muted-foreground">{lens.description}</p>
             </div>
           </Reveal>
         ))}
       </ul>
+      <Reveal className="mt-8">
+        <Button asChild size="lg">
+          <Link href={routes.map.path}>Open the map</Link>
+        </Button>
+      </Reveal>
     </Section>
   );
 }

@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 3000;
+// Swymble dev-port family: main 5173, mybirth 5174, what2watch 5175, mymalaysia 5176.
+const PORT = 5176;
 const baseURL = `http://localhost:${PORT}`;
 
 // In CI the workflow builds first, so e2e runs against the production server.

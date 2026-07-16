@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { MalaysiaMap } from "@/features/home/malaysia-map";
+import { routes } from "@/config/navigation";
 import { fadeIn, fadeUp, staggerContainer } from "@/lib/motion";
 
 /**
@@ -39,7 +41,7 @@ export function Hero() {
         </motion.p>
         <motion.div variants={item} className="mt-8 flex flex-wrap gap-3">
           <Button asChild size="lg">
-            <a href="#modules">Preview the modules</a>
+            <Link href={routes.map.path}>Open the map</Link>
           </Button>
           <Button asChild size="lg" variant="ghost">
             <a href="#philosophy">Our data promise</a>

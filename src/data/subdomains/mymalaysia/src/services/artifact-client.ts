@@ -51,10 +51,18 @@ async function fetchAndValidate<T>(
   }
 
   let body: unknown;
+  const raw = await response.text().catch(() => "");
+  if (raw.trim() === "") {
+    throw new ArtifactError(datasetId, `empty response body from ${url}`);
+  }
   try {
-    body = await response.json();
+    body = JSON.parse(raw);
   } catch (cause) {
-    throw new ArtifactError(datasetId, "artifact is not valid JSON", cause);
+    throw new ArtifactError(
+      datasetId,
+      `artifact is not valid JSON (starts with: ${raw.slice(0, 80)}…)`,
+      cause,
+    );
   }
 
   const envelope = artifactEnvelopeSchema.safeParse(body);

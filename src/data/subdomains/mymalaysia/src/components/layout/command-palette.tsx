@@ -109,11 +109,14 @@ export function CommandPaletteProvider({ children }: { children: React.ReactNode
             )}
             <CommandSeparator />
             <CommandGroup heading="Search">
-              <CommandItem disabled value="search datasets">
+              <CommandItem
+                value="search datasets places layers catalogue"
+                onSelect={() => runAction(() => router.push("/map?panel=data"))}
+              >
                 <Search aria-hidden />
-                <span>Search datasets</span>
+                <span>Browse the data catalogue</span>
                 <span className="ml-2 text-xs text-muted-foreground">
-                  arrives with the data layer
+                  places &amp; layers live in the map&apos;s own search
                 </span>
               </CommandItem>
             </CommandGroup>

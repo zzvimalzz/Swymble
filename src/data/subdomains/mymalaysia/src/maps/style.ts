@@ -18,6 +18,9 @@ export const MAP_COLORS: Record<
     selected: string;
     boundary: string;
     boundaryStrong: string;
+    /** Sequential choropleth ramp (magnitude): one hue, light → dark. */
+    rampLow: string;
+    rampHigh: string;
   }
 > = {
   light: {
@@ -27,6 +30,8 @@ export const MAP_COLORS: Record<
     selected: "#2f55a4",
     boundary: "#fbfbfc",
     boundaryStrong: "#9aa1b0",
+    rampLow: "#dde6f6",
+    rampHigh: "#1c3f8c",
   },
   dark: {
     water: "#14161d",
@@ -35,6 +40,8 @@ export const MAP_COLORS: Record<
     selected: "#8fb0f0",
     boundary: "#14161d",
     boundaryStrong: "#4a5060",
+    rampLow: "#232c40",
+    rampHigh: "#a5c2f7",
   },
 };
 
@@ -44,7 +51,9 @@ export const LAYER_IDS = {
   statesLine: "states-line",
   districtsFill: "districts-fill",
   districtsLine: "districts-line",
+  districtsChoropleth: "districts-choropleth",
   districtsExtrusion: "districts-extrusion",
+  selectionOutline: "selection-outline",
 } as const;
 
 /** Ceiling of the 3D prisms, in metres. Heights are set via feature-state. */
@@ -78,16 +87,18 @@ function boundaryFillOpacity(): DataDrivenPropertyValueSpecification<number> {
 }
 
 /**
- * Builds the engine's style: a boundary-first data canvas (no street
- * basemap — deliberate, see docs/adr/0002). Both boundary levels are always
- * present; visibility is toggled by the layer system so switching levels
- * never refetches data.
+ * The engine's data overlay: every source and layer MyMalaysia adds on top
+ * of whatever ground it renders over. Today the ground is a flat colored
+ * canvas; when basemap tiles come online (NEXT_PUBLIC_BASEMAP_STYLE_URL)
+ * the same overlay is merged onto that style instead — no refactor.
  */
-export function buildMapStyle(theme: MapTheme, initialLevel: BoundaryLevel): StyleSpecification {
+export function buildDataOverlay(
+  theme: MapTheme,
+  initialLevel: BoundaryLevel,
+): Pick<StyleSpecification, "sources" | "layers"> {
   const colors = MAP_COLORS[theme];
 
   return {
-    version: 8,
     sources: {
       [BOUNDARY_SOURCES.states.id]: {
         type: "geojson",
@@ -101,11 +112,6 @@ export function buildMapStyle(theme: MapTheme, initialLevel: BoundaryLevel): Sty
       },
     },
     layers: [
-      {
-        id: LAYER_IDS.background,
-        type: "background",
-        paint: { "background-color": colors.water },
-      },
       {
         id: LAYER_IDS.statesFill,
         type: "fill",
@@ -143,6 +149,41 @@ export function buildMapStyle(theme: MapTheme, initialLevel: BoundaryLevel): Sty
           "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.5, 9, 1.25],
         },
       },
+      // Choropleth surface: colored by a normalised 0..1 "value" feature-state
+      // (set per active data layer), sequential single-hue ramp. Hidden until
+      // a data layer enables it; uniform opacity is the layer's opacity knob.
+      {
+        id: LAYER_IDS.districtsChoropleth,
+        type: "fill",
+        source: BOUNDARY_SOURCES.districts.id,
+        layout: { visibility: "none" },
+        paint: {
+          "fill-color": [
+            "interpolate",
+            ["linear"],
+            ["coalesce", ["feature-state", "value"], -1],
+            -1,
+            colors.land,
+            0,
+            colors.rampLow,
+            1,
+            colors.rampHigh,
+          ],
+          "fill-opacity": 0.85,
+        },
+      },
+      // Selection outline: rides above every fill/choropleth so a selected
+      // feature stays visible regardless of the color underneath.
+      {
+        id: LAYER_IDS.selectionOutline,
+        type: "line",
+        source: BOUNDARY_SOURCES.districts.id,
+        filter: ["==", ["get", "fid"], -1],
+        paint: {
+          "line-color": colors.selected,
+          "line-width": 2.5,
+        },
+      },
       // 3D mode: district prisms. Heights arrive via feature-state (set from
       // the active dataset), color ramps from land to the interface blue with
       // height. Hidden until a view enables 3D.
@@ -175,5 +216,43 @@ export function buildMapStyle(theme: MapTheme, initialLevel: BoundaryLevel): Sty
         },
       },
     ],
+  };
+}
+
+/** Full style for the default ground: a flat colored canvas + the overlay. */
+export function buildMapStyle(theme: MapTheme, initialLevel: BoundaryLevel): StyleSpecification {
+  const colors = MAP_COLORS[theme];
+  const overlay = buildDataOverlay(theme, initialLevel);
+
+  return {
+    version: 8,
+    sources: overlay.sources,
+    layers: [
+      {
+        id: LAYER_IDS.background,
+        type: "background",
+        paint: { "background-color": colors.water },
+      },
+      ...overlay.layers,
+    ],
+  };
+}
+
+/**
+ * Merges the data overlay onto an external basemap style (vector tiles,
+ * terrain-ready) fetched from NEXT_PUBLIC_BASEMAP_STYLE_URL. Basemap layers
+ * stay below; our sources/layers append on top. Colliding ids are ours.
+ */
+export function mergeOntoBasemap(
+  basemap: StyleSpecification,
+  theme: MapTheme,
+  initialLevel: BoundaryLevel,
+): StyleSpecification {
+  const overlay = buildDataOverlay(theme, initialLevel);
+  const overlayIds = new Set(overlay.layers.map((l) => l.id));
+  return {
+    ...basemap,
+    sources: { ...basemap.sources, ...overlay.sources },
+    layers: [...basemap.layers.filter((l) => !overlayIds.has(l.id)), ...overlay.layers],
   };
 }

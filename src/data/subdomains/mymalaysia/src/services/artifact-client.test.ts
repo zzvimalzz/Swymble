@@ -31,7 +31,7 @@ function mockFetchOnce(body: unknown, ok = true, status = 200) {
   return vi.spyOn(globalThis, "fetch").mockResolvedValue({
     ok,
     status,
-    json: async () => body,
+    text: async () => JSON.stringify(body),
   } as Response);
 }
 
@@ -62,8 +62,12 @@ describe("fetchArtifact", () => {
   it("rejects HTTP errors and does not memoise failures", async () => {
     const spy = vi
       .spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce({ ok: false, status: 404, json: async () => ({}) } as Response)
-      .mockResolvedValueOnce({ ok: true, status: 200, json: async () => envelope() } as Response);
+      .mockResolvedValueOnce({ ok: false, status: 404, text: async () => "" } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify(envelope()),
+      } as Response);
 
     await expect(fetchArtifact("fuel-price", payloadSchema)).rejects.toThrow(/HTTP 404/);
     await expect(fetchArtifact("fuel-price", payloadSchema)).resolves.toBeTruthy();

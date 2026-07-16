@@ -1,13 +1,17 @@
-import type { Metadata } from "next";
+"use client";
 
-import { LiveView } from "@/features/live";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import { routes } from "@/config/navigation";
 
-export const metadata: Metadata = {
-  title: routes.live.label,
-  description: routes.live.description,
-};
-
+/** Legacy route: the Live board is now a panel inside the Atlas. */
 export default function LivePage() {
-  return <LiveView />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace(`${routes.map.path}?panel=live`);
+  }, [router]);
+
+  return null;
 }

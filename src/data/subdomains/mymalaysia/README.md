@@ -15,12 +15,21 @@ MyMalaysia aggregates, visualises, and explains Malaysian public data through pr
 
 ## Getting started
 
-Requires Node 22 (`.nvmrc`).
+Requires Node 22+ (`.nvmrc`).
 
 ```bash
 npm ci
-npm run dev            # dev server on http://localhost:3000
+npm run dev            # dev server on http://localhost:5176
 ```
+
+Port 5176 is deliberate: the Swymble dev family is main 5173, mybirth 5174,
+what2watch 5175, **mymalaysia 5176**.
+
+**OneDrive note:** this checkout may live under OneDrive, which corrupts
+`.next` by syncing files mid-write ("Unexpected end of JSON input",
+missing React Client Manifest entries). `predev`/`prebuild` automatically
+junction `.next` to `%LOCALAPPDATA%\mymalaysia-build` to prevent this
+(`scripts/ensure-local-next-dir.mjs`).
 
 ## Commands
 
@@ -40,6 +49,8 @@ npm run dev            # dev server on http://localhost:3000
 | `npm run deploy`         | Build + deploy to Cloudflare Workers (needs wrangler login) |
 
 ## Architecture
+
+**The map is the application.** `/map` (the Atlas, `src/features/atlas/`) hosts one persistent MapLibre instance; Layers, Inspector, Timeline, Live, and Search are lenses on it, and every dataset is a layer object. The engine renders a flat data canvas today and upgrades to a vector basemap + 3D terrain purely via env config (`NEXT_PUBLIC_BASEMAP_STYLE_URL`, `NEXT_PUBLIC_TERRAIN_DEM_URL`) once tiles land on R2 — see `docs/adr/0004`.
 
 The platform is **static-first**: almost all Malaysian public data changes monthly/quarterly/annually, so datasets are ingested, validated, and versioned by scheduled GitHub Actions, published to Cloudflare R2 as typed JSON/Parquet/PMTiles, and served through edge caching — no database until a feature genuinely needs one. Realtime feeds (weather, transit) proxy official public APIs.
 

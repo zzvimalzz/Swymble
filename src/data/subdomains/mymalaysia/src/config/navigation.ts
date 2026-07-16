@@ -1,8 +1,10 @@
 /**
  * The route registry — every internal path in the product. Components never
- * hardcode paths; they import from here. Modules ship with status "soon"
- * until their milestone lands, so navigation renders them as previews
- * without dead links.
+ * hardcode paths; they import from here.
+ *
+ * Since the Atlas refactor (ADR-0004) the product is one map workspace:
+ * former modules (Explorer, Live, Economy, Population) are lenses inside
+ * /map, not routes. /explorer and /live remain as redirect stubs.
  */
 
 export type RouteStatus = "live" | "soon";
@@ -12,12 +14,12 @@ export interface SiteRoute {
   id: string;
   path: string;
   label: string;
-  /** One-line description shown in command palette and module previews. */
+  /** One-line description shown in command palette and previews. */
   description: string;
   status: RouteStatus;
   /** Show in the header navigation. */
   inNav: boolean;
-  /** Show in the footer's module list. */
+  /** Show in the footer's list. */
   inFooter: boolean;
 }
 
@@ -31,40 +33,13 @@ export const routes = {
     inNav: false,
     inFooter: false,
   },
-  explorer: {
-    id: "explorer",
-    path: "/explorer",
-    label: "Explorer",
-    description: "Interactive map of every state and district — population, economy, income.",
-    status: "live",
-    inNav: true,
-    inFooter: true,
-  },
-  live: {
-    id: "live",
-    path: "/live",
-    label: "Live",
+  map: {
+    id: "map",
+    path: "/map",
+    label: "Map",
     description:
-      "Malaysia right now — nationwide weather and prices at the pump; rates and transit follow.",
+      "The atlas — every dataset as a layer on one map: boundaries, people, economy, live feeds, time.",
     status: "live",
-    inNav: true,
-    inFooter: true,
-  },
-  economy: {
-    id: "economy",
-    path: "/economy",
-    label: "Economy",
-    description: "GDP, inflation, trade, employment — the national ledger, visualised.",
-    status: "soon",
-    inNav: true,
-    inFooter: true,
-  },
-  population: {
-    id: "population",
-    path: "/population",
-    label: "Population",
-    description: "Who lives in Malaysia — age, income, households, urbanisation.",
-    status: "soon",
     inNav: true,
     inFooter: true,
   },

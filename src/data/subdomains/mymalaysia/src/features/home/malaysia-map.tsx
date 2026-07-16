@@ -19,7 +19,7 @@ export function MalaysiaMap() {
   const router = useRouter();
 
   const openInExplorer = (code: number) => {
-    router.push(`${routes.explorer.path}?state=${code}`);
+    router.push(`${routes.map.path}?state=${code}`);
   };
 
   return (

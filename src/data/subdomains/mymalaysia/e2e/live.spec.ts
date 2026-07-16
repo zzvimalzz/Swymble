@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-// The Live board: fuel from the committed artifact (real data), weather via
-// an intercepted MET response so the spec is deterministic offline.
+// The Live lens inside the atlas: fuel from the committed artifact (real
+// data), weather via an intercepted MET response so the spec is
+// deterministic offline.
 const weatherFixture = (city: string) => [
   {
     location: { location_id: "Ds000", location_name: city },
@@ -16,7 +17,7 @@ const weatherFixture = (city: string) => [
   },
 ];
 
-test.describe("live", () => {
+test.describe("live lens", () => {
   test.beforeEach(async ({ page }) => {
     await page.route("https://api.data.gov.my/weather/forecast/**", async (route) => {
       const url = new URL(route.request().url());
@@ -25,32 +26,30 @@ test.describe("live", () => {
     });
   });
 
-  test("shows pump prices, the chart, and forecasts", async ({ page }) => {
-    await page.goto("/live");
+  test("shows pump prices, the chart, and forecasts beside the map", async ({ page }) => {
+    await page.goto("/map?panel=live");
 
-    // Fuel tiles carry real artifact prices (RM x.xx format).
+    // The map stays alive next to the panel.
+    await expect(page.locator(".maplibregl-canvas")).toBeVisible({ timeout: 15_000 });
+
+    // Fuel tiles carry real artifact prices.
     await expect(page.getByTestId("fuel-ron95")).toContainText(/RM \d\.\d{2}/, {
       timeout: 15_000,
     });
     await expect(page.getByTestId("fuel-diesel")).toContainText(/vs last week|unchanged/);
 
-    // The chart renders with its legend and table fallback.
+    // The chart renders with its table fallback.
     await expect(page.getByRole("img", { name: /Weekly fuel prices/ })).toBeVisible();
     await page.getByText("View recent weeks as a table").click();
     await expect(page.getByRole("table")).toBeVisible();
 
-    // Range switch keeps the chart alive.
-    await page.getByRole("button", { name: "1Y", exact: true }).click();
-    await expect(page.getByRole("img", { name: /Weekly fuel prices/ })).toBeVisible();
-
     // Weather tiles from the (intercepted) MET feed.
     await expect(page.getByTestId("weather-tile").first()).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("weather-tile")).toHaveCount(8);
-    await expect(page.getByTestId("weather-tile").first()).toContainText("°");
 
-    // Attribution for the fuel dataset (scoped: the footer links there too).
+    // Attribution for the fuel dataset within the panel.
     await expect(
-      page.getByLabel("At the pump").getByRole("link", { name: "data.gov.my" }),
+      page.getByLabel("Live panel").getByRole("link", { name: "data.gov.my", exact: true }),
     ).toBeVisible();
   });
 });

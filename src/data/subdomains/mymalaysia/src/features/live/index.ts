@@ -1,1 +1,2 @@
-export { LiveView } from "./live-view";
+export { FuelBoard } from "./fuel-board";
+export { WeatherBoard } from "./weather-board";
