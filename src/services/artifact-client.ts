@@ -24,7 +24,11 @@ class ArtifactError extends Error {
 const memo = new Map<string, Promise<ArtifactEnvelope>>();
 
 function artifactUrl(path: string): string {
-  return new URL(path, `${env.NEXT_PUBLIC_DATA_BASE_URL}/`).toString();
+  const base = env.NEXT_PUBLIC_DATA_BASE_URL;
+  // Same-origin relative URLs when no data domain is configured — artifacts
+  // ship with the site. (Relative fetch is browser-only; v1 loads dataset
+  // content from client components exclusively.)
+  return base ? new URL(path, `${base}/`).toString() : `/${path}`;
 }
 
 async function fetchAndValidate<T>(

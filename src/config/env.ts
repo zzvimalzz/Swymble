@@ -9,7 +9,12 @@ import { z } from "zod";
  */
 const publicEnvSchema = z.object({
   NEXT_PUBLIC_SITE_URL: z.url().default("https://mymalaysia.swymble.com"),
-  NEXT_PUBLIC_DATA_BASE_URL: z.url().default("https://data.mymalaysia.swymble.com"),
+  /**
+   * Base URL of the data lake. Empty string = same-origin (artifacts are
+   * committed under public/data and deploy with the site). Set to the R2
+   * custom domain once bucket + DNS exist — nothing else changes.
+   */
+  NEXT_PUBLIC_DATA_BASE_URL: z.union([z.url(), z.literal("")]).default(""),
 });
 
 export const env = publicEnvSchema.parse({
