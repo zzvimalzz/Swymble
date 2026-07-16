@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:static": "cross-env NEXT_OUTPUT=export next build",
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -33,7 +34,7 @@
     ]
   },
   "engines": {
-    "node": ">=22 <23"
+    "node": ">=22"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
@@ -69,6 +70,7 @@
     "@types/react-dom": "^19",
     "@vitest/browser-playwright": "4.1.10",
     "@vitest/coverage-v8": "4.1.10",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "eslint-config-prettier": "^10.1.8",
