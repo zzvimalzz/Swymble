@@ -44,8 +44,9 @@ export const routes = {
     id: "live",
     path: "/live",
     label: "Live",
-    description: "Malaysia right now — weather, fuel prices, exchange rates, transit.",
-    status: "soon",
+    description:
+      "Malaysia right now — nationwide weather and prices at the pump; rates and transit follow.",
+    status: "live",
     inNav: true,
     inFooter: true,
   },
