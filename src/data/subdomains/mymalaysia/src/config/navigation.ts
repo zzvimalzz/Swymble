@@ -58,7 +58,7 @@ export const routes = {
     path: "/transit",
     label: "Transit",
     description:
-      "Live vehicles from the national GTFS-Realtime feed — KTM trains and Rapid buses, every 30 seconds.",
+      "The living transit map — every route, station, and stop, with KTM trains and Rapid buses moving live and ETA estimates.",
     status: "live",
     inNav: true,
     inFooter: true,

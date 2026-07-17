@@ -18,6 +18,8 @@ export const MAP_COLORS: Record<
     selected: string;
     boundary: string;
     boundaryStrong: string;
+    /** State/district border ink — black on both themes (user doctrine). */
+    borderInk: string;
     /** Heat ramp for magnitude: low → mid → high (green → yellow → red). */
     rampLow: string;
     rampMid: string;
@@ -31,6 +33,7 @@ export const MAP_COLORS: Record<
     selected: "#2f55a4",
     boundary: "#fbfbfc",
     boundaryStrong: "#9aa1b0",
+    borderInk: "#000000",
     rampLow: "#1f9d55",
     rampMid: "#e3a008",
     rampHigh: "#c81e1e",
@@ -42,6 +45,7 @@ export const MAP_COLORS: Record<
     selected: "#a5c2f7",
     boundary: "#191c24",
     boundaryStrong: "#5b6478",
+    borderInk: "#000000",
     rampLow: "#4ade80",
     rampMid: "#facc15",
     rampHigh: "#f05252",
@@ -57,10 +61,17 @@ export const LAYER_IDS = {
   districtsChoropleth: "districts-choropleth",
   districtsExtrusion: "districts-extrusion",
   selectionOutline: "selection-outline",
+  transitRoutes: "transit-routes",
+  transitRoutesActive: "transit-routes-active",
+  transitStops: "transit-stops",
+  transitStations: "transit-stations",
   transitVehicles: "transit-vehicles",
+  transitVehiclesActive: "transit-vehicles-active",
 } as const;
 
 export const TRANSIT_SOURCE_ID = "transit-vehicles-source";
+export const TRANSIT_ROUTES_SOURCE_ID = "transit-routes-source";
+export const TRANSIT_STOPS_SOURCE_ID = "transit-stops-source";
 
 /**
  * Agency identity colors for live transit (categorical, both themes chosen
@@ -132,6 +143,14 @@ export function buildDataOverlay(
         type: "geojson",
         data: { type: "FeatureCollection", features: [] },
       },
+      [TRANSIT_ROUTES_SOURCE_ID]: {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      },
+      [TRANSIT_STOPS_SOURCE_ID]: {
+        type: "geojson",
+        data: { type: "FeatureCollection", features: [] },
+      },
     },
     layers: [
       {
@@ -150,7 +169,7 @@ export function buildDataOverlay(
         source: BOUNDARY_SOURCES.states.id,
         layout: { visibility: initialLevel === "states" ? "visible" : "none" },
         paint: {
-          "line-color": colors.boundaryStrong,
+          "line-color": colors.borderInk,
           "line-width": ["interpolate", ["linear"], ["zoom"], 4, 1, 8, 2],
         },
       },
@@ -167,7 +186,8 @@ export function buildDataOverlay(
         source: BOUNDARY_SOURCES.districts.id,
         layout: { visibility: initialLevel === "districts" ? "visible" : "none" },
         paint: {
-          "line-color": colors.boundary,
+          "line-color": colors.borderInk,
+          "line-opacity": 0.55,
           "line-width": ["interpolate", ["linear"], ["zoom"], 4, 0.5, 9, 1.25],
         },
       },
@@ -208,6 +228,81 @@ export function buildDataOverlay(
           "line-width": 2.5,
         },
       },
+      // Transit network skeleton (GTFS Static artifacts): route lines in
+      // their official colors, bus stops, and rail stations. Hidden until a
+      // transit view loads the network. Bus lines and stops are zoom-gated
+      // so the country view stays legible; rail lines always draw.
+      {
+        id: LAYER_IDS.transitRoutes,
+        type: "line",
+        source: TRANSIT_ROUTES_SOURCE_ID,
+        layout: { visibility: "none", "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": ["coalesce", ["get", "color"], TRANSIT_FALLBACK_COLOR],
+          "line-width": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            6,
+            ["match", ["get", "mode"], "rail", 1.5, 0.6],
+            11,
+            ["match", ["get", "mode"], "rail", 3, 1.4],
+            14,
+            ["match", ["get", "mode"], "rail", 5, 2.5],
+          ],
+          "line-opacity": [
+            "step",
+            ["zoom"],
+            ["match", ["get", "mode"], "rail", 0.9, 0],
+            9.5,
+            ["match", ["get", "mode"], "rail", 0.9, 0.45],
+          ],
+        },
+      },
+      // The highlighted route (selected vehicle/stop): same source, drawn
+      // wide and full-strength above the muted network.
+      {
+        id: LAYER_IDS.transitRoutesActive,
+        type: "line",
+        source: TRANSIT_ROUTES_SOURCE_ID,
+        filter: ["==", ["get", "routeId"], ""],
+        layout: { visibility: "none", "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": ["coalesce", ["get", "color"], TRANSIT_FALLBACK_COLOR],
+          "line-width": ["interpolate", ["linear"], ["zoom"], 6, 2.5, 11, 5, 14, 7],
+          "line-opacity": 0.95,
+        },
+      },
+      {
+        id: LAYER_IDS.transitStops,
+        type: "circle",
+        source: TRANSIT_STOPS_SOURCE_ID,
+        minzoom: 11.5,
+        filter: ["==", ["get", "mode"], "bus"],
+        layout: { visibility: "none" },
+        paint: {
+          // Transit-map convention: white stops with an ink ring — reads on
+          // both themes and never competes with the route colors.
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 11.5, 1.5, 15, 4],
+          "circle-color": "#ffffff",
+          "circle-stroke-color": colors.boundaryStrong,
+          "circle-stroke-width": 1,
+        },
+      },
+      {
+        id: LAYER_IDS.transitStations,
+        type: "circle",
+        source: TRANSIT_STOPS_SOURCE_ID,
+        minzoom: 8,
+        filter: ["==", ["get", "mode"], "rail"],
+        layout: { visibility: "none" },
+        paint: {
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 4.5, 15, 6],
+          "circle-color": "#ffffff",
+          "circle-stroke-color": colors.borderInk,
+          "circle-stroke-width": 1.5,
+        },
+      },
       // Live transit vehicles: agency-colored dots over everything else,
       // fed by GTFS-Realtime via setData on an interval. Hidden until the
       // transit layer is toggled on.
@@ -228,6 +323,20 @@ export function buildDataOverlay(
           ] as unknown as DataDrivenPropertyValueSpecification<string>,
           "circle-stroke-color": colors.boundary,
           "circle-stroke-width": 1.5,
+        },
+      },
+      // Halo ring around the selected vehicle (filtered by vehicle key).
+      {
+        id: LAYER_IDS.transitVehiclesActive,
+        type: "circle",
+        source: TRANSIT_SOURCE_ID,
+        filter: ["==", ["get", "vehicleId"], ""],
+        layout: { visibility: "none" },
+        paint: {
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 7, 10, 11, 14, 15],
+          "circle-color": "rgba(0, 0, 0, 0)",
+          "circle-stroke-color": colors.selected,
+          "circle-stroke-width": 2.5,
         },
       },
       // 3D mode: district prisms. Heights arrive via feature-state (set from

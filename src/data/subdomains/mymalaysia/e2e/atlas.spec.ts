@@ -40,6 +40,35 @@ test.describe("atlas", () => {
     // map never goes empty.
     await page.getByTestId("layer-toggle-gdp").click();
     await expect(page.getByTestId("layer-toggle-gdp")).toHaveAttribute("data-state", "checked");
+
+    // Boundaries are the canvas, not filters — and there is no opacity knob.
+    await expect(page.getByRole("switch", { name: /boundaries/i })).toHaveCount(0);
+    await expect(page.getByRole("slider", { name: /opacity/i })).toHaveCount(0);
+  });
+
+  test("hovering the map names the district and its state", async ({ page }) => {
+    await page.goto("/map?state=6");
+    await expect(page.getByTestId("inspector-heading")).toHaveText("Pahang", { timeout: 15_000 });
+
+    const box = await page.locator(".maplibregl-canvas").boundingBox();
+    if (!box) throw new Error("map canvas has no bounding box");
+    // The deep-linked flight eases in; poke the cursor until the tooltip
+    // reports the district under it.
+    await expect(async () => {
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 - 8);
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await expect(page.getByTestId("map-tooltip")).toContainText("Pahang", { timeout: 1_000 });
+    }).toPass({ timeout: 20_000 });
+  });
+
+  test("map workspaces run full-bleed without the footer", async ({ page }) => {
+    await page.goto("/map");
+    await expect(page.locator(".maplibregl-canvas")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("footer")).toHaveCount(0);
+
+    await page.goto("/live");
+    await expect(page.getByRole("heading", { name: /The week's numbers/ })).toBeVisible();
+    await expect(page.locator("footer")).toBeVisible();
   });
 
   test("timeline scrubs the active layer through its years", async ({ page }) => {
@@ -122,6 +151,14 @@ test.describe("atlas", () => {
     await page.goto("/transit");
     await expect(page.locator(".maplibregl-canvas")).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId("transit-total")).toContainText("4", { timeout: 15_000 });
+    // The living map: the static network loads (rail lines legend, e.g. the
+    // Kelana Jaya Line chip) and the stamp carries a full date + time.
+    await expect(page.getByLabel("Rail lines")).toContainText("KJL", { timeout: 15_000 });
+    await expect(page.getByTestId("transit-updated")).toHaveText(
+      /updated \d{1,2} \w{3} \d{4}, \d{2}:\d{2}:\d{2}/,
+    );
+    // Full-bleed: no footer on the transit workspace.
+    await expect(page.locator("footer")).toHaveCount(0);
 
     await page.goto("/population");
     await expect(page.getByRole("heading", { name: /Who lives where/ })).toBeVisible();

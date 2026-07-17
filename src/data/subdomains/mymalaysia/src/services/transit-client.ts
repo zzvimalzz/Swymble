@@ -43,6 +43,14 @@ export interface TransitVehicleProps {
   agency: string;
   route: string | null;
   bearing: number | null;
+  /** Trip id — KTMB's feed identifies vehicles by trip, not route. */
+  tripId: string | null;
+  /** Stable vehicle id from the feed, when present. */
+  vehicleId: string | null;
+  /** Rider-facing vehicle label (e.g. train set "SCS13"). */
+  label: string | null;
+  /** Reported speed in km/h, when the feed includes one. */
+  speed: number | null;
   [key: string]: unknown;
 }
 
@@ -73,6 +81,10 @@ export function entitiesToFeatures(
         agency: agencyId,
         route: entity.vehicle?.trip?.routeId ?? null,
         bearing: position.bearing ?? null,
+        tripId: entity.vehicle?.trip?.tripId ?? null,
+        vehicleId: entity.vehicle?.vehicle?.id ?? null,
+        label: entity.vehicle?.vehicle?.label ?? null,
+        speed: position.speed ?? null,
       },
     });
   }

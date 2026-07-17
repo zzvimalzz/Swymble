@@ -18,6 +18,7 @@ import {
 import { DATA_LAYERS } from "@/features/atlas/layer-registry";
 import { getDatasetManifest } from "@/services/dataset-registry";
 import { DISTRICT_META, STATE_META } from "@/maps/generated/boundary-meta";
+import { routes } from "@/config/navigation";
 import { env } from "@/config/env";
 
 const STATE_NAME_BY_CODE = new Map(STATE_META.map((s) => [s.code, s.name]));
@@ -172,9 +173,17 @@ export function DatasetDetail({ id }: { id: string }) {
         {DATA_LAYERS.some((l) => l.datasetId === id) && <MetricBody id={id} />}
         {id.startsWith("boundaries-") && (
           <Button asChild>
-            <Link href="/map">
+            <Link href={routes.map.path}>
               <MapIcon className="size-4" aria-hidden />
               View on the map
+            </Link>
+          </Button>
+        )}
+        {id.startsWith("transit-network-") && (
+          <Button asChild>
+            <Link href={routes.transit.path}>
+              <MapIcon className="size-4" aria-hidden />
+              Open the live transit map
             </Link>
           </Button>
         )}

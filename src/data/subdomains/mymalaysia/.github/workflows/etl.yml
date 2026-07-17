@@ -39,6 +39,9 @@ jobs:
       - name: Run tabular pipeline
         run: npm run etl
 
+      - name: Build transit network artifacts (GTFS Static)
+        run: npm run etl:gtfs
+
       - name: Unit tests (transforms + registry still hold)
         run: npm test
 

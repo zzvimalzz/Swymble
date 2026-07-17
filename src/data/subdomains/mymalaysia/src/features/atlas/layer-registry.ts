@@ -4,11 +4,12 @@ import { LAYER_IDS } from "@/maps/style";
  * Layers are first-class objects: everything the workspace shows on the map
  * is declared here — engine wiring, grouping, color identity, legend, and
  * the dataset it derives from (attribution/metadata). Data layers
- * (choropleths) are exclusive with one another; base and live layers toggle
- * independently.
+ * (choropleths) are exclusive with one another; live layers toggle
+ * independently. State/district boundaries are not layers: they are the
+ * canvas itself, always on, and never appear as filters.
  */
 
-export type AtlasLayerKind = "base" | "data" | "live";
+export type AtlasLayerKind = "data" | "live";
 
 export type MetricId = "population" | "income" | "gdp";
 
@@ -39,9 +40,9 @@ export interface AtlasLayerDef {
   id: string;
   kind: AtlasLayerKind;
   title: string;
-  group: "Boundaries" | "People" | "Economy" | "Transit";
+  group: "People" | "Economy" | "Transit";
   description: string;
-  /** Engine layer ids this layer controls (visibility/opacity). */
+  /** Engine layer ids this layer controls (visibility). */
   engineLayers: string[];
   /** For data layers: the metric rendered as choropleth/extrusion. */
   metric?: MetricId;
@@ -54,34 +55,9 @@ export interface AtlasLayerDef {
   /** Attribution line for layers without a dataset manifest (live feeds). */
   attribution?: string;
   defaultVisible: boolean;
-  defaultOpacity: number;
 }
 
 export const ATLAS_LAYERS: AtlasLayerDef[] = [
-  {
-    id: "state-boundaries",
-    kind: "base",
-    title: "State boundaries",
-    group: "Boundaries",
-    description: "The 16 states and federal territories.",
-    engineLayers: [LAYER_IDS.statesLine],
-    accent: { light: "#5a6472", dark: "#8b93a3" },
-    datasetId: "boundaries-states",
-    defaultVisible: true,
-    defaultOpacity: 1,
-  },
-  {
-    id: "district-boundaries",
-    kind: "base",
-    title: "District boundaries",
-    group: "Boundaries",
-    description: "All 160 administrative districts.",
-    engineLayers: [LAYER_IDS.districtsFill, LAYER_IDS.districtsLine],
-    accent: { light: "#5a6472", dark: "#8b93a3" },
-    datasetId: "boundaries-districts",
-    defaultVisible: true,
-    defaultOpacity: 1,
-  },
   {
     id: "population",
     kind: "data",
@@ -94,7 +70,6 @@ export const ATLAS_LAYERS: AtlasLayerDef[] = [
     ramp: HEAT_RAMP,
     datasetId: "population-district",
     defaultVisible: true,
-    defaultOpacity: 0.85,
   },
   {
     id: "median-income",
@@ -108,7 +83,6 @@ export const ATLAS_LAYERS: AtlasLayerDef[] = [
     ramp: HEAT_RAMP,
     datasetId: "household-income-district",
     defaultVisible: false,
-    defaultOpacity: 0.85,
   },
   {
     id: "gdp",
@@ -122,7 +96,6 @@ export const ATLAS_LAYERS: AtlasLayerDef[] = [
     ramp: HEAT_RAMP,
     datasetId: "gdp-district",
     defaultVisible: false,
-    defaultOpacity: 0.85,
   },
   {
     id: "transit",
@@ -135,12 +108,10 @@ export const ATLAS_LAYERS: AtlasLayerDef[] = [
     accent: { light: "#c2273b", dark: "#f16a7c" },
     attribution: "GTFS-Realtime · data.gov.my · refreshed every 30 s",
     defaultVisible: false,
-    defaultOpacity: 1,
   },
 ];
 
 export const DATA_LAYERS = ATLAS_LAYERS.filter((l) => l.kind === "data");
-export const BASE_LAYERS = ATLAS_LAYERS.filter((l) => l.kind === "base");
 
 export function getAtlasLayer(id: string): AtlasLayerDef | undefined {
   return ATLAS_LAYERS.find((l) => l.id === id);

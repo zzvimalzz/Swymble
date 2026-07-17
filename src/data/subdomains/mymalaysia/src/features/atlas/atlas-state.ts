@@ -1,9 +1,8 @@
 import type { MetricId } from "./layer-registry";
 
-/** Per-layer UI state (visibility + opacity), keyed by atlas layer id. */
+/** Per-layer UI state, keyed by atlas layer id. */
 export interface LayerState {
   visible: boolean;
-  opacity: number;
 }
 
 export type AtlasPanel = "layers" | "inspector" | "data" | "live";
