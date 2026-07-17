@@ -6,7 +6,9 @@ import {
   EXTRUSION_MAX_HEIGHT,
   FILL_LAYER_BY_LEVEL,
   LAYER_IDS,
+  TRANSIT_ROUTES_SOURCE_ID,
   TRANSIT_SOURCE_ID,
+  TRANSIT_STOPS_SOURCE_ID,
 } from "@/maps/style";
 
 export type FeatureId = number;
@@ -229,6 +231,66 @@ export function setExtrusionRamp(
 export function setTransitData(map: MaplibreMap, collection: FeatureCollection): void {
   const source = map.getSource(TRANSIT_SOURCE_ID) as GeoJSONSource | undefined;
   source?.setData(collection);
+}
+
+/** Loads the static transit network (route lines + stops) into the map. */
+export function setTransitNetworkData(
+  map: MaplibreMap,
+  routes: FeatureCollection,
+  stops: FeatureCollection,
+): void {
+  (map.getSource(TRANSIT_ROUTES_SOURCE_ID) as GeoJSONSource | undefined)?.setData(routes);
+  (map.getSource(TRANSIT_STOPS_SOURCE_ID) as GeoJSONSource | undefined)?.setData(stops);
+}
+
+const TRANSIT_NETWORK_LAYERS = [
+  LAYER_IDS.transitRoutes,
+  LAYER_IDS.transitRoutesActive,
+  LAYER_IDS.transitStops,
+  LAYER_IDS.transitStations,
+] as const;
+
+/** Shows/hides the whole transit network skeleton. */
+export function setTransitNetworkVisible(map: MaplibreMap, visible: boolean): void {
+  for (const layerId of TRANSIT_NETWORK_LAYERS) setLayerVisible(map, layerId, visible);
+}
+
+/**
+ * Highlights one route (selected vehicle or stop): the active layer filters
+ * to it and the rest of the network fades back. Pass null to clear.
+ */
+export function setTransitRouteHighlight(map: MaplibreMap, routeId: string | null): void {
+  if (!map.getLayer(LAYER_IDS.transitRoutesActive)) return;
+  map.setFilter(LAYER_IDS.transitRoutesActive, [
+    "==",
+    ["get", "routeId"],
+    routeId ?? "",
+  ] as unknown as Parameters<typeof map.setFilter>[1]);
+  // The base network fades while a route is highlighted.
+  map.setPaintProperty(
+    LAYER_IDS.transitRoutes,
+    "line-opacity",
+    routeId
+      ? 0.18
+      : ([
+          "step",
+          ["zoom"],
+          ["match", ["get", "mode"], "rail", 0.9, 0],
+          9.5,
+          ["match", ["get", "mode"], "rail", 0.9, 0.45],
+        ] as unknown as number),
+  );
+}
+
+/** Halo around the selected live vehicle (matched by vehicleId). */
+export function setTransitVehicleHighlight(map: MaplibreMap, vehicleId: string | null): void {
+  if (!map.getLayer(LAYER_IDS.transitVehiclesActive)) return;
+  map.setFilter(LAYER_IDS.transitVehiclesActive, [
+    "==",
+    ["get", "vehicleId"],
+    vehicleId ?? "",
+  ] as unknown as Parameters<typeof map.setFilter>[1]);
+  setLayerVisible(map, LAYER_IDS.transitVehiclesActive, vehicleId !== null);
 }
 
 /** Moves the selection outline to one district (null clears it). */

@@ -34,3 +34,19 @@ data presented as real.
 unit) · `npm run e2e` (Playwright) · `npm run storybook` · `npm run build` ·
 `npm run preview` (Cloudflare Worker locally). CI runs all of them; husky +
 lint-staged guard commits.
+
+Data pipelines: `npm run etl` (tabular parquet), `npm run etl:geo`
+(boundaries), `npm run etl:gtfs` (transit networks: GTFS Static →
+`public/data/transit/*.json` — routes with official colors, stops, simplified
+shapes; the skeleton the live GTFS-Realtime vehicles ride on). All artifacts
+are committed; the scheduled ETL workflow refreshes them by PR.
+
+## Transit specifics
+
+- Live vehicle positions: GTFS-Realtime (browser-polled, CORS-open) for KTMB
+  - Rapid buses. LRT/MRT positions are NOT published upstream — never fake
+    them; rail lines/stations render from the static network instead.
+- ETAs are estimates (distance along the route shape ÷ reported or default
+  speed) and every surface must say so. The Prasarana Socket.IO feed and
+  third-party APIs (MTREC) are not used: unofficial, cookie-gated, or
+  rate-capped.

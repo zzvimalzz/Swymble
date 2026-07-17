@@ -18,6 +18,20 @@ export function formatRmMillions(valueMillions: number): string {
   return `RM ${valueMillions.toLocaleString("en-MY", { maximumFractionDigits: 0 })} mn`;
 }
 
+/** Full "updated" stamp with date AND time, Malaysian clock. */
+export function formatMyDateTime(date: Date): string {
+  return date.toLocaleString("en-MY", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Kuala_Lumpur",
+  });
+}
+
 /** Compact people counts for dense UI ("3.8 m", "495 k"). */
 export function formatPeopleCompact(value: number): string {
   if (Math.abs(value) >= 1_000_000) {

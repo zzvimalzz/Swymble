@@ -46,13 +46,13 @@ export const datasetManifestSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(10),
   /** Owning module (route id from src/config/navigation). */
-  module: z.enum(["explorer", "live", "economy", "population"]),
+  module: z.enum(["explorer", "live", "economy", "population", "transit"]),
   tier: dataTierSchema,
   cadence: refreshCadenceSchema,
   source: datasetSourceSchema,
   /** Where the ETL pipeline downloads from. */
   upstream: z.object({
-    kind: z.enum(["parquet", "json-api", "geojson"]),
+    kind: z.enum(["parquet", "json-api", "geojson", "gtfs"]),
     url: z.url(),
   }),
   /** Artifact the app consumes, relative to the data base URL. */

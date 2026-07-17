@@ -1,8 +1,8 @@
 "use client";
 
-import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { SourceAttribution } from "@/components/source-attribution";
+import { formatMyDateTime } from "@/lib/format";
 import { getDatasetManifest } from "@/services/dataset-registry";
 import { TRANSIT_AGENCIES, type TransitSnapshot } from "@/services/transit-client";
 import { TRANSIT_AGENCY_COLORS, TRANSIT_FALLBACK_COLOR } from "@/maps/style";
@@ -17,7 +17,6 @@ interface LayersPanelProps {
   data: AtlasData | null;
   transit: TransitSnapshot | null;
   onToggle: (layer: AtlasLayerDef, visible: boolean) => void;
-  onOpacity: (layer: AtlasLayerDef, opacity: number) => void;
 }
 
 /**
@@ -66,12 +65,7 @@ function TransitLegend({ transit }: { transit: TransitSnapshot | null }) {
       ))}
       {transit && (
         <p className="pt-1 font-mono text-[10px] text-muted-foreground">
-          updated{" "}
-          {transit.fetchedAt.toLocaleTimeString("en-MY", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          })}
+          updated {formatMyDateTime(transit.fetchedAt)}
         </p>
       )}
     </div>
@@ -79,12 +73,13 @@ function TransitLegend({ transit }: { transit: TransitSnapshot | null }) {
 }
 
 /**
- * The layer manager: grouped toggles, opacity, legends, per-layer source
+ * The layer manager: grouped toggles, legends, per-layer source
  * attribution with live quality. Layer identity colors render via
  * light-dark() (hydration-safe). Data layers behave as an exclusive set
- * with exactly one always on; base and live layers compose.
+ * with exactly one always on; live layers compose. Boundaries aren't
+ * listed — they are the canvas, always on.
  */
-export function LayersPanel({ layerState, data, transit, onToggle, onOpacity }: LayersPanelProps) {
+export function LayersPanel({ layerState, data, transit, onToggle }: LayersPanelProps) {
   const groups = [...new Set(ATLAS_LAYERS.map((l) => l.group))];
 
   return (
@@ -127,19 +122,6 @@ export function LayersPanel({ layerState, data, transit, onToggle, onOpacity }: 
 
                   {state.visible && (
                     <div className="mt-3 space-y-2">
-                      <div className="flex items-center gap-3">
-                        <span className="w-14 shrink-0 font-mono text-[10px] text-muted-foreground uppercase">
-                          opacity
-                        </span>
-                        <Slider
-                          value={[Math.round(state.opacity * 100)]}
-                          min={10}
-                          max={100}
-                          step={5}
-                          onValueChange={([v]) => onOpacity(layer, v / 100)}
-                          aria-label={`${layer.title} opacity`}
-                        />
-                      </div>
                       {layer.kind === "data" && <RampLegend data={data} layer={layer} />}
                       {layer.id === "transit" && <TransitLegend transit={transit} />}
                     </div>

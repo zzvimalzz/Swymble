@@ -5,6 +5,7 @@ import { fuelPrice } from "./fuel-price";
 import { gdpDistrict } from "./gdp-district";
 import { householdIncomeDistrict } from "./household-income-district";
 import { populationDistrict } from "./population-district";
+import { transitNetworkManifests } from "./transit-networks";
 
 /**
  * Every dataset manifest, in one list. The ETL pipeline iterates this to
@@ -19,4 +20,5 @@ export const DATASET_MANIFESTS: DatasetManifest[] = [
   fuelPrice,
   boundariesStates,
   boundariesDistricts,
+  ...transitNetworkManifests,
 ];

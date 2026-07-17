@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, IBM_Plex_Mono, Instrument_Sans } from "next/font/google";
 
 import { Providers } from "@/components/layout/providers";
-import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteFooterGate } from "@/components/layout/site-footer-gate";
 import { SiteHeader } from "@/components/layout/site-header";
 import { site } from "@/config/site";
 
@@ -79,7 +79,7 @@ export default function RootLayout({
           <main id="main-content" className="flex-1">
             {children}
           </main>
-          <SiteFooter />
+          <SiteFooterGate />
         </Providers>
       </body>
     </html>

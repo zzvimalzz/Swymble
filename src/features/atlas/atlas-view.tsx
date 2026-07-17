@@ -16,10 +16,10 @@ import {
   setExtrusionHeights,
   setExtrusionRamp,
   setExtrusionVisible,
-  setLayerOpacity,
   setLayerVisible,
   setSelectionOutline,
   setTransitData,
+  useCursorTip,
 } from "@/components/map";
 import { fetchVehiclePositions, type TransitSnapshot } from "@/services/transit-client";
 import { useTheme } from "next-themes";
@@ -60,9 +60,7 @@ const PANEL_TITLES: Record<AtlasPanel, string> = {
 };
 
 function initialLayerState(): Record<string, LayerState> {
-  return Object.fromEntries(
-    ATLAS_LAYERS.map((l) => [l.id, { visible: l.defaultVisible, opacity: l.defaultOpacity }]),
-  );
+  return Object.fromEntries(ATLAS_LAYERS.map((l) => [l.id, { visible: l.defaultVisible }]));
 }
 
 /**
@@ -100,6 +98,7 @@ export function AtlasView() {
     initialParams.panel ?? (initialParams.state ? "inspector" : "layers"),
   );
   const [searchOpen, setSearchOpen] = useState(false);
+  const tip = useCursorTip();
 
   const { resolvedTheme } = useTheme();
   const mapTheme = resolvedTheme === "dark" ? "dark" : "light";
@@ -166,9 +165,19 @@ export function AtlasView() {
         if (feature?.id != null) selectDistrict(feature.id as number, false);
       });
       map.on("mousemove", (event) => {
-        const hit = map.queryRenderedFeatures(event.point, { layers: pickableLayers() }).length;
-        map.getCanvas().style.cursor = hit ? "pointer" : "";
+        const feature = map.queryRenderedFeatures(event.point, { layers: pickableLayers() })[0];
+        map.getCanvas().style.cursor = feature ? "pointer" : "";
+        // Floating tooltip: which district (and its state) is under the cursor.
+        const district =
+          feature?.id != null ? DISTRICT_META.find((d) => d.id === feature.id) : undefined;
+        if (district) {
+          const state = STATE_META.find((s) => s.code === district.stateCode);
+          tip.show(event.point, district.name, state?.name);
+        } else {
+          tip.hide();
+        }
       });
+      map.getCanvas().addEventListener("mouseleave", () => tip.hide());
       // Deep-linked state: fly there now that the camera exists.
       if (initialParams.state) {
         const state = STATE_META.find((s) => s.code === initialParams.state);
@@ -176,7 +185,7 @@ export function AtlasView() {
       }
       setMapReady(true);
     },
-    [selectDistrict, initialParams.state],
+    [selectDistrict, initialParams.state, tip],
   );
 
   // ---- layer actions ----
@@ -207,13 +216,6 @@ export function AtlasView() {
     [activateDataLayer],
   );
 
-  const setOpacity = useCallback((layer: AtlasLayerDef, opacity: number) => {
-    setLayerState((current) => ({
-      ...current,
-      [layer.id]: { ...current[layer.id], opacity },
-    }));
-  }, []);
-
   // ---- paint the map from state (and re-paint after style reloads) ----
   useEffect(() => {
     const map = mapRef.current;
@@ -222,13 +224,16 @@ export function AtlasView() {
     const apply = () => {
       if (!map.getLayer(LAYER_IDS.districtsChoropleth)) return;
 
-      // Base + live layers: plain visibility/opacity from state.
+      // Boundaries are the canvas, not filters: always on, black ink.
+      setLayerVisible(map, LAYER_IDS.statesLine, true);
+      setLayerVisible(map, LAYER_IDS.districtsFill, true);
+      setLayerVisible(map, LAYER_IDS.districtsLine, true);
+
+      // Live layers: plain visibility from state.
       for (const layer of ATLAS_LAYERS) {
-        const state = layerState[layer.id];
         if (layer.kind !== "data") {
           for (const engineLayer of layer.engineLayers) {
-            setLayerVisible(map, engineLayer, state.visible);
-            setLayerOpacity(map, engineLayer, state.opacity);
+            setLayerVisible(map, engineLayer, layerState[layer.id].visible);
           }
         }
       }
@@ -236,16 +241,13 @@ export function AtlasView() {
       const showChoropleth = Boolean(activeSeries) && !threeD;
       setLayerVisible(map, LAYER_IDS.districtsChoropleth, showChoropleth);
       setExtrusionVisible(map, Boolean(activeSeries) && threeD);
-      if (activeDataLayer) {
-        setLayerOpacity(map, LAYER_IDS.districtsChoropleth, layerState[activeDataLayer.id].opacity);
+      if (activeDataLayer?.ramp) {
         // Each data layer paints in its own hue — identity carried from the
         // layer card through the map ramp and 3D prisms.
-        if (activeDataLayer.ramp) {
-          const ramp = activeDataLayer.ramp[mapTheme];
-          const colors = MAP_COLORS[mapTheme];
-          setChoroplethRamp(map, { ...ramp, land: colors.land });
-          setExtrusionRamp(map, { ...ramp, selected: colors.selected, hover: colors.landHover });
-        }
+        const ramp = activeDataLayer.ramp[mapTheme];
+        const colors = MAP_COLORS[mapTheme];
+        setChoroplethRamp(map, { ...ramp, land: colors.land });
+        setExtrusionRamp(map, { ...ramp, selected: colors.selected, hover: colors.landHover });
       }
 
       if (activeSeries && activeYear !== null) {
@@ -387,7 +389,6 @@ export function AtlasView() {
                 data={data}
                 transit={transit}
                 onToggle={toggleLayer}
-                onOpacity={setOpacity}
               />
             )}
             {panel === "inspector" && (
@@ -453,6 +454,7 @@ export function AtlasView() {
               />
             </div>
           )}
+          <div {...tip.props} data-testid="map-tooltip" />
         </MapView>
       </div>
 
