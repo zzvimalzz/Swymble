@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, IdCard, Minus } from "lucide-react";
-import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,10 +14,10 @@ import type { QualityStatus } from "@/types/dataset";
 import { FuelChart } from "./fuel-chart";
 import {
   BUDI95,
-  FUEL_COLORS,
   FUEL_RANGES,
   FUEL_SERIES,
   formatRmPerLitre,
+  fuelSeriesColor,
   latestWithDelta,
   sliceRange,
   type FuelRange,
@@ -63,8 +62,6 @@ export function FuelBoard({ narrow = false }: FuelBoardProps) {
   const [fuel, setFuel] = useState<FuelState | null>(null);
   const [fuelError, setFuelError] = useState(false);
   const [range, setRange] = useState<FuelRange>("3y");
-  const { resolvedTheme } = useTheme();
-  const colors = FUEL_COLORS[resolvedTheme === "dark" ? "dark" : "light"];
 
   useEffect(() => {
     let cancelled = false;
@@ -128,12 +125,12 @@ export function FuelBoard({ narrow = false }: FuelBoardProps) {
           <div
             key={series.id}
             className="border-l-4 bg-card p-4"
-            style={{ borderLeftColor: colors[series.id] }}
+            style={{ borderLeftColor: fuelSeriesColor(series.id) }}
             data-testid={`fuel-${series.id}`}
           >
             <dt
               className="text-xs font-semibold tracking-wide uppercase"
-              style={{ color: colors[series.id] }}
+              style={{ color: fuelSeriesColor(series.id) }}
             >
               {series.label}
             </dt>
