@@ -76,6 +76,12 @@
   }
   html {
     @apply font-sans;
+    /* Drives CSS light-dark() (see src/lib/theme-color.ts) — must follow
+       next-themes' class, not the OS preference. */
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
   }
   /* Headings use the display face with tight tracking; numbers in data
      contexts get tabular figures via the .tabular utility below. */

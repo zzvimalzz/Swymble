@@ -145,8 +145,3 @@ export const BASE_LAYERS = ATLAS_LAYERS.filter((l) => l.kind === "base");
 export function getAtlasLayer(id: string): AtlasLayerDef | undefined {
   return ATLAS_LAYERS.find((l) => l.id === id);
 }
-
-/** Layer accent for the active theme. */
-export function layerAccent(layer: AtlasLayerDef, theme: "light" | "dark"): string {
-  return layer.accent[theme];
-}

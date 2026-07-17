@@ -1,16 +1,15 @@
 "use client";
 
-import { useTheme } from "next-themes";
-
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { SourceAttribution } from "@/components/source-attribution";
 import { getDatasetManifest } from "@/services/dataset-registry";
 import { TRANSIT_AGENCIES, type TransitSnapshot } from "@/services/transit-client";
 import { TRANSIT_AGENCY_COLORS, TRANSIT_FALLBACK_COLOR } from "@/maps/style";
+import { themedColor } from "@/lib/theme-color";
 
 import type { AtlasData } from "../atlas-data";
-import { ATLAS_LAYERS, layerAccent, type AtlasLayerDef } from "../layer-registry";
+import { ATLAS_LAYERS, type AtlasLayerDef } from "../layer-registry";
 import type { LayerState } from "../atlas-state";
 
 interface LayersPanelProps {
@@ -21,27 +20,22 @@ interface LayersPanelProps {
   onOpacity: (layer: AtlasLayerDef, opacity: number) => void;
 }
 
-/** Continuous-ramp legend in the layer's own hue. */
-function RampLegend({
-  data,
-  layer,
-  theme,
-}: {
-  data: AtlasData | null;
-  layer: AtlasLayerDef;
-  theme: "light" | "dark";
-}) {
+/**
+ * Continuous heat legend. Colors use CSS light-dark() so the SSR HTML is
+ * theme-independent (hydration-safe) yet flips live with the theme.
+ */
+function RampLegend({ data, layer }: { data: AtlasData | null; layer: AtlasLayerDef }) {
   const series = layer.metric && data ? data.metrics[layer.metric] : null;
   if (!series || !layer.ramp) return null;
-  const ramp = layer.ramp[theme];
+  const low = themedColor({ light: layer.ramp.light.low, dark: layer.ramp.dark.low });
+  const mid = themedColor({ light: layer.ramp.light.mid, dark: layer.ramp.dark.mid });
+  const high = themedColor({ light: layer.ramp.light.high, dark: layer.ramp.dark.high });
 
   return (
     <div className="mt-2">
       <div
         className="h-2 w-full rounded-full"
-        style={{
-          background: `linear-gradient(to right, ${ramp.low}, ${ramp.mid}, ${ramp.high})`,
-        }}
+        style={{ background: `linear-gradient(to right, ${low}, ${mid}, ${high})` }}
         aria-hidden
       />
       <div className="mt-1 flex justify-between font-mono text-[10px] text-muted-foreground">
@@ -86,13 +80,11 @@ function TransitLegend({ transit }: { transit: TransitSnapshot | null }) {
 
 /**
  * The layer manager: grouped toggles, opacity, legends, per-layer source
- * attribution with live quality. Every layer carries its own identity color
- * from the map ramp through the card. Data layers behave as an exclusive
- * set; base and live layers compose.
+ * attribution with live quality. Layer identity colors render via
+ * light-dark() (hydration-safe). Data layers behave as an exclusive set
+ * with exactly one always on; base and live layers compose.
  */
 export function LayersPanel({ layerState, data, transit, onToggle, onOpacity }: LayersPanelProps) {
-  const { resolvedTheme } = useTheme();
-  const theme = resolvedTheme === "dark" ? "dark" : "light";
   const groups = [...new Set(ATLAS_LAYERS.map((l) => l.group))];
 
   return (
@@ -106,7 +98,7 @@ export function LayersPanel({ layerState, data, transit, onToggle, onOpacity }: 
             {ATLAS_LAYERS.filter((l) => l.group === group).map((layer) => {
               const state = layerState[layer.id];
               const series = layer.metric && data ? data.metrics[layer.metric] : null;
-              const accent = layerAccent(layer, theme);
+              const accent = themedColor(layer.accent);
               return (
                 <li
                   key={layer.id}
@@ -148,9 +140,7 @@ export function LayersPanel({ layerState, data, transit, onToggle, onOpacity }: 
                           aria-label={`${layer.title} opacity`}
                         />
                       </div>
-                      {layer.kind === "data" && (
-                        <RampLegend data={data} layer={layer} theme={theme} />
-                      )}
+                      {layer.kind === "data" && <RampLegend data={data} layer={layer} />}
                       {layer.id === "transit" && <TransitLegend transit={transit} />}
                     </div>
                   )}

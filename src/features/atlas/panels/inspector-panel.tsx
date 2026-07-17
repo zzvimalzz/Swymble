@@ -1,22 +1,23 @@
 "use client";
 
-import { useTheme } from "next-themes";
-
 import { Sparkline } from "@/components/charts/sparkline";
 import { SourceAttribution } from "@/components/source-attribution";
 import { getDatasetManifest } from "@/services/dataset-registry";
 import { DISTRICT_META, STATE_META } from "@/maps/generated/boundary-meta";
 import { formatPeople } from "@/lib/format";
+import { themedColor } from "@/lib/theme-color";
 
 import { seriesForDistrict, stateSeries, type AtlasData } from "../atlas-data";
 import type { AtlasSelection } from "../atlas-state";
 import { DATA_LAYERS, type MetricId } from "../layer-registry";
 
-/** Identity color for a metric row (mirrors the layer card + map ramp). */
-function useMetricAccent(): (metric: MetricId) => string | undefined {
-  const { resolvedTheme } = useTheme();
-  const theme = resolvedTheme === "dark" ? "dark" : "light";
-  return (metric) => DATA_LAYERS.find((l) => l.metric === metric)?.accent[theme];
+/**
+ * Identity color for a metric row (mirrors the layer card). light-dark()
+ * keeps it hydration-safe and live to theme switches.
+ */
+function metricAccent(metric: MetricId): string | undefined {
+  const pair = DATA_LAYERS.find((l) => l.metric === metric)?.accent;
+  return pair ? themedColor(pair) : undefined;
 }
 
 interface InspectorPanelProps {
@@ -26,8 +27,7 @@ interface InspectorPanelProps {
 }
 
 function MetricRow({ data, metric, fid }: { data: AtlasData; metric: MetricId; fid: number }) {
-  const accentFor = useMetricAccent();
-  const accent = accentFor(metric);
+  const accent = metricAccent(metric);
   const series = data.metrics[metric];
   const points = seriesForDistrict(series, fid);
   if (points.length === 0) {

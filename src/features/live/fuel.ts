@@ -19,6 +19,14 @@ export const FUEL_COLORS: Record<"light" | "dark", Record<FuelSeries, string>> =
   dark: { ron95: "#5c86d9", ron97: "#b28320", diesel: "#8b5fd6" },
 };
 
+/**
+ * Hydration-safe series color: one CSS light-dark() string for both themes
+ * (never resolve the theme in JS for SSR-rendered styles).
+ */
+export function fuelSeriesColor(series: FuelSeries): string {
+  return `light-dark(${FUEL_COLORS.light[series]}, ${FUEL_COLORS.dark[series]})`;
+}
+
 export type FuelRange = "1y" | "3y" | "all";
 
 export const FUEL_RANGES: Array<{ id: FuelRange; label: string }> = [

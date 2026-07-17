@@ -35,6 +35,11 @@ test.describe("atlas", () => {
     await page.getByTestId("layer-toggle-gdp").click();
     await expect(page.getByTestId("layer-toggle-gdp")).toHaveAttribute("data-state", "checked");
     await expect(populationToggle).toHaveAttribute("data-state", "unchecked");
+
+    // …and radio-style: the active data layer can't be un-toggled, so the
+    // map never goes empty.
+    await page.getByTestId("layer-toggle-gdp").click();
+    await expect(page.getByTestId("layer-toggle-gdp")).toHaveAttribute("data-state", "checked");
   });
 
   test("timeline scrubs the active layer through its years", async ({ page }) => {

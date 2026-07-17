@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Map as MapIcon } from "lucide-react";
-import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +11,7 @@ import { SourceAttribution } from "@/components/source-attribution";
 import { getDatasetManifest } from "@/services/dataset-registry";
 import { DISTRICT_META, STATE_META } from "@/maps/generated/boundary-meta";
 import { formatPeople } from "@/lib/format";
+import { themedColor } from "@/lib/theme-color";
 
 import {
   loadAtlasData,
@@ -37,8 +37,6 @@ function nationalSeries(series: MetricSeries): Array<{ year: number; value: numb
 }
 
 function MetricSection({ data, metric }: { data: AtlasData; metric: MetricId }) {
-  const { resolvedTheme } = useTheme();
-  const theme = resolvedTheme === "dark" ? "dark" : "light";
   const layer = DATA_LAYERS.find((l) => l.metric === metric);
   if (!layer?.datasetId) return null;
 
@@ -48,7 +46,7 @@ function MetricSection({ data, metric }: { data: AtlasData; metric: MetricId }) 
     .filter((v): v is { id: number; value: number; raw: number } => v.raw !== null)
     .sort((a, b) => b.raw - a.raw);
   const top = rows.slice(0, 10);
-  const accent = layer.accent[theme];
+  const accent = themedColor(layer.accent);
 
   // Summing only makes sense for additive metrics (people, RM output) —
   // median income shows the national spread instead.

@@ -192,8 +192,11 @@ export function AtlasView() {
 
   const toggleLayer = useCallback(
     (layer: AtlasLayerDef, visible: boolean) => {
-      if (layer.kind === "data" && visible) {
-        activateDataLayer(layer);
+      if (layer.kind === "data") {
+        // Radio semantics: exactly one data layer stays on. Activating one
+        // deactivates the others; un-toggling the active one is a no-op so
+        // the map can never go empty.
+        if (visible) activateDataLayer(layer);
         return;
       }
       setLayerState((current) => ({

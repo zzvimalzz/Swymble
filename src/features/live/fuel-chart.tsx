@@ -1,12 +1,11 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { useTheme } from "next-themes";
 
 import type { FuelPriceRow } from "@/types/dataset-payloads";
 import { cn } from "@/lib/utils";
 
-import { FUEL_COLORS, FUEL_SERIES, formatRmPerLitre, type FuelSeries } from "./fuel";
+import { FUEL_SERIES, formatRmPerLitre, fuelSeriesColor, type FuelSeries } from "./fuel";
 
 const WIDTH = 860;
 const HEIGHT = 300;
@@ -69,8 +68,6 @@ function linePath(rows: FuelPriceRow[], series: FuelSeries, scales: Scales): str
 export function FuelChart({ rows, className }: FuelChartProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
-  const { resolvedTheme } = useTheme();
-  const colors = FUEL_COLORS[resolvedTheme === "dark" ? "dark" : "light"];
 
   const scales = useMemo(() => buildScales(rows), [rows]);
   if (rows.length < 2) return null;
@@ -138,7 +135,7 @@ export function FuelChart({ rows, className }: FuelChartProps) {
             key={series.id}
             d={linePath(rows, series.id, scales)}
             fill="none"
-            stroke={colors[series.id]}
+            style={{ stroke: fuelSeriesColor(series.id) }}
             strokeWidth={2}
             strokeLinejoin="round"
           />
@@ -183,7 +180,7 @@ export function FuelChart({ rows, className }: FuelChartProps) {
                 cx={scales.x(hoverIndex)}
                 cy={scales.y(hovered[series.id])}
                 r={4}
-                fill={colors[series.id]}
+                style={{ fill: fuelSeriesColor(series.id) }}
                 className="stroke-background"
                 strokeWidth={2}
               />
@@ -206,7 +203,7 @@ export function FuelChart({ rows, className }: FuelChartProps) {
             <div key={series.id} className="mt-1 flex items-center gap-2">
               <span
                 className="inline-block size-2 rounded-full"
-                style={{ background: colors[series.id] }}
+                style={{ background: fuelSeriesColor(series.id) }}
                 aria-hidden
               />
               <span>{series.label}</span>
@@ -223,7 +220,7 @@ export function FuelChart({ rows, className }: FuelChartProps) {
           <span key={series.id} className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span
               className="inline-block h-0.5 w-4 rounded-full"
-              style={{ background: colors[series.id] }}
+              style={{ background: fuelSeriesColor(series.id) }}
               aria-hidden
             />
             {series.label}
