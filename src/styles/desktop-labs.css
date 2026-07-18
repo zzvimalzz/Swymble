@@ -168,7 +168,6 @@
   line-height: 1.7;
   color: #ccc;
   margin-bottom: 1.25rem;
-  flex-grow: 1;
 }
 
 .lab-highlights {
@@ -187,6 +186,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  /* Push the footer group (tags + updated + actions) to the card bottom so
+     rows of unequal-length cards keep their footers aligned. */
+  margin-top: auto;
+  padding-top: 1rem;
   margin-bottom: 0.9rem;
 }
 

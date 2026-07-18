@@ -20,7 +20,7 @@
  * elevation (unlike symlinks).
  */
 import { createHash } from "node:crypto";
-import { existsSync, lstatSync, mkdirSync, rmSync, symlinkSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readlinkSync, rmSync, symlinkSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -44,9 +44,27 @@ function isLink(p) {
   return existsSync(p) && lstatSync(p).isSymbolicLink();
 }
 
+// Junction targets come back with a \\?\ prefix on Windows; normalise so a
+// stale link (e.g. a pre-rename build dir) is detected and relinked.
+function normalize(p) {
+  return path.resolve(p.replace(/^\\\\\?\\/, "")).toLowerCase();
+}
+
+function linkTarget(p) {
+  try {
+    return isLink(p) ? readlinkSync(p) : null;
+  } catch {
+    return null;
+  }
+}
+
 try {
-  if (!isLink(nextDir)) {
-    if (existsSync(nextDir)) {
+  const current = linkTarget(nextDir);
+  const isCorrect = current !== null && normalize(current) === normalize(target);
+  if (!isCorrect) {
+    // Not a link, or a link to the wrong place (project renamed/moved) — the
+    // old cache is stale and would break module resolution. Relink fresh.
+    if (existsSync(nextDir) || isLink(nextDir)) {
       rmSync(nextDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
     }
     mkdirSync(target, { recursive: true });
