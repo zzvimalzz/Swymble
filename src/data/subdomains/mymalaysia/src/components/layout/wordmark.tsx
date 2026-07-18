@@ -6,8 +6,8 @@ import { site } from "@/config/site";
 import { cn } from "@/lib/utils";
 
 /**
- * The MyMalaysia identity: the tricolor mark (crescent, the two halves of
- * the country, data bars) beside the wordmark — "My" in selat blue.
+ * The MalaysiaHub identity: the tricolor mark beside the wordmark —
+ * "Hub" in selat blue (the interactive hue: this is where everything meets).
  */
 export function Wordmark({ className }: { className?: string }) {
   return (
@@ -19,17 +19,22 @@ export function Wordmark({ className }: { className?: string }) {
       )}
       aria-label={`${site.name} — home`}
     >
-      <Image
-        src="/images/mymalaysia_logo.png"
-        alt=""
-        width={32}
-        height={32}
-        className="size-8 shrink-0"
-        priority
-      />
+      {/* The emblem's navy crescent/map disappears on dark surfaces, so it
+          rides on a white "coin" (app-icon style) for guaranteed contrast in
+          both themes. */}
+      <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white ring-1 ring-black/10 dark:ring-white/15">
+        <Image
+          src="/images/mymalaysia_logo.png"
+          alt=""
+          width={32}
+          height={32}
+          className="size-7"
+          priority
+        />
+      </span>
       <span className="font-display text-lg font-semibold tracking-tight">
-        <span className="text-brand-selat">My</span>
         <span>Malaysia</span>
+        <span className="text-brand-selat">Hub</span>
       </span>
     </Link>
   );

@@ -1,10 +1,3 @@
 export { Hero } from "./hero";
-export {
-  Facts,
-  FeaturedDatasets,
-  Mission,
-  ModulesPreview,
-  Philosophy,
-  Roadmap,
-  Technology,
-} from "./sections";
+export { Pillars } from "./pillars";
+export { Closing } from "./closing";

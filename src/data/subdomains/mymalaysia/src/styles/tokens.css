@@ -1,25 +1,42 @@
 /*
- * MyMalaysia design tokens — single source of truth.
+ * MalaysiaHub design tokens — single source of truth.
  *
- * Doctrine:
- *  - "Selat" blue is the interface color: interactive elements, selection,
- *    links, focus. It signals trust and technology.
- *  - "Songket" gold is editorial: pull-quotes, highlighted figures, featured
- *    markers. Never for interactive states — if it's clickable, it's blue.
- *  - Semantic status colors (ok / caution / critical) are reserved for data
- *    quality and alerts; they are not decoration and don't count as accents.
- *  - Neutrals carry a slight cool blue bias in both themes. Dark theme is
- *    deep ink, never pure black.
+ * Palette = Jalur Gemilang (the Malaysian flag) fused with the Swymble
+ * signature. Five brand hues on cool neutrals, each with a strict role so the
+ * result stays minimal, never a rainbow:
+ *
+ *  FLAG
+ *  - "Selat" blue — the INTERFACE color: interactive elements, selection,
+ *    links, focus. Trust + technology. If it's clickable, it's blue.
+ *  - "Songket" gold — EDITORIAL: pull-quotes, highlighted figures, featured
+ *    markers. Never interactive.
+ *  - "Merah" red — ENERGY / LIVE: the flag's red, tuned toward Swymble neon
+ *    (#FF003C). Live indicators, alerts, the tricolor rule.
+ *
+ *  SWYMBLE SIGNATURE (woven in, used sparingly)
+ *  - "Cyan" (#00F0FF) — the tech accent: data glows, active data states,
+ *    Swymble-brand moments, gradient companion to blue. Decorative/data only,
+ *    not body text (too light for AA on paper).
+ *  - "Volt" (#EFFF04) — the electric highlight: pulses and accents on dark/ink
+ *    surfaces (hero, footer). High-energy, used in tiny doses.
+ *
+ *  - Semantic status colors (ok / caution / critical) are data-quality/alert
+ *    only — not decoration, not accents.
+ *  - Neutrals carry a slight cool blue bias in both themes. Dark is deep ink,
+ *    never pure black.
  *
  * Consumed by src/app/globals.css (@theme inline maps these into Tailwind).
  */
 
 :root {
-  /* ---- brand (jalur gemilang tricolor + ink) ---- */
+  /* ---- brand (jalur gemilang × swymble) ---- */
   --brand-selat: oklch(0.44 0.13 258);
   --brand-selat-bright: oklch(0.55 0.13 258);
   --brand-songket: oklch(0.78 0.15 82);
-  --brand-merah: oklch(0.55 0.21 25);
+  --brand-merah: oklch(0.56 0.23 22);
+  --brand-cyan: oklch(0.82 0.12 205);
+  --brand-cyan-deep: oklch(0.58 0.11 220);
+  --brand-volt: oklch(0.92 0.2 118);
   --brand-ink: oklch(0.2 0.015 260);
 
   /* ---- semantic surfaces & text ---- */
@@ -88,11 +105,14 @@
 }
 
 .dark {
-  /* ---- brand (jalur gemilang tricolor + ink) ---- */
+  /* ---- brand (jalur gemilang × swymble) ---- */
   --brand-selat: oklch(0.72 0.12 255);
   --brand-selat-bright: oklch(0.78 0.11 252);
   --brand-songket: oklch(0.82 0.15 85);
-  --brand-merah: oklch(0.66 0.19 25);
+  --brand-merah: oklch(0.68 0.21 22);
+  --brand-cyan: oklch(0.85 0.13 200);
+  --brand-cyan-deep: oklch(0.7 0.12 205);
+  --brand-volt: oklch(0.94 0.21 118);
   --brand-ink: oklch(0.93 0.006 250);
 
   /* ---- semantic surfaces & text ---- */

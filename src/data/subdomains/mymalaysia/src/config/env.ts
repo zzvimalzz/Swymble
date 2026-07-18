@@ -8,7 +8,7 @@ import { z } from "zod";
  * Defaults are the production values: a fresh clone builds without any .env.
  */
 const publicEnvSchema = z.object({
-  NEXT_PUBLIC_SITE_URL: z.url().default("https://mymalaysia.swymble.com"),
+  NEXT_PUBLIC_SITE_URL: z.url().default("https://malaysiahub.swymble.com"),
   /**
    * Base URL of the data lake. Empty string = same-origin (artifacts are
    * committed under public/data and deploy with the site). Set to the R2

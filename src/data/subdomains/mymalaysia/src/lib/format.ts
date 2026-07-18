@@ -10,6 +10,16 @@ export function formatRm(value: number): string {
   return `RM ${number.format(Math.round(value))}`;
 }
 
+const money = new Intl.NumberFormat("en-MY", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+/** RM with sen precision ("RM 3,825.50") — for money that must balance. */
+export function formatRmPrecise(value: number): string {
+  return `RM ${money.format(value)}`;
+}
+
 /** RM millions → compact display ("RM 11.6 bn", "RM 840 mn"). */
 export function formatRmMillions(valueMillions: number): string {
   if (Math.abs(valueMillions) >= 1000) {

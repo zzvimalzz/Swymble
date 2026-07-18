@@ -16,6 +16,9 @@
   --color-brand-selat-bright: var(--brand-selat-bright);
   --color-brand-songket: var(--brand-songket);
   --color-brand-merah: var(--brand-merah);
+  --color-brand-cyan: var(--brand-cyan);
+  --color-brand-cyan-deep: var(--brand-cyan-deep);
+  --color-brand-volt: var(--brand-volt);
   --color-brand-ink: var(--brand-ink);
   --color-status-ok: var(--status-ok);
   --color-status-caution: var(--status-caution);
@@ -112,4 +115,75 @@
     var(--brand-songket) 33.4% 66.7%,
     var(--brand-merah) 66.7% 100%
   );
+}
+
+/* The full brand spectrum: flag tricolor carried into the Swymble signature
+   (cyan). For hero rules and animated accents where the plain flag bar reads
+   too official. */
+@utility brand-bar {
+  background: linear-gradient(
+    to right,
+    var(--brand-merah) 0%,
+    var(--brand-songket) 32%,
+    var(--brand-selat) 64%,
+    var(--brand-cyan) 100%
+  );
+}
+
+/* Headline gradient: blue → Swymble cyan. For one hero word, never body. */
+@utility text-gradient-brand {
+  background: linear-gradient(
+    100deg,
+    var(--brand-selat-bright) 0%,
+    var(--brand-cyan-deep) 55%,
+    var(--brand-cyan) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Soft brand halo behind hero art / feature figures. */
+@utility brand-glow {
+  background: radial-gradient(
+    60% 60% at 50% 40%,
+    color-mix(in oklch, var(--brand-cyan) 40%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+/* A live data pulse: the red/volt dot next to realtime figures. */
+@keyframes sw-live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.82);
+  }
+}
+
+@utility live-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--brand-merah);
+  box-shadow: 0 0 0 0.2rem color-mix(in oklch, var(--brand-merah) 22%, transparent);
+  animation: sw-live-pulse 1.8s var(--ease-in-out-soft) infinite;
+}
+
+/* Sheen sweep for loading/awaiting states, honoring reduced motion below. */
+@keyframes sw-sheen {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot {
+    animation: none;
+  }
 }

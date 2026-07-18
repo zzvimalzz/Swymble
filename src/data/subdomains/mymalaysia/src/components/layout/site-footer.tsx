@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { Badge } from "@/components/ui/badge";
 import { Wordmark } from "@/components/layout/wordmark";
 import { footerRoutes } from "@/config/navigation";
@@ -19,18 +21,25 @@ export function SiteFooter() {
           <div className="max-w-sm space-y-3">
             <Wordmark />
             <p className="text-sm text-muted-foreground">{site.description}</p>
-            <p className="text-sm text-muted-foreground">
-              A{" "}
-              <a
-                href={site.brand.companyUrl}
-                className="underline underline-offset-4 hover:text-foreground"
-                rel="noreferrer"
-                target="_blank"
-              >
-                {site.brand.company}
-              </a>{" "}
-              product.
-            </p>
+            <a
+              href={site.brand.companyUrl}
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-opacity hover:opacity-80"
+              rel="noreferrer"
+              target="_blank"
+              aria-label={`A ${site.brand.company} product`}
+            >
+              <span>A</span>
+              {/* Swymble mark is white-on-transparent (built for their dark
+                  site); invert it to ink on the light theme, keep white on dark. */}
+              <Image
+                src="/images/swymble-wordmark-white.png"
+                alt={site.brand.company}
+                width={969}
+                height={466}
+                className="h-5 w-auto invert dark:invert-0"
+              />
+              <span>product</span>
+            </a>
           </div>
 
           <nav aria-label="Modules" className="space-y-3">

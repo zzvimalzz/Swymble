@@ -2,17 +2,17 @@ import { env } from "@/config/env";
 
 /** Site identity — the single source for name, description, and links. */
 export const site = {
-  name: "MyMalaysia",
-  tagline: "Explore Malaysia through data",
+  name: "MalaysiaHub",
+  tagline: "Everything Malaysia, in one place",
   description:
-    "The most beautiful way to explore Malaysia through open public data — interactive maps, live indicators, and deep statistics for every state and district.",
+    "The daily operating system for living in Malaysia — fuel prices, ringgit rates, salary and tax calculators, government services, and transit, in one beautiful place.",
   url: env.NEXT_PUBLIC_SITE_URL,
   brand: {
     company: "Swymble",
     companyUrl: "https://swymble.com",
   },
   links: {
-    github: "https://github.com/swymble/mymalaysia",
+    github: "https://github.com/swymble/malaysiahub",
     dataGovMy: "https://data.gov.my",
     openDosm: "https://open.dosm.gov.my",
     bnm: "https://apikijangportal.bnm.gov.my",

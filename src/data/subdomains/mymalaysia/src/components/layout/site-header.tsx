@@ -40,6 +40,10 @@ function NavItems({ orientation }: { orientation: "horizontal" | "vertical" }) {
             aria-current={isActive ? "page" : undefined}
             className={cn(
               "rounded-sm text-sm transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+              orientation === "horizontal" &&
+                "relative py-1 after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-full after:origin-left after:rounded-full after:bg-brand-selat after:transition-transform after:duration-200 after:content-[''] hover:after:scale-x-100",
+              orientation === "horizontal" &&
+                (isActive ? "after:scale-x-100" : "after:scale-x-0"),
               orientation === "vertical" && "py-2 text-base",
               isActive
                 ? "font-medium text-foreground"
