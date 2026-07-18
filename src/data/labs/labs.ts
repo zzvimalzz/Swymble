@@ -122,23 +122,23 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     ],
   },
   {
-    id: 'mymalaysia',
-    title: 'MYMALAYSIA',
-    category: 'OPEN DATA',
+    id: 'malaysiahub',
+    title: 'MALAYSIAHUB',
+    category: 'DAILY OS',
     categoryColor: '#6fa0e8',
-    image: '/images/mymalaysia_logo.png',
+    image: '/images/malaysiahub_logo.png',
     status: 'In Development',
     visibility: 'public',
     publicSummary:
-      'A premium platform for exploring Malaysia through official open data: an interactive map of all 16 states and 160 districts with population, income, and GDP — plus a 3D mode where districts rise by the numbers.',
+      'The daily operating system for living in Malaysia: salary, EPF and tax calculators, live fuel prices and ringgit rates, government service guides, and a living data atlas of every state and district — the ten tabs you open every day, in one place.',
     safeHighlights: [
-      'Official sources only (OpenDOSM, data.gov.my, BNM), attributed under CC BY 4.0',
-      'MapLibre engine with drill-down selection and 3D data prisms',
-      'Self-refreshing data pipeline that opens reviewable update PRs',
+      'Finance toolkit — salary take-home, loan, savings, and live currency conversion, every statutory rate sourced and dated',
+      'Living atlas of all 16 states and 160 districts on one MapLibre workspace, official open data (OpenDOSM, data.gov.my, BNM) under CC BY 4.0',
+      'Static-first and free where it should be; a self-refreshing pipeline opens reviewable data-update PRs',
     ],
-    tags: ['Open Data', 'Maps', 'Public'],
+    tags: ['Finance', 'Open Data', 'Public'],
     updatedAt: 'Jul 2026',
-    // Add an OPEN MYMALAYSIA action (createSubdomainUrl('mymalaysia')) once
+    // Add an OPEN MALAYSIAHUB action (createSubdomainUrl('malaysiahub')) once
     // the Cloudflare subdomain worker is wired and the site is reachable.
   },
   {

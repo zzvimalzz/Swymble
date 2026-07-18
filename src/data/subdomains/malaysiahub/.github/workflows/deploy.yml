@@ -1,0 +1,46 @@
+# Production deployment to Cloudflare Workers via OpenNext.
+#
+# Gated on the repository variable ENABLE_CLOUDFLARE_DEPLOY == 'true' so CI
+# stays green before the Cloudflare account is wired up. To enable:
+#   1. Create the Worker's Cloudflare API token (Workers Scripts: Edit).
+#   2. Add repo secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
+#   3. Add repo variable ENABLE_CLOUDFLARE_DEPLOY = true.
+#   4. After first deploy, attach the custom domain malaysiahub.swymble.com
+#      (see the commented "routes" block in wrangler.jsonc).
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ vars.ENABLE_CLOUDFLARE_DEPLOY == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (OpenNext for Cloudflare)
+        run: npx opennextjs-cloudflare build
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy

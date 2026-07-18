@@ -223,7 +223,7 @@ export default defineConfig({
   plugins: [react(), createStaticSubdomainPlugin()],
   base: '/',
   test: {
-    // Subdomain apps run their own test suites (mymalaysia ships vitest
+    // Subdomain apps run their own test suites (malaysiahub ships vitest
     // tests of its own); this suite only covers the root site.
     exclude: ['**/node_modules/**', '**/dist/**', 'src/data/subdomains/**'],
   },
