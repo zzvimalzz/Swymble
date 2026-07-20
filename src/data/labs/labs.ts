@@ -122,26 +122,6 @@ export const SWYMBLE_LABS: SwymbleLab[] = [
     ],
   },
   {
-    id: 'malaysiahub',
-    title: 'MALAYSIAHUB',
-    category: 'DAILY OS',
-    categoryColor: '#6fa0e8',
-    image: '/images/malaysiahub_logo.png',
-    status: 'In Development',
-    visibility: 'public',
-    publicSummary:
-      'The daily operating system for living in Malaysia: salary, EPF and tax calculators, live fuel prices and ringgit rates, government service guides, and a living data atlas of every state and district — the ten tabs you open every day, in one place.',
-    safeHighlights: [
-      'Finance toolkit — salary take-home, loan, savings, and live currency conversion, every statutory rate sourced and dated',
-      'Living atlas of all 16 states and 160 districts on one MapLibre workspace, official open data (OpenDOSM, data.gov.my, BNM) under CC BY 4.0',
-      'Static-first and free where it should be; a self-refreshing pipeline opens reviewable data-update PRs',
-    ],
-    tags: ['Finance', 'Open Data', 'Public'],
-    updatedAt: 'Jul 2026',
-    // Add an OPEN MALAYSIAHUB action (createSubdomainUrl('malaysiahub')) once
-    // the Cloudflare subdomain worker is wired and the site is reachable.
-  },
-  {
     id: 'territory',
     title: 'TERRITORY',
     category: 'FITNESS & GAMING',

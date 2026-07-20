@@ -34,7 +34,6 @@ jobs:
             package-lock.json
             src/data/subdomains/mybirth/package-lock.json
             src/data/subdomains/what2watch/package-lock.json
-            src/data/subdomains/malaysiahub/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -44,9 +43,6 @@ jobs:
 
       - name: Install what2watch dependencies
         run: npm ci --prefix src/data/subdomains/what2watch
-
-      - name: Install MalaysiaHub dependencies
-        run: npm ci --prefix src/data/subdomains/malaysiahub
 
       - name: Run data-integrity tests
         run: npm test
