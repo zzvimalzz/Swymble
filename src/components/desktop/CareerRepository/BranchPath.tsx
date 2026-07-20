@@ -1,5 +1,5 @@
-import { motion, useReducedMotion } from 'framer-motion';
-import { useState, type CSSProperties } from 'react';
+import { motion, useReducedMotion, useTransform, type MotionValue } from 'framer-motion';
+import type { CSSProperties } from 'react';
 import type { SwymbleCareerBranch } from '../../../data/types';
 
 type BranchPathProps = {
@@ -8,38 +8,46 @@ type BranchPathProps = {
   pathId: string;
   isDimmed: boolean;
   color: string;
+  /** Shared across every branch (one scroll subscription for the whole graph); each branch just
+   *  maps its own slice of it to a 0-1 draw progress. */
+  scrollYProgress: MotionValue<number>;
+  /** This branch's own vertical extent, as a fraction of the graph's total height. */
+  startFraction: number;
+  endFraction: number;
 };
 
-export default function BranchPath({ branch, d, pathId, isDimmed, color }: BranchPathProps) {
+export default function BranchPath({
+  branch,
+  d,
+  pathId,
+  isDimmed,
+  color,
+  scrollYProgress,
+  startFraction,
+  endFraction,
+}: BranchPathProps) {
   const prefersReducedMotion = useReducedMotion();
-  const [drawn, setDrawn] = useState(prefersReducedMotion ?? false);
+  const pathLength = useTransform(scrollYProgress, [startFraction, endFraction], [0, 1], { clamp: true });
   const style = { '--branch-color': color } as CSSProperties;
 
   return (
-    <g
-      className={`career-branch career-branch--${branch.category}${isDimmed ? ' career-branch--dimmed' : ''}`}
-      style={style}
-    >
+    <g className={`career-branch career-branch--${branch.category}${isDimmed ? ' career-branch--dimmed' : ''}`} style={style}>
       <motion.path
         id={pathId}
         className="career-branch-path__draw"
         d={d}
         fill="none"
-        initial={prefersReducedMotion ? false : { pathLength: 0 }}
-        whileInView={{ pathLength: 1 }}
-        viewport={{ once: true, amount: 0, margin: '0px 0px -30% 0px' }}
-        transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-        onAnimationComplete={() => setDrawn(true)}
+        style={prefersReducedMotion ? undefined : { pathLength }}
+        pathLength={prefersReducedMotion ? 1 : undefined}
       />
-      {drawn && !prefersReducedMotion && (
-        <motion.path
-          className="career-branch-path__pulse"
-          d={d}
-          fill="none"
-          animate={{ opacity: [0.15, 0.4, 0.15] }}
-          transition={{ repeat: Infinity, duration: 3.4, ease: 'easeInOut' }}
-        />
-      )}
+      {/* Same scroll-linked pathLength, so the pulse only glows the portion already drawn; a
+          plain CSS keyframe handles the breathing opacity, no extra JS animation loop needed. */}
+      <motion.path
+        className="career-branch-path__pulse"
+        d={d}
+        fill="none"
+        style={prefersReducedMotion ? { display: 'none' } : { pathLength }}
+      />
     </g>
   );
 }

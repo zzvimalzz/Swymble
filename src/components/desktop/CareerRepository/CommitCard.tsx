@@ -1,29 +1,36 @@
 import { motion } from 'framer-motion';
+import type { CSSProperties } from 'react';
 import type { SwymbleCareerNode } from '../../../data/types';
 
 type CommitCardProps = {
   node: SwymbleCareerNode;
   x: number;
   y: number;
-  /** Render below the node instead of above — used for the topmost lane, where there's no room
+  color: string;
+  /** Render below the node instead of above, used for the topmost lane, where there's no room
    *  above the graph's scroll container for the card to sit without being clipped. */
   flip?: boolean;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 };
 
 const formatDate = (node: SwymbleCareerNode): string =>
-  node.endDate ? `${node.date} – ${node.endDate}` : node.date;
+  node.endDate ? `${node.date} to ${node.endDate}` : node.date;
 
-export default function CommitCard({ node, x, y, flip = false }: CommitCardProps) {
+export default function CommitCard({ node, x, y, color, flip = false, onMouseEnter, onMouseLeave }: CommitCardProps) {
   const description = Array.isArray(node.description) ? node.description : node.description ? [node.description] : [];
+  const style = { left: x, top: y, '--branch-color': color } as CSSProperties;
 
   return (
     <motion.div
       className={`career-commit-card${flip ? ' career-commit-card--below' : ''}`}
-      style={{ left: x, top: y }}
+      style={style}
       initial={{ opacity: 0, y: 8, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 8, scale: 0.97 }}
       transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       role="dialog"
       aria-label={node.title}
     >

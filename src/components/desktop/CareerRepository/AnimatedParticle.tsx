@@ -5,7 +5,7 @@ type AnimatedParticleProps = {
 };
 
 /** A small glowing dot that periodically travels along an active branch's path, via native SVG
- *  SMIL animateMotion — cheap, GPU-friendly, and needs no per-frame JS. `keyPoints`/`keyTimes`
+ *  SMIL animateMotion, cheap, GPU-friendly, and needs no per-frame JS. `keyPoints`/`keyTimes`
  *  reverse the default start→end traversal so it travels from the oldest end up toward the
  *  branch's most recent point, matching the graph's newest-at-top reading direction. */
 export default function AnimatedParticle({ pathId, delaySeconds, color }: AnimatedParticleProps) {

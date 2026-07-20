@@ -15,6 +15,10 @@ export type LayoutBranch = {
   /** SVG path `d` for the branch line, including fork-in and merge-back curves. */
   path: string;
   nodes: LayoutNode[];
+  /** Vertical extent of the rendered path (including any fork/merge curve past the nodes
+   *  themselves), used to scroll-scrub the draw-in animation. */
+  startY: number;
+  endY: number;
 };
 
 export type CareerLayout = {
@@ -35,7 +39,7 @@ const parseDateKey = (date: string): number => {
 };
 
 /** Orders branches so every branch comes after its parent, regardless of the order files were
- *  discovered in — this is what lets a new branch file just declare `parentBranchId` and work,
+ *  discovered in: this is what lets a new branch file just declare `parentBranchId` and work,
  *  with no index to hand-edit or ordering to get right. */
 const topologicalOrder = (branches: SwymbleCareerBranch[]): SwymbleCareerBranch[] => {
   const byId = new Map(branches.map((branch) => [branch.id, branch]));
@@ -56,7 +60,7 @@ const topologicalOrder = (branches: SwymbleCareerBranch[]): SwymbleCareerBranch[
   return ordered;
 };
 
-/** Assigns each node a row by chronological rank, MOST RECENT FIRST (row 0 = top) — the graph
+/** Assigns each node a row by chronological rank, MOST RECENT FIRST (row 0 = top): the graph
  *  reads top-to-bottom as now-to-past, so scrolling down moves back through history. */
 const assignNodeRows = (branches: SwymbleCareerBranch[]): Map<string, number> => {
   const entries = branches.flatMap((branch) =>
@@ -121,12 +125,15 @@ export function computeCareerLayout(branches: SwymbleCareerBranch[]): CareerLayo
     const newestOwn = nodes[nodes.length - 1];
 
     let d = '';
+    let startY = newestOwn?.y ?? PADDING_Y;
+    let endY = oldestOwn?.y ?? PADDING_Y;
 
     if (branch.status === 'merged' && parentX !== undefined && newestOwn) {
       const siblingIndex = mergeCountByParent.get(branch.parentBranchId!) ?? 0;
       mergeCountByParent.set(branch.parentBranchId!, siblingIndex + 1);
       const mergeY = newestOwn.y - CURVE_RUN_Y - siblingIndex * SIBLING_STAGGER_Y;
       d = `M ${parentX} ${mergeY} ${smoothSegment(parentX, mergeY, newestOwn.x, newestOwn.y)}`;
+      startY = mergeY;
     } else if (newestOwn) {
       d = `M ${newestOwn.x} ${newestOwn.y}`;
     }
@@ -140,13 +147,14 @@ export function computeCareerLayout(branches: SwymbleCareerBranch[]): CareerLayo
       forkCountByParent.set(branch.parentBranchId!, siblingIndex + 1);
       const forkY = oldestOwn.y + CURVE_RUN_Y + siblingIndex * SIBLING_STAGGER_Y;
       d += ` ${smoothSegment(oldestOwn.x, oldestOwn.y, parentX, forkY)}`;
+      endY = forkY;
       maxYExtent = Math.max(maxYExtent, forkY);
     }
 
     if (newestOwn) maxYExtent = Math.max(maxYExtent, newestOwn.y);
     if (oldestOwn) maxYExtent = Math.max(maxYExtent, oldestOwn.y);
 
-    layoutBranches.push({ branch, lane, x, path: d.trim(), nodes });
+    layoutBranches.push({ branch, lane, x, path: d.trim(), nodes, startY, endY });
   }
 
   const maxLane = Math.max(0, ...layoutBranches.map((b) => b.lane));

@@ -37,7 +37,7 @@ export default function CommitNode({ node, x, y, isActive, isDimmed, delay, colo
     );
 
   return (
-    // Static positioning lives on this plain <g> — Framer Motion writes its own CSS `transform`
+    // Static positioning lives on this plain <g>: Framer Motion writes its own CSS `transform`
     // for the animated inner group, which would silently clobber an SVG `transform` attribute
     // placed on the same animated element.
     <g transform={`translate(${x}, ${y})`} style={style}>
@@ -69,6 +69,9 @@ export default function CommitNode({ node, x, y, isActive, isDimmed, delay, colo
         role="button"
         aria-label={`${node.title}${node.org ? `, ${node.org}` : ''}, ${node.date}`}
       >
+        {/* Generous invisible hit area: the painted shape alone (~16-18px) is an easy target to
+            lose track of while moving the mouse toward the card that just appeared. */}
+        <circle className="career-node__hit-area" r={radius + 14} />
         <motion.g
           animate={
             node.isFuture && !prefersReducedMotion

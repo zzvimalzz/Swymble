@@ -2,7 +2,7 @@
 
 .career-repository {
   /* Sibling of .page-content-wrapper (which caps at 800px) inside .layout-content (max-width:
-     1400px, centered) — this fills that wider column instead of the narrow text column. */
+     1400px, centered): this fills that wider column instead of the narrow text column. */
   width: 100%;
   margin-top: 4rem;
   padding-top: 2.5rem;
@@ -68,7 +68,7 @@
   border-color: var(--sw-accent-volt);
 }
 
-/* Graph shell — vertical: reads top (now) to bottom (past) with normal page scroll. */
+/* Graph shell, vertical: reads top (now) to bottom (past) with normal page scroll. */
 .career-repository__graph {
   display: flex;
   justify-content: center;
@@ -105,9 +105,15 @@
   stroke-width: 2;
   stroke-linecap: round;
   filter: drop-shadow(0 0 4px var(--branch-color, var(--sw-accent-cyan)));
+  animation: career-branch-pulse 3.4s ease-in-out infinite;
 }
 
-/* Ambient particle — color set inline per branch via the `color` property */
+@keyframes career-branch-pulse {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.4; }
+}
+
+/* Ambient particle: color set inline per branch via the `color` property */
 .career-particle {
   fill: currentColor;
   filter: drop-shadow(0 0 5px currentColor);
@@ -124,6 +130,10 @@
 
 .career-node--dimmed {
   opacity: 0.28;
+}
+
+.career-node__hit-area {
+  fill: transparent;
 }
 
 .career-node__halo {
@@ -183,102 +193,108 @@
 /* Commit card */
 .career-commit-card {
   position: absolute;
-  transform: translate(-50%, calc(-100% - 20px));
-  width: 260px;
-  background: rgba(10, 10, 10, 0.86);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--sw-border-soft);
+  transform: translate(-50%, calc(-100% - 22px));
+  width: min(360px, 90vw);
+  max-height: min(560px, 70vh);
+  overflow-y: auto;
+  background: rgba(8, 8, 8, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--branch-color, var(--sw-text-muted)) 30%, var(--sw-border-soft));
+  border-left: 3px solid var(--branch-color, var(--sw-accent-volt));
   border-radius: var(--sw-radius-card);
   box-shadow: var(--sw-shadow-panel);
-  padding: 1.1rem 1.2rem;
+  padding: 1.4rem 1.6rem;
   z-index: var(--sw-z-floating);
   pointer-events: auto;
 }
 
 .career-commit-card--below {
-  transform: translate(-50%, 20px);
+  transform: translate(-50%, 22px);
 }
 
 .career-commit-card__image {
   width: 100%;
   border-radius: calc(var(--sw-radius-card) - 0.3rem);
-  margin-bottom: 0.8rem;
+  margin-bottom: 1rem;
   display: block;
 }
 
 .career-commit-card__date {
   font-family: var(--sw-font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  color: var(--sw-accent-cyan);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--branch-color, var(--sw-accent-cyan));
   text-transform: uppercase;
 }
 
 .career-commit-card__title {
   font-family: var(--sw-font-display);
-  font-size: 1.05rem;
+  font-size: 1.3rem;
+  line-height: 1.3;
   font-weight: 800;
   color: var(--sw-text-main);
-  margin: 0.3rem 0 0.1rem;
+  margin: 0.4rem 0 0.15rem;
 }
 
 .career-commit-card__org {
-  font-size: 0.8rem;
+  font-size: 0.92rem;
   color: var(--sw-text-muted);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .career-commit-card__results {
   font-family: var(--sw-font-mono);
-  font-size: 0.72rem;
+  font-size: 0.8rem;
+  font-weight: 700;
   color: var(--sw-accent-volt);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.4rem;
 }
 
 .career-commit-card__description {
-  font-size: 0.85rem;
-  line-height: 1.55;
+  font-size: 0.96rem;
+  line-height: 1.65;
   color: var(--sw-text-muted);
-  margin: 0.4rem 0 0;
+  margin: 0.5rem 0 0;
 }
 
 .career-commit-card__description-list {
-  font-size: 0.85rem;
-  line-height: 1.5;
+  font-size: 0.96rem;
+  line-height: 1.6;
   color: var(--sw-text-muted);
-  margin: 0.4rem 0 0;
-  padding-left: 1.1em;
+  margin: 0.5rem 0 0;
+  padding-left: 1.15em;
   display: grid;
-  gap: 0.45rem;
+  gap: 0.6rem;
 }
 
 .career-commit-card__tech {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  margin-top: 0.7rem;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
 }
 
 .career-commit-card__tech-chip {
   font-family: var(--sw-font-mono);
-  font-size: 0.65rem;
-  padding: 0.2em 0.6em;
+  font-size: 0.72rem;
+  padding: 0.25em 0.7em;
   border: 1px solid var(--sw-border-soft);
   border-radius: var(--sw-radius-pill);
   color: var(--sw-text-muted);
 }
 
 .career-commit-card__links {
-  margin-top: 0.8rem;
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.4rem;
 }
 
 .career-commit-card__link {
   font-family: var(--sw-font-mono);
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 700;
   color: var(--sw-accent-volt);
   text-decoration: none;
