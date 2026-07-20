@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import Reveal from '../../components/motion/Reveal';
+import CareerRepository from '../../components/desktop/CareerRepository/CareerRepository';
 import { SWYMBLE_DATA } from '../../data/config';
 
 export default function DesktopAbout() {
@@ -25,26 +25,9 @@ export default function DesktopAbout() {
             </motion.p>
           ))}
         </div>
-
-        <Reveal className="about-stack" y={24} margin="-80px">
-          <h2 className="about-stack__heading">Stack</h2>
-          <div className="about-stack__grid">
-            {SWYMBLE_DATA.skills.map((category) => (
-              <div className="about-stack__category" key={category.category}>
-                <span className="about-stack__label">{category.category}</span>
-                <div className="about-stack__chips">
-                  {category.items.map((item) => (
-                    <span className="about-stack__chip" key={item.name}>
-                      <span className="about-stack__dot" style={{ backgroundColor: item.color }} />
-                      {item.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Reveal>
       </div>
+
+      <CareerRepository branches={SWYMBLE_DATA.career} />
     </section>
   );
 }

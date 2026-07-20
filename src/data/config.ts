@@ -1,5 +1,5 @@
 import { SWYMBLE_ABOUT } from './about/about';
-import { SWYMBLE_TECH_STACK } from './about/techstack';
+import { SWYMBLE_CAREER } from './about/career';
 import { SWYMBLE_BLOG } from './blog';
 import { SWYMBLE_BRANDING } from './home/branding';
 import { SWYMBLE_LATEST_UPDATES } from './home/latestupdates';
@@ -26,7 +26,7 @@ export * from './types';
 // - studio process (01-04 steps): home/process.ts
 // - projects: projects/projects.ts
 // - about: about/about.ts
-// - tech stack (About page stack strip): about/techstack.ts
+// - career repository (About page git-graph, one file per branch): about/career/
 // - labs (one file per lab, named after its id): labs/
 // - blog: blog/
 export const SWYMBLE_DATA: SwymbleData = {
@@ -42,9 +42,9 @@ export const SWYMBLE_DATA: SwymbleData = {
   latestUpdates: SWYMBLE_LATEST_UPDATES,
   endCardMobileImage: SWYMBLE_BRANDING.endCardMobileImage,
   about: SWYMBLE_ABOUT,
+  career: SWYMBLE_CAREER,
   labs: SWYMBLE_LABS,
   blog: SWYMBLE_BLOG,
-  skills: SWYMBLE_TECH_STACK,
   universe: SWYMBLE_UNIVERSE,
   socials: SWYMBLE_SOCIALS,
 };

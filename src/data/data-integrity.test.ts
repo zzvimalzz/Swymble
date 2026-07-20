@@ -71,18 +71,71 @@ describe('blog', () => {
   });
 });
 
-describe('skills and universe', () => {
+describe('universe', () => {
   it('every category has at least one item', () => {
-    for (const group of [...SWYMBLE_DATA.skills, ...SWYMBLE_DATA.universe]) {
+    for (const group of SWYMBLE_DATA.universe) {
       expect(group.items.length, `category ${group.category}`).toBeGreaterThan(0);
     }
   });
 
   it('proof links are internal routes or full URLs', () => {
-    for (const group of [...SWYMBLE_DATA.skills, ...SWYMBLE_DATA.universe]) {
+    for (const group of SWYMBLE_DATA.universe) {
       const proofs = [...(group.proof ?? []), ...group.items.flatMap((item) => item.proof ?? [])];
       for (const proof of proofs) {
         expect(proof.href, `${group.category} proof "${proof.label}"`).toMatch(/^(\/|https?:\/\/)/);
+      }
+    }
+  });
+});
+
+describe('career', () => {
+  const branchIds = new Set(SWYMBLE_DATA.career.map((branch) => branch.id));
+  const allNodes = SWYMBLE_DATA.career.flatMap((branch) =>
+    branch.nodes.map((node) => ({ branch, node })),
+  );
+  const nodeIds = new Set(allNodes.map(({ node }) => node.id));
+
+  it('has unique branch ids', () => {
+    const ids = SWYMBLE_DATA.career.map((branch) => branch.id);
+    expect(uniqueCount(ids)).toBe(ids.length);
+  });
+
+  it('has unique node ids across the whole graph', () => {
+    const ids = allNodes.map(({ node }) => node.id);
+    expect(uniqueCount(ids)).toBe(ids.length);
+  });
+
+  it('resolves every parentBranchId to a real branch', () => {
+    for (const branch of SWYMBLE_DATA.career) {
+      if (branch.parentBranchId) {
+        expect(branchIds.has(branch.parentBranchId), `branch ${branch.id} parentBranchId`).toBe(true);
+      }
+    }
+  });
+
+  it('resolves every splitAfterNodeId / mergesBackAfterNodeId to a real node', () => {
+    for (const branch of SWYMBLE_DATA.career) {
+      if (branch.splitAfterNodeId) {
+        expect(nodeIds.has(branch.splitAfterNodeId), `branch ${branch.id} splitAfterNodeId`).toBe(true);
+      }
+      if (branch.mergesBackAfterNodeId) {
+        expect(nodeIds.has(branch.mergesBackAfterNodeId), `branch ${branch.id} mergesBackAfterNodeId`).toBe(true);
+      }
+    }
+  });
+
+  it('has resolvable node link hrefs', () => {
+    for (const { node } of allNodes) {
+      for (const link of node.links ?? []) {
+        expect(link.href, `node ${node.id} link "${link.label}"`).toMatch(/^(\/|https?:\/\/)/);
+      }
+    }
+  });
+
+  it('uses public-root image paths where set', () => {
+    for (const { node } of allNodes) {
+      if (node.image) {
+        expect(node.image, `node ${node.id} image`).toMatch(/^\//);
       }
     }
   });

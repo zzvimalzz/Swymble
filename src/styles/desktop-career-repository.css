@@ -1,0 +1,375 @@
+/* ── About: Career Repository (git-graph) ── */
+
+.career-repository {
+  /* Sibling of .page-content-wrapper (which caps at 800px) inside .layout-content (max-width:
+     1400px, centered) — this fills that wider column instead of the narrow text column. */
+  width: 100%;
+  margin-top: 4rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.career-repository__header {
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  text-align: left;
+}
+
+.career-repository__heading {
+  font-family: var(--sw-font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--sw-text-main);
+  margin: 0 0 0.6rem;
+}
+
+.career-repository__subheading {
+  color: var(--sw-text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 1.6rem;
+  max-width: 60ch;
+}
+
+/* Filters */
+.career-filters {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.career-filters__pill {
+  font-family: var(--sw-font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.5em 1.1em;
+  background: transparent;
+  color: var(--sw-text-muted);
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-pill);
+  cursor: pointer;
+  transition: color var(--sw-motion-fast) var(--sw-ease-standard),
+    border-color var(--sw-motion-fast) var(--sw-ease-standard),
+    background var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.career-filters__pill:hover {
+  color: var(--sw-text-main);
+  border-color: var(--sw-border-volt);
+}
+
+.career-filters__pill--active {
+  color: var(--sw-bg-ink);
+  background: var(--sw-accent-volt);
+  border-color: var(--sw-accent-volt);
+}
+
+/* Graph shell */
+.career-repository__graph {
+  position: relative;
+}
+
+.career-repository__scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  cursor: grab;
+  padding: 1rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sw-line-muted) transparent;
+  touch-action: pan-x;
+  user-select: none;
+}
+
+.career-repository__scroll:active {
+  cursor: grabbing;
+}
+
+.career-repository__inner {
+  position: relative;
+}
+
+.career-repository__canvas {
+  display: block;
+  overflow: visible;
+}
+
+/* Branch lines */
+.career-branch {
+  transition: opacity var(--sw-motion-med) var(--sw-ease-standard);
+}
+
+.career-branch--dimmed {
+  opacity: 0.22;
+}
+
+.career-branch-path__draw {
+  stroke: var(--sw-line-muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.career-branch-path__pulse {
+  stroke: var(--sw-accent-cyan);
+  stroke-width: 2;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px rgba(var(--sw-accent-cyan-rgb), 0.6));
+}
+
+/* Ambient particle */
+.career-particle {
+  fill: var(--sw-accent-cyan);
+  filter: drop-shadow(0 0 5px rgba(var(--sw-accent-cyan-rgb), 0.9));
+}
+
+/* Nodes */
+.career-node {
+  cursor: pointer;
+  outline: none;
+  transition: opacity var(--sw-motion-med) var(--sw-ease-standard);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.career-node--dimmed {
+  opacity: 0.28;
+}
+
+.career-node__halo {
+  fill: none;
+  stroke: none;
+  opacity: 0;
+  transition: opacity var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.career-node--active .career-node__halo,
+.career-node:hover .career-node__halo,
+.career-node:focus-visible .career-node__halo {
+  opacity: 1;
+  stroke: rgba(var(--sw-accent-volt-rgb), 0.45);
+  stroke-width: 1.5;
+  fill: rgba(var(--sw-accent-volt-rgb), 0.08);
+}
+
+.career-node__shape {
+  fill: var(--sw-bg-ink);
+  stroke: var(--sw-text-muted);
+  stroke-width: 1.6;
+}
+
+.career-node--active .career-node__shape,
+.career-node:hover .career-node__shape,
+.career-node:focus-visible .career-node__shape {
+  stroke: var(--sw-accent-volt);
+  fill: var(--sw-accent-volt);
+}
+
+.career-node__shape--hollow {
+  fill: transparent;
+  stroke-dasharray: 3 3;
+}
+
+.career-node--active .career-node__shape--hollow,
+.career-node:hover .career-node__shape--hollow,
+.career-node:focus-visible .career-node__shape--hollow {
+  fill: transparent;
+  stroke: var(--sw-accent-volt);
+}
+
+.career-node__tag-pill {
+  fill: var(--sw-surface-strong);
+  stroke: var(--sw-border-soft);
+  stroke-width: 1;
+}
+
+.career-node__tag-text {
+  fill: var(--sw-text-muted);
+  font-family: var(--sw-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.02em;
+}
+
+/* Commit card */
+.career-commit-card {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 20px));
+  width: 260px;
+  background: rgba(10, 10, 10, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-card);
+  box-shadow: var(--sw-shadow-panel);
+  padding: 1.1rem 1.2rem;
+  z-index: var(--sw-z-floating);
+  pointer-events: auto;
+}
+
+.career-commit-card--below {
+  transform: translate(-50%, 20px);
+}
+
+.career-commit-card__image {
+  width: 100%;
+  border-radius: calc(var(--sw-radius-card) - 0.3rem);
+  margin-bottom: 0.8rem;
+  display: block;
+}
+
+.career-commit-card__date {
+  font-family: var(--sw-font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--sw-accent-cyan);
+  text-transform: uppercase;
+}
+
+.career-commit-card__title {
+  font-family: var(--sw-font-display);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--sw-text-main);
+  margin: 0.3rem 0 0.1rem;
+}
+
+.career-commit-card__org {
+  font-size: 0.8rem;
+  color: var(--sw-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.career-commit-card__description {
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--sw-text-muted);
+  margin: 0.4rem 0 0;
+}
+
+.career-commit-card__tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.7rem;
+}
+
+.career-commit-card__tech-chip {
+  font-family: var(--sw-font-mono);
+  font-size: 0.65rem;
+  padding: 0.2em 0.6em;
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-pill);
+  color: var(--sw-text-muted);
+}
+
+.career-commit-card__links {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.career-commit-card__link {
+  font-family: var(--sw-font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--sw-accent-volt);
+  text-decoration: none;
+}
+
+.career-commit-card__link:hover {
+  text-decoration: underline;
+}
+
+/* Controls: legend + reset */
+.career-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.career-controls__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.career-controls__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--sw-text-muted);
+  text-transform: uppercase;
+}
+
+.career-controls__legend-shape {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  background: var(--sw-text-muted);
+}
+
+.career-controls__legend-shape--diamond {
+  transform: rotate(45deg);
+  border-radius: 1px;
+}
+
+.career-controls__legend-shape--square {
+  border-radius: 2px;
+}
+
+.career-controls__legend-shape--circle,
+.career-controls__legend-shape--small-circle {
+  border-radius: 999px;
+}
+
+.career-controls__legend-shape--small-circle {
+  width: 7px;
+  height: 7px;
+}
+
+.career-controls__legend-shape--hollow-circle {
+  background: transparent;
+  border: 1.5px dashed var(--sw-text-muted);
+  border-radius: 999px;
+}
+
+.career-controls__reset {
+  font-family: var(--sw-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+  background: transparent;
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-pill);
+  padding: 0.45em 1em;
+  cursor: pointer;
+  transition: color var(--sw-motion-fast) var(--sw-ease-standard),
+    border-color var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.career-controls__reset:hover {
+  color: var(--sw-accent-volt);
+  border-color: var(--sw-border-volt);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .career-branch-path__pulse {
+    display: none;
+  }
+}

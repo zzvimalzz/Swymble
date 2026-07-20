@@ -92,6 +92,53 @@ export type SwymbleAbout = {
   paragraphs: string[];
 };
 
+// CAREER REPOSITORY (About page git-graph) — see data/about/career/README.md
+export type SwymbleCareerNodeType = 'education' | 'employment' | 'milestone' | 'project' | 'future';
+
+export type SwymbleCareerTag = { label: string; date?: string };
+
+export type SwymbleCareerLink = { label: string; href: string };
+
+export type SwymbleCareerNode = {
+  /** Unique across the whole graph. */
+  id: string;
+  /** Drives node shape: education=diamond, employment=square, milestone=circle,
+   *  project=small circle, future=hollow circle (breathing). */
+  type: SwymbleCareerNodeType;
+  title: string;
+  org?: string;
+  /** 'YYYY' or 'YYYY-MM' — also the chronological sort key within a branch. */
+  date: string;
+  description?: string;
+  tech?: string[];
+  links?: SwymbleCareerLink[];
+  /** Public-root path, e.g. '/images/foo.png'. */
+  image?: string;
+  /** Git-tag style decorations on this commit (e.g. Promotion, Resigned) rendered as flags. */
+  tags?: SwymbleCareerTag[];
+  /** Hollow, breathing "ghost commit" for an upcoming milestone. */
+  isFuture?: boolean;
+};
+
+export type SwymbleCareerBranch = {
+  /** e.g. 'main', 'feature/swymble', 'client/ibsolutions', 'product/what2watch'. */
+  id: string;
+  label: string;
+  /** Drives the Filters pills — filtering happens per-node, this is the branch's dominant one. */
+  category: 'career' | 'education' | 'project';
+  /** Omit for the trunk ('main'). */
+  parentBranchId?: string;
+  /** Node id on the parent branch this branch forks from. */
+  splitAfterNodeId?: string;
+  /** Set for branches that complete and merge back into their parent (e.g. finished client work). */
+  mergesBackAfterNodeId?: string;
+  status: 'active' | 'merged' | 'ongoing';
+  /** Chronological. */
+  nodes: SwymbleCareerNode[];
+};
+
+export type SwymbleCareerRepository = SwymbleCareerBranch[];
+
 export type SwymbleBlogRichText = string | string[];
 
 export type SwymbleBlogContentBlock =
@@ -199,9 +246,9 @@ export type SwymbleData = {
   latestUpdates: SwymbleLatestUpdateCard[];
   endCardMobileImage?: string;
   about: SwymbleAbout;
+  career: SwymbleCareerRepository;
   labs: SwymbleLab[];
   blog: SwymbleBlogState;
-  skills: SwymbleSkillCategory[];
   universe: SwymbleUniverseOrbit[];
   socials: SwymbleSocial[];
 };
