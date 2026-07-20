@@ -1,6 +1,6 @@
 import type { SwymblePositioning } from '../types';
 import { SWYMBLE_BLOG_POSTS } from '../blog/posts';
-import { SWYMBLE_LABS } from '../labs/labs';
+import { SWYMBLE_LABS } from '../labs';
 import { SWYMBLE_PROJECTS } from '../projects/projects';
 
 // POSITIONING SECTION (replaces the old homepage "PROJECTS" carousel)
@@ -9,7 +9,7 @@ import { SWYMBLE_PROJECTS } from '../projects/projects';
 //   that substring becomes a link
 // - stats: label/value pairs shown as the big counter row. Values are DERIVED from the
 //   data layer (projects/labs/blog arrays), so they update on their own as content is
-//   added — edit the arrays in projects.ts/labs.ts/blog/posts, not a number here.
+//   added — edit projects.ts / labs/ / blog/posts, not a number here.
 export const SWYMBLE_POSITIONING: SwymblePositioning = {
   statement: [
     'The one-engineer software studio a developer in Kuala Lumpur.',

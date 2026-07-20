@@ -11,7 +11,7 @@ point — every file below is assembled into `SWYMBLE_DATA` there — and all ty
 | `home/` | `branding.ts`, `socials.ts`, `positioning.ts`, `latestupdates.ts`, `services.ts`, `process.ts`, `universe.ts` | homepage sections (branding and socials are also used site-wide in nav/footer) | [home/README.md](home/README.md) |
 | `projects/` | `projects.ts` | project cards | [projects/README.md](projects/README.md) |
 | `about/` | `about.ts`, `techstack.ts` | about copy and the tech stack strip | [about/README.md](about/README.md) |
-| `labs/` | `labs.ts` | labs entries | [labs/README.md](labs/README.md) |
+| `labs/` | one file per lab, named after its id (e.g. `cortex.ts`), plus `index.ts` aggregator | labs entries | [labs/README.md](labs/README.md) |
 | `blog/` | `meta.ts`, `posts/` | blog categories and one file per post | [blog/README.md](blog/README.md) |
 | `subdomains/` | one folder per subdomain site | static/app subdomain sources | [subdomains/README.md](subdomains/README.md) |
 

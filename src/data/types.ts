@@ -78,6 +78,9 @@ export type SwymbleLab = {
   safeHighlights: string[];
   tags: string[];
   updatedAt: string;
+  /** Display order on /labs, ascending. Leave gaps of 10 between entries so new labs can be
+   *  slotted in without renumbering everything else. */
+  order: number;
   blogCategoryId?: string;
   blogLink?: string;
   actions?: SwymbleLabAction[];

@@ -39,7 +39,7 @@ export const SWYMBLE_SOCIALS = [
 Replaces the old homepage "PROJECTS" carousel. `statement[0]` renders as the headline; the rest
 render as body paragraphs. `statementLink` (optional) turns its `label` into a link wherever that
 exact substring appears in a statement paragraph. `stats[].value` should stay wired to
-`.length` on the real data arrays (`projects.ts`/`labs.ts`/`blog/posts`) rather than a hand-typed
+`.length` on the real data arrays (`projects.ts`/`labs/`/`blog/posts`) rather than a hand-typed
 number, so the counters can never drift out of sync with the content.
 ```ts
 export const SWYMBLE_POSITIONING = {

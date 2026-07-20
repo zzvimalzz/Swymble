@@ -9,7 +9,7 @@ import { SWYMBLE_SERVICES } from './home/services';
 import { SWYMBLE_SOCIALS } from './home/socials';
 import { SWYMBLE_TECH_STACK_SECTION } from './home/stack';
 import { SWYMBLE_UNIVERSE } from './home/universe';
-import { SWYMBLE_LABS } from './labs/labs';
+import { SWYMBLE_LABS } from './labs';
 import { SWYMBLE_PROJECTS } from './projects/projects';
 import type { SwymbleData } from './types';
 
@@ -27,7 +27,7 @@ export * from './types';
 // - projects: projects/projects.ts
 // - about: about/about.ts
 // - tech stack (About page stack strip): about/techstack.ts
-// - labs: labs/labs.ts
+// - labs (one file per lab, named after its id): labs/
 // - blog: blog/
 export const SWYMBLE_DATA: SwymbleData = {
   name: SWYMBLE_BRANDING.name,
