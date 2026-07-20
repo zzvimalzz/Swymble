@@ -26,7 +26,7 @@ export * from './types';
 // - studio process (01-04 steps): home/process.ts
 // - projects: projects/projects.ts
 // - about: about/about.ts
-// - career repository (About page git-graph, one file per branch): about/career/
+// - career repository (About page git-graph): about/career/index.ts
 // - labs (one file per lab, named after its id): labs/
 // - blog: blog/
 export const SWYMBLE_DATA: SwymbleData = {

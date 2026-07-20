@@ -93,7 +93,7 @@ export type SwymbleAbout = {
 };
 
 // CAREER REPOSITORY (About page git-graph) — see data/about/career/README.md
-export type SwymbleCareerNodeType = 'education' | 'employment' | 'milestone' | 'project' | 'future';
+export type SwymbleCareerNodeType = 'education' | 'employment' | 'milestone' | 'project' | 'award' | 'future';
 
 export type SwymbleCareerTag = { label: string; date?: string };
 
@@ -102,14 +102,20 @@ export type SwymbleCareerLink = { label: string; href: string };
 export type SwymbleCareerNode = {
   /** Unique across the whole graph. */
   id: string;
-  /** Drives node shape: education=diamond, employment=square, milestone=circle,
-   *  project=small circle, future=hollow circle (breathing). */
+  /** Drives node shape: 'education' = diamond, everything else = square. */
   type: SwymbleCareerNodeType;
   title: string;
   org?: string;
-  /** 'YYYY' or 'MM-YYYY' — also the chronological sort key within a branch. */
+  /** 'YYYY' or 'MM-YYYY' — the node's position in time (its start, if it spans a range). Also
+   *  the chronological sort key. */
   date: string;
-  description?: string;
+  /** Optional — same format as `date`, or the literal 'Present' for an ongoing role. Purely
+   *  cosmetic (renders as "date – endDate"); only `date` affects layout/sorting. */
+  endDate?: string;
+  /** Short highlighted result/achievement line, e.g. 'CGPA 3.83/4.00'. */
+  results?: string;
+  /** A single paragraph, or a bullet list for multi-point roles. */
+  description?: string | string[];
   tech?: string[];
   links?: SwymbleCareerLink[];
   /** Public-root path, e.g. '/images/foo.png'. */
@@ -121,7 +127,7 @@ export type SwymbleCareerNode = {
 };
 
 export type SwymbleCareerBranch = {
-  /** e.g. 'main', 'swymble', 'ibsolutions', 'what2watch'. Also its filename in data/about/career/. */
+  /** e.g. 'main', 'swymble', 'ibsolutions', 'what2watch'. Referenced by any branch forking from it. */
   id: string;
   label: string;
   /** Drives the Filters pills — filtering happens per-node, this is the branch's dominant one. */

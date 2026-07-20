@@ -118,8 +118,12 @@ describe('career', () => {
   });
 
   it('uses YYYY or MM-YYYY dates', () => {
+    const dateShape = /^(\d{4}|\d{2}-\d{4})$/;
     for (const { node } of allNodes) {
-      expect(node.date, `node ${node.id} date`).toMatch(/^(\d{4}|\d{2}-\d{4})$/);
+      expect(node.date, `node ${node.id} date`).toMatch(dateShape);
+      if (node.endDate) {
+        expect(node.endDate === 'Present' || dateShape.test(node.endDate), `node ${node.id} endDate`).toBe(true);
+      }
     }
   });
 

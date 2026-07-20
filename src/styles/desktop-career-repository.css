@@ -22,15 +22,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--sw-text-main);
-  margin: 0 0 0.6rem;
-}
-
-.career-repository__subheading {
-  color: var(--sw-text-muted);
-  font-size: 1rem;
-  line-height: 1.6;
-  margin: 0 0 1.6rem;
-  max-width: 60ch;
+  margin: 0 0 1.4rem;
 }
 
 .career-repository__header-row {
@@ -237,11 +229,28 @@
   margin-bottom: 0.5rem;
 }
 
+.career-commit-card__results {
+  font-family: var(--sw-font-mono);
+  font-size: 0.72rem;
+  color: var(--sw-accent-volt);
+  margin-bottom: 0.3rem;
+}
+
 .career-commit-card__description {
   font-size: 0.85rem;
   line-height: 1.55;
   color: var(--sw-text-muted);
   margin: 0.4rem 0 0;
+}
+
+.career-commit-card__description-list {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--sw-text-muted);
+  margin: 0.4rem 0 0;
+  padding-left: 1.1em;
+  display: grid;
+  gap: 0.45rem;
 }
 
 .career-commit-card__tech {

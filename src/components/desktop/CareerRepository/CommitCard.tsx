@@ -10,7 +10,12 @@ type CommitCardProps = {
   flip?: boolean;
 };
 
+const formatDate = (node: SwymbleCareerNode): string =>
+  node.endDate ? `${node.date} – ${node.endDate}` : node.date;
+
 export default function CommitCard({ node, x, y, flip = false }: CommitCardProps) {
+  const description = Array.isArray(node.description) ? node.description : node.description ? [node.description] : [];
+
   return (
     <motion.div
       className={`career-commit-card${flip ? ' career-commit-card--below' : ''}`}
@@ -23,10 +28,19 @@ export default function CommitCard({ node, x, y, flip = false }: CommitCardProps
       aria-label={node.title}
     >
       {node.image && <img className="career-commit-card__image" src={node.image} alt="" />}
-      <div className="career-commit-card__date">{node.date}</div>
+      <div className="career-commit-card__date">{formatDate(node)}</div>
       <h3 className="career-commit-card__title">{node.title}</h3>
       {node.org && <div className="career-commit-card__org">{node.org}</div>}
-      {node.description && <p className="career-commit-card__description">{node.description}</p>}
+      {node.results && <div className="career-commit-card__results">{node.results}</div>}
+      {description.length === 1 ? (
+        <p className="career-commit-card__description">{description[0]}</p>
+      ) : description.length > 1 ? (
+        <ul className="career-commit-card__description-list">
+          {description.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
       {node.tech && node.tech.length > 0 && (
         <div className="career-commit-card__tech">
           {node.tech.map((tech) => (

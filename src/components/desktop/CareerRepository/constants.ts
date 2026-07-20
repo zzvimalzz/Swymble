@@ -20,6 +20,7 @@ export const NODE_SHAPE_BY_TYPE: Record<SwymbleCareerNodeType, NodeShape> = {
   employment: 'square',
   milestone: 'square',
   project: 'square',
+  award: 'square',
   future: 'square',
 };
 
