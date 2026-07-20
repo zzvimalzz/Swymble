@@ -1,5 +1,5 @@
 import type { SwymbleCareerBranch, SwymbleCareerNode } from '../../../data/types';
-import { CURVE_RUN_X, LANE_SPACING_Y, MIN_FORK_GAP, NODE_SPACING_X, PADDING_X, PADDING_Y } from './constants';
+import { COLUMN_SPACING_X, MIN_FORK_GAP, PADDING_X, PADDING_Y, ROW_SPACING_Y } from './constants';
 
 export type LayoutNode = {
   node: SwymbleCareerNode;
@@ -11,7 +11,7 @@ export type LayoutNode = {
 export type LayoutBranch = {
   branch: SwymbleCareerBranch;
   lane: number;
-  y: number;
+  x: number;
   /** SVG path `d` for the branch line, including fork-in and merge-back curves. */
   path: string;
   nodes: LayoutNode[];
@@ -38,108 +38,98 @@ const assignLanes = (branches: SwymbleCareerBranch[]): Map<string, number> => {
   return lanes;
 };
 
-/** Assigns each node an x slot by chronological sequence (git-log style: position reflects
- *  commit order, not literal elapsed time — otherwise a decade-spanning education branch would
- *  crush a few-month client engagement into an unreadable cluster). */
-const assignNodeSequence = (branches: SwymbleCareerBranch[]): Map<string, number> => {
+/** Assigns each node a row by chronological rank, MOST RECENT FIRST (row 0 = top) — the graph
+ *  reads top-to-bottom as now-to-past, so scrolling down moves back through history. */
+const assignNodeRows = (branches: SwymbleCareerBranch[]): Map<string, number> => {
   const entries = branches.flatMap((branch) =>
     branch.nodes.map((node) => ({ branchId: branch.id, node })),
   );
-  entries.sort((a, b) => parseDateKey(a.node.date) - parseDateKey(b.node.date));
+  entries.sort((a, b) => parseDateKey(b.node.date) - parseDateKey(a.node.date));
 
-  const xById = new Map<string, number>();
+  const rowById = new Map<string, number>();
   entries.forEach(({ node }, index) => {
-    xById.set(node.id, PADDING_X + index * NODE_SPACING_X);
+    rowById.set(node.id, index);
   });
-  return xById;
+  return rowById;
 };
 
+/** Straight line within a column; a vertical S-curve (bulging through a mid-row control point)
+ *  when jogging sideways into a different column — the standard commit-graph fork/merge shape. */
 const smoothSegment = (x1: number, y1: number, x2: number, y2: number): string => {
-  if (y1 === y2) {
+  if (x1 === x2) {
     return `L ${x2} ${y2}`;
   }
-  const midX = (x1 + x2) / 2;
-  return `C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`;
+  const midY = (y1 + y2) / 2;
+  return `C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`;
 };
 
 export function computeCareerLayout(branches: SwymbleCareerBranch[]): CareerLayout {
   const lanes = assignLanes(branches);
-  const laneY = (lane: number) => PADDING_Y + lane * LANE_SPACING_Y;
-  const rawX = assignNodeSequence(branches);
-  // Multiple branches can fork from the very same commit (e.g. a client branch and several
-  // product branches all splitting off "First Client") — without staggering them, their curves
-  // land on top of each other right at the fork point. Each subsequent sibling gets a bit more
-  // run-up so they fan out instead of overlapping.
-  const forkSiblingIndex = new Map<string, number>();
+  const laneX = (lane: number) => PADDING_X + lane * COLUMN_SPACING_X;
+  const rawRow = assignNodeRows(branches);
+  const minGapRows = Math.max(1, Math.ceil(MIN_FORK_GAP / ROW_SPACING_Y));
 
   const nodesById = new Map<string, LayoutNode>();
   const layoutBranches: LayoutBranch[] = [];
 
   for (const branch of branches) {
     const lane = lanes.get(branch.id) ?? 0;
-    const y = laneY(lane);
+    const x = laneX(lane);
 
     const forkNode = branch.splitAfterNodeId ? nodesById.get(branch.splitAfterNodeId) : undefined;
-    const parentLane = branch.parentBranchId ? lanes.get(branch.parentBranchId) : undefined;
-    const laneDistance = forkNode && parentLane !== undefined ? Math.abs(lane - parentLane) : 0;
-
-    let siblingIndex = 0;
-    if (forkNode) {
-      siblingIndex = forkSiblingIndex.get(forkNode.node.id) ?? 0;
-      forkSiblingIndex.set(forkNode.node.id, siblingIndex + 1);
-    }
-    const curveRun = CURVE_RUN_X + laneDistance * 16 + siblingIndex * 30;
-    const minFirstX = forkNode ? forkNode.x + MIN_FORK_GAP + siblingIndex * 30 : PADDING_X;
+    // branch.nodes is authored oldest-first; nodes[0] is the branch's earliest event — the one
+    // nearest in time to the fork point, so it must land strictly closer to "now" (smaller row)
+    // than the fork node by at least a minimum gap.
+    const maxFirstRow = forkNode ? rawRow.get(forkNode.node.id)! - minGapRows : Infinity;
 
     const nodes: LayoutNode[] = branch.nodes.map((node, index) => {
-      const x = Math.max(rawX.get(node.id) ?? PADDING_X, index === 0 ? minFirstX : 0);
-      const layoutNode: LayoutNode = { node, branchId: branch.id, x, y };
+      const row = Math.min(rawRow.get(node.id) ?? 0, index === 0 ? maxFirstRow : Infinity);
+      const layoutNode: LayoutNode = { node, branchId: branch.id, x, y: PADDING_Y + row * ROW_SPACING_Y };
       nodesById.set(node.id, layoutNode);
       return layoutNode;
     });
 
-    // Ensure strictly increasing x along the branch even if two nodes shared a date slot.
+    // nodes[] is authored oldest→newest; ensure y strictly decreases in that direction (each
+    // later/more-recent node sits further up than the one before it).
     for (let i = 1; i < nodes.length; i++) {
-      if (nodes[i].x <= nodes[i - 1].x) {
-        nodes[i].x = nodes[i - 1].x + NODE_SPACING_X;
+      if (nodes[i].y >= nodes[i - 1].y) {
+        nodes[i].y = nodes[i - 1].y - ROW_SPACING_Y;
       }
     }
 
     let d = '';
-    if (forkNode) {
-      const firstOwn = nodes[0];
-      const bendX = Math.min(forkNode.x + curveRun, firstOwn ? firstOwn.x - curveRun : forkNode.x + curveRun);
-      d = `M ${forkNode.x} ${forkNode.y} ${smoothSegment(forkNode.x, forkNode.y, Math.max(bendX, forkNode.x), y)}`;
-      if (firstOwn && firstOwn.x > forkNode.x) {
-        d += ` L ${firstOwn.x} ${firstOwn.y}`;
-      }
-    } else if (nodes.length > 0) {
-      d = `M ${nodes[0].x} ${nodes[0].y}`;
-    }
-
-    for (let i = 1; i < nodes.length; i++) {
-      d += ` ${smoothSegment(nodes[i - 1].x, nodes[i - 1].y, nodes[i].x, nodes[i].y)}`;
-    }
 
     if (branch.mergesBackAfterNodeId) {
-      const mergeNode = nodesById.get(branch.mergesBackAfterNodeId);
-      if (mergeNode && parentLane !== undefined) {
-        const parentY = laneY(parentLane);
-        const mergeX = mergeNode.x + curveRun;
-        d += ` ${smoothSegment(mergeNode.x, mergeNode.y, mergeX, parentY)}`;
+      const parentLane = branch.parentBranchId ? lanes.get(branch.parentBranchId) : undefined;
+      const newest = nodes[nodes.length - 1]; // most recent own node (smallest y)
+      if (newest && parentLane !== undefined) {
+        const parentX = laneX(parentLane);
+        d = `M ${parentX} ${newest.y} ${smoothSegment(parentX, newest.y, newest.x, newest.y)}`;
       }
+    } else if (nodes.length > 0) {
+      d = `M ${nodes[nodes.length - 1].x} ${nodes[nodes.length - 1].y}`;
     }
 
-    layoutBranches.push({ branch, lane, y, path: d.trim(), nodes });
+    // Draw newest-to-oldest (top to bottom) through the branch's own nodes.
+    for (let i = nodes.length - 2; i >= 0; i--) {
+      d += ` ${smoothSegment(nodes[i + 1].x, nodes[i + 1].y, nodes[i].x, nodes[i].y)}`;
+    }
+
+    if (forkNode && nodes.length > 0) {
+      const oldestOwn = nodes[0];
+      d += ` ${smoothSegment(oldestOwn.x, oldestOwn.y, forkNode.x, forkNode.y)}`;
+    }
+
+    layoutBranches.push({ branch, lane, x, path: d.trim(), nodes });
   }
 
-  const maxX = Math.max(PADDING_X, ...[...nodesById.values()].map((n) => n.x));
+  const maxY = Math.max(PADDING_Y, ...[...nodesById.values()].map((n) => n.y));
   const maxLane = Math.max(0, ...layoutBranches.map((b) => b.lane));
 
   return {
     branches: layoutBranches,
     nodesById,
-    width: maxX + PADDING_X,
-    height: maxLane * LANE_SPACING_Y + PADDING_Y * 2,
+    width: maxLane * COLUMN_SPACING_X + PADDING_X * 2,
+    height: maxY + PADDING_Y,
   };
 }

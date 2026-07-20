@@ -11,7 +11,7 @@
 
 .career-repository__header {
   max-width: 800px;
-  margin: 0 auto 2rem;
+  margin: 0 auto 2.5rem;
   text-align: left;
 }
 
@@ -31,6 +31,14 @@
   line-height: 1.6;
   margin: 0 0 1.6rem;
   max-width: 60ch;
+}
+
+.career-repository__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 /* Filters */
@@ -68,27 +76,14 @@
   border-color: var(--sw-accent-volt);
 }
 
-/* Graph shell */
+/* Graph shell — vertical: reads top (now) to bottom (past) with normal page scroll. */
 .career-repository__graph {
-  position: relative;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 4rem;
 }
 
-.career-repository__scroll {
-  overflow-x: auto;
-  overflow-y: hidden;
-  cursor: grab;
-  padding: 1rem 0;
-  scrollbar-width: thin;
-  scrollbar-color: var(--sw-line-muted) transparent;
-  touch-action: pan-x;
-  user-select: none;
-}
-
-.career-repository__scroll:active {
-  cursor: grabbing;
-}
-
-.career-repository__inner {
+.career-repository__stage {
   position: relative;
 }
 
@@ -283,18 +278,7 @@
   text-decoration: underline;
 }
 
-/* Controls: legend + reset */
-.career-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: 1.2rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--sw-border-soft);
-}
-
+/* Legend */
 .career-controls__legend {
   display: flex;
   flex-wrap: wrap;
@@ -331,41 +315,10 @@
   border-radius: 2px;
 }
 
-.career-controls__legend-shape--circle,
-.career-controls__legend-shape--small-circle {
-  border-radius: 999px;
-}
-
-.career-controls__legend-shape--small-circle {
-  width: 7px;
-  height: 7px;
-}
-
-.career-controls__legend-shape--hollow-circle {
+.career-controls__legend-shape--square-hollow {
   background: transparent;
   border: 1.5px dashed var(--sw-text-muted);
-  border-radius: 999px;
-}
-
-.career-controls__reset {
-  font-family: var(--sw-font-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--sw-text-muted);
-  background: transparent;
-  border: 1px solid var(--sw-border-soft);
-  border-radius: var(--sw-radius-pill);
-  padding: 0.45em 1em;
-  cursor: pointer;
-  transition: color var(--sw-motion-fast) var(--sw-ease-standard),
-    border-color var(--sw-motion-fast) var(--sw-ease-standard);
-}
-
-.career-controls__reset:hover {
-  color: var(--sw-accent-volt);
-  border-color: var(--sw-border-volt);
+  border-radius: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

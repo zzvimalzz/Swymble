@@ -7,10 +7,9 @@ type BranchPathProps = {
   d: string;
   pathId: string;
   isDimmed: boolean;
-  delay: number;
 };
 
-export default function BranchPath({ branch, d, pathId, isDimmed, delay }: BranchPathProps) {
+export default function BranchPath({ branch, d, pathId, isDimmed }: BranchPathProps) {
   const prefersReducedMotion = useReducedMotion();
   const [drawn, setDrawn] = useState(prefersReducedMotion ?? false);
 
@@ -23,8 +22,8 @@ export default function BranchPath({ branch, d, pathId, isDimmed, delay }: Branc
         fill="none"
         initial={prefersReducedMotion ? false : { pathLength: 0 }}
         whileInView={{ pathLength: 1 }}
-        viewport={{ once: true, margin: '-40px' }}
-        transition={{ delay, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        viewport={{ once: true, amount: 0, margin: '0px 0px -30% 0px' }}
+        transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
         onAnimationComplete={() => setDrawn(true)}
       />
       {drawn && !prefersReducedMotion && (

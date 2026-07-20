@@ -23,16 +23,14 @@ export default function CommitNode({ node, x, y, isActive, isDimmed, delay, onHo
   const prefersReducedMotion = useReducedMotion();
   const shape = getNodeShape(node);
   const radius = NODE_RADIUS_BY_SHAPE[shape];
-  const hollow = shape === 'hollow-circle';
+  const hollow = node.isFuture;
   const variants = buildVariants(delay);
 
   const shapeEl =
     shape === 'square' ? (
       <rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={2} />
-    ) : shape === 'diamond' ? (
-      <rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={1} transform="rotate(45)" />
     ) : (
-      <circle r={radius} />
+      <rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={1} transform="rotate(45)" />
     );
 
   return (
