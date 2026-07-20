@@ -102,22 +102,23 @@
 }
 
 .career-branch-path__draw {
-  stroke: var(--sw-line-muted);
+  stroke: var(--branch-color, var(--sw-line-muted));
   stroke-width: 2;
   stroke-linecap: round;
+  opacity: 0.85;
 }
 
 .career-branch-path__pulse {
-  stroke: var(--sw-accent-cyan);
+  stroke: var(--branch-color, var(--sw-accent-cyan));
   stroke-width: 2;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 4px rgba(var(--sw-accent-cyan-rgb), 0.6));
+  filter: drop-shadow(0 0 4px var(--branch-color, var(--sw-accent-cyan)));
 }
 
-/* Ambient particle */
+/* Ambient particle — color set inline per branch via the `color` property */
 .career-particle {
-  fill: var(--sw-accent-cyan);
-  filter: drop-shadow(0 0 5px rgba(var(--sw-accent-cyan-rgb), 0.9));
+  fill: currentColor;
+  filter: drop-shadow(0 0 5px currentColor);
 }
 
 /* Nodes */
@@ -151,7 +152,7 @@
 
 .career-node__shape {
   fill: var(--sw-bg-ink);
-  stroke: var(--sw-text-muted);
+  stroke: var(--branch-color, var(--sw-text-muted));
   stroke-width: 1.6;
 }
 

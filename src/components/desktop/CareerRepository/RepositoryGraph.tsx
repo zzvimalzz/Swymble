@@ -4,7 +4,7 @@ import AnimatedParticle from './AnimatedParticle';
 import BranchPath from './BranchPath';
 import CommitCard from './CommitCard';
 import CommitNode from './CommitNode';
-import { ROW_SPACING_Y } from './constants';
+import { branchColor, ROW_SPACING_Y } from './constants';
 import type { CareerFilter } from './Filters';
 import { computeCareerLayout } from './layout';
 
@@ -29,6 +29,7 @@ export default function RepositoryGraph({ branches, filter }: RepositoryGraphPro
   const activeLayoutNode = activeNodeId ? layout.nodesById.get(activeNodeId) : undefined;
   const activeBranchId = activeLayoutNode?.branchId ?? null;
   const topRowY = Math.min(...[...layout.nodesById.values()].map((n) => n.y));
+  const colorByBranchId = new Map(layout.branches.map((lb) => [lb.branch.id, branchColor(lb.lane)]));
 
   const handleSelect = (id: string) => {
     setSelectedNodeId((current) => (current === id ? null : id));
@@ -59,6 +60,7 @@ export default function RepositoryGraph({ branches, filter }: RepositoryGraphPro
                 d={layoutBranch.path}
                 pathId={`career-branch-path-${layoutBranch.branch.id.replace('/', '-')}`}
                 isDimmed={filterDimmed || hoverDimmed}
+                color={colorByBranchId.get(layoutBranch.branch.id) ?? branchColor(0)}
               />
             );
           })}
@@ -73,6 +75,7 @@ export default function RepositoryGraph({ branches, filter }: RepositoryGraphPro
                 isActive={activeNodeId === layoutNode.node.id}
                 isDimmed={!nodeMatchesFilter(layoutNode.node, layoutBranch.branch, filter)}
                 delay={(nodeIndex % 4) * 0.06}
+                color={colorByBranchId.get(layoutBranch.branch.id) ?? branchColor(0)}
                 onHover={setHoveredNodeId}
                 onSelect={handleSelect}
               />
@@ -86,6 +89,7 @@ export default function RepositoryGraph({ branches, filter }: RepositoryGraphPro
                 key={layoutBranch.branch.id}
                 pathId={`career-branch-path-${layoutBranch.branch.id.replace('/', '-')}`}
                 delaySeconds={index * 1.4}
+                color={colorByBranchId.get(layoutBranch.branch.id) ?? branchColor(0)}
               />
             ))}
         </svg>

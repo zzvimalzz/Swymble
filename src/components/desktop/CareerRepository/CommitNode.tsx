@@ -1,4 +1,5 @@
 import { motion, useReducedMotion, type Variants } from 'framer-motion';
+import type { CSSProperties } from 'react';
 import type { SwymbleCareerNode } from '../../../data/types';
 import { getNodeShape, NODE_RADIUS_BY_SHAPE } from './constants';
 
@@ -9,6 +10,7 @@ type CommitNodeProps = {
   isActive: boolean;
   isDimmed: boolean;
   delay: number;
+  color: string;
   onHover: (id: string | null) => void;
   onSelect: (id: string) => void;
 };
@@ -19,12 +21,13 @@ const buildVariants = (delay: number): Variants => ({
   hover: { scale: 1.4, transition: { duration: 0.18, ease: 'easeOut' } },
 });
 
-export default function CommitNode({ node, x, y, isActive, isDimmed, delay, onHover, onSelect }: CommitNodeProps) {
+export default function CommitNode({ node, x, y, isActive, isDimmed, delay, color, onHover, onSelect }: CommitNodeProps) {
   const prefersReducedMotion = useReducedMotion();
   const shape = getNodeShape(node);
   const radius = NODE_RADIUS_BY_SHAPE[shape];
   const hollow = node.isFuture;
   const variants = buildVariants(delay);
+  const style = { '--branch-color': color } as CSSProperties;
 
   const shapeEl =
     shape === 'square' ? (
@@ -37,7 +40,7 @@ export default function CommitNode({ node, x, y, isActive, isDimmed, delay, onHo
     // Static positioning lives on this plain <g> — Framer Motion writes its own CSS `transform`
     // for the animated inner group, which would silently clobber an SVG `transform` attribute
     // placed on the same animated element.
-    <g transform={`translate(${x}, ${y})`}>
+    <g transform={`translate(${x}, ${y})`} style={style}>
       <motion.g
         className={`career-node career-node--${shape}${isDimmed ? ' career-node--dimmed' : ''}${isActive ? ' career-node--active' : ''}`}
         variants={prefersReducedMotion ? undefined : variants}

@@ -107,7 +107,7 @@ export type SwymbleCareerNode = {
   type: SwymbleCareerNodeType;
   title: string;
   org?: string;
-  /** 'YYYY' or 'YYYY-MM' — also the chronological sort key within a branch. */
+  /** 'YYYY' or 'MM-YYYY' — also the chronological sort key within a branch. */
   date: string;
   description?: string;
   tech?: string[];
@@ -121,19 +121,18 @@ export type SwymbleCareerNode = {
 };
 
 export type SwymbleCareerBranch = {
-  /** e.g. 'main', 'feature/swymble', 'client/ibsolutions', 'product/what2watch'. */
+  /** e.g. 'main', 'swymble', 'ibsolutions', 'what2watch'. Also its filename in data/about/career/. */
   id: string;
   label: string;
   /** Drives the Filters pills — filtering happens per-node, this is the branch's dominant one. */
   category: 'career' | 'education' | 'project';
-  /** Omit for the trunk ('main'). */
+  /** Which branch this forks from. Omit only for the trunk ('main'). The fork/merge points are
+   *  found automatically from dates — no node reference needed. */
   parentBranchId?: string;
-  /** Node id on the parent branch this branch forks from. */
-  splitAfterNodeId?: string;
-  /** Set for branches that complete and merge back into their parent (e.g. finished client work). */
-  mergesBackAfterNodeId?: string;
+  /** 'merged' draws the branch curving back into its parent after its last node (e.g. finished
+   *  client work); 'ongoing'/'active' leaves it open, continuing off the top of the graph. */
   status: 'active' | 'merged' | 'ongoing';
-  /** Chronological. */
+  /** Chronological, oldest first. */
   nodes: SwymbleCareerNode[];
 };
 

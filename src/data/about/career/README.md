@@ -1,24 +1,26 @@
 # Career Repository Data
 
-Drives the interactive git-graph on `/about`. `index.ts` imports every branch file here
-explicitly (order matters — it controls lane order in the graph) and flattens them into
-`SWYMBLE_CAREER`.
+Drives the interactive git-graph on `/about`. Each branch lives in its own file, named after its
+`id` (e.g. `main.ts`, `swymble.ts`, `ibsolutions.ts`) — `index.ts` discovers every file here
+automatically (`import.meta.glob`) and lays them out; you never edit it.
 
 ## Concepts
-- **Branch** — a thread through the graph: the `main` trunk (education → employment), the
-  long-running `feature/swymble` studio branch (forks off `main` and never merges back), short
-  client branches that merge back in once a project ships, and long-running product branches that
-  stay open with future "ghost" commits.
-- **Node** (commit) — one milestone on a branch. `type` drives its shape on the graph: `education`
-  = diamond, `employment` = square, `milestone` = circle, `project` = small circle, and any node
-  with `isFuture: true` = hollow, breathing circle regardless of `type`.
-- **Tags** — small flags on a node for in-place events that don't warrant their own commit (a
-  promotion, a major release). Attach via `node.tags`, not a new node.
+- **Branch** — a thread through the graph: the `main` trunk (education → employment), branches
+  that fork off another branch and stay open (`status: 'ongoing'`), and branches that fork off,
+  do their thing, and fold back in (`status: 'merged'`).
+- **Node** (commit) — one milestone on a branch. `type` drives its shape: `education` = diamond,
+  everything else (`employment` / `milestone` / `project`) = square. Any node with
+  `isFuture: true` renders hollow/dashed and gently breathing, regardless of `type`.
+- **Fork & merge points are automatic** — set `parentBranchId` to the branch you're forking from
+  and the graph works out *where* to draw the join from your nodes' dates. You never reference a
+  specific node id to fork or merge.
+- **Column & color are automatic too** — a branch's left-to-right position and its line color are
+  both derived from where it sits in the fork tree. Nothing to configure.
 
 ## Adding a branch
-Create a new file, export a `SwymbleCareerBranch` (or an array of related branches — see
-`swymble.ts` for a studio branch plus its client/product sub-branches) as the default export, and
-import it into `index.ts` in the position you want it to appear.
+Copy an existing file (e.g. `ibsolutions.ts`), rename it to the new branch's id, set
+`parentBranchId` to whatever it forks from (or omit it — only `main` should have no parent), and
+fill in the nodes. That's it — no other file needs to change.
 
 ## Template
 ```ts
@@ -26,31 +28,28 @@ import it into `index.ts` in the position you want it to appear.
 import type { SwymbleCareerBranch } from '../../types';
 
 const branch: SwymbleCareerBranch = {
-  id: 'client/my-client',           // 'main' | 'feature/x' | 'client/x' | 'product/x'
-  label: 'client/my-client',
-  category: 'project',              // 'career' | 'education' | 'project' — drives Filters
-  parentBranchId: 'feature/swymble',// omit only for 'main'
-  splitAfterNodeId: 'swymble-first-client', // node id on the parent this forks from
-  mergesBackAfterNodeId: 'my-client-launch', // set once the branch merges back; omit if ongoing
-  status: 'merged',                 // 'active' | 'merged' | 'ongoing'
+  id: 'my-branch',            // matches the filename; also referenced by any branch forking FROM this one
+  label: 'my-branch',         // shown nowhere yet, but keep it human-readable
+  category: 'project',        // 'career' | 'education' | 'project' — drives the Filters
+  parentBranchId: 'swymble',  // which branch this forks from; omit only for 'main'
+  status: 'ongoing',          // 'ongoing' | 'active' stays open; 'merged' curves back into its parent
   nodes: [
     {
-      id: 'my-client-discovery',    // unique across the WHOLE graph, not just this branch
+      id: 'my-branch-kickoff',    // unique across the WHOLE graph, not just this branch
       type: 'project',
-      title: 'Discovery',
+      title: 'Kickoff',
       org: 'My Client',
-      date: '2027-01',              // 'YYYY' or 'YYYY-MM', also the sort key
+      date: '01-2027',            // 'MM-YYYY', or just 'YYYY' if you don't know/need the month
       description: 'Public-safe summary of this milestone.',
       tech: ['Optional', 'Tags'],
       links: [{ label: 'View project', href: '/projects#my-client' }],
-      tags: [{ label: 'Kickoff', date: '2027-01' }], // optional git-tag decorations
+      tags: [{ label: 'Kickoff' }], // optional git-tag decorations, rendered as small flags
     },
     {
-      id: 'my-client-launch',
+      id: 'my-branch-launch',
       type: 'project',
       title: 'Launch',
-      org: 'My Client',
-      date: '2027-03',
+      date: '03-2027',
       isFuture: true,                // hollow, breathing "ghost commit" for something upcoming
     },
   ],
@@ -61,8 +60,15 @@ export default branch;
 
 ## Field notes
 - `id` (branch and node) must be globally unique — the data-integrity tests enforce this.
-- `parentBranchId` / `splitAfterNodeId` / `mergesBackAfterNodeId` must reference real branch/node
-  ids — also enforced by tests.
+- `parentBranchId` must reference a real branch id — also enforced by tests. Nodes are authored
+  **oldest first** within a branch; the earliest node is what the fork point is measured from, and
+  the latest node is what the merge point (if any) is measured from.
+- `date`: `'MM-YYYY'` (e.g. `'03-2027'`) or just `'YYYY'` when you don't have/need a specific
+  month. This is also the sort key, so it has to be accurate relative to everything else.
 - `links[].href`: an internal route (`/projects#...`, `/blog/...`) or a full external URL.
 - `image` (optional, on a node): a public-root path, e.g. `/images/foo.png`.
 - Keep copy public-safe — same rule as every other data folder in this repo.
+
+## Removing a branch
+Delete its file. Any branch that forked from it should either be re-pointed (`parentBranchId`) or
+removed too. `index.ts` picks up the change automatically.

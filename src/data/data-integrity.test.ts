@@ -93,7 +93,6 @@ describe('career', () => {
   const allNodes = SWYMBLE_DATA.career.flatMap((branch) =>
     branch.nodes.map((node) => ({ branch, node })),
   );
-  const nodeIds = new Set(allNodes.map(({ node }) => node.id));
 
   it('has unique branch ids', () => {
     const ids = SWYMBLE_DATA.career.map((branch) => branch.id);
@@ -113,14 +112,14 @@ describe('career', () => {
     }
   });
 
-  it('resolves every splitAfterNodeId / mergesBackAfterNodeId to a real node', () => {
-    for (const branch of SWYMBLE_DATA.career) {
-      if (branch.splitAfterNodeId) {
-        expect(nodeIds.has(branch.splitAfterNodeId), `branch ${branch.id} splitAfterNodeId`).toBe(true);
-      }
-      if (branch.mergesBackAfterNodeId) {
-        expect(nodeIds.has(branch.mergesBackAfterNodeId), `branch ${branch.id} mergesBackAfterNodeId`).toBe(true);
-      }
+  it('has exactly one trunk branch (no parentBranchId)', () => {
+    const trunks = SWYMBLE_DATA.career.filter((branch) => !branch.parentBranchId);
+    expect(trunks.map((branch) => branch.id)).toEqual(['main']);
+  });
+
+  it('uses YYYY or MM-YYYY dates', () => {
+    for (const { node } of allNodes) {
+      expect(node.date, `node ${node.id} date`).toMatch(/^(\d{4}|\d{2}-\d{4})$/);
     }
   });
 

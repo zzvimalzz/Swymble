@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import type { SwymbleCareerBranch } from '../../../data/types';
 
 type BranchPathProps = {
@@ -7,14 +7,19 @@ type BranchPathProps = {
   d: string;
   pathId: string;
   isDimmed: boolean;
+  color: string;
 };
 
-export default function BranchPath({ branch, d, pathId, isDimmed }: BranchPathProps) {
+export default function BranchPath({ branch, d, pathId, isDimmed, color }: BranchPathProps) {
   const prefersReducedMotion = useReducedMotion();
   const [drawn, setDrawn] = useState(prefersReducedMotion ?? false);
+  const style = { '--branch-color': color } as CSSProperties;
 
   return (
-    <g className={`career-branch career-branch--${branch.category}${isDimmed ? ' career-branch--dimmed' : ''}`}>
+    <g
+      className={`career-branch career-branch--${branch.category}${isDimmed ? ' career-branch--dimmed' : ''}`}
+      style={style}
+    >
       <motion.path
         id={pathId}
         className="career-branch-path__draw"

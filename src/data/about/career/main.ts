@@ -57,10 +57,6 @@ const branch: SwymbleCareerBranch = {
       description:
         'Joined as a software engineer building and supporting fintech and banking systems for enterprise clients across banking and telco. Technical Lead for Change Requests, owning the full lifecycle from requirements to production deployment; resolved high-priority incidents under strict SLAs.',
       tech: ['PHP', 'PL/SQL', 'REST APIs', 'Batch Jobs'],
-      tags: [
-        { label: 'Promoted', date: '2021' },
-        { label: 'Technical Lead — Change Requests', date: '2023' },
-      ],
     },
     {
       id: 'main-masters',
