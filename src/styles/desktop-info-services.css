@@ -84,15 +84,22 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  /* The accent drops below the title instead of squeezing it once they stop fitting side by side. */
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
 }
 
+/* Fluid rather than a fixed 5rem: at that size "WORK WITH ME" and "START A PROJECT" wrapped onto
+   two and three lines on a phone. The vw term keeps every section title on one line down to the
+   narrowest screens and scales it back up to the original 5rem on desktop. */
 .section-header h1,
 .section-header h2 {
   font-family: var(--font-logo);
-  font-size: 5rem;
+  font-size: clamp(2.1rem, 10.5vw, 5rem);
   font-weight: 400;
   text-transform: uppercase;
   line-height: 1;
+  text-wrap: nowrap;
 }
 
 .header-accent {

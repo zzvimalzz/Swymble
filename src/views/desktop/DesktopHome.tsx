@@ -1,8 +1,9 @@
 import { motion, MotionValue } from 'framer-motion';
-import { lazy, Suspense, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import DesktopContactSection from '../../components/desktop/DesktopContactSection';
 import HeroField from '../../components/desktop/HeroField';
+import HeroTelemetry from '../../components/desktop/HeroTelemetry';
 import HeroWordmark from '../../components/desktop/HeroWordmark';
 import ParallaxMarquee from '../../components/desktop/ParallaxMarquee';
 import PositioningStats from '../../components/desktop/PositioningStats';
@@ -10,10 +11,7 @@ import ProcessRail from '../../components/desktop/ProcessRail';
 import ProximityCard from '../../components/desktop/ProximityCard';
 import TechStackSection from '../../components/desktop/TechStackSection';
 import { SWYMBLE_DATA } from '../../data/config';
-import { useNearViewport } from '../../hooks/useNearViewport';
 import '../../styles/desktop-studio.css';
-
-const TechUniverse = lazy(() => import('../../components/desktop/TechUniverse'));
 
 type DesktopHomeProps = {
   baseUrl: string;
@@ -23,7 +21,6 @@ type DesktopHomeProps = {
 
 export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHomeProps) {
   const location = useLocation();
-  const { ref: techSectionRef, hasBeenNear: shouldMountTechUniverse } = useNearViewport<HTMLDivElement>('600px');
 
   useEffect(() => {
     if (!location.hash) {
@@ -72,12 +69,21 @@ export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHome
         >
           {SWYMBLE_DATA.tagline}
         </motion.p>
+
+        <HeroTelemetry
+          location={SWYMBLE_DATA.about.location}
+          availability={SWYMBLE_DATA.about.availability.label}
+        />
       </motion.section>
 
       <ParallaxMarquee text={SWYMBLE_DATA.marquee} />
 
       <section className="layout-content">
-        <PositioningStats positioning={SWYMBLE_DATA.positioning} />
+        <PositioningStats
+          positioning={SWYMBLE_DATA.positioning}
+          projects={SWYMBLE_DATA.projects}
+          labs={SWYMBLE_DATA.labs}
+        />
 
         <div className="studio-section">
           <div className="section-header">
@@ -94,22 +100,6 @@ export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHome
         </div>
 
         <TechStackSection techStack={SWYMBLE_DATA.techStack} />
-
-        <div className="info-row" ref={techSectionRef}>
-          <div className="info-column" style={{ width: '100%' }}>
-            <div className="section-header">
-              <h2>SWYMBLE UNIVERSE</h2>
-            </div>
-
-            {shouldMountTechUniverse ? (
-              <Suspense fallback={<div className="tech-universe tech-universe--loading">Calibrating the universe...</div>}>
-                <TechUniverse skills={SWYMBLE_DATA.universe} />
-              </Suspense>
-            ) : (
-              <div className="tech-universe tech-universe--loading">Calibrating the universe...</div>
-            )}
-          </div>
-        </div>
 
         <DesktopContactSection />
       </section>

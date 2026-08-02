@@ -1,0 +1,1012 @@
+/* ── About page ──
+   The page is framed as a git repository: header (whoami), README, languages, the career graph
+   (desktop-career-repository.css), git config, a shell, and git remote. Section chrome — kicker,
+   heading, lede — is shared so every block reads as part of one document. */
+
+.desktop-about-page {
+  padding-top: 11rem;
+  padding-bottom: 4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-section__kicker {
+  font-family: var(--sw-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sw-accent-volt);
+  margin: 0 0 0.7rem;
+}
+
+.about-section__heading {
+  font-family: var(--sw-font-display);
+  font-size: clamp(1.7rem, 6vw, 2.4rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--sw-text-main);
+  margin: 0 0 0.9rem;
+  line-height: 1.05;
+}
+
+.about-section__lede {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--sw-text-muted);
+  line-height: 1.7;
+  font-size: 0.98rem;
+}
+
+.about-section__lede code {
+  font-family: var(--sw-font-mono);
+  font-size: 0.88em;
+  color: var(--sw-accent-cyan);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+}
+
+/* ── 00. Header ── */
+.about-header {
+  margin-bottom: 5rem;
+}
+
+.about-header__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4rem;
+  align-items: start;
+}
+
+.about-header__prompt {
+  font-family: var(--sw-font-mono);
+  font-size: 0.85rem;
+  color: var(--sw-text-muted);
+  margin: 0 0 1.2rem;
+}
+
+.about-header__path {
+  color: var(--sw-accent-volt);
+  font-weight: 700;
+}
+
+.about-header__path::after {
+  content: ' $';
+  opacity: 0.5;
+}
+
+.about-header__repo {
+  font-family: var(--sw-font-logo);
+  font-size: clamp(3.4rem, 5.4vw, 5.6rem);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.92;
+  letter-spacing: 0.01em;
+  margin: 0 0 1rem;
+  color: var(--sw-text-main);
+}
+
+.about-header__role {
+  font-family: var(--sw-font-mono);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--sw-accent-cyan);
+  margin: 0 0 1.2rem;
+}
+
+.about-header__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.7rem 1.2rem;
+  margin-bottom: 1.8rem;
+}
+
+.about-header__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.42em 0.95em;
+  border-radius: var(--sw-radius-pill);
+  border: 1px solid;
+}
+
+.about-header__status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  animation: about-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes about-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.about-header__status--open {
+  color: #9dfca8;
+  border-color: rgba(157, 252, 168, 0.45);
+  background: rgba(157, 252, 168, 0.07);
+}
+
+.about-header__status--limited {
+  color: var(--sw-accent-volt);
+  border-color: var(--sw-border-volt);
+  background: rgba(var(--sw-accent-volt-rgb), 0.07);
+}
+
+.about-header__status--closed {
+  color: #ff8fa3;
+  border-color: rgba(255, 143, 163, 0.45);
+  background: rgba(255, 143, 163, 0.07);
+}
+
+.about-header__location {
+  font-family: var(--sw-font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+}
+
+.about-header__intro {
+  display: grid;
+  gap: 1.1rem;
+  max-width: 56ch;
+}
+
+.about-header__intro p {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: #d2d2d2;
+}
+
+/* Stats */
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
+  margin: 3.5rem 0 0;
+  background: var(--sw-border-soft);
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-panel);
+  overflow: hidden;
+}
+
+.about-stats__item {
+  background: var(--sw-bg-ink);
+  padding: 1.6rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+/* Anton at the same scale the homepage counters use (.positioning-stat-value), so a number on
+   this page and a number on the home page read as the same thing. */
+.about-stats__value {
+  font-family: var(--sw-font-logo);
+  font-size: clamp(2.6rem, 3.4vw, 3.6rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--sw-accent-volt);
+}
+
+/* The label is the part that has to be *read*, so it gets sentence case at a legible size
+   instead of tiny wide-tracked uppercase, which is decoration masquerading as a caption. */
+.about-stats__label {
+  margin: 0;
+  font-family: var(--sw-font-mono);
+  font-size: 0.86rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  color: #e2e2e2;
+  text-transform: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.about-stats__hint {
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--sw-text-muted);
+  opacity: 0.7;
+}
+
+/* ── Contribution mosaic ── */
+/* Fixed width, not min-width. The readout underneath changes with whatever cell you hover, and a
+   content-sized panel in an `auto` grid column resized the whole header every time the text
+   length changed. */
+.mosaic {
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-panel);
+  background: rgba(255, 255, 255, 0.018);
+  padding: 1.2rem 1.3rem 1rem;
+  width: 26rem;
+  max-width: 100%;
+}
+
+.mosaic__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.mosaic__title {
+  font-family: var(--sw-font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sw-text-main);
+}
+
+.mosaic__sub {
+  font-family: var(--sw-font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--sw-text-muted);
+}
+
+.mosaic__grid {
+  display: grid;
+  grid-template-columns: 2.6rem repeat(12, 1fr);
+  gap: 3px;
+  align-items: center;
+}
+
+.mosaic__corner {
+  display: block;
+}
+
+.mosaic__month,
+.mosaic__year {
+  font-family: var(--sw-font-mono);
+  font-size: 0.6rem;
+  color: var(--sw-text-muted);
+  opacity: 0.6;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+.mosaic__year {
+  text-align: left;
+  font-size: 0.65rem;
+}
+
+.mosaic__cell {
+  display: block;
+  aspect-ratio: 1;
+  min-height: 14px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.035);
+  transition: transform var(--sw-motion-fast) var(--sw-ease-standard),
+    box-shadow var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.mosaic__cell--on {
+  background: color-mix(in srgb, var(--cell-color) calc(var(--cell-alpha) * 100%), transparent);
+}
+
+.mosaic__cell--on:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 10px var(--cell-color);
+}
+
+.mosaic__readout {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--sw-border-soft);
+  /* Fixed height so revealing the readout never nudges the layout beside it. */
+  height: 3.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.72rem;
+  overflow: hidden;
+}
+
+.mosaic__readout-date {
+  color: var(--sw-accent-volt);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mosaic__readout-body,
+.mosaic__readout-hint {
+  color: var(--sw-text-muted);
+  line-height: 1.5;
+  /* A long commit title clamps rather than growing the panel it sits in. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mosaic__readout-hint {
+  opacity: 0.55;
+}
+
+/* ── 01. README ── */
+.readme {
+  margin-bottom: 5rem;
+  padding-top: 3rem;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.readme__head {
+  margin-bottom: 2.5rem;
+}
+
+.readme__body {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.5rem;
+}
+
+.readme__section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.readme__heading {
+  font-family: var(--sw-font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--sw-text-main);
+  margin: 0 0 1rem;
+}
+
+.readme__hash {
+  color: var(--sw-accent-neon);
+  opacity: 0.8;
+}
+
+.readme__text {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.75;
+  color: #c8c8c8;
+}
+
+.readme__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
+}
+
+.readme__chip {
+  font-family: var(--sw-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.42em 0.85em;
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-pill);
+  color: var(--sw-text-muted);
+  text-decoration: none;
+  transition: color var(--sw-motion-fast) var(--sw-ease-standard),
+    border-color var(--sw-motion-fast) var(--sw-ease-standard),
+    background var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.readme__chip:hover {
+  color: var(--sw-bg-ink);
+  background: var(--sw-accent-volt);
+  border-color: var(--sw-accent-volt);
+}
+
+.readme__quote {
+  margin: 3rem 0 0;
+  padding: 1.6rem 0 1.6rem 1.8rem;
+  border-left: 3px solid var(--sw-accent-volt);
+  font-family: var(--sw-font-display);
+  font-size: clamp(1.3rem, 1.9vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--sw-text-main);
+  max-width: 40ch;
+  position: relative;
+}
+
+.readme__quote-mark {
+  font-family: var(--sw-font-mono);
+  color: var(--sw-accent-volt);
+  margin-right: 0.5rem;
+  opacity: 0.7;
+}
+
+/* ── 02. The stack ──
+   Chips reuse `.techstack-chip` from desktop-techstack.css so the homepage and this page share
+   one component; only the grid, the focus states and the readout are new here. */
+.stack {
+  margin-bottom: 5rem;
+  padding-top: 3rem;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.stack__head {
+  margin-bottom: 2.2rem;
+}
+
+.stack__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+}
+
+.stack__chip {
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.25s var(--sw-ease-standard), border-color 0.25s ease,
+    background-color 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+}
+
+/* Pulling the rest back is what makes the hovered chip read as selected, and it pairs with the
+   readout below telling you what you're pointing at. */
+.stack__chip--muted {
+  opacity: 0.35;
+}
+
+.stack__chip--active .techstack-chip-icon {
+  filter: grayscale(0%);
+}
+
+.stack__readout {
+  /* Reserved height: the readout appears on hover and must not reflow the grid beneath it. */
+  min-height: 5.2rem;
+  margin-top: 1.6rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--sw-border-volt);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+  font-family: var(--sw-font-mono);
+}
+
+.stack__readout-name {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--sw-accent-volt);
+}
+
+.stack__readout-role {
+  font-size: 0.85rem;
+  color: var(--sw-text-main);
+}
+
+.stack__readout-used {
+  font-size: 0.78rem;
+  color: var(--sw-text-muted);
+}
+
+.stack__readout-hint {
+  font-size: 0.85rem;
+  color: var(--sw-text-muted);
+  opacity: 0.5;
+}
+
+.stack__domains {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 2rem;
+  background: var(--sw-border-soft);
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-panel);
+  overflow: hidden;
+}
+
+.stack__domain {
+  background: var(--sw-bg-ink);
+  padding: 1.4rem 1.5rem;
+}
+
+.stack__domain-label {
+  font-family: var(--sw-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sw-accent-cyan);
+  margin: 0 0 0.9rem;
+}
+
+.stack__domain-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.stack__domain-item {
+  font-family: var(--sw-font-mono);
+  font-size: 0.76rem;
+  padding: 0.32em 0.7em;
+  border: 1px solid var(--sw-border-soft);
+  border-radius: 4px;
+  color: #c8c8c8;
+  transition: border-color var(--sw-motion-fast) var(--sw-ease-standard),
+    color var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.stack__domain-item:hover {
+  border-color: var(--sw-border-volt);
+  color: var(--sw-text-main);
+}
+
+/* ── 04. Config ── */
+.config {
+  margin-bottom: 5rem;
+  padding-top: 3rem;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.config__head {
+  margin-bottom: 2.2rem;
+}
+
+.config__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.config__list {
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-panel);
+  padding: 1.2rem 1.4rem;
+  background: rgba(255, 255, 255, 0.018);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.config__row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.config__key {
+  color: var(--sw-accent-cyan);
+  white-space: nowrap;
+}
+
+.config__equals {
+  color: var(--sw-text-muted);
+  opacity: 0.5;
+}
+
+.config__value {
+  color: #d0d0d0;
+}
+
+.config__value--link {
+  color: var(--sw-accent-volt);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(var(--sw-accent-volt-rgb), 0.35);
+}
+
+.config__value--link:hover {
+  border-bottom-color: var(--sw-accent-volt);
+}
+
+.config__now {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.config__now-title {
+  font-family: var(--sw-font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sw-accent-volt);
+  margin: 0;
+}
+
+.config__now-row {
+  display: grid;
+  gap: 0.25rem;
+  padding-left: 1.1rem;
+  border-left: 2px solid var(--sw-border-soft);
+}
+
+.config__now-label {
+  font-family: var(--sw-font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+  opacity: 0.7;
+}
+
+.config__now-value {
+  font-family: var(--sw-font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sw-text-main);
+  line-height: 1.3;
+}
+
+.config__now-detail {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--sw-text-muted);
+}
+
+/* ── 05. Terminal ── */
+.terminal-section {
+  margin-bottom: 5rem;
+  padding-top: 3rem;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.terminal-section__head {
+  margin-bottom: 2.2rem;
+}
+
+.terminal {
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-panel);
+  overflow: hidden;
+  background: rgba(4, 4, 4, 0.9);
+  box-shadow: var(--sw-shadow-panel);
+}
+
+.terminal__chrome {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--sw-border-soft);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.terminal__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.terminal__dot--red { background: #ff5f57; }
+.terminal__dot--amber { background: #febc2e; }
+.terminal__dot--green { background: #28c840; }
+
+.terminal__chrome-title {
+  margin-left: auto;
+  font-family: var(--sw-font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--sw-text-muted);
+  opacity: 0.6;
+}
+
+.terminal__screen {
+  height: 24rem;
+  overflow-y: auto;
+  padding: 1.1rem 1.3rem 1.4rem;
+  font-family: var(--sw-font-mono);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sw-line-muted) transparent;
+}
+
+.terminal__block {
+  margin-top: 1rem;
+}
+
+.terminal__line,
+.terminal__echo {
+  display: block;
+  color: #d4d4d4;
+  /* Command output is column-aligned with padEnd, so the spacing has to survive rendering. */
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.terminal__echo {
+  color: var(--sw-text-main);
+  margin-bottom: 0.35rem;
+}
+
+.terminal__line--muted { color: var(--sw-text-muted); opacity: 0.75; }
+.terminal__line--accent { color: var(--sw-accent-volt); }
+.terminal__line--error { color: var(--sw-accent-neon); }
+.terminal__line--heading {
+  color: var(--sw-accent-cyan);
+  font-weight: 700;
+  margin-top: 0.3rem;
+}
+
+.terminal__link {
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  width: fit-content;
+}
+
+.terminal__prompt {
+  color: var(--sw-accent-volt);
+  font-weight: 700;
+}
+
+.terminal__inputline {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.terminal__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--sw-text-main);
+  font-family: var(--sw-font-mono);
+  font-size: 0.8rem;
+  caret-color: var(--sw-accent-volt);
+}
+
+.terminal__input::placeholder {
+  color: var(--sw-text-muted);
+  opacity: 0.4;
+}
+
+.terminal__suggestions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.1rem;
+}
+
+.terminal__suggestions-label {
+  font-family: var(--sw-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+  opacity: 0.6;
+  margin-right: 0.3rem;
+}
+
+.terminal__suggestion {
+  font-family: var(--sw-font-mono);
+  font-size: 0.74rem;
+  padding: 0.35em 0.8em;
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-pill);
+  background: transparent;
+  color: var(--sw-text-muted);
+  transition: color var(--sw-motion-fast) var(--sw-ease-standard),
+    border-color var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.terminal__suggestion:hover {
+  color: var(--sw-accent-volt);
+  border-color: var(--sw-border-volt);
+}
+
+/* ── 06. Remote ── */
+.remote {
+  padding-top: 3rem;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.remote__head {
+  margin-bottom: 2.2rem;
+}
+
+.remote__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 3rem;
+  align-items: start;
+}
+
+.remote__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.remote__tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 68px;
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-card);
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--sw-text-muted);
+  text-decoration: none;
+  transition: transform 0.25s var(--sw-ease-standard), border-color 0.25s ease,
+    background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.remote__tile:hover {
+  transform: translateY(-4px);
+  border-color: var(--sw-accent-volt);
+  background: rgba(var(--sw-accent-volt-rgb), 0.09);
+  color: var(--sw-accent-volt);
+  box-shadow: 0 10px 26px -14px var(--sw-accent-volt);
+}
+
+.remote__icon {
+  flex: 0 0 auto;
+}
+
+.remote__tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  background: var(--sw-text-main);
+  color: var(--sw-bg-ink);
+  font-family: var(--sw-font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition: opacity 0.2s ease, transform 0.2s var(--sw-ease-standard);
+  z-index: 5;
+}
+
+.remote__tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--sw-text-main);
+}
+
+.remote__tile:hover .remote__tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.remote__cta {
+  display: grid;
+  gap: 1.1rem;
+  justify-items: start;
+}
+
+.remote__status {
+  margin: 0;
+  font-family: var(--sw-font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9dfca8;
+}
+
+.remote__pitch {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #c8c8c8;
+  max-width: 44ch;
+}
+
+.remote__button {
+  font-family: var(--sw-font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.9rem 1.8rem;
+  background: var(--sw-accent-volt);
+  color: var(--sw-bg-ink);
+  border: 1px solid var(--sw-accent-volt);
+  border-radius: var(--sw-radius-pill);
+  text-decoration: none;
+  transition: background var(--sw-motion-fast) var(--sw-ease-standard),
+    box-shadow var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.remote__button:hover {
+  background: var(--sw-text-main);
+  border-color: var(--sw-text-main);
+  box-shadow: 0 0 20px rgba(var(--sw-accent-volt-rgb), 0.35);
+}
+
+/* ── Responsive ── */
+@media screen and (max-width: 1180px) {
+  .about-header__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+
+  .mosaic {
+    min-width: 0;
+  }
+
+  .about-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .readme__body,
+  .stack__domains {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .config__grid,
+  .remote__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media screen and (max-width: 820px) {
+  .desktop-about-page {
+    padding-top: 9rem;
+  }
+
+  .about-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Five stats in a two-column grid leaves the last one beside an empty cell. Spanning it across
+     both closes the hole instead of leaving a dead square in the middle of the panel. */
+  .about-stats__item:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .readme__body,
+  .stack__domains {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-header__status::before {
+    animation: none;
+  }
+}

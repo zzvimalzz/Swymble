@@ -112,10 +112,31 @@ export default function HeroField() {
     let lastClientY = -9999;
     let parallaxX = 0;
     let parallaxY = 0;
+    let pressed = false;
 
+    // Mouse only, and only when no button is held. A touch scroll or a click-drag emits
+    // pointermove exactly like a hover does, so without this the field was shoved aside every
+    // time the page was tapped or dragged, which is not what the effect is for.
     const handlePointerMove = (event: PointerEvent) => {
+      if (pressed || event.pointerType !== 'mouse') {
+        return;
+      }
       lastClientX = event.clientX;
       lastClientY = event.clientY;
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse') return;
+      pressed = true;
+    };
+
+    const handlePointerUp = () => {
+      pressed = false;
+    };
+
+    const handleMouseLeave = () => {
+      lastClientX = -9999;
+      lastClientY = -9999;
     };
 
     let resizeFrame = 0;
@@ -141,6 +162,10 @@ export default function HeroField() {
     };
 
     window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+    window.addEventListener('pointerup', handlePointerUp, { passive: true });
+    window.addEventListener('pointercancel', handlePointerUp, { passive: true });
+    document.addEventListener('mouseleave', handleMouseLeave);
     window.addEventListener('resize', scheduleResize);
     window.addEventListener('scroll', handleScroll, { passive: true });
 
@@ -302,6 +327,10 @@ export default function HeroField() {
         window.cancelAnimationFrame(scrollFrame);
       }
       window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+      document.removeEventListener('mouseleave', handleMouseLeave);
       window.removeEventListener('resize', scheduleResize);
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('visibilitychange', handleVisibility);

@@ -1,0 +1,222 @@
+/* ── Home: the work deck ──
+   A loose pile of project/lab cards beside the studio statement. Throw the top card away to reach
+   the next; click it to turn it over. Replaces both the old full-width work grid and the radar
+   panel that used to fill this space. */
+
+.workdeck {
+  width: 100%;
+  max-width: 400px;
+  margin-left: auto;
+}
+
+.workdeck__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.workdeck__label {
+  color: var(--accent-volt);
+  font-weight: 700;
+}
+
+.workdeck__counter {
+  color: var(--sw-text-muted);
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Every card is absolutely positioned inside this box, so the pile takes exactly one card's worth
+   of layout however many are in it. The extra height covers the scatter offsets; the padding
+   keeps rotated corners from clipping. */
+.workdeck__stage {
+  position: relative;
+  height: 490px;
+  /* Room for the scatter offsets and for rotated corners to swing without clipping. */
+  padding: 16px;
+  perspective: 1600px;
+}
+
+.workdeck__card {
+  --work-accent: var(--accent-cyan);
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  height: 420px;
+  border-radius: var(--sw-radius-panel);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.workdeck__card--top {
+  cursor: none;
+}
+
+.workdeck__card:focus-visible {
+  outline: 2px solid var(--accent-volt);
+  outline-offset: 6px;
+}
+
+/* Both faces occupy the same box; the parent's rotateY decides which one you see. */
+.workdeck__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--sw-radius-panel);
+  background: #0a0a0a;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* A hard shadow under every card is what separates one from the next in the pile. */
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.9);
+}
+
+.workdeck__card--top .workdeck__face {
+  border-color: color-mix(in srgb, var(--work-accent) 50%, rgba(255, 255, 255, 0.16));
+  box-shadow: 0 22px 44px -18px rgba(0, 0, 0, 0.95), 0 0 34px -18px var(--work-accent);
+}
+
+.workdeck__face--back {
+  transform: rotateY(180deg);
+  padding: 1.5rem;
+  background: linear-gradient(160deg, #101010, #050505);
+}
+
+.workdeck__media {
+  position: relative;
+  height: 190px;
+  flex: 0 0 auto;
+  background: #000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.workdeck__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+}
+
+.workdeck__status {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+}
+
+.workdeck__body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 1.25rem 1.4rem 1.4rem;
+}
+
+.workdeck__kind {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--work-accent);
+  margin-bottom: 0.55rem;
+}
+
+.workdeck__title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: var(--text-main);
+  margin: 0 0 0.6rem;
+}
+
+.workdeck__blurb {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: #b8b8b8;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.workdeck__highlights {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.workdeck__highlights li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  color: #c4c4c4;
+}
+
+.workdeck__highlights li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--work-accent);
+}
+
+.workdeck__actions {
+  margin-top: auto;
+  padding-top: 1.2rem;
+}
+
+.workdeck__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.73rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.7rem 1.2rem;
+  border-radius: var(--sw-radius-pill);
+  background: var(--work-accent);
+  color: var(--bg-color);
+  text-decoration: none;
+  transition: filter 0.25s ease, box-shadow 0.25s ease;
+}
+
+.workdeck__button:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 0 18px -4px var(--work-accent);
+}
+
+.workdeck__hint {
+  margin: 1.2rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--sw-text-muted);
+  opacity: 0.55;
+}
+
+@media screen and (max-width: 1100px) {
+  .workdeck {
+    margin-left: 0;
+  }
+}

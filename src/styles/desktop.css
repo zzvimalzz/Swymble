@@ -1,10 +1,10 @@
 @import './desktop-core.css';
 @import './desktop-hero.css';
 @import './desktop-positioning.css';
+@import './desktop-workdeck.css';
 @import './desktop-techstack.css';
 @import './desktop-nav.css';
 @import './desktop-info-services.css';
-@import './desktop-tech-universe.css';
 @import './desktop-work-form.css';
 @import './desktop-studio.css';
 @import './desktop-footer.css';
@@ -13,3 +13,4 @@
 @import './desktop-pages.css';
 @import './desktop-career-repository.css';
 @import './desktop-contact.css';
+@import './site-responsive.css';

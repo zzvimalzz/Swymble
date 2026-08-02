@@ -8,7 +8,6 @@ import { SWYMBLE_PROCESS } from './home/process';
 import { SWYMBLE_SERVICES } from './home/services';
 import { SWYMBLE_SOCIALS } from './home/socials';
 import { SWYMBLE_TECH_STACK_SECTION } from './home/stack';
-import { SWYMBLE_UNIVERSE } from './home/universe';
 import { SWYMBLE_LABS } from './labs';
 import { SWYMBLE_PROJECTS } from './projects/projects';
 import type { SwymbleData } from './types';
@@ -21,7 +20,6 @@ export * from './types';
 // - positioning (homepage claim + shipped/lab/blog counters): home/positioning.ts
 // - tech stack logos + "what I build" list (homepage, after WORK WITH ME): home/stack.ts
 // - latest updates: home/latestupdates.ts
-// - swymble universe (desktop 3D scene): home/universe.ts
 // - studio services (WORK WITH ME): home/services.ts
 // - studio process (01-04 steps): home/process.ts
 // - projects: projects/projects.ts
@@ -45,6 +43,5 @@ export const SWYMBLE_DATA: SwymbleData = {
   career: SWYMBLE_CAREER,
   labs: SWYMBLE_LABS,
   blog: SWYMBLE_BLOG,
-  universe: SWYMBLE_UNIVERSE,
   socials: SWYMBLE_SOCIALS,
 };

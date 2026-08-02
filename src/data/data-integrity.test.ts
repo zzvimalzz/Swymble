@@ -71,23 +71,6 @@ describe('blog', () => {
   });
 });
 
-describe('universe', () => {
-  it('every category has at least one item', () => {
-    for (const group of SWYMBLE_DATA.universe) {
-      expect(group.items.length, `category ${group.category}`).toBeGreaterThan(0);
-    }
-  });
-
-  it('proof links are internal routes or full URLs', () => {
-    for (const group of SWYMBLE_DATA.universe) {
-      const proofs = [...(group.proof ?? []), ...group.items.flatMap((item) => item.proof ?? [])];
-      for (const proof of proofs) {
-        expect(proof.href, `${group.category} proof "${proof.label}"`).toMatch(/^(\/|https?:\/\/)/);
-      }
-    }
-  });
-});
-
 describe('career', () => {
   const branchIds = new Set(SWYMBLE_DATA.career.map((branch) => branch.id));
   const allNodes = SWYMBLE_DATA.career.flatMap((branch) =>

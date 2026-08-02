@@ -17,9 +17,13 @@ html, body, #root {
 
 /* Belt-and-suspenders horizontal overflow guard: full-bleed decorative elements
    (e.g. the rotated marquee strip, width: 100vw plus a transform) can extend past
-   the viewport edge. body already sets overflow-x: hidden on desktop, but that
-   alone doesn't reliably stop the *html* element itself from being horizontally
-   scrollable (e.g. via trackpad/shift-wheel), so pin it here too, globally. */
+   the viewport edge. body clips on its own (see desktop-core.css),
+   but that alone doesn't reliably stop the *html* element itself from being
+   horizontally scrollable (e.g. via trackpad/shift-wheel), so pin it here too.
+   `hidden` is correct on <html> specifically — it is the root scroller either way, so
+   unlike on <body> it costs nothing. Do NOT "simplify" body back to a bare
+   overflow-x: hidden: that makes <body> a scroll container that never scrolls and
+   silently breaks position: sticky for every descendant. */
 html {
   overflow-x: hidden;
 }

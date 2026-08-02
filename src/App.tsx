@@ -1,11 +1,9 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { BrowserRouter } from 'react-router-dom';
-import { useDeviceView } from './hooks/useDeviceView';
 import { useRouteSeo } from './hooks/useRouteSeo';
 
-const DesktopView = lazy(() => import('./views/DesktopView'));
-const MobileTabletView = lazy(() => import('./views/MobileTabletView'));
+const SiteView = lazy(() => import('./views/SiteView'));
 
 // Keep the loader on screen long enough to register, then ease it out instead
 // of letting Suspense swap it for the real content in the same frame it resolves.
@@ -50,7 +48,6 @@ function ContentReadySignal({ onReady }: { onReady: () => void }) {
 }
 
 function AppContent() {
-  const isDesktopView = useDeviceView();
   useRouteSeo();
 
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
@@ -78,7 +75,7 @@ function AppContent() {
       {!loaderRemoved && <AppLoader fadingOut={readyToFade} />}
       <Suspense fallback={null}>
         <ContentReadySignal onReady={() => setContentMounted(true)} />
-        {isDesktopView ? <DesktopView /> : <MobileTabletView />}
+        <SiteView />
       </Suspense>
     </>
   );

@@ -29,9 +29,9 @@ export default function HeroWordmark({ text }: HeroWordmarkProps) {
 
   useEffect(() => {
     const container = containerRef.current;
-    // The desktop view itself is already gated to (hover: hover) and (pointer: fine)
-    // devices (see useDeviceView) — this check is a second, cheap line of defense in
-    // case that ever changes, mirroring the same guard in GlitchCursor.
+    // Now that one view serves every device, this gate is the only thing keeping the magnetic
+    // effect off touchscreens, where a tap or a scroll emits pointermove and the letters would
+    // scatter as though being dragged.
     const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (!container || prefersReducedMotion || !canHover) {
       return;
@@ -70,10 +70,29 @@ export default function HeroWordmark({ text }: HeroWordmarkProps) {
     let pointerY = -9999;
     let pointerActive = false;
 
+    // While a button is held the gesture is a click or a drag, not a hover. Tracking through it
+    // made the letters chase the cursor mid-press and stay flung out until the next move, which
+    // read as the title reacting to being grabbed.
+    let pressed = false;
+
     const handlePointerMove = (event: PointerEvent) => {
+      if (pressed || event.pointerType !== 'mouse') {
+        return;
+      }
       pointerX = event.clientX;
       pointerY = event.clientY;
       pointerActive = true;
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse') return;
+      pressed = true;
+      // Release immediately so the letters spring home rather than freezing mid-push.
+      pointerActive = false;
+    };
+
+    const handlePointerUp = () => {
+      pressed = false;
     };
 
     const handlePointerLeave = () => {
@@ -134,7 +153,12 @@ export default function HeroWordmark({ text }: HeroWordmarkProps) {
     rafId = window.requestAnimationFrame(tick);
 
     window.addEventListener('pointermove', handlePointerMove, { passive: true });
-    window.addEventListener('pointerleave', handlePointerLeave, { passive: true });
+    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+    window.addEventListener('pointerup', handlePointerUp, { passive: true });
+    window.addEventListener('pointercancel', handlePointerUp, { passive: true });
+    // `pointerleave` never fires on window; the document-level `mouseleave` is what actually
+    // signals the cursor left the page, so without it the field stayed stuck where it exited.
+    document.addEventListener('mouseleave', handlePointerLeave);
     window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', handleScroll, { passive: true });
 
@@ -144,7 +168,10 @@ export default function HeroWordmark({ text }: HeroWordmarkProps) {
         window.cancelAnimationFrame(scrollFrame);
       }
       window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerleave', handlePointerLeave);
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('pointerup', handlePointerUp);
+      window.removeEventListener('pointercancel', handlePointerUp);
+      document.removeEventListener('mouseleave', handlePointerLeave);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', handleScroll);
 

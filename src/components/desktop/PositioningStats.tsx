@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
+import WorkDeck from './WorkDeck';
 import type { SwymblePositioning } from '../../data/config';
+import type { SwymbleLab, SwymbleProject } from '../../data/types';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -16,6 +18,8 @@ const statVariants: Variants = {
 
 type PositioningStatsProps = {
   positioning: SwymblePositioning;
+  projects: SwymbleProject[];
+  labs: SwymbleLab[];
 };
 
 function renderParagraph(paragraph: string, link: SwymblePositioning['statementLink']) {
@@ -35,11 +39,12 @@ function renderParagraph(paragraph: string, link: SwymblePositioning['statementL
   );
 }
 
-export default function PositioningStats({ positioning }: PositioningStatsProps) {
+export default function PositioningStats({ positioning, projects, labs }: PositioningStatsProps) {
   const [headline, ...paragraphs] = positioning.statement;
 
   return (
     <section className="positioning-section" aria-label="What Swymble is">
+      <div className="positioning-copy">
       <motion.div
         className="positioning-statement"
         initial={{ opacity: 0, y: 32 }}
@@ -66,6 +71,17 @@ export default function PositioningStats({ positioning }: PositioningStatsProps)
             <span className="positioning-stat-label">{stat.label}</span>
           </motion.div>
         ))}
+      </motion.div>
+      </div>
+
+      <motion.div
+        className="positioning-visual"
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-80px' }}
+        transition={{ duration: 0.8, ease: EASE }}
+      >
+        <WorkDeck projects={projects} labs={labs} />
       </motion.div>
     </section>
   );

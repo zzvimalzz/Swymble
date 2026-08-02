@@ -1,0 +1,339 @@
+/* ── Responsive shell ──
+   The site is one tree at every width now. This file owns the pieces that only exist below the
+   nav breakpoint (the thumb menu and the floating controls) plus the shell-level adjustments
+   that used to live in the deleted mobile-only stylesheets. Page-specific breakpoints stay in
+   each page's own file. */
+
+:root {
+  /* Below this the top nav links collapse into the thumb sheet. */
+  --nav-breakpoint: 860px;
+  --floating-size: 52px;
+  --floating-gap: 14px;
+  --floating-edge: 20px;
+}
+
+/* ── Floating controls (bottom right, above the nav trigger) ── */
+.floating-controls {
+  position: fixed;
+  right: var(--floating-edge);
+  /* Sits directly above the nav trigger, which is one button tall plus a gap off the edge. */
+  bottom: calc(var(--floating-edge) + var(--floating-size) + var(--floating-gap));
+  z-index: var(--sw-z-floating);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--floating-gap);
+  pointer-events: none;
+}
+
+.floating-controls__btn {
+  width: var(--floating-size);
+  height: var(--floating-size);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--sw-border-soft);
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text-main);
+  pointer-events: auto;
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.9);
+  transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.floating-controls__btn:hover {
+  color: var(--accent-volt);
+  border-color: var(--sw-border-volt);
+  background: rgba(var(--sw-accent-volt-rgb), 0.1);
+}
+
+/* The back button is only useful where there is no visible nav to go back with. */
+@media screen and (min-width: 861px) {
+  .floating-controls__btn--back {
+    display: none;
+  }
+}
+
+/* ── Thumb nav sheet ── */
+.nav-sheet__trigger {
+  position: fixed;
+  right: var(--floating-edge);
+  bottom: var(--floating-edge);
+  width: var(--floating-size);
+  height: var(--floating-size);
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--sw-border-volt);
+  background: var(--accent-volt);
+  color: var(--bg-color);
+  z-index: calc(var(--sw-z-floating) + 2);
+  box-shadow: 0 14px 34px -12px rgba(var(--sw-accent-volt-rgb), 0.7);
+}
+
+.nav-sheet {
+  position: fixed;
+  right: var(--floating-edge);
+  bottom: calc(var(--floating-edge) + var(--floating-size) + var(--floating-gap));
+  width: min(15rem, calc(100vw - 2.5rem));
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-panel);
+  background: rgba(8, 8, 8, 0.97);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--sw-shadow-panel);
+  overflow: hidden;
+  z-index: calc(var(--sw-z-floating) + 1);
+  /* Kept out of the layout entirely when closed, so it can't trap focus or block taps. */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.97);
+  transform-origin: bottom right;
+  transition: opacity 0.24s var(--sw-ease-standard), transform 0.24s var(--sw-ease-standard),
+    visibility 0.24s;
+}
+
+.nav-sheet--open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.nav-sheet__backdrop {
+  position: fixed;
+  inset: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: var(--sw-z-floating);
+}
+
+.nav-sheet__header {
+  padding: 0.85rem 1.1rem 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+  opacity: 0.6;
+}
+
+.nav-sheet__list {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0.4rem;
+}
+
+.nav-sheet__item {
+  padding: 0.85rem 1.1rem;
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  text-align: left;
+  color: var(--sw-text-muted);
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-sheet__item:hover,
+.nav-sheet__item--active {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.04);
+  border-left-color: var(--accent-volt);
+}
+
+/* ── Nav swap ── */
+@media screen and (max-width: 860px) {
+  .nav-sheet__trigger {
+    display: inline-flex;
+  }
+
+  /* The whole top bar goes, not just its links. Navigation lives in the thumb sheet, which is
+     reachable one-handed; keeping a fixed bar as well cost a strip of every screen and forced
+     every page to reserve ~12rem of top padding to clear it. */
+  .desktop-nav {
+    display: none;
+  }
+}
+
+/* ── Touch devices ── */
+/* The custom cursor is meaningless without a pointer, and `cursor: none` on a touch device just
+   means nothing shows when a Bluetooth mouse is attached. Restore the real cursor and hide the
+   painted one wherever the primary input is coarse. */
+@media (pointer: coarse) {
+  .glitch-cursor {
+    display: none;
+  }
+
+  *,
+  .lab-btn,
+  .workdeck__card--top {
+    cursor: auto;
+  }
+
+  a,
+  button,
+  [role='button'] {
+    cursor: pointer;
+  }
+}
+
+/* Give the fixed bottom-right controls room so they never cover the last line of a page. */
+@media screen and (max-width: 860px) {
+  .swymble-app {
+    padding-bottom: calc(var(--floating-edge) + var(--floating-size));
+  }
+}
+
+/* ── Mobile spacing scale ──
+   Every gap below was inherited straight from the desktop layout: 160px between home sections,
+   128px on projects, and a 12rem page top reserved for a nav bar that no longer renders here.
+   At 390px those read as blank screens between blocks, so the whole vertical rhythm is scaled
+   down to roughly a third. */
+@media screen and (max-width: 860px) {
+  /* Page shells. There is no fixed nav to clear any more, so the top padding is just breathing
+     room above the first heading. */
+  .layout-content {
+    padding: 3.5rem 5vw;
+  }
+
+  .desktop-page-layout,
+  .desktop-about-page,
+  .desktop-labs-page,
+  .desktop-projects-page {
+    padding-top: 4rem;
+    padding-bottom: 3rem;
+  }
+
+  .section-header {
+    margin-bottom: 2rem;
+  }
+
+  /* Home */
+  .marquee-container {
+    margin-top: 3rem;
+    padding: 1rem 0;
+  }
+
+  .marquee-content {
+    font-size: 1.6rem;
+  }
+
+  .positioning-section {
+    padding: 3rem 0;
+    gap: 2.5rem;
+  }
+
+  .positioning-copy {
+    gap: 2.25rem;
+  }
+
+  .studio-section {
+    margin-top: 4rem;
+  }
+
+  .techstack-section {
+    padding: 0 0 2rem;
+    margin-top: 3.5rem;
+    gap: 2.5rem;
+  }
+
+  .workdeck {
+    margin-bottom: 0;
+  }
+
+  /* About: one rhythm for every numbered block. */
+  .readme,
+  .stack,
+  .career-repository,
+  .config,
+  .terminal-section,
+  .remote {
+    margin-bottom: 2.5rem;
+    padding-top: 2.25rem;
+  }
+
+  .about-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .about-header__grid {
+    gap: 2rem;
+  }
+
+  .about-stats {
+    margin-top: 2rem;
+  }
+
+  .readme__head,
+  .stack__head,
+  .config__head,
+  .terminal-section__head,
+  .remote__head,
+  .career-repository__header {
+    margin-bottom: 1.5rem;
+  }
+
+  .readme__quote {
+    margin-top: 2rem;
+  }
+
+  /* Projects */
+  .projects-list {
+    gap: 2.5rem;
+    margin-top: 2rem;
+  }
+
+  .projects-cta {
+    margin-top: 3rem;
+  }
+
+  /* Labs */
+  .labs-subtitle {
+    margin-top: -1rem;
+    margin-bottom: 2rem;
+  }
+
+  .labs-grid {
+    gap: 1.5rem;
+  }
+}
+
+/* ── Touch targets ──
+   These were all laid out for a mouse and came in between 22px and 29px tall, which is well
+   under a fingertip. Raising the minimum rather than restyling each one keeps them looking the
+   same on a desktop while making them hittable on a phone. */
+@media (pointer: coarse), screen and (max-width: 860px) {
+  .readme__chip,
+  .terminal__suggestion,
+  .blog-folder-btn,
+  .career-filters__pill,
+  .lab-tag,
+  .project-stack-chip {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .career-log__button,
+  .deck__index-item,
+  .nav-sheet__item {
+    min-height: 44px;
+  }
+
+  /* An inline link in a run of text can't grow without breaking the line, so it gets vertical
+     padding instead, which enlarges the hit box without moving anything. */
+  .config__value--link,
+  .career-commit-card__link {
+    display: inline-block;
+    padding-block: 0.45rem;
+  }
+
+  /* The month initials across the top of the contribution mosaic were 9.6px. */
+  .mosaic__month {
+    font-size: 0.7rem;
+  }
+}

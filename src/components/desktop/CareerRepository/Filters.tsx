@@ -1,4 +1,18 @@
+import type { SwymbleCareerBranch, SwymbleCareerNode } from '../../../data/types';
+
 export type CareerFilter = 'all' | 'career' | 'project' | 'education';
+
+/** Shared by the graph and the commit log so a filter dims the same set of things in both. */
+export const nodeMatchesFilter = (
+  node: SwymbleCareerNode,
+  branch: SwymbleCareerBranch,
+  filter: CareerFilter,
+): boolean => {
+  if (filter === 'all') return true;
+  if (filter === 'education') return node.type === 'education';
+  if (filter === 'project') return branch.category === 'project';
+  return branch.category === 'career' && node.type !== 'education';
+};
 
 const FILTERS: { id: CareerFilter; label: string }[] = [
   { id: 'all', label: 'Everything' },

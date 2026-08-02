@@ -12,16 +12,24 @@ import { SWYMBLE_PROJECTS } from '../projects/projects';
 //   added — edit projects.ts / labs/ / blog/posts, not a number here.
 export const SWYMBLE_POSITIONING: SwymblePositioning = {
   statement: [
-    'The one-engineer software studio a developer in Kuala Lumpur.',
-    'Daylight goes to a fulltime job and a Masters Degree while the rest of it comes here, for fun builds, client projects, blog posts, and one deliberately pointless masterpiece.',
+    'A software engineer and a one-person studio in Kuala Lumpur.',
+    'Backend systems, APIs and AI platforms for clients, plus a lab of my own products, a few write-ups, and one deliberately pointless masterpiece.',
   ],
   statementLink: {
     label: 'one deliberately pointless masterpiece',
     href: 'https://www.watchpaintdry.net/',
   },
   stats: [
-    { id: 'projects', label: 'SHIPPED & LIVE', value: SWYMBLE_PROJECTS.length },
-    { id: 'labs', label: 'IN THE LAB', value: SWYMBLE_LABS.length },
+    {
+      id: 'projects',
+      label: 'SHIPPED & LIVE',
+      value: SWYMBLE_PROJECTS.length + SWYMBLE_LABS.filter((lab) => lab.status === 'Live').length,
+    },
+    {
+      id: 'labs',
+      label: 'STILL BUILDING',
+      value: SWYMBLE_LABS.filter((lab) => lab.status !== 'Live' && lab.visibility !== 'private').length,
+    },
     { id: 'notes', label: 'Blog Posts', value: SWYMBLE_BLOG_POSTS.length },
   ],
 };

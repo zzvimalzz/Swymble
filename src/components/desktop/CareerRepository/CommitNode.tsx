@@ -55,6 +55,21 @@ export default function CommitNode({ node, x, y, isActive, isDimmed, delay, colo
         onFocus={() => onHover(node.id)}
         onBlur={() => onHover(null)}
         onClick={(event) => {
+          // Mouse only. A touch tap is handled on pointerup below, because the click the browser
+          // synthesises afterwards is dispatched to the graph wrapper rather than to this node.
+          if (event.nativeEvent instanceof PointerEvent && event.nativeEvent.pointerType !== 'mouse') {
+            return;
+          }
+          event.stopPropagation();
+          onSelect(node.id);
+        }}
+        // Touch selects on pointerDOWN, not pointerup or click. Everything the browser does after
+        // a touch begins — focusing the node and scrolling it into view, then synthesising a
+        // click at the original coordinates — can land somewhere else entirely once the page has
+        // moved. That is why tapping a node near the top or bottom of the screen did nothing
+        // while the identical node in the middle worked.
+        onPointerDown={(event) => {
+          if (event.pointerType === 'mouse') return;
           event.stopPropagation();
           onSelect(node.id);
         }}

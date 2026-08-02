@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SITE_ROUTES } from './routes';
+import { NAV_ROUTES, SITE_ROUTES } from './routes';
 
 // SITE_ROUTES drives navigation, SEO meta, the sitemap, and prerendering — malformed entries
 // fan out into every one of those, so they're pinned down here.
@@ -23,11 +23,17 @@ describe('SITE_ROUTES', () => {
     }
   });
 
-  it('gives every home-section mobile route a section id', () => {
+  it('exposes every route in the nav unless it opts out', () => {
+    // One nav for every viewport since the mobile-only view was removed; a route that is not
+    // hidden must be reachable from it.
     for (const route of SITE_ROUTES) {
-      if (route.mobileMode === 'home-section') {
-        expect(route.mobileSectionId, `${route.path} mobileSectionId`).toBeTruthy();
+      if (!route.hideFromNav) {
+        expect(NAV_ROUTES, `${route.path} missing from NAV_ROUTES`).toContain(route);
       }
     }
+  });
+
+  it('has at most one call-to-action link', () => {
+    expect(SITE_ROUTES.filter((route) => route.navEmphasis).length).toBeLessThanOrEqual(1);
   });
 });

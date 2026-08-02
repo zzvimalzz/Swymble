@@ -230,18 +230,11 @@ export default defineConfig({
     allowedHosts: ['.localhost'],
   },
   build: {
-    rollupOptions: {
-      output: {
-        // three.js is only imported by the lazy TechUniverse chunk; splitting it into its own
-        // vendor chunk keeps it lazy but stops every TechUniverse code change from invalidating
-        // the (much larger, rarely-changing) three.js bytes in visitors' caches.
-        manualChunks: {
-          three: ['three'],
-        },
-      },
-    },
-    // The three vendor chunk is ~600 kB minified by itself — deliberate and lazy-loaded, so the
-    // default 500 kB warning would fire on every build for a chunk we can't shrink further.
+    // No `manualChunks` for three.js any more. It used to be pinned to its own vendor chunk for
+    // the lazy TechUniverse scene, but nothing on the desktop site imports three.js since that
+    // section was removed, so the rule only produced an empty chunk and a build warning. The
+    // package is still a dependency (the mybirth subdomain app uses it) — re-add the split if a
+    // three.js scene ever comes back to the main site.
     chunkSizeWarningLimit: 700,
   },
 })

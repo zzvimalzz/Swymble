@@ -1,28 +1,44 @@
-/* ── About: Career Repository (git-graph) ── */
+/* ── About: Career Repository (git swimlane graph + commit log) ── */
 
+/* Rhythm matches the other About blocks in desktop-about.css: 5rem below, 3rem above the rule.
+   An extra margin-top here on top of the previous section's margin-bottom read as a dead gap. */
 .career-repository {
-  /* Sibling of .page-content-wrapper (which caps at 800px) inside .layout-content (max-width:
-     1400px, centered): this fills that wider column instead of the narrow text column. */
   width: 100%;
-  margin-top: 4rem;
-  padding-top: 2.5rem;
+  margin-bottom: 5rem;
+  padding-top: 3rem;
   border-top: 1px solid var(--sw-border-soft);
 }
 
 .career-repository__header {
-  max-width: 800px;
-  margin: 0 auto 2.5rem;
+  margin: 0 0 2.5rem;
   text-align: left;
+}
+
+.career-repository__kicker {
+  font-family: var(--sw-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sw-accent-volt);
+  margin: 0 0 0.7rem;
 }
 
 .career-repository__heading {
   font-family: var(--sw-font-display);
-  font-size: 1.5rem;
+  font-size: clamp(1.7rem, 6vw, 2.4rem);
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.02em;
   color: var(--sw-text-main);
-  margin: 0 0 1.4rem;
+  margin: 0 0 0.9rem;
+}
+
+.career-repository__lede {
+  max-width: 62ch;
+  margin: 0 0 1.8rem;
+  color: var(--sw-text-muted);
+  line-height: 1.7;
+  font-size: 0.98rem;
 }
 
 .career-repository__header-row {
@@ -31,6 +47,16 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+/* Graph and log are two views of one dataset, side by side. */
+.career-repository__body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2.5rem;
+  /* Deliberately NOT `align-items: start` — the log column has to stretch to the graph's full
+     height for the panel inside it to have anywhere to stick to. */
+  align-items: stretch;
 }
 
 /* Filters */
@@ -68,20 +94,40 @@
   border-color: var(--sw-accent-volt);
 }
 
-/* Graph shell, vertical: reads top (now) to bottom (past) with normal page scroll. */
+/* Graph shell: reads top (2019) to bottom (present) so scrolling moves forward through time. */
 .career-repository__graph {
   display: flex;
-  justify-content: center;
-  padding-bottom: 4rem;
+  justify-content: flex-start;
 }
 
 .career-repository__stage {
   position: relative;
+  flex: 0 0 auto;
 }
 
 .career-repository__canvas {
   display: block;
   overflow: visible;
+}
+
+/* Year ruler: the axis that makes vertical distance mean elapsed time instead of node count. */
+.career-ruler__spine {
+  stroke: var(--sw-border-soft);
+  stroke-width: 1;
+}
+
+.career-ruler__gridline {
+  stroke: rgba(255, 255, 255, 0.055);
+  stroke-width: 1;
+}
+
+.career-ruler__label {
+  fill: var(--sw-text-muted);
+  font-family: var(--sw-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  opacity: 0.75;
 }
 
 /* Branch lines */
@@ -111,6 +157,40 @@
 @keyframes career-branch-pulse {
   0%, 100% { opacity: 0.15; }
   50% { opacity: 0.4; }
+}
+
+/* Branch name pill, anchored at the fork point. Lanes are reused by successive branches, so
+   these labels are what keep the graph unambiguous — they are not decoration. */
+.career-branch-label {
+  pointer-events: none;
+  transition: opacity var(--sw-motion-med) var(--sw-ease-standard);
+}
+
+.career-branch-label--dimmed {
+  opacity: 0.25;
+}
+
+/* Faint, so it reads as a tether rather than another branch line. */
+.career-branch-label__leader {
+  stroke: var(--branch-color, var(--sw-line-muted));
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  opacity: 0.4;
+}
+
+.career-branch-label__pill {
+  fill: rgba(8, 8, 8, 0.88);
+  stroke: var(--branch-color, var(--sw-border-soft));
+  stroke-width: 1;
+  opacity: 0.95;
+}
+
+.career-branch-label__text {
+  fill: var(--branch-color, var(--sw-text-muted));
+  font-family: var(--sw-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 /* Ambient particle: color set inline per branch via the `color` property */
@@ -190,27 +270,152 @@
   letter-spacing: 0.02em;
 }
 
-/* Commit card */
-.career-commit-card {
+/* Commit card. Vertically centred on its node and pushed fully to one side of it — the graph
+   positions it, this only mirrors the horizontal anchor. It must never overlap its own node:
+   a card under the pointer takes the hover that opened it and flickers. */
+/* The anchor is the positioned element; it carries the transform that places the card relative to
+   its node. See the comment in CommitCard.tsx for why this can't live on the animated element. */
+.career-commit-anchor {
   position: absolute;
-  transform: translate(-50%, calc(-100% - 22px));
-  width: min(360px, 90vw);
-  max-height: min(560px, 70vh);
-  overflow-y: auto;
-  background: rgba(8, 8, 8, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid color-mix(in srgb, var(--branch-color, var(--sw-text-muted)) 30%, var(--sw-border-soft));
-  border-left: 3px solid var(--branch-color, var(--sw-accent-volt));
-  border-radius: var(--sw-radius-card);
-  box-shadow: var(--sw-shadow-panel);
-  padding: 1.4rem 1.6rem;
   z-index: var(--sw-z-floating);
+}
+
+.career-commit-anchor--right {
+  transform: translateY(-50%);
+}
+
+.career-commit-anchor--left {
+  transform: translate(-100%, -50%);
+}
+
+/* ── Commit modal (narrow screens) ──
+   The canvas is scaled down there and nothing fits beside a node, so a tap opens a real dialog:
+   centred, above everything, dismissed by the close button, the backdrop or Escape. Portalled to
+   <body>, so no ancestor in the graph can clip it or capture its taps. */
+.commit-modal {
+  position: fixed;
+  inset: 0;
+  /* Above the floating controls and the nav trigger, which sit at ~98-100. */
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.commit-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+/* Column of [close button][panel], so the button sits clear of the card entirely.
+   `pointer-events: none` because the column is full-width while the close button only occupies its
+   right end: without it, the transparent strip beside the button swallowed taps that were meant
+   for the backdrop, and the modal would not close there. Children opt back in. */
+.commit-modal__dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+  width: min(30rem, 100%);
+  max-height: 100%;
+  pointer-events: none;
+}
+
+.commit-modal__dialog > * {
   pointer-events: auto;
 }
 
-.career-commit-card--below {
-  transform: translate(-50%, 22px);
+.commit-modal__panel {
+  width: 100%;
+  /* Hugs short entries and clamps long ones to the dialog height, where the body scrolls instead.
+     `min-height: 0` is what lets a flex child shrink below its content. */
+  min-height: 0;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid color-mix(in srgb, var(--branch-color, var(--sw-text-muted)) 35%, var(--sw-border-soft));
+  border-top: 3px solid var(--branch-color, var(--sw-accent-volt));
+  border-radius: var(--sw-radius-panel);
+  background: #0a0a0a;
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.95);
+  overflow: hidden;
+}
+
+.commit-modal__close {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--sw-border-soft);
+  background: rgba(14, 14, 14, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--sw-text-main);
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.commit-modal__close:hover {
+  color: var(--sw-accent-volt);
+  border-color: var(--sw-border-volt);
+  background: rgba(var(--sw-accent-volt-rgb), 0.12);
+  transform: scale(1.06);
+}
+
+/* Scoped under .commit-modal on purpose. This element also carries .career-commit-card for its
+   typography, and that rule is defined later in this file — at equal specificity it won, so the
+   body stayed pinned to the anchored card's 380px max-height and every modal rendered the same
+   height regardless of content. The descendant selector outranks it. */
+.commit-modal .commit-modal__scroll {
+  position: static;
+  width: auto;
+  min-height: 0;
+  max-height: none;
+  flex: 0 1 auto;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1.5rem;
+}
+
+.career-commit-card {
+  width: min(340px, 90vw);
+  /* Keep in step with CARD_HALF_HEIGHT in constants.ts, which clamps the centre point. */
+  max-height: 380px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sw-line-muted) transparent;
+  background: rgba(8, 8, 8, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--branch-color, var(--sw-text-muted)) 30%, var(--sw-border-soft));
+  border-radius: var(--sw-radius-card);
+  box-shadow: var(--sw-shadow-panel);
+  padding: 1.25rem 1.4rem;
+  pointer-events: auto;
+  /* Long unbroken strings (a URL, a very long org name) must wrap rather than widen the card. */
+  overflow-wrap: anywhere;
+}
+
+.career-commit-anchor--right .career-commit-card {
+  border-left: 3px solid var(--branch-color, var(--sw-accent-volt));
+}
+
+.career-commit-anchor--left .career-commit-card {
+  border-right: 3px solid var(--branch-color, var(--sw-accent-volt));
 }
 
 .career-commit-card__image {
@@ -231,15 +436,18 @@
 
 .career-commit-card__title {
   font-family: var(--sw-font-display);
-  font-size: 1.3rem;
+  /* Long titles ("Bachelor of Computer Science (Hons), Cyber Security") step down a size rather
+     than running to four cramped lines. */
+  font-size: clamp(1.02rem, 1.25rem, 1.25rem);
   line-height: 1.3;
   font-weight: 800;
   color: var(--sw-text-main);
   margin: 0.4rem 0 0.15rem;
+  text-wrap: balance;
 }
 
 .career-commit-card__org {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   color: var(--sw-text-muted);
   margin-bottom: 0.6rem;
 }
@@ -253,14 +461,14 @@
 }
 
 .career-commit-card__description {
-  font-size: 0.96rem;
+  font-size: 0.92rem;
   line-height: 1.65;
   color: var(--sw-text-muted);
   margin: 0.5rem 0 0;
 }
 
 .career-commit-card__description-list {
-  font-size: 0.96rem;
+  font-size: 0.92rem;
   line-height: 1.6;
   color: var(--sw-text-muted);
   margin: 0.5rem 0 0;
@@ -304,6 +512,259 @@
   text-decoration: underline;
 }
 
+/* ── Commit log panel ── */
+.career-log-column {
+  min-width: 0;
+  height: 100%;
+}
+
+/* Sticky so it stays a usable index for the whole height of the graph beside it. */
+.career-log {
+  position: sticky;
+  top: 7rem;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 11rem);
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-panel);
+  background: rgba(255, 255, 255, 0.018);
+  overflow: hidden;
+}
+
+.career-log__chrome {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid var(--sw-border-soft);
+  font-family: var(--sw-font-mono);
+  font-size: 0.76rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.career-log__prompt {
+  color: var(--sw-accent-volt);
+  font-weight: 700;
+}
+
+.career-log__prompt::after {
+  content: ' $';
+  opacity: 0.5;
+}
+
+.career-log__command {
+  color: var(--sw-text-muted);
+}
+
+.career-log__list {
+  overflow-y: auto;
+  flex: 1 1 auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sw-line-muted) transparent;
+}
+
+/* Year headers give the list the same landmarks as the graph's year ruler. Sticky, so the year
+   you're reading stays named while you scroll through it. */
+.career-log__year {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0.55rem 1.1rem 0.4rem;
+  background: linear-gradient(rgba(9, 9, 9, 0.97) 78%, rgba(9, 9, 9, 0));
+  font-family: var(--sw-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.career-log__year-label {
+  color: var(--sw-accent-volt);
+}
+
+.career-log__year-rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--sw-border-soft);
+}
+
+.career-log__year-count {
+  color: var(--sw-text-muted);
+  opacity: 0.55;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.career-log__rows {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+}
+
+.career-log__row {
+  transition: opacity var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.career-log__row--dimmed {
+  opacity: 0.28;
+}
+
+.career-log__button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 14px 3.9em minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 1.1rem;
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  font-family: var(--sw-font-mono);
+  font-size: 0.76rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--sw-motion-fast) var(--sw-ease-standard),
+    border-color var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.career-log__button:hover,
+.career-log__row--active .career-log__button {
+  background: rgba(var(--sw-accent-volt-rgb), 0.07);
+  border-left-color: var(--branch-color, var(--sw-accent-volt));
+}
+
+/* The `--graph` rail: a vertical line in the branch colour with the commit dot on it. */
+.career-log__rail {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.career-log__rail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--branch-color, var(--sw-line-muted));
+  opacity: 0.3;
+}
+
+.career-log__marker {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--branch-color, var(--sw-text-muted));
+  box-shadow: 0 0 0 3px rgba(9, 9, 9, 0.95);
+}
+
+.career-log__row--future .career-log__marker {
+  background: transparent;
+  border: 1px dashed var(--branch-color, var(--sw-text-muted));
+}
+
+.career-log__row--active .career-log__marker {
+  background: var(--sw-accent-volt);
+  box-shadow: 0 0 0 3px rgba(9, 9, 9, 0.95), 0 0 9px var(--sw-accent-volt);
+}
+
+.career-log__sha {
+  color: var(--sw-accent-volt);
+  opacity: 0.7;
+  letter-spacing: 0.02em;
+}
+
+.career-log__body {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+/* The message is the row. When space runs short the org gives way first (see the shrink factor
+   on .career-log__org), so a long date range can't reduce the subject to three characters. */
+.career-log__subject {
+  min-width: 6rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 1 auto;
+}
+
+/* Conventional-commit colouring, the way a terminal with a good theme would show it. */
+.career-log__verb {
+  font-weight: 700;
+}
+
+.career-log__verb--feat { color: #8fd0a0; }
+.career-log__verb--perf { color: var(--sw-accent-volt); }
+.career-log__verb--chore { color: var(--sw-text-muted); }
+.career-log__verb--wip { color: #b08fe0; }
+
+.career-log__scope {
+  color: var(--sw-accent-cyan);
+  opacity: 0.8;
+}
+
+.career-log__title {
+  color: var(--sw-text-main);
+}
+
+.career-log__title::before {
+  content: ': ';
+  color: var(--sw-text-muted);
+}
+
+/* A very high shrink factor makes this the first thing to give up width. */
+.career-log__org {
+  color: var(--sw-text-muted);
+  opacity: 0.6;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1 999 auto;
+  min-width: 0;
+}
+
+.career-log__date {
+  color: var(--sw-text-muted);
+  font-size: 0.68rem;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.career-log__row--future .career-log__title {
+  color: var(--sw-text-muted);
+  font-style: italic;
+}
+
+.career-log__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1.1rem;
+  border-top: 1px solid var(--sw-border-soft);
+  font-family: var(--sw-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+  opacity: 0.75;
+}
+
+.career-log__footer-hint {
+  opacity: 0.6;
+}
+
 /* Legend */
 .career-controls__legend {
   display: flex;
@@ -345,6 +806,31 @@
   background: transparent;
   border: 1.5px dashed var(--sw-text-muted);
   border-radius: 2px;
+}
+
+/* Below ~1180px the graph and a usable log can't sit side by side — stack them and let the log
+   scroll in place instead of squeezing it to an unreadable width. */
+@media screen and (max-width: 1180px) {
+  .career-repository__body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  /* No horizontal scrolling: RepositoryGraph measures this box and scales the canvas to fit, so
+     the whole graph is visible rather than half of it being off screen. */
+  .career-repository__graph {
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .career-log-column {
+    height: auto;
+  }
+
+  .career-log {
+    position: static;
+    max-height: 30rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -76,7 +76,7 @@
 }
 
 .project-title {
-  font-size: 3rem;
+  font-size: clamp(1.8rem, 5vw, 3rem);
   margin-bottom: 1rem;
 }
 
@@ -224,19 +224,70 @@
   text-decoration: none;
 }
 
-/* Ensure responsiveness even on desktop views scaling down to ~1024px */
 @media screen and (max-width: 1200px) {
   .project-row,
   .project-row-reversed {
     gap: 2rem;
   }
-  
-  .project-image-container {
-    flex: 1 1 auto;
-    width: 100%;
-  }
 
   .project-title {
     font-size: 2.5rem;
+  }
+}
+
+/* Below this the two columns stop being two columns. Widening the image alone was not enough:
+   the row stayed `flex-direction: row`, so the screenshot shrank to a thumbnail and the copy was
+   squeezed into a column a few words wide. */
+@media screen and (max-width: 860px) {
+  .project-row,
+  .project-row-reversed {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .project-image-container {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .project-image {
+    padding: 0.6rem;
+  }
+
+  .project-title {
+    font-size: clamp(1.7rem, 8vw, 2.3rem);
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Category and client sat side by side and each wrapped to three lines. */
+  .project-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .project-description {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .project-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .project-actions .project-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .projects-cta {
+    padding: 2.5rem 1.5rem;
   }
 }

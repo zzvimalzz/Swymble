@@ -12,7 +12,12 @@ visible.
 | `latestupdates.ts` | latest update cards |
 | `services.ts` | "WORK WITH ME" service cards |
 | `process.ts` | "WORK WITH ME" 01–04 process steps |
-| `universe.ts` | desktop 3D "SWYMBLE UNIVERSE" scene |
+| `universe.ts` | **currently unused on desktop** — see the note at the bottom |
+
+The homepage's "THE WORK" section has no data file of its own: `FeaturedWork.tsx` derives it from
+`projects/projects.ts` and `labs/`, so shipping something new puts it on the homepage
+automatically. The hero telemetry strip is likewise derived, from `about/career/` plus
+`about/about.ts`.
 
 ## branding.ts
 ```ts
@@ -94,7 +99,15 @@ export const SWYMBLE_PROCESS = [
 ];
 ```
 
-## universe.ts — desktop 3D scene
+## universe.ts — NOT CURRENTLY RENDERED
+The "SWYMBLE UNIVERSE" section was removed from the homepage: it cost a full section and a click
+to reach, and then showed roughly what the tech stack row already showed. The hero's `HeroOrbit`
+three.js layer replaced it as the page's 3D moment.
+
+This file, `TechUniverse*.tsx/ts` and the `.glb` models under `public/models/` are all still in
+the repo but nothing imports them. Delete them together if the section is not coming back, or wire
+`TechUniverse` back into `DesktopHome` if it is. The shape below still describes the data.
+
 Orbits are *kinds of work*; moons are *real shipped things*.
 ```ts
 export const SWYMBLE_UNIVERSE = [

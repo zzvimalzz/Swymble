@@ -198,3 +198,77 @@
   line-height: 1.7;
   z-index: 2;
 }
+
+/* ── Hero telemetry strip ── */
+.hero-telemetry {
+  position: relative;
+  z-index: 3;
+  margin: 3.5rem 0 0;
+  padding: 0 5vw;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem 3rem;
+}
+
+.hero-telemetry__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.hero-telemetry__label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sw-text-muted);
+  opacity: 0.6;
+}
+
+.hero-telemetry__value {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-telemetry__value--live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #9dfca8;
+}
+
+.hero-telemetry__value--live::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  animation: hero-telemetry-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes hero-telemetry-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@media screen and (max-width: 900px) {
+  .hero-telemetry {
+    gap: 0.9rem 1.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-telemetry__value--live::before {
+    animation: none;
+  }
+}

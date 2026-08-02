@@ -3,9 +3,18 @@ import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import SmartImage from '../../components/SmartImage';
 import { SWYMBLE_DATA } from '../../data/config';
+import type { SwymbleLab } from '../../data/types';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import { isMailtoLink } from '../../utils/mailto';
 import '../../styles/desktop-labs.css';
+
+/** Status to CSS modifier. Typed against SwymbleLab['status'], so adding a status without giving
+ *  it a colour is a compile error rather than a silently unstyled badge. */
+const STATUS_MODIFIER: Record<SwymbleLab['status'], string> = {
+  Live: 'live',
+  'In Development': 'development',
+  'Private Beta': 'beta',
+};
 
 export default function DesktopLabs() {
   const location = useLocation();
@@ -87,7 +96,9 @@ export default function DesktopLabs() {
                   className="lab-card-image"
                 />
                 <div className="lab-card-overlay">
-                  <span className="lab-status-badge">{labItem.status.toUpperCase()}</span>
+                  <span className={`lab-status-badge lab-status-badge--${STATUS_MODIFIER[labItem.status]}`}>
+                    {labItem.status.toUpperCase()}
+                  </span>
                 </div>
               </div>
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { DESKTOP_NAV_ROUTES } from '../../routes';
+import { NAV_ROUTES } from '../../routes';
 import '../../styles/desktop-nav.css';
 
 type DesktopNavProps = {
@@ -22,8 +22,8 @@ export default function DesktopNav({ brandName }: DesktopNavProps) {
 
   // navEmphasis routes (e.g. /contact) render as a CTA pill after the regular links, regardless
   // of their position in SITE_ROUTES.
-  const standardRoutes = DESKTOP_NAV_ROUTES.filter((route) => !route.navEmphasis);
-  const emphasisRoutes = DESKTOP_NAV_ROUTES.filter((route) => route.navEmphasis);
+  const standardRoutes = NAV_ROUTES.filter((route) => !route.navEmphasis);
+  const emphasisRoutes = NAV_ROUTES.filter((route) => route.navEmphasis);
 
   return (
     <nav className={`desktop-nav ${isCompact ? 'is-compact' : ''}`.trim()}>

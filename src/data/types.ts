@@ -87,9 +87,86 @@ export type SwymbleLab = {
   primaryAction?: SwymbleLabAction;
 };
 
+// ABOUT PAGE — see data/about/README.md
+// The page is framed as a git repository: a header (`whoami`), a README, a language breakdown,
+// the career graph, a `git config` block and a `git remote` sign-off. These types back everything
+// except the graph, which has its own shapes below.
+
+export type SwymbleAboutLink = {
+  label: string;
+  /** Internal route ('/projects#ib-solutions') or full external URL. */
+  href: string;
+};
+
+export type SwymbleAboutAvailability = {
+  /** Drives the status dot's color. */
+  state: 'open' | 'limited' | 'closed';
+  label: string;
+};
+
+/** One `## Heading` block of the rendered README. */
+export type SwymbleAboutReadmeSection = {
+  id: string;
+  heading: string;
+  body: string;
+  /** Links that back the claim up — rendered as chips under the paragraph. */
+  proof?: SwymbleAboutLink[];
+};
+
+/** A logo chip in the About page stack grid. Same chip treatment as the homepage tech stack
+ *  (grayscale at rest, brand color on hover) plus a `usedIn` readout, which is the thing that
+ *  makes it a claim rather than a wall of logos. */
+export type SwymbleAboutStackTool = {
+  id: string;
+  name: string;
+  /** Path under /public, e.g. '/images/stack_icons/react.png'. Logo should already be in its
+   *  real brand color on a transparent background. */
+  icon: string;
+  /** One short line naming what it is. */
+  role: string;
+  /** Where it was actually used, revealed on hover. */
+  usedIn: string[];
+};
+
+/** The parts of the stack that have no logo to show: practices, protocols, platform work. */
+export type SwymbleAboutSkillDomain = {
+  id: string;
+  label: string;
+  items: string[];
+};
+
+/** A `key = value` line in the `git config --list` block. */
+export type SwymbleAboutConfigLine = {
+  key: string;
+  value: string;
+  /** Makes the value a link. */
+  href?: string;
+};
+
+/** A "currently ..." entry: what's in flight right now. */
+export type SwymbleAboutCurrent = {
+  id: string;
+  label: string;
+  value: string;
+  detail?: string;
+};
+
 export type SwymbleAbout = {
   title: string;
-  paragraphs: string[];
+  /** Repo name shown in the header, e.g. 'swymble/engineer'. */
+  repo: string;
+  role: string;
+  location: string;
+  availability: SwymbleAboutAvailability;
+  /** Short header bio — two or three lines, not the full README. */
+  intro: string[];
+  readme: SwymbleAboutReadmeSection[];
+  /** Single line given pull-quote treatment between the README and the languages. */
+  pullQuote: string;
+  stack: SwymbleAboutStackTool[];
+  skillDomains: SwymbleAboutSkillDomain[];
+  config: SwymbleAboutConfigLine[];
+  currently: SwymbleAboutCurrent[];
 };
 
 // CAREER REPOSITORY (About page git-graph) — see data/about/career/README.md
@@ -191,32 +268,6 @@ export type SwymbleLatestUpdateCard = {
   ctaHref?: string;
 };
 
-export type SwymbleMoonModelId = 'moon-01' | 'moon-02' | 'moon-03' | 'moon-04' | 'moon-05' | 'moon-06' | 'moon-07' | 'moon-08';
-
-export type SwymbleSkillProof = {
-  label: string;
-  href: string; // internal route ('/labs', '/projects#ib-solutions', '/blog/cortex-part-1') or full external URL (starts with 'http')
-};
-
-export type SwymbleSkillItem = {
-  name: string;
-  color: string;
-  description?: string;
-  moonModelId?: SwymbleMoonModelId;
-  proof?: SwymbleSkillProof[];
-};
-
-export type SwymbleSkillCategory = {
-  category: string;
-  context?: string;
-  items: SwymbleSkillItem[];
-  proof?: SwymbleSkillProof[];
-};
-
-/** The Swymble Universe orbits (kinds of work) and moons (real shipped things) shown in the
- *  desktop 3D scene. Structurally identical to SwymbleSkillCategory. */
-export type SwymbleUniverseOrbit = SwymbleSkillCategory;
-
 export type SwymbleSocial = {
   id: string;
   name: string;
@@ -254,6 +305,5 @@ export type SwymbleData = {
   career: SwymbleCareerRepository;
   labs: SwymbleLab[];
   blog: SwymbleBlogState;
-  universe: SwymbleUniverseOrbit[];
   socials: SwymbleSocial[];
 };

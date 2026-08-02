@@ -1,33 +1,52 @@
-import { motion } from 'framer-motion';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import CareerRepository from '../../components/desktop/CareerRepository/CareerRepository';
+import CareerTerminal from '../../components/desktop/About/CareerTerminal';
+import ConfigPanel from '../../components/desktop/About/ConfigPanel';
+import ReadmePanel from '../../components/desktop/About/ReadmePanel';
+import RemotePanel from '../../components/desktop/About/RemotePanel';
+import RepoHeader from '../../components/desktop/About/RepoHeader';
+import StackSection from '../../components/desktop/About/StackSection';
 import { SWYMBLE_DATA } from '../../data/config';
+import '../../styles/desktop-about.css';
 
 export default function DesktopAbout() {
-  const { title, paragraphs } = SWYMBLE_DATA.about;
+  const location = useLocation();
+  const { about, career, labs, projects, socials } = SWYMBLE_DATA;
+  const visibleLabs = labs.filter((lab) => lab.visibility !== 'private');
+  // "Shipped and live" means exactly that: client projects plus the labs that are actually
+  // reachable by a stranger. Everything else is still being built. Previously both numbers came
+  // from raw array lengths, so the shipped count ignored the live products entirely and the lab
+  // count included things that had already launched.
+  const liveLabs = visibleLabs.filter((lab) => lab.status === 'Live');
+  const unreleasedLabs = visibleLabs.filter((lab) => lab.status !== 'Live');
+
+  // Depend on the primitive pathname, not the `location` object itself — see DesktopProjects.tsx
+  // for why depending on the whole object causes a scroll-to-top mid-scroll.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
-    <section className="layout-content desktop-page-layout">
-      <div className="section-header">
-        <h1>{title}</h1>
-      </div>
+    <section className="layout-content desktop-about-page">
+      <RepoHeader
+        about={about}
+        career={career}
+        shippedCount={projects.length + liveLabs.length}
+        labCount={unreleasedLabs.length}
+      />
 
-      <div className="page-content-wrapper">
-        <div className="about-text-content">
-          {paragraphs.map((para, i) => (
-            <motion.p
-              key={i}
-              style={{ marginTop: i > 0 ? '2rem' : '0', fontSize: '1.2rem', lineHeight: '1.8' }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.15, duration: 0.8 }}
-            >
-              {para}
-            </motion.p>
-          ))}
-        </div>
-      </div>
+      <ReadmePanel sections={about.readme} pullQuote={about.pullQuote} />
 
-      <CareerRepository branches={SWYMBLE_DATA.career} />
+      <StackSection stack={about.stack} domains={about.skillDomains} />
+
+      <CareerRepository branches={career} />
+
+      <ConfigPanel config={about.config} currently={about.currently} />
+
+      <CareerTerminal context={{ about, career, labs, projects }} />
+
+      <RemotePanel socials={socials} availabilityLabel={about.availability.label} />
     </section>
   );
 }
