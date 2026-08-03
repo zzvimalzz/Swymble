@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 
-export type SiteRoutePath = '/' | '/projects' | '/labs' | '/contact' | '/about' | '/blog';
+export type SiteRoutePath = '/' | '/projects' | '/labs' | '/contact' | '/about' | '/resume' | '/blog';
 
 export type SiteRoute = {
   path: SiteRoutePath;
@@ -56,6 +56,14 @@ export const SITE_ROUTES: SiteRoute[] = [
     seoTitle: `About | ${SITE_NAME}`,
     seoDescription:
       'The engineer behind SWYMBLE: enterprise fintech experience, a one-person studio for client work, and a lab of personal builds and experiments.',
+    shouldIndex: true,
+  },
+  {
+    path: '/resume',
+    label: 'Resume',
+    seoTitle: `Resume | ${SITE_NAME}`,
+    seoDescription:
+      'One-page resume: fintech platform engineering, a solo studio shipping client work, selected products, education and the full stack behind them.',
     shouldIndex: true,
   },
   {

@@ -22,6 +22,7 @@ import DesktopBlogPost from './desktop/DesktopBlogPost';
 import DesktopContact from './desktop/DesktopContact';
 import DesktopLabs from './desktop/DesktopLabs';
 import DesktopNotFound from './desktop/DesktopNotFound';
+import DesktopResume from './desktop/DesktopResume';
 
 import { SWYMBLE_DATA } from '../data/config';
 import { SITE_ROUTES } from '../routes';
@@ -108,6 +109,7 @@ export default function SiteView() {
     '/labs': <DesktopLabs />,
     '/contact': <DesktopContact />,
     '/about': <DesktopAbout />,
+    '/resume': <DesktopResume />,
     '/blog': <DesktopBlog />,
   };
 

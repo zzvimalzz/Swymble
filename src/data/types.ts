@@ -221,6 +221,36 @@ export type SwymbleCareerBranch = {
 
 export type SwymbleCareerRepository = SwymbleCareerBranch[];
 
+// RESUME (the one-page employer view at /resume) — see data/resume.ts
+// Deliberately an *overlay*, not a copy: the roles, education and projects themselves are read
+// straight out of SWYMBLE_CAREER so the resume can never quietly drift from the About page. This
+// type only carries the things a CV needs that the site doesn't — a summary in resume voice,
+// tighter bullets, grouped skills, and the handful of entries a CV leaves out.
+
+/** A named group of skills, e.g. 'Languages'. */
+export type SwymbleResumeSkillGroup = {
+  id: string;
+  label: string;
+  items: string[];
+};
+
+export type SwymbleResume = {
+  /** Name at the top of the resume. Omit to fall back to the site's brand name — set it to a
+   *  legal name if the employer version should read as a person rather than a studio. */
+  name?: string;
+  /** One line under the name, e.g. 'Software Engineer · Backend & Platform'. */
+  headline: string;
+  /** Two or three sentences: the professional summary an employer reads first. */
+  summary: string[];
+  /** Career node ids to leave off the resume. Include-by-default is deliberate — a new role or
+   *  degree added to the career data shows up here automatically, and this list only has to name
+   *  what does not belong on a CV (pre-degree education). */
+  excludeNodeIds: string[];
+  /** Resume-voice bullets keyed by career node id; falls back to the node's own description. */
+  bullets: Record<string, string[]>;
+  skillGroups: SwymbleResumeSkillGroup[];
+};
+
 export type SwymbleBlogRichText = string | string[];
 
 export type SwymbleBlogContentBlock =
@@ -303,6 +333,7 @@ export type SwymbleData = {
   endCardMobileImage?: string;
   about: SwymbleAbout;
   career: SwymbleCareerRepository;
+  resume: SwymbleResume;
   labs: SwymbleLab[];
   blog: SwymbleBlogState;
   socials: SwymbleSocial[];

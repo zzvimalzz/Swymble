@@ -10,6 +10,7 @@ const STATIC_ROUTE_META = {
   '/labs': { changefreq: 'weekly', priority: '0.8' },
   '/contact': { changefreq: 'monthly', priority: '0.8' },
   '/about': { changefreq: 'monthly', priority: '0.7' },
+  '/resume': { changefreq: 'monthly', priority: '0.7' },
   '/blog': { changefreq: 'weekly', priority: '0.8' },
 };
 const DEFAULT_ROUTE_META = { changefreq: 'monthly', priority: '0.6' };

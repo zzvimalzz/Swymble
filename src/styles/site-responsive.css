@@ -245,6 +245,14 @@
     margin-bottom: 0;
   }
 
+  /* 10rem of margin plus 4rem of padding was over a screen and a half of nothing between the
+     tech stack and the contact block. The section is the last thing on the page, so it only
+     needs enough separation to read as a new block. */
+  .footer-cta {
+    margin-top: 3rem;
+    padding: 1rem 0 0;
+  }
+
   /* About: one rhythm for every numbered block. */
   .readme,
   .stack,

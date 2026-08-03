@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion';
+import { ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { SwymbleAbout, SwymbleCareerRepository } from '../../../data/types';
 import { parseDateKey } from '../CareerRepository/layout';
 import ContributionMosaic from './ContributionMosaic';
@@ -65,6 +67,13 @@ export default function RepoHeader({ about, career, shippedCount, labCount }: Re
             </span>
             <span className="about-header__location">{about.location}</span>
           </div>
+
+          {/* This page is the long version on purpose. Anyone who only has two minutes — an
+              employer, usually — should not have to scroll a git graph to find the facts. */}
+          <Link className="about-header__resume" to="/resume">
+            Short on time? Read the one-page resume
+            <ArrowUpRight size={15} aria-hidden="true" />
+          </Link>
 
           <div className="about-header__intro">
             {about.intro.map((line, index) => (

@@ -12,6 +12,12 @@
   margin-bottom: 6rem;
 }
 
+@media screen and (max-width: 860px) {
+  .studio-section .focus-grid {
+    margin-bottom: 3rem;
+  }
+}
+
 /* Process rail */
 .process-rail {
   position: relative;
@@ -67,13 +73,40 @@
   color: var(--sw-text-muted);
 }
 
+/* `1fr` is `minmax(auto, 1fr)`, and the auto minimum is the step's min-content width — a
+   long mono word or the "SHIP &" title is enough to push both tracks wider than the rail,
+   which is why the second column ran off the side of the screen. `minmax(0, 1fr)` lets the
+   copy wrap inside the track instead. */
 @media screen and (max-width: 1500px) {
   .process-rail {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 2.5rem;
     row-gap: 3.5rem;
   }
 
   .process-rail::before {
     display: none;
+  }
+}
+
+/* Two columns of ~140px is narrower than the mono copy can wrap in without breaking every
+   line into two or three words, so the rail goes single-file on a phone. */
+@media screen and (max-width: 700px) {
+  .process-rail {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 2.5rem;
+    padding-top: 1rem;
+  }
+
+  .process-step-number {
+    font-size: 2.25rem;
+  }
+
+  .process-step-title {
+    font-size: 1.2rem;
+  }
+
+  .process-step-desc {
+    font-size: 0.9rem;
   }
 }

@@ -10,6 +10,7 @@ import { SWYMBLE_SOCIALS } from './home/socials';
 import { SWYMBLE_TECH_STACK_SECTION } from './home/stack';
 import { SWYMBLE_LABS } from './labs';
 import { SWYMBLE_PROJECTS } from './projects/projects';
+import { SWYMBLE_RESUME } from './resume';
 import type { SwymbleData } from './types';
 
 export * from './types';
@@ -25,6 +26,7 @@ export * from './types';
 // - projects: projects/projects.ts
 // - about: about/about.ts
 // - career repository (About page git-graph): about/career/index.ts
+// - resume overlay (/resume summary, bullets, skill groups): resume.ts
 // - labs (one file per lab, named after its id): labs/
 // - blog: blog/
 export const SWYMBLE_DATA: SwymbleData = {
@@ -41,6 +43,7 @@ export const SWYMBLE_DATA: SwymbleData = {
   endCardMobileImage: SWYMBLE_BRANDING.endCardMobileImage,
   about: SWYMBLE_ABOUT,
   career: SWYMBLE_CAREER,
+  resume: SWYMBLE_RESUME,
   labs: SWYMBLE_LABS,
   blog: SWYMBLE_BLOG,
   socials: SWYMBLE_SOCIALS,
