@@ -343,3 +343,175 @@
     padding: 2rem 1.2rem;
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Accordion — the ≤780px rendering (see LabAccordion.tsx)                     */
+/*                                                                            */
+/* Collapsed rows show the logo, the name and the status; everything else is   */
+/* behind the tap. Only one panel is open at a time, so the list never grows   */
+/* past a screen or two however many labs there are.                          */
+/* -------------------------------------------------------------------------- */
+
+.labs-accordion {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.lab-row {
+  border: 1px solid var(--muted);
+  border-radius: var(--sw-radius-card);
+  background: rgba(20, 20, 20, 0.6);
+  overflow: hidden;
+  transition: border-color var(--sw-motion-med) var(--sw-ease-standard),
+    box-shadow var(--sw-motion-med) var(--sw-ease-standard);
+}
+
+.lab-row--open {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 12px 30px -14px rgba(0, 240, 255, 0.45);
+}
+
+.lab-row__header {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.95rem;
+  padding: 0.85rem 0.95rem;
+  background: transparent;
+  border: none;
+  text-align: left;
+  color: inherit;
+}
+
+.lab-row__thumb {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--sw-border-soft);
+  border-radius: 0.6rem;
+  background: #000;
+  overflow: hidden;
+}
+
+.lab-row__thumb img {
+  width: 100%;
+  height: 100%;
+  /* SmartImage already picks contain + padding for a `*_logo` source; this only pins the box. */
+  transition: filter var(--sw-motion-med) var(--sw-ease-standard),
+    opacity var(--sw-motion-med) var(--sw-ease-standard);
+  filter: grayscale(100%);
+  opacity: 0.75;
+}
+
+.lab-row--open .lab-row__thumb {
+  border-color: rgba(var(--sw-accent-cyan-rgb), 0.5);
+}
+
+.lab-row--open .lab-row__thumb img {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+.lab-row__identity {
+  display: grid;
+  gap: 0.3rem;
+  justify-items: start;
+  min-width: 0;
+}
+
+.lab-row__title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--text-main);
+  transition: color var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.lab-row--open .lab-row__title {
+  color: var(--accent-cyan);
+}
+
+.lab-row__category {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-volt);
+  /* Categories run long ("ARTIFICIAL INTELLIGENCE"); one line, elided, keeps every row the
+     same height so the collapsed list reads as a list. */
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lab-row__status {
+  /* Smaller than the card's overlay badge — here it is a third line of metadata, not a label
+     floating over an image. */
+  font-size: 0.6rem;
+  letter-spacing: 0.09em;
+  padding: 0.24rem 0.6rem 0.24rem 0.5rem;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.lab-row__chevron {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--sw-border-soft);
+  color: var(--sw-text-muted);
+}
+
+.lab-row--open .lab-row__chevron {
+  border-color: rgba(var(--sw-accent-cyan-rgb), 0.5);
+  color: var(--accent-cyan);
+}
+
+/* The animated element is height-only; all padding lives on the inner div. Padding on the
+   animating element would be added to a height of 0 and leave a visible stub when closed. */
+.lab-row__panel {
+  overflow: hidden;
+}
+
+.lab-row__panel-inner {
+  padding: 0.35rem 0.95rem 1.1rem;
+  border-top: 1px solid var(--sw-border-soft);
+  margin-top: 0.35rem;
+}
+
+.lab-row__panel-inner .lab-visibility-badge {
+  display: inline-block;
+  margin-bottom: 0.9rem;
+}
+
+.lab-row__panel-inner .lab-desc {
+  font-size: 0.92rem;
+  margin-bottom: 1rem;
+}
+
+.lab-row__panel-inner .lab-highlights {
+  margin-bottom: 1rem;
+}
+
+.lab-row__panel-inner .lab-tags {
+  margin-top: 0;
+  padding-top: 0;
+  margin-bottom: 0.85rem;
+}
+
+.lab-row__panel-inner .lab-updated {
+  margin-bottom: 1.1rem;
+}
+
+.lab-row__panel-inner .lab-btn {
+  flex: 1 1 auto;
+}

@@ -44,14 +44,33 @@
   background: radial-gradient(circle, rgba(var(--sw-accent-volt-rgb), 0.28), transparent 70%);
 }
 
+/* Positioning context for the watermark. NOT `.hero-wordmark` — that class is already taken by
+   the span of magnetic letters inside the title (HeroWordmark.tsx), and styling both with one
+   rule stretches the letter span to full width and left-aligns the title.
+
+   Flex rather than a plain block so the title doesn't sit on a line box: an inline-block's strut
+   adds leading above and below it, and the watermark centres on this element's box, so that
+   leading would push the mark off the letters. */
+.hero-wordmark-stack {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* Centred on .hero-wordmark-stack, so it tracks the title rather than the section — see DesktopHome.
+   No min-width: a 600px floor only ever binds below a ~630px viewport, that is, only on the
+   phones it breaks. The mark was laid out 600px wide inside a 390px screen, so both ends ran off
+   under .hero-section's clip and all that showed was the middle of one swoosh. 95vw alone keeps
+   the whole wordmark on screen at every size and is identical to the old rule on desktop. */
 .hero-bg-logo {
   position: absolute;
-  top: 52%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 95vw;
   max-width: 1400px;
-  min-width: 600px;
   height: auto;
   opacity: 0.25;
   z-index: 1;
@@ -264,6 +283,14 @@
 @media screen and (max-width: 900px) {
   .hero-telemetry {
     gap: 0.9rem 1.8rem;
+  }
+
+  /* On desktop the watermark is far wider than the wordmark, so the two read as separate layers.
+     At phone widths they end up nearly the same width and the mark's strokes cut through the
+     letters — pulled in and knocked back so it stays a backdrop rather than competing. */
+  .hero-bg-logo {
+    width: 84vw;
+    opacity: 0.16;
   }
 }
 

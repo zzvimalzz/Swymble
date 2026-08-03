@@ -42,24 +42,31 @@ export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHome
       <motion.section className="hero-section" style={{ y: heroY, opacity: heroOpacity }}>
         <HeroField />
 
-        <div className="hero-bg-logo" aria-hidden="true">
-          <img
-            src={`${baseUrl}images/white-logo.png`}
-            alt=""
-            loading="eager"
-            fetchPriority="high"
-            width={980}
-            height={342}
-          />
-        </div>
+        {/* Watermark and wordmark share a wrapper so the watermark is centred on the *title*
+            rather than on the hero section. They are not the same point: the section centres its
+            whole stack, so the tagline and telemetry below push the title above the section's
+            middle by an amount that changes with viewport height and how many lines the tagline
+            wraps to. Anchored here, the watermark sits behind the wordmark at every size. */}
+        <div className="hero-wordmark-stack">
+          <div className="hero-bg-logo" aria-hidden="true">
+            <img
+              src={`${baseUrl}images/white-logo.png`}
+              alt=""
+              loading="eager"
+              fetchPriority="high"
+              width={980}
+              height={342}
+            />
+          </div>
 
-        <h1
-          className="hero-title glitch-mega"
-          data-cursor="hover"
-          aria-label={SWYMBLE_DATA.name}
-        >
-          <HeroWordmark text={SWYMBLE_DATA.name} />
-        </h1>
+          <h1
+            className="hero-title glitch-mega"
+            data-cursor="hover"
+            aria-label={SWYMBLE_DATA.name}
+          >
+            <HeroWordmark text={SWYMBLE_DATA.name} />
+          </h1>
+        </div>
 
         <motion.p
           className="hero-tagline"

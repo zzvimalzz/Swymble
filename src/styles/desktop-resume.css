@@ -244,21 +244,61 @@
   margin-bottom: 3rem;
 }
 
-.resume-jump__list {
-  display: flex;
-  gap: 0.35rem;
-  list-style: none;
-  margin: 0;
-  padding: 0.4rem;
+/* The bar owns the chrome and the edge fades; the list inside it is what scrolls. Keeping those
+   on separate elements is what lets the fades stay pinned to the bar's edges instead of sliding
+   away with the content they are supposed to be fading. */
+.resume-jump__bar {
+  position: relative;
   border: 1px solid var(--sw-border-soft);
   border-radius: var(--sw-radius-pill);
   background: rgba(8, 8, 8, 0.86);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: var(--sw-shadow-panel);
-  /* Falls back to a swipeable strip rather than wrapping to two rows on a narrow phone. */
+  overflow: hidden;
+}
+
+.resume-jump__bar::before,
+.resume-jump__bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2.25rem;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity var(--sw-motion-med) var(--sw-ease-standard);
+}
+
+.resume-jump__bar::before {
+  left: 0;
+  background: linear-gradient(90deg, rgba(8, 8, 8, 0.95), rgba(8, 8, 8, 0));
+}
+
+.resume-jump__bar::after {
+  right: 0;
+  background: linear-gradient(270deg, rgba(8, 8, 8, 0.95), rgba(8, 8, 8, 0));
+}
+
+.resume-jump__bar--fade-start::before,
+.resume-jump__bar--fade-end::after {
+  opacity: 1;
+}
+
+.resume-jump__list {
+  display: flex;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem;
+  /* Positioned so the active button's offsetLeft is measured against the strip, which is what
+     the centre-the-active-pill scroll in ResumeJumpRow reads. */
+  position: relative;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .resume-jump__list::-webkit-scrollbar {
@@ -266,6 +306,7 @@
 }
 
 .resume-jump__item {
+  position: relative;
   flex: 0 0 auto;
   border: none;
   background: transparent;
@@ -277,18 +318,36 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--sw-text-muted);
-  transition: color var(--sw-motion-fast) var(--sw-ease-standard),
-    background var(--sw-motion-fast) var(--sw-ease-standard);
+  transition: color var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+/* The highlight is one shared element that framer-motion moves between buttons, so it slides
+   along the strip. It sits *behind* the label rather than being the button's own background,
+   which is what lets a single element be the highlight for all of them. */
+.resume-jump__indicator {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--sw-radius-pill);
+  background: var(--sw-accent-volt);
+  box-shadow: 0 0 18px -4px rgba(var(--sw-accent-volt-rgb), 0.65);
+}
+
+.resume-jump__label {
+  position: relative;
+  z-index: 1;
 }
 
 .resume-jump__item:hover {
   color: var(--sw-text-main);
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .resume-jump__item--active {
   color: var(--sw-bg-ink);
-  background: var(--sw-accent-volt);
+}
+
+.resume-jump__item--active:hover {
+  color: var(--sw-bg-ink);
 }
 
 /* ── Section ── */
@@ -718,28 +777,29 @@
     margin-bottom: 2.25rem;
   }
 
-  /* Five labels don't fit one 390px line, and a sideways-scrolling strip hides the last section
-     behind an edge with nothing to say it's there. Wrapping to two rows costs ~30px of a screen
-     the top nav has already vacated and keeps every section visible. */
+  /* Five labels don't fit one 390px line, so the strip scrolls. That only works because the
+     active pill scrolls itself into view and the bar fades at whichever edge still has strip
+     behind it — without both, the last section is just invisible. */
   .resume-jump__list {
-    flex-wrap: wrap;
-    overflow-x: visible;
-    border-radius: var(--sw-radius-panel);
-    padding: 0.35rem;
-    gap: 0.25rem;
+    padding: 0.3rem;
+    gap: 0.2rem;
   }
 
   .resume-jump__item {
-    padding: 0.45rem 0.75rem;
-    font-size: 0.66rem;
-    letter-spacing: 0.07em;
+    /* Thumb-sized rather than mouse-sized: this is the primary way round the page on a phone. */
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
   }
 
   .resume-section {
     margin-bottom: 2.75rem;
-    /* Clears the two-row jump bar (~6rem) plus the 0.6rem it sits off the top, or a jumped-to
-       heading lands underneath it. */
-    scroll-margin-top: 8rem;
+    /* Clears the single-row jump bar (~3.2rem) plus the 0.6rem it sits off the top, or a
+       jumped-to heading lands underneath it. */
+    scroll-margin-top: 5.5rem;
   }
 
   .resume-hero {

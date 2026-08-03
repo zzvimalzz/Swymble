@@ -1,24 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import LabAccordion from '../../components/desktop/Labs/LabAccordion';
+import { LabActions, STATUS_MODIFIER } from '../../components/desktop/Labs/labPresentation';
 import SmartImage from '../../components/SmartImage';
+import useMediaQuery from '../../hooks/useMediaQuery';
 import { SWYMBLE_DATA } from '../../data/config';
-import type { SwymbleLab } from '../../data/types';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
-import { isMailtoLink } from '../../utils/mailto';
 import '../../styles/desktop-labs.css';
 
-/** Status to CSS modifier. Typed against SwymbleLab['status'], so adding a status without giving
- *  it a colour is a compile error rather than a silently unstyled badge. */
-const STATUS_MODIFIER: Record<SwymbleLab['status'], string> = {
-  Live: 'live',
-  'In Development': 'development',
-  'Private Beta': 'beta',
-};
+/** Where the card grid has already collapsed to one column, and the stacked cards get long. */
+const COMPACT_QUERY = '(max-width: 780px)';
 
 export default function DesktopLabs() {
   const location = useLocation();
   const visibleLabs = SWYMBLE_DATA.labs?.filter((lab) => lab.visibility !== 'private') ?? [];
+
+  const isCompact = useMediaQuery(COMPACT_QUERY);
+  // Null, not the first lab: the point of collapsing is that the whole list is visible at once,
+  // and opening one by default puts the reader back to scrolling before they have chosen anything.
+  const [openLabId, setOpenLabId] = useState<string | null>(null);
 
   // Depend on the primitive pathname, not the `location` object itself. See DesktopProjects.tsx
   // for why depending on the whole object causes a scroll-to-top mid-scroll.
@@ -26,34 +27,12 @@ export default function DesktopLabs() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  const renderActionLink = (href: string, label: string, className: string) => {
-    if (href.startsWith('/')) {
-      return (
-        <Link to={href} className={className}>
-          {label}
-        </Link>
-      );
-    }
-
-    const isMailto = isMailtoLink(href);
-
-    return (
-      <a
-        href={href}
-        {...(isMailto ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
-        className={className}
-      >
-        {label}
-      </a>
-    );
-  };
-
   return (
     <section className="layout-content desktop-labs-page">
       <div className="section-header">
         <h1>SWYMBLE LABS</h1>
       </div>
-      
+
       <p className="labs-subtitle">
         In-progress experiments and proprietary systems.
       </p>
@@ -69,17 +48,15 @@ export default function DesktopLabs() {
             REQUEST PRIVATE BRIEFING
           </a>
         </div>
+      ) : isCompact ? (
+        <LabAccordion
+          labs={visibleLabs}
+          openId={openLabId}
+          onToggle={(id) => setOpenLabId((current) => (current === id ? null : id))}
+        />
       ) : (
-      <div className="labs-grid">
-        {visibleLabs.map((labItem, index) => {
-          const categoryAccentStyle = getCategoryAccentStyle(labItem.category, labItem.categoryColor);
-          const labActions = labItem.actions?.length
-            ? labItem.actions
-            : labItem.primaryAction
-              ? [labItem.primaryAction]
-              : [];
-
-          return (
+        <div className="labs-grid">
+          {visibleLabs.map((labItem, index) => (
             <motion.div
               key={labItem.id}
               className="lab-card"
@@ -90,13 +67,11 @@ export default function DesktopLabs() {
               transition={{ delay: index * 0.1, duration: 0.5 }}
             >
               <div className="lab-card-image-wrap">
-                <SmartImage
-                  src={labItem.image}
-                  alt={labItem.title}
-                  className="lab-card-image"
-                />
+                <SmartImage src={labItem.image} alt={labItem.title} className="lab-card-image" />
                 <div className="lab-card-overlay">
-                  <span className={`lab-status-badge lab-status-badge--${STATUS_MODIFIER[labItem.status]}`}>
+                  <span
+                    className={`lab-status-badge lab-status-badge--${STATUS_MODIFIER[labItem.status]}`}
+                  >
                     {labItem.status.toUpperCase()}
                   </span>
                 </div>
@@ -104,7 +79,12 @@ export default function DesktopLabs() {
 
               <div className="lab-card-content">
                 <div className="lab-meta">
-                  <span className="lab-category category-accent-text" style={categoryAccentStyle}>{labItem.category}</span>
+                  <span
+                    className="lab-category category-accent-text"
+                    style={getCategoryAccentStyle(labItem.category, labItem.categoryColor)}
+                  >
+                    {labItem.category}
+                  </span>
                   <span className={`lab-visibility-badge visibility-${labItem.visibility}`}>
                     {labItem.visibility.toUpperCase()}
                   </span>
@@ -130,35 +110,11 @@ export default function DesktopLabs() {
 
                 <div className="lab-updated">UPDATED {labItem.updatedAt.toUpperCase()}</div>
 
-                <div className="lab-actions">
-                  {labActions.map((action, actionIndex) => {
-                    const isSecondary = action.variant === 'secondary' || actionIndex > 0;
-
-                    return (
-                      <span key={`${labItem.id}-${action.label}`}>
-                        {renderActionLink(action.href, action.label, `lab-btn${isSecondary ? ' secondary' : ''}`)}
-                      </span>
-                    );
-                  })}
-
-                  {(labItem.blogCategoryId || labItem.blogLink) && (
-                    <Link
-                      to={labItem.blogCategoryId ? `/blog?category=${encodeURIComponent(labItem.blogCategoryId)}` : (labItem.blogLink as string)}
-                      className={`lab-btn ${labActions.length > 0 ? 'secondary' : ''}`}
-                    >
-                      READ BLOG
-                    </Link>
-                  )}
-
-                  {labActions.length === 0 && !labItem.blogCategoryId && !labItem.blogLink && (
-                    <div className="lab-btn disabled">NO PUBLIC ACTION</div>
-                  )}
-                </div>
+                <LabActions lab={labItem} />
               </div>
             </motion.div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
       )}
     </section>
   );
