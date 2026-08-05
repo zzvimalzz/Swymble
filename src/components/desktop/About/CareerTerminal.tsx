@@ -109,7 +109,7 @@ export default function CareerTerminal({ context }: { context: TerminalContext }
   return (
     <Reveal as="section" className="terminal-section" id="shell" y={24} margin="-80px">
       <div className="terminal-section__head">
-        <p className="about-section__kicker">05 &middot; /bin/swymble</p>
+        <p className="about-section__kicker">06 &middot; /bin/swymble</p>
         <h2 className="about-section__heading">Ask it yourself</h2>
         <p className="about-section__lede">
           Everything above, queryable. It runs against the same data the graph does. Try{' '}

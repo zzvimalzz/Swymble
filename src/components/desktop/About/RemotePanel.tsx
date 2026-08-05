@@ -16,7 +16,7 @@ export default function RemotePanel({ socials, availabilityLabel }: RemotePanelP
   return (
     <Reveal as="section" className="remote" id="remote" y={24} margin="-80px">
       <div className="remote__head">
-        <p className="about-section__kicker">06 &middot; git remote -v</p>
+        <p className="about-section__kicker">07 &middot; git remote -v</p>
         <h2 className="about-section__heading">Where to find me</h2>
       </div>
 

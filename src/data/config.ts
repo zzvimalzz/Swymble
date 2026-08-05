@@ -2,6 +2,7 @@ import { SWYMBLE_ABOUT } from './about/about';
 import { SWYMBLE_CAREER } from './about/career';
 import { SWYMBLE_BLOG } from './blog';
 import { SWYMBLE_BRANDING } from './home/branding';
+import { SWYMBLE_FAQ } from './home/faq';
 import { SWYMBLE_LATEST_UPDATES } from './home/latestupdates';
 import { SWYMBLE_POSITIONING } from './home/positioning';
 import { SWYMBLE_PROCESS } from './home/process';
@@ -20,6 +21,7 @@ export * from './types';
 // - socials (footer/contact, used site-wide): home/socials.ts
 // - positioning (homepage claim + shipped/lab/blog counters): home/positioning.ts
 // - tech stack logos + "what I build" list (homepage, after WORK WITH ME): home/stack.ts
+// - sitewide FAQ ("What is Swymble?", rendered on /about + FAQPage schema): home/faq.ts
 // - latest updates: home/latestupdates.ts
 // - studio services (WORK WITH ME): home/services.ts
 // - studio process (01-04 steps): home/process.ts
@@ -47,4 +49,5 @@ export const SWYMBLE_DATA: SwymbleData = {
   labs: SWYMBLE_LABS,
   blog: SWYMBLE_BLOG,
   socials: SWYMBLE_SOCIALS,
+  faq: SWYMBLE_FAQ,
 };

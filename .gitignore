@@ -35,6 +35,14 @@ desktop.ini
 # Folders
 /swymble_assets/
 
+# IndexNow ownership-verification key file, written into public/ at build time from
+# INDEXNOW_KEY (see scripts/generate-indexnow-key.mjs). Its name is the key itself, so it can't
+# be matched by name — everything else in public/ that ends in .txt is checked in explicitly.
+/public/*.txt
+!/public/robots.txt
+!/public/llms.txt
+!/public/llms-full.txt
+
 # Env files
 .env
 .env.*

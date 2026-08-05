@@ -1,0 +1,250 @@
+/* /labs/<id> — a single lab's page. Reuses the lab card's badge, tag and highlight classes from
+   desktop-labs.css (imported by the /labs page) so a status pill looks the same in both places;
+   everything here is the page-level layout those pieces sit in. */
+
+.lab-detail-page {
+  padding-top: 12rem;
+  padding-bottom: 8rem;
+  min-height: 80vh;
+}
+
+.lab-detail-breadcrumbs {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.lab-detail-breadcrumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lab-detail-breadcrumbs li + li::before {
+  content: '/';
+  margin-right: 0.5rem;
+  color: var(--sw-line-muted);
+}
+
+.lab-detail-breadcrumbs a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.lab-detail-breadcrumbs a:hover,
+.lab-detail-breadcrumbs a:focus-visible {
+  color: var(--sw-accent-volt);
+}
+
+.lab-detail-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 3rem;
+  align-items: start;
+  margin-top: 2rem;
+  padding-bottom: 3rem;
+  border-bottom: 1px solid var(--sw-border-soft);
+}
+
+.lab-detail-title {
+  font-family: var(--sw-font-display);
+  font-size: clamp(2.6rem, 6vw, 4.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  margin: 0.6rem 0 1.2rem;
+}
+
+.lab-detail-lede {
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: #d6d6d6;
+  max-width: 62ch;
+  margin: 0;
+}
+
+.lab-detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.6rem 0;
+}
+
+.lab-detail-logo {
+  border: 1px solid var(--sw-border-soft);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--sw-radius-card);
+  padding: 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+.lab-detail-logo img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.lab-detail-section {
+  margin-top: 3.5rem;
+  max-width: 78ch;
+}
+
+.lab-detail-section h2 {
+  font-family: var(--sw-font-display);
+  font-size: 1.6rem;
+  letter-spacing: 0.01em;
+  margin-bottom: 1.2rem;
+}
+
+.lab-detail-paragraph {
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: #c9c9c9;
+  margin-bottom: 1.2rem;
+}
+
+.lab-detail-features {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.lab-detail-feature {
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-card);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 1.4rem;
+}
+
+.lab-detail-feature h3 {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sw-accent-volt);
+  margin-bottom: 0.6rem;
+}
+
+.lab-detail-feature p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #c1c1c1;
+}
+
+.lab-detail-specs {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--sw-border-soft);
+}
+
+.lab-detail-spec {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--sw-border-soft);
+}
+
+.lab-detail-spec dt {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lab-detail-spec dd {
+  margin: 0;
+  color: #dcdcdc;
+}
+
+.lab-detail-faq {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.lab-detail-faq-item h3 {
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+  color: var(--sw-text-main);
+}
+
+.lab-detail-faq-item p {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #c1c1c1;
+}
+
+.lab-detail-more {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.lab-detail-more a {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-card);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--sw-motion-fast) var(--sw-ease-standard),
+    background-color var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.lab-detail-more a:hover,
+.lab-detail-more a:focus-visible {
+  border-color: var(--sw-border-volt);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.lab-detail-more strong {
+  font-family: var(--sw-font-display);
+  font-size: 1.05rem;
+}
+
+.lab-detail-more span {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .lab-detail-header {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  /* Logo above the wall of text on a phone: it is the fastest confirmation you landed on the
+     right product, and 220px of it stranded at the bottom of the page helps nobody. */
+  .lab-detail-logo {
+    order: -1;
+    justify-self: start;
+    width: 150px;
+  }
+
+  .lab-detail-features {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lab-detail-spec {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .lab-detail-page {
+    padding-top: 9rem;
+  }
+}

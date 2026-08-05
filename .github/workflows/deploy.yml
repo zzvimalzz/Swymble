@@ -49,6 +49,13 @@ jobs:
 
       - name: Build site
         run: npm run build
+        env:
+          # Ownership-verification tokens and the IndexNow key. All three are public values that
+          # end up in the deployed site, so repository *variables* are the right home for them —
+          # they are not secrets. Each is optional: unset, the build simply omits that piece.
+          GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION }}
+          BING_SITE_VERIFICATION: ${{ vars.BING_SITE_VERIFICATION }}
+          INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
 
       # Report-only Lighthouse audit of the built pages (results land in the job log with a
       # temporary public report URL). continue-on-error keeps flaky runners from blocking deploys.
@@ -74,3 +81,18 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      # Tells Bing (and Yandex/Seznam) that these URLs changed, instead of waiting to be
+      # re-crawled. Runs after the deploy so the key file it references is already live.
+      # No-ops when INDEXNOW_KEY is unset, and never fails the job — the deploy has already
+      # succeeded by this point and a rejected ping is not a reason to mark it red.
+      - name: Checkout (for the submission script)
+        if: vars.INDEXNOW_KEY != ''
+        uses: actions/checkout@v4
+
+      - name: Notify IndexNow
+        if: vars.INDEXNOW_KEY != ''
+        continue-on-error: true
+        env:
+          INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
+        run: npm run submit:indexnow

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { SWYMBLE_DATA } from './config';
 import { parseDateKey } from '../components/desktop/CareerRepository/layout';
 import { buildResumeModel } from '../utils/resumeModel';
+import { labDisplayName, labSeoDescription, labSeoTitle } from '../utils/labSeo';
 
 // Content lives in plain TS files edited by hand — these tests catch the mistakes a
 // typechecker can't: duplicate ids/anchors, malformed dates, dangling category references,
@@ -28,6 +29,43 @@ describe('labs', () => {
           /^(\/|https?:\/\/|mailto:)/,
         );
       }
+    }
+  });
+
+  // Each lab's id is its URL at /labs/<id>, and these fields are what the page's <title> and
+  // meta description are built from. A slug with a space in it, or a description long enough to
+  // be cut off mid-sentence in a search result, is invisible to a typechecker.
+  it('has URL-safe ids (ids double as /labs/<id> routes)', () => {
+    for (const lab of SWYMBLE_DATA.labs) {
+      expect(lab.id, `lab ${lab.id} id`).toMatch(/^[a-z0-9][a-z0-9-]*$/);
+    }
+  });
+
+  it('keeps lab meta descriptions inside the ~160 char snippet budget', () => {
+    for (const lab of SWYMBLE_DATA.labs) {
+      expect(labSeoDescription(lab).length, `lab ${lab.id} description`).toBeLessThanOrEqual(160);
+
+      if (lab.detail) {
+        // The one-liner is the description verbatim — if it needs truncating, the ellipsis is
+        // visible in the search result and the sentence never finishes.
+        expect(lab.detail.oneLiner.length, `lab ${lab.id} oneLiner`).toBeLessThanOrEqual(160);
+      }
+    }
+  });
+
+  it('keeps lab page titles short enough not to be truncated in results', () => {
+    for (const lab of SWYMBLE_DATA.labs) {
+      expect(labSeoTitle(lab).length, `lab ${lab.id} title`).toBeLessThanOrEqual(70);
+    }
+  });
+
+  it('names the lab in its own one-liner, so a quoted answer says what it is about', () => {
+    for (const lab of SWYMBLE_DATA.labs) {
+      if (!lab.detail) continue;
+      expect(
+        lab.detail.oneLiner.toLowerCase(),
+        `lab ${lab.id} oneLiner should contain "${labDisplayName(lab)}"`,
+      ).toContain(labDisplayName(lab).toLowerCase());
     }
   });
 });

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import LabAccordion from '../../components/desktop/Labs/LabAccordion';
 import { LabActions, STATUS_MODIFIER } from '../../components/desktop/Labs/labPresentation';
 import SmartImage from '../../components/SmartImage';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import { SWYMBLE_DATA } from '../../data/config';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
+import { labsIndexJsonLd } from '../../utils/labSeo';
 import '../../styles/desktop-labs.css';
 
 /** Where the card grid has already collapsed to one column, and the stacked cards get long. */
@@ -29,6 +30,17 @@ export default function DesktopLabs() {
 
   return (
     <section className="layout-content desktop-labs-page">
+      {/* Says "this page is a list of N named products, and here they are" rather than leaving a
+          crawler to infer it from a grid of divs. Inline rather than in useRouteSeo because it is
+          derived from the same `visibleLabs` the page renders, so the two cannot disagree. */}
+      {visibleLabs.length > 0 && (
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(labsIndexJsonLd(visibleLabs)) }}
+        />
+      )}
+
       <div className="section-header">
         <h1>SWYMBLE LABS</h1>
       </div>
@@ -89,7 +101,9 @@ export default function DesktopLabs() {
                     {labItem.visibility.toUpperCase()}
                   </span>
                 </div>
-                <h3 className="lab-title">{labItem.title}</h3>
+                <h3 className="lab-title">
+                  <Link to={`/labs/${labItem.id}`}>{labItem.title}</Link>
+                </h3>
                 <p className="lab-desc">{labItem.publicSummary}</p>
 
                 <ul className="lab-highlights">
@@ -110,7 +124,7 @@ export default function DesktopLabs() {
 
                 <div className="lab-updated">UPDATED {labItem.updatedAt.toUpperCase()}</div>
 
-                <LabActions lab={labItem} />
+                <LabActions lab={labItem} showDetailLink />
               </div>
             </motion.div>
           ))}

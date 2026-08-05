@@ -18,6 +18,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
 import { ROOT_DIR, loadRouteData, loadBlogPosts } from './lib/route-data.mjs';
+import { loadLabs, labRoutePath } from './lib/lab-data.mjs';
 
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const SNAPSHOT_TIMEOUT_MS = 20_000;
@@ -146,11 +147,12 @@ const snapshotRoute = async (page, baseUrl, routePath) => {
 };
 
 const run = async () => {
-  const [{ routes }, blogPosts] = await Promise.all([loadRouteData(), loadBlogPosts()]);
+  const [{ routes }, blogPosts, labs] = await Promise.all([loadRouteData(), loadBlogPosts(), loadLabs()]);
 
   const routePaths = routes.filter((route) => route.shouldIndex !== false).map((route) => route.path);
+  const labPaths = labs.map((lab) => labRoutePath(lab));
   const blogPaths = blogPosts.map((post) => `/blog/${post.id}`);
-  const allPaths = [...new Set([...routePaths, ...blogPaths])];
+  const allPaths = [...new Set([...routePaths, ...labPaths, ...blogPaths])];
 
   const server = await startStaticServer();
   const { port } = server.address();

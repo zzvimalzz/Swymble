@@ -36,11 +36,41 @@ function resolveSubdomainFromHost(hostHeader?: string) {
     return labels[0]
   }
 
-  if (labels.length > 2 && hostname.endsWith('.swymble.com')) {
+  // `www` is a canonical-host alias, not a subdomain app — see the matching guard in index.html.
+  if (labels.length > 2 && hostname.endsWith('.swymble.com') && labels[0] !== 'www') {
     return labels[0]
   }
 
   return null
+}
+
+/**
+ * Injects search-engine ownership-verification meta tags when the corresponding env vars are set,
+ * and nothing at all when they are not. Verifying the property in Google Search Console and Bing
+ * Webmaster Tools is what lets a sitemap actually be submitted (and indexing be requested) — the
+ * single highest-leverage step for a domain that has no inbound links yet.
+ *
+ * Set GOOGLE_SITE_VERIFICATION / BING_SITE_VERIFICATION in the build environment (GitHub Actions
+ * repository variables are enough; these tokens are not secrets, they end up in public HTML).
+ */
+function createSeoVerificationPlugin(): Plugin {
+  const tags: { name: string; content: string }[] = []
+  const google = process.env.GOOGLE_SITE_VERIFICATION?.trim()
+  const bing = process.env.BING_SITE_VERIFICATION?.trim()
+
+  if (google) tags.push({ name: 'google-site-verification', content: google })
+  if (bing) tags.push({ name: 'msvalidate.01', content: bing })
+
+  return {
+    name: 'swymble-seo-verification',
+    transformIndexHtml() {
+      return tags.map((tag) => ({
+        tag: 'meta',
+        attrs: { name: tag.name, content: tag.content },
+        injectTo: 'head' as const,
+      }))
+    },
+  }
 }
 
 function buildSubdomainRequestPath(subdomain: string, url: string) {
@@ -220,7 +250,7 @@ function createStaticSubdomainPlugin(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), createStaticSubdomainPlugin()],
+  plugins: [react(), createStaticSubdomainPlugin(), createSeoVerificationPlugin()],
   base: '/',
   test: {
     // Subdomain apps run their own test suites; this suite only covers the root site.

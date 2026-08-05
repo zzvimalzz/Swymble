@@ -1,42 +1,58 @@
 # SWYMBLE
 
-> SWYMBLE is the software studio and engineering portfolio of a
-> fintech-grade software engineer, showcasing production systems, client
-> work, and personal experiments built in the open.
+> Swymble is a one-person software studio and engineering lab based in Kuala
+> Lumpur, Malaysia. It builds websites, apps and AI systems for businesses as
+> client work, and develops its own experimental products under the name
+> Swymble Labs.
 
-Swymble is both a personal engineering brand and a small studio. The
-engineer behind it builds fintech and banking systems professionally,
-then applies the same discipline to independent products, AI-assisted
-tools, and client projects.
+Swymble is both a personal engineering brand and a small studio. The engineer
+behind it builds backend systems, APIs and AI platforms professionally —
+mostly on enterprise fintech platforms — and applies the same discipline to
+client projects and to independent products.
 
 ## Key pages
 
-- / : Home. Focus areas, featured projects, and the Swymble Universe map.
-- /projects : Case studies and shipped project write-ups.
-- /labs : Experimental builds and works in progress.
-- /blog : Writing on engineering, fintech systems, and building in public.
-- /about : Background, professional experience, and technical stack.
-- /contact : Get in touch about client work or collaboration.
+- https://swymble.com/ : The software studio and personal lab of a fintech grade engineer: client products, shipped projects, experiments, and the stories behind them.
+- https://swymble.com/projects : Websites, apps, and product builds shipped by SWYMBLE: client work and personal products, with the thinking behind each one.
+- https://swymble.com/labs : See SWYMBLE Labs experiments across AI, product R&D, prototypes, and in-progress ideas.
+- https://swymble.com/about : The engineer behind SWYMBLE: enterprise fintech experience, a one-person studio for client work, and a lab of personal builds and experiments.
+- https://swymble.com/resume : One-page resume: fintech platform engineering, a solo studio shipping client work, selected products, education and the full stack behind them.
+- https://swymble.com/blog : Read SWYMBLE notes on software engineering, AI systems, builds, lessons learned, and ideas worth documenting.
+- https://swymble.com/contact : Start a project with SWYMBLE. Tell me what you want to build and I will get back to you within 24 hours.
+
+## Swymble Labs projects
+
+Each lab has its own page with a full description, and several are live
+products anyone can use today.
+
+- https://swymble.com/labs/cortex : Cortex is a Swymble Labs AI platform built around persistent long-context memory and operator decision support for complex digital workflows.
+- https://swymble.com/labs/mybirth : MyBirth is a free web app that rebuilds the day you were born — moon phase, weather, headlines, music and film — as a shareable keepsake archive.
+- https://swymble.com/labs/mydompet : MyDompet is an offline-first money tracker for Android and iOS that keeps every transaction in SQLite on your own phone, with no account server.
+- https://swymble.com/labs/what2watch : what2watch is a free Swymble Labs web app that packs tens of thousands of movies and shows into one interactive voronoi wall you can browse by mood.
+- https://swymble.com/labs/watchpaintdry : Watch Paint Dry is a free browser toy: a wall of fresh paint, a timer counting how long you stare at it, and achievements for your patience.
+- https://swymble.com/labs/territory : Territory is a fitness gamification app from Swymble Labs that turns real-world movement into claimable territory on a virtual map.
+
+## Client projects
+
+- IB Solutions (IB Solutions (M)): I designed and built IB Solutions company profile from the ground up. They are a Malaysian professional services company specialising in corporate training and capability development. Live at https://ibsolutions.com.my.
+
+## Writing
+
+- https://swymble.com/blog/cortex-part-1 : Cortex - Part 1: The Introduction — An introduction to Cortex, my proprietary cognitive platform focused on long-context memory and conversation.
+
+## Other domains operated by Swymble
+
+- https://mybirth.swymble.com
+- https://www.watchpaintdry.net
+- https://what2watch.swymble.com
 
 ## Services
 
-Company profile sites, product builds, and AI-powered systems, delivered
-with enterprise-grade discipline drawn from fintech production work.
-
-## Related builds (subdomains)
-
-- https://mybirth.swymble.com : MyBirth. Turns a name, birth date, and
-  birthplace into a cinematic archive of the moon, weather, headlines,
-  music, film, and symbols from that day.
-- https://what2watch.swymble.com : what2watch. An interactive
-  force-directed voronoi visualization for exploring tens of thousands
-  of movies and shows, a Swymble Labs experiment.
-- https://www.watchpaintdry.net : Watch Paint Dry. A deliberately
-  pointless relaxation toy — a wall of fresh paint, a staring timer,
-  and achievements for patience — served from this repo on its own
-  domain as a Swymble Labs experiment.
+Company profile websites, product builds, and AI-powered systems, delivered
+solo end to end — scoping, UI/UX, implementation, deployment and support.
 
 ## Contact
 
 Email: hello@swymble.com
 Site: https://swymble.com
+Contact form: https://swymble.com/contact

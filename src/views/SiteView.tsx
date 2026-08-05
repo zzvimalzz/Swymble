@@ -20,6 +20,7 @@ import DesktopAbout from './desktop/DesktopAbout';
 import DesktopBlog from './desktop/DesktopBlog';
 import DesktopBlogPost from './desktop/DesktopBlogPost';
 import DesktopContact from './desktop/DesktopContact';
+import DesktopLabDetail from './desktop/DesktopLabDetail';
 import DesktopLabs from './desktop/DesktopLabs';
 import DesktopNotFound from './desktop/DesktopNotFound';
 import DesktopResume from './desktop/DesktopResume';
@@ -93,6 +94,14 @@ export default function SiteView() {
 
   const isHome = location.pathname === '/';
   const handleBack = () => {
+    // A lab page goes back to the labs index rather than into history — arriving on /labs/mydompet
+    // straight from a search result is the normal case for these pages, and there is nothing
+    // useful behind it.
+    if (location.pathname.startsWith('/labs/')) {
+      navigate('/labs');
+      return;
+    }
+
     // A blog post goes back to the list it came from, preserving the category filter; anything
     // else falls back to browser history, then home.
     if (location.pathname.startsWith('/blog/')) {
@@ -140,6 +149,7 @@ export default function SiteView() {
                   <Route key={route.path} path={route.path} element={routeElements[route.path]} />
                 ))}
                 <Route path="/blog/:id" element={<DesktopBlogPost />} />
+                <Route path="/labs/:id" element={<DesktopLabDetail />} />
                 <Route path="*" element={<DesktopNotFound />} />
               </Routes>
             </RouteTransitionFrame>

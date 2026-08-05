@@ -14,6 +14,12 @@
     <meta name="apple-mobile-web-app-title" content="SWYMBLE" />
 
     <link rel="canonical" href="https://swymble.com/" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="SWYMBLE Blog"
+      href="https://swymble.com/feed.xml"
+    />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="SWYMBLE" />
@@ -29,27 +35,94 @@
     <meta name="twitter:description" content="SWYMBLE is the software studio and personal lab of a fintech-grade engineer: building websites, apps, and AI systems for businesses, and documenting every build along the way." />
     <meta name="twitter:image" content="https://swymble.com/images/og-card.png" />
 
+    <!--
+      Sitewide entity graph. Everything here is stable across routes, so it lives in the HTML shell
+      rather than in useRouteSeo.ts (which only owns the per-route `data-swymble-jsonld` blocks).
+      The @id anchors let per-page structured data reference these nodes instead of redefining them,
+      which is what lets a search engine or an assistant treat "Swymble" as one entity rather than
+      as a different organisation on every page.
+    -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "SWYMBLE",
-        "url": "https://swymble.com",
-        "logo": "https://swymble.com/images/icon-512.png",
-        "sameAs": ["https://github.com/zzvimalzz"],
-        "email": "hello@swymble.com",
-        "description": "SWYMBLE is the software studio and personal lab of a fintech-grade engineer: building websites, apps, and AI systems for businesses, and documenting every build along the way.",
-        "knowsAbout": ["Software Engineering", "Web Development", "Fintech Systems", "AI Systems"]
-      }
-    </script>
-
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "SWYMBLE",
-        "alternateName": "Swymble",
-        "url": "https://swymble.com"
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://swymble.com/#organization",
+            "name": "SWYMBLE",
+            "alternateName": ["Swymble", "Swymble Studio", "Swymble Labs"],
+            "url": "https://swymble.com",
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://swymble.com/#logo",
+              "url": "https://swymble.com/images/icon-512.png",
+              "width": 512,
+              "height": 512,
+              "caption": "SWYMBLE"
+            },
+            "image": { "@id": "https://swymble.com/#logo" },
+            "description": "Swymble is a one-person software studio and engineering lab based in Kuala Lumpur, Malaysia. It builds websites, apps and AI systems for businesses, and runs its own experimental products under Swymble Labs.",
+            "slogan": "Products for businesses. Experiments for fun. Stories from both.",
+            "email": "hello@swymble.com",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Kuala Lumpur",
+              "addressCountry": "MY"
+            },
+            "areaServed": "Worldwide",
+            "founder": { "@id": "https://swymble.com/#person" },
+            "sameAs": ["https://github.com/zzvimalzz"],
+            "knowsAbout": [
+              "Software Engineering",
+              "Web Development",
+              "Backend Systems and APIs",
+              "Fintech Systems",
+              "AI Systems",
+              "Mobile App Development"
+            ],
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "contactType": "sales",
+                "email": "hello@swymble.com",
+                "url": "https://swymble.com/contact",
+                "availableLanguage": ["English"]
+              }
+            ]
+          },
+          {
+            "@type": "Person",
+            "@id": "https://swymble.com/#person",
+            "name": "Vimal",
+            "jobTitle": "Software Engineer",
+            "description": "Software engineer working on backend systems, APIs and AI platforms, with production experience on enterprise fintech platforms. Founder of Swymble.",
+            "url": "https://swymble.com/about",
+            "worksFor": { "@id": "https://swymble.com/#organization" },
+            "sameAs": ["https://github.com/zzvimalzz"],
+            "knowsAbout": [
+              "Backend Engineering",
+              "API Design",
+              "Fintech Platforms",
+              "AI Systems",
+              "Web Development"
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Kuala Lumpur",
+              "addressCountry": "MY"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://swymble.com/#website",
+            "name": "SWYMBLE",
+            "alternateName": "Swymble",
+            "url": "https://swymble.com",
+            "description": "Swymble is a one-person software studio and engineering lab based in Kuala Lumpur, Malaysia. It builds websites, apps and AI systems for businesses, and runs its own experimental products under Swymble Labs.",
+            "inLanguage": "en",
+            "publisher": { "@id": "https://swymble.com/#organization" }
+          }
+        ]
       }
     </script>
 
@@ -59,12 +132,24 @@
       (function (location) {
         var hostname = location.hostname.toLowerCase();
         var hostLabels = hostname.split('.').filter(Boolean);
+
+        // `www` is not a subdomain app. Without this guard the block below rewrote
+        // https://www.swymble.com/ to /subdomains/www/index.html, which does not exist — every
+        // www visit (and every crawl of a www link) landed on the 404 handler instead of the
+        // site. Send it to the canonical apex host instead, preserving the path.
+        if (hostname === 'www.swymble.com') {
+          location.replace(
+            'https://swymble.com' + location.pathname + location.search + location.hash,
+          );
+          return;
+        }
+
         var localhostSubdomain =
           hostLabels.length > 1 && hostLabels[hostLabels.length - 1] === 'localhost'
             ? hostLabels[0]
             : null;
         var swymbleSubdomain =
-          hostLabels.length > 2 && hostname.endsWith('.swymble.com')
+          hostLabels.length > 2 && hostname.endsWith('.swymble.com') && hostLabels[0] !== 'www'
             ? hostLabels[0]
             : null;
         var activeSubdomain = localhostSubdomain || swymbleSubdomain;

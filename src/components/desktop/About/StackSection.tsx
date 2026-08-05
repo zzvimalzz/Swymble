@@ -33,7 +33,7 @@ export default function StackSection({ stack, domains }: StackSectionProps) {
   return (
     <Reveal as="section" className="stack" id="stack" y={24} margin="-80px">
       <div className="stack__head">
-        <p className="about-section__kicker">02 &middot; The stack</p>
+        <p className="about-section__kicker">03 &middot; The stack</p>
         <h2 className="about-section__heading">What I build with</h2>
         <p className="about-section__lede">
           Hover anything to see what it is and where it actually got used.

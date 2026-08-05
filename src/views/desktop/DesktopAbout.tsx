@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import CareerRepository from '../../components/desktop/CareerRepository/CareerRepository';
 import CareerTerminal from '../../components/desktop/About/CareerTerminal';
 import ConfigPanel from '../../components/desktop/About/ConfigPanel';
+import FaqPanel from '../../components/desktop/About/FaqPanel';
 import ReadmePanel from '../../components/desktop/About/ReadmePanel';
 import RemotePanel from '../../components/desktop/About/RemotePanel';
 import RepoHeader from '../../components/desktop/About/RepoHeader';
@@ -12,7 +13,7 @@ import '../../styles/desktop-about.css';
 
 export default function DesktopAbout() {
   const location = useLocation();
-  const { about, career, labs, projects, socials } = SWYMBLE_DATA;
+  const { about, career, faq, labs, projects, socials } = SWYMBLE_DATA;
   const visibleLabs = labs.filter((lab) => lab.visibility !== 'private');
   // "Shipped and live" means exactly that: client projects plus the labs that are actually
   // reachable by a stranger. Everything else is still being built. Previously both numbers came
@@ -37,6 +38,10 @@ export default function DesktopAbout() {
       />
 
       <ReadmePanel sections={about.readme} pullQuote={about.pullQuote} />
+
+      {/* Sits right behind the README rather than at the foot of the page: it answers the same
+          question the README does, but in the literal words someone would type or ask. */}
+      <FaqPanel faq={faq} />
 
       <StackSection stack={about.stack} domains={about.skillDomains} />
 

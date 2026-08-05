@@ -17,6 +17,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { ROOT_DIR, loadRouteData, loadBlogPosts } from './lib/route-data.mjs';
+import { loadLabs, labRoutePath, labSeoTitle, labSeoDescription } from './lib/lab-data.mjs';
 
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const INDEX_HTML_PATH = path.join(DIST_DIR, 'index.html');
@@ -138,9 +139,10 @@ const writeRouteFile = async (routePath, html) => {
 };
 
 const run = async () => {
-  const [routeData, blogPosts, baseHtml] = await Promise.all([
+  const [routeData, blogPosts, labs, baseHtml] = await Promise.all([
     loadRouteData(),
     loadBlogPosts(),
+    loadLabs(),
     fs.readFile(INDEX_HTML_PATH, 'utf8'),
   ]);
 
@@ -173,6 +175,28 @@ const run = async () => {
     });
 
     await writeRouteFile(route.path, html);
+    writtenCount += 1;
+  }
+
+  // Lab pages. Unlike blog posts these get no JSON-LD injected here: the lab graph
+  // (SoftwareApplication + breadcrumbs + FAQPage) is built by src/utils/labSeo.ts and rendered
+  // by the app, and prerender-snapshot.mjs captures it from the real DOM. Reproducing that graph
+  // in this script would mean two copies of it, drifting apart the first time a field changes.
+  for (const lab of labs) {
+    const routePath = labRoutePath(lab);
+    const canonicalUrl = `${siteUrl}${routePath}`;
+    const image = toAbsoluteImageUrl(siteUrl, lab.image, defaultImage);
+
+    const html = stampHtml(baseHtml, {
+      title: labSeoTitle(lab, siteName),
+      description: labSeoDescription(lab),
+      canonicalUrl,
+      ogType: 'website',
+      image,
+      imageAlt: `${lab.seoName} — a ${siteName} Labs project`,
+    });
+
+    await writeRouteFile(routePath, html);
     writtenCount += 1;
   }
 

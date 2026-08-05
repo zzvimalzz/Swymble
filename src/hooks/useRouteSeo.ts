@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { SWYMBLE_DATA } from '../data/config';
+import type { SwymbleLab } from '../data/types';
 import { DEFAULT_SEO_IMAGE, SITE_NAME, SITE_URL, findSiteRoute } from '../routes';
+import { labImageUrl, labJsonLd, labSeoDescription, labSeoTitle } from '../utils/labSeo';
 
 type SeoPayload = {
   title: string;
@@ -13,6 +15,8 @@ type SeoPayload = {
   datePublished?: string;
   /** Human title used in article JSON-LD/breadcrumbs (without the "| SWYMBLE Blog" suffix). */
   articleTitle?: string;
+  /** Only set on /labs/<id>; drives the SoftwareApplication + breadcrumb + FAQ structured data. */
+  lab?: SwymbleLab;
 };
 
 const ensureMetaTag = (selector: string, attributes: Record<string, string>) => {
@@ -98,6 +102,22 @@ const buildSeoPayload = (pathname: string): SeoPayload => {
     };
   }
 
+  if (pathname.startsWith('/labs/')) {
+    const labId = pathname.replace('/labs/', '').replace(/\/$/, '');
+    const lab = SWYMBLE_DATA.labs?.find((entry) => entry.id === labId && entry.visibility !== 'private');
+
+    if (lab) {
+      return {
+        title: labSeoTitle(lab),
+        description: labSeoDescription(lab),
+        image: labImageUrl(lab),
+        type: 'website',
+        shouldIndex: true,
+        lab,
+      };
+    }
+  }
+
   if (pathname.startsWith('/blog/')) {
     const postId = pathname.replace('/blog/', '').replace(/\/$/, '');
     const post = SWYMBLE_DATA.blog.posts.find((entry) => entry.id === postId);
@@ -165,6 +185,10 @@ export function useRouteSeo() {
       'og:image:alt',
       payload.articleTitle ?? 'SWYMBLE wave logo: software studio, projects, experiments',
     );
+
+    // One block per lab page carrying the product, its breadcrumbs and its FAQ. Removed on every
+    // other route so a lab's structured data can't follow the reader onto the next page.
+    setRouteJsonLd('lab', payload.lab ? labJsonLd(payload.lab) : null);
 
     if (payload.type === 'article' && payload.datePublished) {
       setPropertyMeta('article:published_time', payload.datePublished);
