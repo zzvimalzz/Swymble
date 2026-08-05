@@ -32,4 +32,7 @@ npm run build    # everything, including prerendered HTML and generated SEO file
 - [`docs/swymble-hosting.md`](docs/swymble-hosting.md) — hosting, subdomains and Cloudflare setup
 - [`docs/search-visibility.md`](docs/search-visibility.md) — how the site is made findable, and
   the Search Console / Bing / backlink steps that live outside this repo
+- [`docs/agent-readiness.md`](docs/agent-readiness.md) — Markdown twins, typed links and WebMCP
+  for automated clients, plus why the OAuth/MCP/API-catalog discovery documents are deliberately
+  absent
 - Each folder under `src/data` has its own README with the field reference for that section

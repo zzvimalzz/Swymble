@@ -83,6 +83,7 @@ answer "what is Swymble?" — which is why IndexNow (section 2) and Bing Webmast
 | Generated `llms.txt` + new `llms-full.txt` | `scripts/generate-llms.mjs` | Every lab described in plain text, generated from the same data the site renders so it cannot drift |
 | RSS feed at `/feed.xml` | `scripts/generate-feed.mjs` | A second machine-readable door; aggregators and crawlers poll feeds faster than they re-crawl pages |
 | Google / Bing verification meta tags, env-driven | `vite.config.ts` | Makes section 3 a variable change rather than a code change |
+| A `.md` twin of every content page, typed `<link>` relations, WebMCP tools | see [`agent-readiness.md`](agent-readiness.md) | Assistants that fetch a page get the answer as clean text instead of 40 KB of markup around it |
 | IndexNow key file + post-deploy submission | `scripts/generate-indexnow-key.mjs`, `scripts/submit-indexnow.mjs` | Direct "these URLs exist" ping to Bing — the one discovery channel that does not require a link first |
 
 All of it is generated from `src/data`, so adding a lab or a post updates the sitemap, the

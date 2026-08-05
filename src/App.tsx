@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { BrowserRouter } from 'react-router-dom';
 import { useRouteSeo } from './hooks/useRouteSeo';
+import { useWebMcp } from './hooks/useWebMcp';
 
 const SiteView = lazy(() => import('./views/SiteView'));
 
@@ -49,6 +50,9 @@ function ContentReadySignal({ onReady }: { onReady: () => void }) {
 
 function AppContent() {
   useRouteSeo();
+  // Offers the site's labs, projects and writing as tools to browser agents that support WebMCP.
+  // No-ops everywhere else, which today is everywhere. See hooks/useWebMcp.ts.
+  useWebMcp();
 
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const [contentMounted, setContentMounted] = useState(false);

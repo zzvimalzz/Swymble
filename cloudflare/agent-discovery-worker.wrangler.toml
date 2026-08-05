@@ -1,0 +1,25 @@
+# Wrangler config for the agent-discovery Worker (Link headers + Accept: text/markdown).
+#
+# Deploy from the repo root:
+#   npx wrangler deploy --config cloudflare/agent-discovery-worker.wrangler.toml
+#
+# This one is different from the other workers in this folder: its route covers the WHOLE site,
+# not one path or one subdomain. Read cloudflare/agent-discovery-worker.js before deploying, and
+# see docs/agent-readiness.md for the lower-risk alternative (a Cloudflare Transform Rule adds
+# the Link header without any Worker in the request path — it just cannot do the Markdown
+# negotiation).
+#
+# Route precedence: Cloudflare picks the most specific matching route, so the contact worker's
+# `swymble.com/api/contact*` still handles the form. The Worker also skips /api/ itself, so a
+# misordered route cannot silently swallow form submissions.
+#
+# Rollback is `wrangler delete` (or removing the route in the dashboard) — the site is served by
+# GitHub Pages either way, and every .md file stays reachable at its own URL.
+
+name = "swymble-agent-discovery"
+main = "agent-discovery-worker.js"
+compatibility_date = "2026-08-01"
+
+[[routes]]
+pattern = "swymble.com/*"
+zone_name = "swymble.com"

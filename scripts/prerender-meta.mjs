@@ -18,6 +18,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { ROOT_DIR, loadRouteData, loadBlogPosts } from './lib/route-data.mjs';
 import { loadLabs, labRoutePath, labSeoTitle, labSeoDescription } from './lib/lab-data.mjs';
+import { hasMarkdown, markdownUrlFor } from './lib/markdown-routes.mjs';
 
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const INDEX_HTML_PATH = path.join(DIST_DIR, 'index.html');
@@ -61,11 +62,36 @@ const replaceCanonical = (html, href) => {
   return html.replace(pattern, (_match, pre, post) => `${pre}${escapeHtml(href)}${post}`);
 };
 
-const stampHtml = (baseHtml, { title, description, canonicalUrl, ogType, image, imageAlt }) => {
+/**
+ * Points this route's `<link rel="alternate" type="text/markdown">` at its own .md twin
+ * (scripts/generate-markdown.mjs writes them). Without this every page would advertise the
+ * homepage's Markdown, which is worse than advertising none — an agent would follow it and
+ * quietly answer about the wrong page.
+ */
+const replaceMarkdownAlternate = (html, href) => {
+  const pattern = /(<link rel="alternate" type="text\/markdown" href=")[^"]*(")/;
+
+  if (!pattern.test(html)) {
+    console.warn('[prerender-meta] Could not find <link rel="alternate" type="text/markdown"> to stamp.');
+    return html;
+  }
+
+  // No Markdown twin for this route — drop the element rather than leaving it. The tag lives in
+  // index.html pointing at the homepage's /index.md, so a route without its own .md would
+  // otherwise inherit that one and send an agent asking about /contact the homepage instead.
+  if (!href) {
+    return html.replace(/\s*<link rel="alternate" type="text\/markdown" href="[^"]*"\s*\/>/, '');
+  }
+
+  return html.replace(pattern, (_match, pre, post) => `${pre}${escapeHtml(href)}${post}`);
+};
+
+const stampHtml = (baseHtml, { title, description, canonicalUrl, ogType, image, imageAlt, markdownUrl }) => {
   let html = baseHtml;
   html = replaceTitle(html, title);
   html = replaceMetaContent(html, 'name', 'description', description);
   html = replaceCanonical(html, canonicalUrl);
+  html = replaceMarkdownAlternate(html, markdownUrl);
   html = replaceMetaContent(html, 'property', 'og:type', ogType);
   html = replaceMetaContent(html, 'property', 'og:title', title);
   html = replaceMetaContent(html, 'property', 'og:description', description);
@@ -172,6 +198,7 @@ const run = async () => {
       canonicalUrl,
       ogType: 'website',
       image: defaultImage,
+      markdownUrl: hasMarkdown(route.path) ? markdownUrlFor(siteUrl, route.path) : null,
     });
 
     await writeRouteFile(route.path, html);
@@ -194,6 +221,7 @@ const run = async () => {
       ogType: 'website',
       image,
       imageAlt: `${lab.seoName} — a ${siteName} Labs project`,
+      markdownUrl: markdownUrlFor(siteUrl, routePath),
     });
 
     await writeRouteFile(routePath, html);
@@ -212,6 +240,7 @@ const run = async () => {
       ogType: 'article',
       image,
       imageAlt: post.title,
+      markdownUrl: markdownUrlFor(siteUrl, routePath),
     });
     html = injectArticleHead(html, {
       title: post.title,
