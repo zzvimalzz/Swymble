@@ -32,6 +32,14 @@ const escapeHtml = (value) =>
 
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+/**
+ * Mirrors src/utils/jsonLd.ts — see that file for the reasoning. `JSON.stringify` leaves `<`
+ * alone, so a `</script>` sequence in the data would close the element early and the rest would
+ * be parsed as HTML. Not reachable while every value is a repo-authored constant; escaped anyway
+ * so it stays unreachable if that ever changes.
+ */
+const serializeJsonLd = (data) => JSON.stringify(data).replace(/</g, '\\u003c');
+
 // ---------------------------------------------------------------------------
 // HTML stamping — targeted regex replacement of the tags useRouteSeo.ts also manages client-side.
 // Everything else in index.html (the subdomain-redirect script, hashed asset tags, JSON-LD, etc.)
@@ -143,8 +151,8 @@ const injectArticleHead = (html, { title, description, canonicalUrl, image, date
     snippetLines.push(`    <meta property="article:published_time" content="${escapeHtml(datePublished)}" />`);
   }
   snippetLines.push(
-    `    <script type="application/ld+json" data-swymble-jsonld="article">${JSON.stringify(articleJsonLd)}</script>`,
-    `    <script type="application/ld+json" data-swymble-jsonld="breadcrumbs">${JSON.stringify(breadcrumbsJsonLd)}</script>`,
+    `    <script type="application/ld+json" data-swymble-jsonld="article">${serializeJsonLd(articleJsonLd)}</script>`,
+    `    <script type="application/ld+json" data-swymble-jsonld="breadcrumbs">${serializeJsonLd(breadcrumbsJsonLd)}</script>`,
   );
 
   return html.replace('</head>', `${snippetLines.join('\n')}\n  </head>`);

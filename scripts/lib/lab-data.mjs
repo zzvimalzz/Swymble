@@ -33,14 +33,31 @@ const parseLabSource = (source, fallbackId) => {
 
   const title = readStringField(cardBody, 'title') ?? fallbackId;
 
+  // `visibility` is read from the WHOLE source, not from cardBody, and defaults to 'private'.
+  //
+  // Both parts matter. This one field is the only gate keeping an unreleased product out of the
+  // sitemap, llms.txt, site-data.json (which the MCP server serves to any client), the .md twins
+  // and the IndexNow submission — so where it happens to sit in the file must not decide whether
+  // the product is published. Reading only the slice before `detail:` meant a lab that declared
+  // `visibility` after its detail block would silently parse as public. There is no nested
+  // `visibility` key inside `detail` for the wider search to collide with.
+  //
+  // Defaulting to 'private' means a parse failure hides a lab from the generated files rather
+  // than exposing one. The data-integrity test asserts this parser and the app agree on exactly
+  // which labs are public, so a lab disappearing here fails CI instead of going unnoticed.
+  const visibility = readStringField(source, 'visibility') ?? 'private';
+
   return {
     id: readStringField(cardBody, 'id') ?? fallbackId,
     title,
     // Mirrors labDisplayName() in src/utils/labSeo.ts.
     seoName: readStringField(cardBody, 'seoName') ?? title,
     category: readStringField(cardBody, 'category') ?? '',
+    // Public-root path to the lab's logo, e.g. '/images/labs/mydompet_logo.png'. Used by
+    // generate-og-cards.mjs to put the product mark on the lab's social card.
+    image: readStringField(cardBody, 'image') ?? '',
     status: readStringField(cardBody, 'status') ?? '',
-    visibility: readStringField(cardBody, 'visibility') ?? 'public',
+    visibility,
     publicSummary: readStringField(cardBody, 'publicSummary') ?? '',
     safeHighlights: readStringArrayField(cardBody, 'safeHighlights'),
     tags: readStringArrayField(cardBody, 'tags'),

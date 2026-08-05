@@ -7,6 +7,7 @@ import SmartImage from '../../components/SmartImage';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import { SWYMBLE_DATA } from '../../data/config';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
+import { serializeJsonLd } from '../../utils/jsonLd';
 import { labsIndexJsonLd } from '../../utils/labSeo';
 import '../../styles/desktop-labs.css';
 
@@ -37,7 +38,7 @@ export default function DesktopLabs() {
         <script
           type="application/ld+json"
           // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(labsIndexJsonLd(visibleLabs)) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(labsIndexJsonLd(visibleLabs)) }}
         />
       )}
 

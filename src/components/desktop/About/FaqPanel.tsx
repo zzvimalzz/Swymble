@@ -1,5 +1,6 @@
 import Reveal from '../../motion/Reveal';
 import type { SwymbleFaqEntry } from '../../../data/types';
+import { serializeJsonLd } from '../../../utils/jsonLd';
 import { SWYMBLE_SITE_URL } from '../../../utils/siteUrls';
 
 /**
@@ -36,7 +37,7 @@ export default function FaqPanel({ faq }: { faq: SwymbleFaqEntry[] }) {
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
       />
 
       <div className="about-faq__head">

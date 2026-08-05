@@ -10,6 +10,28 @@ import { labDisplayName, labSeoDescription, labSeoTitle } from '../utils/labSeo'
 
 const uniqueCount = (values: string[]) => new Set(values).size;
 
+/** The subset of a parsed lab these tests assert on — see scripts/lib/lab-data.mjs. */
+type ParsedLab = {
+  id: string;
+  seoName: string;
+  image: string;
+  status: string;
+  visibility: string;
+  updatedAt: string;
+  detail: { oneLiner: string } | null;
+};
+
+/**
+ * The build scripts are plain .mjs with no type declarations, so the import is asserted rather
+ * than inferred. That is the point of the tests below: the parser's output is untyped, which is
+ * exactly why it needs pinning against the typed data the app reads.
+ */
+const loadParsedLabs = async (): Promise<ParsedLab[]> => {
+  // @ts-expect-error -- untyped build script; its shape is asserted by ParsedLab above.
+  const labData = await import('../../scripts/lib/lab-data.mjs');
+  return labData.loadLabs() as Promise<ParsedLab[]>;
+};
+
 describe('labs', () => {
   it('has unique ids', () => {
     const ids = SWYMBLE_DATA.labs.map((lab) => lab.id);
@@ -56,6 +78,40 @@ describe('labs', () => {
   it('keeps lab page titles short enough not to be truncated in results', () => {
     for (const lab of SWYMBLE_DATA.labs) {
       expect(labSeoTitle(lab).length, `lab ${lab.id} title`).toBeLessThanOrEqual(70);
+    }
+  });
+
+  // Two independent things decide whether a lab is public: the React app reads the real
+  // TypeScript object, and the build scripts re-read the same files as text (scripts/lib/
+  // lab-data.mjs — see the comment there for why). Only the second one gates the sitemap,
+  // llms.txt, site-data.json, the .md twins and the IndexNow submission, so if the two ever
+  // disagree the site can look correct while the machine-readable surfaces publish something
+  // unreleased. This pins them together.
+  it('agrees with the build-script parser on which labs are public', async () => {
+    const fromScripts = (await loadParsedLabs()).map((lab) => lab.id).sort();
+    const fromApp = SWYMBLE_DATA.labs
+      .filter((lab) => lab.visibility !== 'private')
+      .map((lab) => lab.id)
+      .sort();
+
+    expect(fromScripts).toEqual(fromApp);
+  });
+
+  it('agrees with the build-script parser on every lab field the generated files use', async () => {
+    const parsed = new Map((await loadParsedLabs()).map((lab) => [lab.id, lab]));
+
+    for (const lab of SWYMBLE_DATA.labs.filter((entry) => entry.visibility !== 'private')) {
+      const fromScripts = parsed.get(lab.id);
+      expect(fromScripts, `lab ${lab.id} missing from the build-script parser`).toBeDefined();
+
+      // The fields that end up in a URL, a title, a description or a social card. A parser that
+      // silently returns '' for one of these produces a broken generated file, not a crash.
+      expect(fromScripts?.seoName, `lab ${lab.id} seoName`).toBe(labDisplayName(lab));
+      expect(fromScripts?.image, `lab ${lab.id} image`).toBe(lab.image);
+      expect(fromScripts?.status, `lab ${lab.id} status`).toBe(lab.status);
+      expect(fromScripts?.visibility, `lab ${lab.id} visibility`).toBe(lab.visibility);
+      expect(fromScripts?.updatedAt, `lab ${lab.id} updatedAt`).toBe(lab.updatedAt);
+      expect(fromScripts?.detail?.oneLiner ?? '', `lab ${lab.id} oneLiner`).toBe(lab.detail?.oneLiner ?? '');
     }
   });
 

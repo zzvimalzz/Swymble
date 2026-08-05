@@ -40,6 +40,69 @@ const readAsDataUri = async (filePath, mimeType) => {
   return `data:${mimeType};base64,${buffer.toString('base64')}`;
 };
 
+const IMAGE_MIME_TYPES = {
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.webp': 'image/webp',
+};
+
+/**
+ * The lab's own logo, embedded from public/.
+ *
+ * Returns null rather than throwing when the file is missing or an unknown type: a card without
+ * the product mark is still a good card, and one lab with a broken image path should not cost
+ * the other five their cards.
+ */
+const readLabMark = async (lab) => {
+  const relativePath = lab.image?.replace(/^\//, '');
+
+  if (!relativePath) return null;
+
+  const filePath = path.join(ROOT_DIR, 'public', relativePath);
+  const mimeType = IMAGE_MIME_TYPES[path.extname(filePath).toLowerCase()];
+
+  if (!mimeType) {
+    console.warn(`[og-cards] ${lab.id}: unsupported logo type "${lab.image}" — card will render without it.`);
+    return null;
+  }
+
+  try {
+    return await readAsDataUri(filePath, mimeType);
+  } catch {
+    console.warn(`[og-cards] ${lab.id}: logo not found at ${lab.image} — card will render without it.`);
+    return null;
+  }
+};
+
+/** Starting size for the title; shrinkTitleToFit() takes it down from here if it overflows. */
+const titleFontSize = (name) => (name.length >= 14 ? 72 : 92);
+
+/**
+ * Shrinks the title until it fits its column, measured in the page rather than estimated.
+ *
+ * Syne ExtraBold is far wider than a rule of thumb suggests — "MyDompet" is eight characters and
+ * still overruns a 724px column at 92px — and lab names are not fixed, so any character-count
+ * heuristic is one new lab away from a title sitting on top of the product logo. Measuring is
+ * the only version of this that stays correct.
+ */
+const shrinkTitleToFit = (page) =>
+  page.evaluate(() => {
+    const title = document.querySelector('h1');
+    const column = document.querySelector('.body');
+
+    if (!title || !column) return;
+
+    let size = Number.parseFloat(getComputedStyle(title).fontSize);
+
+    // scrollWidth is the content's own width, so it reports the overflow a shrunk flex item hides.
+    while (size > 44 && title.scrollWidth > column.clientWidth) {
+      size -= 2;
+      title.style.fontSize = `${size}px`;
+    }
+  });
+
 /**
  * Fonts are the site's, loaded from the built CSS's copies in dist/assets. Embedded as data URIs
  * because the page is rendered from a `data:` URL with no origin to resolve relative paths
@@ -58,7 +121,7 @@ const findFontFile = async (pattern) => {
   }
 };
 
-const buildCardHtml = async ({ lab, logoDataUri, fonts }) => {
+const buildCardHtml = async ({ lab, logoDataUri, markDataUri, fonts }) => {
   const name = lab.seoName;
   const tagline = lab.detail?.tagline ?? lab.category;
   const summary = lab.detail?.oneLiner ?? lab.publicSummary;
@@ -107,31 +170,50 @@ const buildCardHtml = async ({ lab, logoDataUri, fonts }) => {
       }
       .frame {
         position: absolute; inset: 0;
-        padding: 72px 80px;
+        padding: 64px 76px;
         display: flex; flex-direction: column; justify-content: space-between;
       }
       .top { display: flex; align-items: center; justify-content: space-between; }
-      .logo { height: 46px; width: auto; opacity: 0.95; }
+      .logo { height: 44px; width: auto; opacity: 0.95; }
+      /* Text and product mark share a row. The mark is the fastest way to recognise which lab a
+         shared link belongs to — faster than reading the name — so it gets real estate, but the
+         text column keeps priority when a name runs long. */
+      .main { display: flex; align-items: center; gap: 56px; }
+      .mark {
+        flex: 0 0 268px; width: 268px; height: 268px;
+        display: grid; place-items: center;
+      }
+      .mark img {
+        max-width: 100%; max-height: 100%;
+        width: auto; height: auto;
+        object-fit: contain;
+        /* Rounds the handful of logos that ship with an opaque square background (Cortex), so
+           they read as a deliberate tile rather than a hard-edged cut-out on the near-black
+           card. Invisible on logos that are already transparent or already rounded. */
+        border-radius: 28px;
+        /* Lifts a logo off the background without adding a visible container that would fight
+           logos which already carry their own shape. */
+        filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.55));
+      }
       .status {
         font-family: 'JetBrains Mono', monospace;
         font-size: 18px; letter-spacing: 0.14em; text-transform: uppercase;
         color: ${INK}; background: ${VOLT};
         padding: 8px 18px; border-radius: 999px; font-weight: 700;
       }
-      .body { display: flex; flex-direction: column; gap: 20px; }
+      .body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 18px; }
       .kicker {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 22px; letter-spacing: 0.18em; text-transform: uppercase; color: ${VOLT};
+        font-size: 21px; letter-spacing: 0.18em; text-transform: uppercase; color: ${VOLT};
       }
       h1 {
-        font-size: 92px; font-weight: 800; line-height: 0.98; letter-spacing: -0.02em;
+        font-size: ${titleFontSize(name)}px; font-weight: 800; line-height: 0.98; letter-spacing: -0.02em;
       }
       p {
-        font-size: 25px; font-weight: 400; line-height: 1.5; color: ${MUTED};
-        max-width: 1010px;
-        /* Three lines at this size holds the full ~160-character one-liner, which is what the
-           data-integrity test caps them at. The clamp is a guard, not the normal path. */
-        display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        font-size: 24px; font-weight: 400; line-height: 1.5; color: ${MUTED};
+        /* Four lines in the narrower column holds the full ~160-character one-liner, which is
+           what the data-integrity test caps them at. The clamp is a guard, not the normal path. */
+        display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
       }
       .foot {
         display: flex; align-items: center; justify-content: space-between;
@@ -151,10 +233,14 @@ const buildCardHtml = async ({ lab, logoDataUri, fonts }) => {
         <span class="status">${escapeHtml(lab.status)}</span>
       </div>
 
-      <div class="body">
-        <span class="kicker">${escapeHtml(tagline)}</span>
-        <h1>${escapeHtml(name)}</h1>
-        <p>${escapeHtml(summary)}</p>
+      <div class="main">
+        <div class="body">
+          <span class="kicker">${escapeHtml(tagline)}</span>
+          <h1>${escapeHtml(name)}</h1>
+          <p>${escapeHtml(summary)}</p>
+        </div>
+
+        ${markDataUri ? `<div class="mark"><img src="${markDataUri}" alt="" /></div>` : ''}
       </div>
 
       <div class="foot">
@@ -215,9 +301,24 @@ const run = async () => {
 
     for (const lab of labs) {
       try {
-        const html = await buildCardHtml({ lab, logoDataUri, fonts });
+        const markDataUri = await readLabMark(lab);
+        const html = await buildCardHtml({ lab, logoDataUri, markDataUri, fonts });
         await page.setContent(html, { waitUntil: 'load' });
-        await page.evaluate(() => document.fonts.ready);
+        // Wait for fonts *and* the embedded logo: a screenshot taken before the data-URI image
+        // has decoded captures an empty box where the product mark should be.
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          await Promise.all(
+            [...document.images].filter((image) => !image.complete).map(
+              (image) =>
+                new Promise((resolve) => {
+                  image.addEventListener('load', resolve, { once: true });
+                  image.addEventListener('error', resolve, { once: true });
+                }),
+            ),
+          );
+        });
+        await shrinkTitleToFit(page);
 
         await page.screenshot({ path: path.join(OUTPUT_DIR, `${lab.id}.png`), type: 'png' });
         renderedIds.push(lab.id);
