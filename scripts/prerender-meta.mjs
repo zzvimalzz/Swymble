@@ -209,10 +209,21 @@ const run = async () => {
   // (SoftwareApplication + breadcrumbs + FAQPage) is built by src/utils/labSeo.ts and rendered
   // by the app, and prerender-snapshot.mjs captures it from the real DOM. Reproducing that graph
   // in this script would mean two copies of it, drifting apart the first time a field changes.
+  // Which labs actually got a social card rendered this build. generate-og-cards.mjs is
+  // non-fatal by design, so trusting that every card exists would mean a failed render leaves a
+  // page advertising an og:image that 404s — which unfurls worse than the generic card it
+  // replaced. Absent manifest (cards not run at all) means every lab falls back.
+  const renderedCards = new Set(
+    await fs
+      .readFile(path.join(DIST_DIR, 'images', 'og', 'manifest.json'), 'utf8')
+      .then((raw) => JSON.parse(raw).cards ?? [])
+      .catch(() => []),
+  );
+
   for (const lab of labs) {
     const routePath = labRoutePath(lab);
     const canonicalUrl = `${siteUrl}${routePath}`;
-    const image = toAbsoluteImageUrl(siteUrl, lab.image, defaultImage);
+    const image = renderedCards.has(lab.id) ? `${siteUrl}/images/og/${lab.id}.png` : defaultImage;
 
     const html = stampHtml(baseHtml, {
       title: labSeoTitle(lab, siteName),

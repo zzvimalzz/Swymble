@@ -59,8 +59,18 @@ export const labExternalUrl = (lab: SwymbleLab) => {
   return actions.find((action) => action.kind === 'external')?.href;
 };
 
+/** The lab's logo — a product image, which is what structured data wants. */
 export const labImageUrl = (lab: SwymbleLab) =>
   /^https?:\/\//i.test(lab.image) ? lab.image : `${SWYMBLE_SITE_URL}${lab.image}`;
+
+/**
+ * The lab's 1200x630 social card, rendered at build time by scripts/generate-og-cards.mjs.
+ *
+ * Deliberately not the logo: logos are square, social cards are 1.91:1, and a shared link that
+ * letterboxes a small square on a grey field is the least informative version of a page that has
+ * a name, a pitch and a status to show.
+ */
+export const labSocialImageUrl = (lab: SwymbleLab) => `${SWYMBLE_SITE_URL}/images/og/${lab.id}.png`;
 
 /**
  * A live lab is a real, usable application; an unreleased one is not, and calling it a

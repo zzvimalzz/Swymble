@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { SWYMBLE_DATA } from '../data/config';
 import type { SwymbleLab } from '../data/types';
 import { DEFAULT_SEO_IMAGE, SITE_NAME, SITE_URL, findSiteRoute } from '../routes';
-import { labImageUrl, labJsonLd, labSeoDescription, labSeoTitle } from '../utils/labSeo';
+import { labJsonLd, labSeoDescription, labSeoTitle, labSocialImageUrl } from '../utils/labSeo';
 
 type SeoPayload = {
   title: string;
@@ -110,7 +110,7 @@ const buildSeoPayload = (pathname: string): SeoPayload => {
       return {
         title: labSeoTitle(lab),
         description: labSeoDescription(lab),
-        image: labImageUrl(lab),
+        image: labSocialImageUrl(lab),
         type: 'website',
         shouldIndex: true,
         lab,
