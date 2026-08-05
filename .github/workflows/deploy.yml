@@ -56,6 +56,9 @@ jobs:
           GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION }}
           BING_SITE_VERIFICATION: ${{ vars.BING_SITE_VERIFICATION }}
           INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
+          # Set only once cloudflare/mcp-worker.js is deployed — it gates whether the MCP server
+          # card is published at all. See docs/agent-readiness.md.
+          MCP_SERVER_URL: ${{ vars.MCP_SERVER_URL }}
 
       # Report-only Lighthouse audit of the built pages (results land in the job log with a
       # temporary public report URL). continue-on-error keeps flaky runners from blocking deploys.
