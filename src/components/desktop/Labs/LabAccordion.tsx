@@ -113,7 +113,7 @@ export default function LabAccordion({ labs, openId, onToggle }: LabAccordionPro
 
                     <div className="lab-updated">UPDATED {lab.updatedAt.toUpperCase()}</div>
 
-                    <LabActions lab={lab} />
+                    <LabActions lab={lab} showDetailLink />
                   </div>
                 </motion.div>
               )}

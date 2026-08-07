@@ -66,9 +66,56 @@ export type SwymbleLabAction = {
   variant?: 'primary' | 'secondary';
 };
 
+/** One question/answer pair on a lab's page. Rendered visibly *and* emitted as FAQPage
+ *  structured data — the question form is what assistants and answer engines quote back when
+ *  someone asks "what is <lab>?", so write the answer to stand on its own without the page. */
+export type SwymbleLabFaq = {
+  question: string;
+  answer: string;
+};
+
+/** A named capability, one step richer than a `safeHighlights` line. */
+export type SwymbleLabFeature = {
+  title: string;
+  body: string;
+};
+
+/** A `label: value` fact in the lab page's spec table (platform, stack, status, …). */
+export type SwymbleLabSpec = {
+  label: string;
+  value: string;
+};
+
+/**
+ * Long-form content for the lab's own page at `/labs/<id>`.
+ *
+ * Every lab gets a detail page whether or not it sets this — without it the page is built from
+ * the card fields alone. Filling it in is what turns the page from a restated card into
+ * something with enough substance to rank for the lab's name and to be summarised accurately by
+ * an assistant. Keep it public-safe, same rule as the card copy.
+ */
+export type SwymbleLabDetail = {
+  /** One self-contained sentence answering "what is <lab>?". Used as the page's meta
+   *  description, so keep it under ~160 characters. */
+  oneLiner: string;
+  /** Three-to-five word descriptor that goes in the page <title> after the lab's name. Say what
+   *  the thing *is* in the words someone would search for, not a slogan. */
+  tagline: string;
+  /** Body paragraphs, rendered in order. */
+  overview: string[];
+  features?: SwymbleLabFeature[];
+  specs?: SwymbleLabSpec[];
+  faq?: SwymbleLabFaq[];
+};
+
 export type SwymbleLab = {
   id: string;
+  /** Display name on the cards — deliberately upper case for the lab grid's type treatment. */
   title: string;
+  /** Normally-cased product name for page titles, structured data and llms.txt. `title` is
+   *  upper case for the card grid, and shouting a brand name in a search result or an assistant's
+   *  answer reads as a different, worse product. Defaults to `title` when unset. */
+  seoName?: string;
   category: string;
   categoryColor?: string;
   image: string;
@@ -85,6 +132,7 @@ export type SwymbleLab = {
   blogLink?: string;
   actions?: SwymbleLabAction[];
   primaryAction?: SwymbleLabAction;
+  detail?: SwymbleLabDetail;
 };
 
 // ABOUT PAGE — see data/about/README.md
@@ -319,6 +367,12 @@ export type SwymblePositioning = {
   stats: SwymblePositioningStat[];
 };
 
+/** One question/answer pair in the sitewide FAQ — see data/home/faq.ts. */
+export type SwymbleFaqEntry = {
+  question: string;
+  answer: string;
+};
+
 export type SwymbleData = {
   name: string;
   tagline: string;
@@ -337,4 +391,5 @@ export type SwymbleData = {
   labs: SwymbleLab[];
   blog: SwymbleBlogState;
   socials: SwymbleSocial[];
+  faq: SwymbleFaqEntry[];
 };

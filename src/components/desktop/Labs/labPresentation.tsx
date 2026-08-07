@@ -41,30 +41,45 @@ function ActionLink({ href, label, className }: { href: string; label: string; c
  * The button row at the foot of a lab, shared by the desktop card and the mobile accordion so
  * the two can't drift on which lab offers which action.
  */
-export function LabActions({ lab }: { lab: SwymbleLab }): ReactNode {
+export function LabActions({
+  lab,
+  showDetailLink = false,
+}: {
+  lab: SwymbleLab;
+  /** Adds a link through to /labs/<id>. Set on the index (card and accordion), left off on the
+   *  detail page itself, which would otherwise link to where the reader already is. */
+  showDetailLink?: boolean;
+}): ReactNode {
   const actions = labActionsOf(lab);
   const blogHref = lab.blogCategoryId
     ? `/blog?category=${encodeURIComponent(lab.blogCategoryId)}`
     : lab.blogLink;
+  const hasAnyAction = actions.length > 0 || Boolean(blogHref) || showDetailLink;
 
   return (
     <div className="lab-actions">
+      {showDetailLink && (
+        <Link to={`/labs/${lab.id}`} className="lab-btn">
+          FULL DETAILS
+        </Link>
+      )}
+
       {actions.map((action, index) => (
         <ActionLink
           key={`${lab.id}-${action.label}`}
           href={action.href}
           label={action.label}
-          className={`lab-btn${action.variant === 'secondary' || index > 0 ? ' secondary' : ''}`}
+          className={`lab-btn${showDetailLink || action.variant === 'secondary' || index > 0 ? ' secondary' : ''}`}
         />
       ))}
 
       {blogHref && (
-        <Link to={blogHref} className={`lab-btn ${actions.length > 0 ? 'secondary' : ''}`}>
+        <Link to={blogHref} className={`lab-btn ${showDetailLink || actions.length > 0 ? 'secondary' : ''}`}>
           READ BLOG
         </Link>
       )}
 
-      {actions.length === 0 && !blogHref && <div className="lab-btn disabled">NO PUBLIC ACTION</div>}
+      {!hasAnyAction && <div className="lab-btn disabled">NO PUBLIC ACTION</div>}
     </div>
   );
 }

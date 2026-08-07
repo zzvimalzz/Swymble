@@ -72,7 +72,7 @@ export default function CareerRepository({ branches }: CareerRepositoryProps) {
   return (
     <Reveal as="section" className="career-repository" id="repository" y={24} margin="-80px">
       <div className="career-repository__header">
-        <p className="career-repository__kicker">03 &middot; git log</p>
+        <p className="career-repository__kicker">04 &middot; git log</p>
         <h2 className="career-repository__heading">The Repository</h2>
         <p className="career-repository__lede">
           Every job, degree, award and shipped project as a commit, newest first. Branches fork

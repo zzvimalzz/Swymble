@@ -1,0 +1,28 @@
+# Wrangler config for the Swymble MCP server.
+#
+# Deploy from the repo root:
+#   npx wrangler deploy --config cloudflare/mcp-worker.wrangler.toml
+#
+# Unlike the other workers in this folder this one takes no zone route, so it cannot affect
+# swymble.com. `workers_dev = true` publishes it at
+# https://swymble-mcp.<your-subdomain>.workers.dev, which is a perfectly good MCP endpoint and
+# means the server can be tried out — and removed — without touching the site's DNS at all.
+#
+# To put it on a nicer hostname later, add a custom domain (e.g. mcp.swymble.com) in the
+# dashboard under the Worker's Settings -> Domains & Routes, then update the MCP_SERVER_URL
+# repository variable so the published server card follows it.
+#
+# After deploying:
+#   1. Check it answers:
+#        curl -sX POST https://<host>/mcp \
+#          -H 'Content-Type: application/json' \
+#          -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | head -40
+#   2. Set the MCP_SERVER_URL repository variable (GitHub -> Settings -> Secrets and variables ->
+#      Actions -> Variables) to the endpoint, e.g. https://<host>/mcp
+#   3. Re-run the site deploy. That publishes /.well-known/mcp/server-card.json pointing at it.
+#      Until MCP_SERVER_URL is set, no card is published — see scripts/generate-mcp-card.mjs.
+
+name = "swymble-mcp"
+main = "mcp-worker.js"
+compatibility_date = "2026-08-01"
+workers_dev = true

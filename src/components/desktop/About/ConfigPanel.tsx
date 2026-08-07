@@ -10,7 +10,7 @@ export default function ConfigPanel({ config, currently }: ConfigPanelProps) {
   return (
     <Reveal as="section" className="config" id="config" y={24} margin="-80px">
       <div className="config__head">
-        <p className="about-section__kicker">04 &middot; git config --list</p>
+        <p className="about-section__kicker">05 &middot; git config --list</p>
         <h2 className="about-section__heading">The settings</h2>
       </div>
 

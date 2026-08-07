@@ -17,18 +17,23 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { ROOT_DIR, loadRouteData, loadBlogPosts } from './lib/route-data.mjs';
+import { loadLabs, labRoutePath, labSeoTitle, labSeoDescription } from './lib/lab-data.mjs';
+import { hasMarkdown, markdownUrlFor } from './lib/markdown-routes.mjs';
+import { escapeHtml, replaceMetaContent as replaceMeta } from './lib/html-meta.mjs';
 
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const INDEX_HTML_PATH = path.join(DIST_DIR, 'index.html');
 
-const escapeHtml = (value) =>
-  String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+const replaceMetaContent = (html, attr, attrValue, content) =>
+  replaceMeta(html, attr, attrValue, content, '[prerender-meta]');
 
-const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+/**
+ * Mirrors src/utils/jsonLd.ts — see that file for the reasoning. `JSON.stringify` leaves `<`
+ * alone, so a `</script>` sequence in the data would close the element early and the rest would
+ * be parsed as HTML. Not reachable while every value is a repo-authored constant; escaped anyway
+ * so it stays unreachable if that ever changes.
+ */
+const serializeJsonLd = (data) => JSON.stringify(data).replace(/</g, '\\u003c');
 
 // ---------------------------------------------------------------------------
 // HTML stamping — targeted regex replacement of the tags useRouteSeo.ts also manages client-side.
@@ -37,17 +42,6 @@ const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // ---------------------------------------------------------------------------
 
 const replaceTitle = (html, title) => html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`);
-
-const replaceMetaContent = (html, attr, attrValue, content) => {
-  const pattern = new RegExp(`(<meta ${attr}="${escapeRegExp(attrValue)}" content=")[^"]*(")`);
-
-  if (!pattern.test(html)) {
-    console.warn(`[prerender-meta] Could not find <meta ${attr}="${attrValue}"> to stamp.`);
-    return html;
-  }
-
-  return html.replace(pattern, (_match, pre, post) => `${pre}${escapeHtml(content)}${post}`);
-};
 
 const replaceCanonical = (html, href) => {
   const pattern = /(<link rel="canonical" href=")[^"]*(")/;
@@ -60,11 +54,36 @@ const replaceCanonical = (html, href) => {
   return html.replace(pattern, (_match, pre, post) => `${pre}${escapeHtml(href)}${post}`);
 };
 
-const stampHtml = (baseHtml, { title, description, canonicalUrl, ogType, image, imageAlt }) => {
+/**
+ * Points this route's `<link rel="alternate" type="text/markdown">` at its own .md twin
+ * (scripts/generate-markdown.mjs writes them). Without this every page would advertise the
+ * homepage's Markdown, which is worse than advertising none — an agent would follow it and
+ * quietly answer about the wrong page.
+ */
+const replaceMarkdownAlternate = (html, href) => {
+  const pattern = /(<link rel="alternate" type="text\/markdown" href=")[^"]*(")/;
+
+  if (!pattern.test(html)) {
+    console.warn('[prerender-meta] Could not find <link rel="alternate" type="text/markdown"> to stamp.');
+    return html;
+  }
+
+  // No Markdown twin for this route — drop the element rather than leaving it. The tag lives in
+  // index.html pointing at the homepage's /index.md, so a route without its own .md would
+  // otherwise inherit that one and send an agent asking about /contact the homepage instead.
+  if (!href) {
+    return html.replace(/\s*<link rel="alternate" type="text\/markdown" href="[^"]*"\s*\/>/, '');
+  }
+
+  return html.replace(pattern, (_match, pre, post) => `${pre}${escapeHtml(href)}${post}`);
+};
+
+const stampHtml = (baseHtml, { title, description, canonicalUrl, ogType, image, imageAlt, markdownUrl }) => {
   let html = baseHtml;
   html = replaceTitle(html, title);
   html = replaceMetaContent(html, 'name', 'description', description);
   html = replaceCanonical(html, canonicalUrl);
+  html = replaceMarkdownAlternate(html, markdownUrl);
   html = replaceMetaContent(html, 'property', 'og:type', ogType);
   html = replaceMetaContent(html, 'property', 'og:title', title);
   html = replaceMetaContent(html, 'property', 'og:description', description);
@@ -116,8 +135,8 @@ const injectArticleHead = (html, { title, description, canonicalUrl, image, date
     snippetLines.push(`    <meta property="article:published_time" content="${escapeHtml(datePublished)}" />`);
   }
   snippetLines.push(
-    `    <script type="application/ld+json" data-swymble-jsonld="article">${JSON.stringify(articleJsonLd)}</script>`,
-    `    <script type="application/ld+json" data-swymble-jsonld="breadcrumbs">${JSON.stringify(breadcrumbsJsonLd)}</script>`,
+    `    <script type="application/ld+json" data-swymble-jsonld="article">${serializeJsonLd(articleJsonLd)}</script>`,
+    `    <script type="application/ld+json" data-swymble-jsonld="breadcrumbs">${serializeJsonLd(breadcrumbsJsonLd)}</script>`,
   );
 
   return html.replace('</head>', `${snippetLines.join('\n')}\n  </head>`);
@@ -138,9 +157,10 @@ const writeRouteFile = async (routePath, html) => {
 };
 
 const run = async () => {
-  const [routeData, blogPosts, baseHtml] = await Promise.all([
+  const [routeData, blogPosts, labs, baseHtml] = await Promise.all([
     loadRouteData(),
     loadBlogPosts(),
+    loadLabs(),
     fs.readFile(INDEX_HTML_PATH, 'utf8'),
   ]);
 
@@ -170,9 +190,44 @@ const run = async () => {
       canonicalUrl,
       ogType: 'website',
       image: defaultImage,
+      markdownUrl: hasMarkdown(route.path) ? markdownUrlFor(siteUrl, route.path) : null,
     });
 
     await writeRouteFile(route.path, html);
+    writtenCount += 1;
+  }
+
+  // Lab pages. Unlike blog posts these get no JSON-LD injected here: the lab graph
+  // (SoftwareApplication + breadcrumbs + FAQPage) is built by src/utils/labSeo.ts and rendered
+  // by the app, and prerender-snapshot.mjs captures it from the real DOM. Reproducing that graph
+  // in this script would mean two copies of it, drifting apart the first time a field changes.
+  // Which labs actually got a social card rendered this build. generate-og-cards.mjs is
+  // non-fatal by design, so trusting that every card exists would mean a failed render leaves a
+  // page advertising an og:image that 404s — which unfurls worse than the generic card it
+  // replaced. Absent manifest (cards not run at all) means every lab falls back.
+  const renderedCards = new Set(
+    await fs
+      .readFile(path.join(DIST_DIR, 'images', 'og', 'manifest.json'), 'utf8')
+      .then((raw) => JSON.parse(raw).cards ?? [])
+      .catch(() => []),
+  );
+
+  for (const lab of labs) {
+    const routePath = labRoutePath(lab);
+    const canonicalUrl = `${siteUrl}${routePath}`;
+    const image = renderedCards.has(lab.id) ? `${siteUrl}/images/og/${lab.id}.png` : defaultImage;
+
+    const html = stampHtml(baseHtml, {
+      title: labSeoTitle(lab, siteName),
+      description: labSeoDescription(lab),
+      canonicalUrl,
+      ogType: 'website',
+      image,
+      imageAlt: `${lab.seoName} — a ${siteName} Labs project`,
+      markdownUrl: markdownUrlFor(siteUrl, routePath),
+    });
+
+    await writeRouteFile(routePath, html);
     writtenCount += 1;
   }
 
@@ -188,6 +243,7 @@ const run = async () => {
       ogType: 'article',
       image,
       imageAlt: post.title,
+      markdownUrl: markdownUrlFor(siteUrl, routePath),
     });
     html = injectArticleHead(html, {
       title: post.title,

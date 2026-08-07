@@ -1,13 +1,37 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { SWYMBLE_DATA } from './config';
 import { parseDateKey } from '../components/desktop/CareerRepository/layout';
 import { buildResumeModel } from '../utils/resumeModel';
+import { labDisplayName, labSeoDescription, labSeoTitle } from '../utils/labSeo';
 
 // Content lives in plain TS files edited by hand — these tests catch the mistakes a
 // typechecker can't: duplicate ids/anchors, malformed dates, dangling category references,
 // and links/images that don't point where the UI expects.
 
 const uniqueCount = (values: string[]) => new Set(values).size;
+
+/** The subset of a parsed lab these tests assert on — see scripts/lib/lab-data.mjs. */
+type ParsedLab = {
+  id: string;
+  seoName: string;
+  image: string;
+  status: string;
+  visibility: string;
+  updatedAt: string;
+  detail: { oneLiner: string } | null;
+};
+
+/**
+ * The build scripts are plain .mjs with no type declarations, so the import is asserted rather
+ * than inferred. That is the point of the tests below: the parser's output is untyped, which is
+ * exactly why it needs pinning against the typed data the app reads.
+ */
+const loadParsedLabs = async (): Promise<ParsedLab[]> => {
+  // @ts-expect-error -- untyped build script; its shape is asserted by ParsedLab above.
+  const labData = await import('../../scripts/lib/lab-data.mjs');
+  return labData.loadLabs() as Promise<ParsedLab[]>;
+};
 
 describe('labs', () => {
   it('has unique ids', () => {
@@ -28,6 +52,131 @@ describe('labs', () => {
           /^(\/|https?:\/\/|mailto:)/,
         );
       }
+    }
+  });
+
+  // Each lab's id is its URL at /labs/<id>, and these fields are what the page's <title> and
+  // meta description are built from. A slug with a space in it, or a description long enough to
+  // be cut off mid-sentence in a search result, is invisible to a typechecker.
+  it('has URL-safe ids (ids double as /labs/<id> routes)', () => {
+    for (const lab of SWYMBLE_DATA.labs) {
+      expect(lab.id, `lab ${lab.id} id`).toMatch(/^[a-z0-9][a-z0-9-]*$/);
+    }
+  });
+
+  it('keeps lab meta descriptions inside the ~160 char snippet budget', () => {
+    for (const lab of SWYMBLE_DATA.labs) {
+      expect(labSeoDescription(lab).length, `lab ${lab.id} description`).toBeLessThanOrEqual(160);
+
+      if (lab.detail) {
+        // The one-liner is the description verbatim — if it needs truncating, the ellipsis is
+        // visible in the search result and the sentence never finishes.
+        expect(lab.detail.oneLiner.length, `lab ${lab.id} oneLiner`).toBeLessThanOrEqual(160);
+      }
+    }
+  });
+
+  it('keeps lab page titles short enough not to be truncated in results', () => {
+    for (const lab of SWYMBLE_DATA.labs) {
+      expect(labSeoTitle(lab).length, `lab ${lab.id} title`).toBeLessThanOrEqual(70);
+    }
+  });
+
+  // Two independent things decide whether a lab is public: the React app reads the real
+  // TypeScript object, and the build scripts re-read the same files as text (scripts/lib/
+  // lab-data.mjs — see the comment there for why). Only the second one gates the sitemap,
+  // llms.txt, site-data.json, the .md twins and the IndexNow submission, so if the two ever
+  // disagree the site can look correct while the machine-readable surfaces publish something
+  // unreleased. This pins them together.
+  it('agrees with the build-script parser on which labs are public', async () => {
+    const fromScripts = (await loadParsedLabs()).map((lab) => lab.id).sort();
+    const fromApp = SWYMBLE_DATA.labs
+      .filter((lab) => lab.visibility !== 'private')
+      .map((lab) => lab.id)
+      .sort();
+
+    expect(fromScripts).toEqual(fromApp);
+  });
+
+  it('agrees with the build-script parser on every lab field the generated files use', async () => {
+    const parsed = new Map((await loadParsedLabs()).map((lab) => [lab.id, lab]));
+
+    for (const lab of SWYMBLE_DATA.labs.filter((entry) => entry.visibility !== 'private')) {
+      const fromScripts = parsed.get(lab.id);
+      expect(fromScripts, `lab ${lab.id} missing from the build-script parser`).toBeDefined();
+
+      // The fields that end up in a URL, a title, a description or a social card. A parser that
+      // silently returns '' for one of these produces a broken generated file, not a crash.
+      expect(fromScripts?.seoName, `lab ${lab.id} seoName`).toBe(labDisplayName(lab));
+      expect(fromScripts?.image, `lab ${lab.id} image`).toBe(lab.image);
+      expect(fromScripts?.status, `lab ${lab.id} status`).toBe(lab.status);
+      expect(fromScripts?.visibility, `lab ${lab.id} visibility`).toBe(lab.visibility);
+      expect(fromScripts?.updatedAt, `lab ${lab.id} updatedAt`).toBe(lab.updatedAt);
+      expect(fromScripts?.detail?.oneLiner ?? '', `lab ${lab.id} oneLiner`).toBe(lab.detail?.oneLiner ?? '');
+    }
+  });
+
+  it('names the lab in its own one-liner, so a quoted answer says what it is about', () => {
+    for (const lab of SWYMBLE_DATA.labs) {
+      if (!lab.detail) continue;
+      expect(
+        lab.detail.oneLiner.toLowerCase(),
+        `lab ${lab.id} oneLiner should contain "${labDisplayName(lab)}"`,
+      ).toContain(labDisplayName(lab).toLowerCase());
+    }
+  });
+});
+
+// The sitewide entity graph lives in index.html; the per-page blocks (labSeo.ts, pageSeo.ts,
+// FaqPanel.tsx) don't restate it, they point at its `@id` anchors. That indirection is the whole
+// mechanism — it is what makes every page describe one Swymble rather than a new Organization
+// each time — and it is a plain string match with nothing checking it. Rename an anchor in
+// index.html and every reference becomes a dangling pointer: still valid JSON-LD, still parses,
+// silently describes nothing.
+describe('structured data anchors', () => {
+  const indexHtml = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
+
+  const REFERENCED_IDS = [
+    'https://swymble.com/#organization',
+    'https://swymble.com/#person',
+    'https://swymble.com/#website',
+    'https://swymble.com/#logo',
+  ];
+
+  it.each(REFERENCED_IDS)('index.html defines the %s node referenced by page-level JSON-LD', (id) => {
+    expect(indexHtml).toContain(`"@id": "${id}"`);
+  });
+});
+
+describe('site FAQ', () => {
+  const answerFor = (question: string) =>
+    SWYMBLE_DATA.faq.find((entry) => entry.question === question)?.answer ?? '';
+
+  it('has unique questions', () => {
+    const questions = SWYMBLE_DATA.faq.map((entry) => entry.question);
+    expect(uniqueCount(questions)).toBe(questions.length);
+  });
+
+  // This answer is the block answer engines quote when asked "what is Swymble Labs?", and it
+  // names every product in hand-written prose. Prose cannot be generated from the lab data
+  // without reading worse than it does — so instead the two are pinned together here. Ship a lab
+  // and forget this sentence, and an assistant confidently lists a roster missing it.
+  it('names every public lab in the "What is Swymble Labs?" answer', () => {
+    const answer = answerFor('What is Swymble Labs?').toLowerCase();
+    expect(answer, 'the "What is Swymble Labs?" entry is missing').not.toBe('');
+
+    for (const lab of SWYMBLE_DATA.labs.filter((entry) => entry.visibility !== 'private')) {
+      expect(answer, `lab "${labDisplayName(lab)}" missing from the Swymble Labs FAQ answer`).toContain(
+        labDisplayName(lab).toLowerCase(),
+      );
+    }
+  });
+
+  // The same rule the file's own editing notes state: these answers get quoted with no
+  // surrounding page, so one that says "we" or "the studio" reads as being about someone else.
+  it('names Swymble in every answer, so a quoted answer is self-contained', () => {
+    for (const entry of SWYMBLE_DATA.faq) {
+      expect(entry.answer.toLowerCase(), `FAQ answer "${entry.question}"`).toContain('swymble');
     }
   });
 });

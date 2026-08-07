@@ -1,0 +1,386 @@
+# SWYMBLE — full reference
+
+Swymble is a one-person software studio and engineering lab based in Kuala
+Lumpur, Malaysia. It builds websites, apps and AI systems for businesses as
+client work, and develops its own experimental products under the name Swymble
+Labs.
+
+This file is the complete public description of Swymble and everything it has
+built, in one document. It is generated from the same source as the website,
+so it is never out of date relative to the site.
+
+Canonical site: https://swymble.com
+
+## About Swymble
+
+### What is Swymble?
+
+Swymble is a one-person software studio and engineering lab based in Kuala
+Lumpur, Malaysia. It builds websites, apps and AI systems for businesses as
+client work, and develops its own experimental products under the name Swymble
+Labs.
+
+### Is Swymble a company or a person?
+
+Swymble is a solo studio. One software engineer does the work end to end —
+scoping, design, implementation, deployment and support — operating under the
+Swymble name rather than as an agency with a team behind it.
+
+### What does Swymble build for clients?
+
+Swymble builds company profile websites, product builds, and AI-powered
+systems. Each project is delivered solo from scoping and UI/UX through
+implementation, deployment and the support afterwards, using the engineering
+practices the same engineer applies to enterprise fintech platforms.
+
+### What is Swymble Labs?
+
+Swymble Labs is the research and development side of Swymble: independent
+products built outside client work. It currently includes Cortex, an AI
+platform with persistent long-context memory; MyDompet, an offline-first money
+tracker for Android and iOS; Territory, a fitness app that turns movement into
+map territory; MyBirth, an archive of the day you were born; what2watch, an
+interactive wall of films and shows; and Watch Paint Dry, a deliberately
+pointless relaxation toy. Each has its own page at swymble.com/labs.
+
+### Who runs Swymble?
+
+Swymble is run by a software engineer working on backend systems, APIs and AI
+platforms — workflow engines, batch pipelines, and integrations between
+systems that were never designed to talk to each other. That work has mostly
+been on enterprise fintech platforms where the data is money-critical and
+downtime has an SLA attached.
+
+### Where is Swymble based?
+
+Swymble is based in Kuala Lumpur, Malaysia, and works with clients remotely.
+
+### How do I contact Swymble?
+
+Email hello@swymble.com or use the form at swymble.com/contact. Swymble
+usually replies within 24 hours.
+
+## Swymble Labs projects
+
+### Cortex
+
+Page: https://swymble.com/labs/cortex
+Category: ARTIFICIAL INTELLIGENCE · Status: In Development · Last updated: Mar 2026
+Tags: AI, R&D, Private
+
+Cortex is Swymble’s AI research project: a cognitive platform whose whole
+premise is that an assistant is only useful over a long engagement if it can
+remember one. It is aimed at operator decision support — the person driving a
+complex digital workflow — rather than at one-off question answering.
+
+Architecturally it is built on persistent memory with a hybrid retrieval layer
+over pgvector and Redis, fronted by a multi-provider LLM gateway with failover
+so no single model provider is a single point of failure.
+
+The interface side is treated as its own research problem. Cortex’s UX
+experiments are operator-first: what a person needs to see to trust and
+correct a system that is holding context on their behalf.
+
+Cortex is under active R&D, with the detailed architecture private and
+controlled pilot evaluations in progress.
+
+Features:
+
+- Persistent long-context memory: Context carries across sessions instead of
+resetting, which is what makes the platform useful for ongoing work rather
+than single questions.
+- Hybrid retrieval: Retrieval runs over pgvector and Redis together, trading
+off semantic recall against latency.
+- Multi-provider LLM gateway: Model calls route through a gateway with
+failover across providers, so one provider outage is not a platform outage.
+- Operator-first UX: The interface research focuses on what an operator needs
+in order to trust, inspect and correct the system’s memory.
+
+At a glance:
+
+- Category: Artificial intelligence, R&D
+- Retrieval: pgvector and Redis hybrid
+- Model access: Multi-provider gateway with failover
+- Status: In development — controlled pilots
+
+Questions and answers:
+
+Q: What is Cortex?
+A: Cortex is an AI platform built by Swymble Labs. It focuses on persistent
+long-context memory and operator decision support, using a hybrid pgvector and
+Redis retrieval layer behind a multi-provider LLM gateway.
+
+Q: Is Cortex publicly available?
+A: No. Cortex is under active R&D with a private architecture and controlled
+pilot evaluations. Private demos can be requested by email at
+hello@swymble.com.
+
+### MyBirth
+
+Page: https://swymble.com/labs/mybirth
+Category: BIRTH ARCHIVE · Status: Live · Last updated: Jun 2026
+Tags: Astronomy, Storytelling, Public
+
+MyBirth takes a name, a birth date and a birthplace and reconstructs that
+specific day as a cinematic archive: the phase of the moon overhead, the
+weather, the headlines, the music and film people were paying attention to,
+and the symbols traditionally attached to that date.
+
+Everything it shows is pulled live from public, key-free data sources at the
+moment you ask for it, so the archive is assembled per request rather than
+read out of a pre-written table of stock facts.
+
+The result is built to be given away. Each archive has its own shareable URL
+and ends in a keepsake certificate with a phase-accurate rendering of that
+night’s moon, which is what makes it work as a birthday gift rather than a
+novelty lookup.
+
+MyBirth is live at mybirth.swymble.com.
+
+Features:
+
+- Live public data: Astronomy, weather, news, music and film details are
+fetched from key-free public sources when the archive is generated.
+- Phase-accurate moon: The moon shown on the keepsake certificate is rendered
+for the actual phase on the birth date, not a generic illustration.
+- Shareable birth story URL: Every archive gets its own link, so it can be
+sent as a gift or kept as a memento.
+
+At a glance:
+
+- Where: mybirth.swymble.com
+- Price: Free, no account needed
+- Inputs: Name, birth date, birthplace
+- Status: Live
+
+Questions and answers:
+
+Q: What is MyBirth?
+A: MyBirth is a free web app from Swymble Labs that turns a name, birth date
+and birthplace into a cinematic archive of the moon, weather, headlines,
+music, film and symbols from that exact day.
+
+Q: Where can I use MyBirth?
+A: MyBirth is live at https://mybirth.swymble.com. It runs in the browser and
+does not require an account.
+
+### MyDompet
+
+Page: https://swymble.com/labs/mydompet
+Category: PERSONAL FINANCE · Status: In Development · Last updated: Aug 2026
+Tags: React Native, Expo, Offline First, E2E Encrypted
+
+MyDompet is a personal finance app built by Swymble Labs around a single
+constraint: your spending data never leaves your phone. Every transaction is
+written to a SQLite database on the device itself. There is no account server
+behind the app, nothing to sign up for, and no copy of your ledger sitting in
+someone else’s database.
+
+That constraint shapes the whole product. Signing in is just picking a local
+profile — no password, no email, no verification step — and the key for that
+session is held in the operating system’s own keychain rather than in app
+storage. With Wi-Fi off, the app behaves exactly the same as with it on,
+because there was never a network round trip in the critical path to begin
+with.
+
+The one feature that does cross devices, Split Bill, is built to preserve the
+same guarantee. Rather than uploading a shared ledger, it routes end-to-end
+encrypted packets through a relay that never sees an amount — the relay moves
+ciphertext between phones and has nothing useful to leak.
+
+MyDompet is in development, built with React Native and Expo.
+
+Features:
+
+- Local-only ledger: Transactions live in SQLite on the device. No cloud
+backend, no sync service, and no account to create.
+- Passwordless local profiles: Signing in means choosing a profile on the
+phone. The session key is held in the OS keychain instead of app storage.
+- Works offline by default: The app behaves identically with the network off,
+because nothing in the core flow depends on a server.
+- End-to-end encrypted Split Bill: Shared bills move between phones as
+encrypted packets through a relay that never sees an amount.
+
+At a glance:
+
+- Platforms: Android, iOS
+- Built with: React Native, Expo, SQLite
+- Data storage: On-device only — no backend
+- Status: In development
+
+Questions and answers:
+
+Q: What is MyDompet?
+A: MyDompet is an offline-first personal finance and money tracking app for
+Android and iOS, built by Swymble Labs. It stores every transaction in a
+SQLite database on your own phone rather than on a server.
+
+Q: Does MyDompet need an account or an internet connection?
+A: No. There is no account server, so there is nothing to register for.
+Signing in means selecting a local profile on the device, and the app works
+the same way with the network switched off.
+
+Q: How does MyDompet handle shared bills if there is no server?
+A: Split Bill sends end-to-end encrypted packets between phones through a
+relay. The relay only forwards ciphertext and never sees a transaction amount.
+
+### what2watch
+
+Page: https://swymble.com/labs/what2watch
+Category: FILM DISCOVERY · Status: Live · Last updated: Jul 2026
+Tags: WebGL, Movies, Public
+
+what2watch is an answer to the scrolling problem: instead of a vertical list
+of ten posters at a time, it renders the whole catalogue as a single living
+wall. Tens of thousands of movies and shows are packed into one screen as a
+force-directed voronoi mosaic of poster tiles that you can wander around, zoom
+into and pull apart.
+
+The wall is not a static image. It runs on the GPU, streams posters live from
+public film APIs, and rebuilds itself in place when you change what you are
+looking for — filter by mood, by type or by genre and the mosaic re-packs
+around the new selection rather than reloading a new page of results.
+
+For the times when you genuinely do not want to choose, there is a surprise-me
+jump, a title search, and a hotkey that throws you at a random pick.
+
+what2watch is live at what2watch.swymble.com.
+
+Features:
+
+- GPU voronoi wall: The catalogue is packed into one screen as a
+force-directed voronoi mosaic, with posters streamed live from public film
+APIs.
+- Mood, type and genre filters: Changing a filter rebuilds the wall in place
+instead of loading a new page of results.
+- Surprise me: Title search, surprise-me jumps and a hotkey for a random pick,
+for when browsing is not the point.
+
+At a glance:
+
+- Where: what2watch.swymble.com
+- Price: Free, no account needed
+- Built with: WebGL, public film APIs
+- Status: Live
+
+Questions and answers:
+
+Q: What is what2watch?
+A: what2watch is a free web app from Swymble Labs for deciding what to watch.
+It shows tens of thousands of movies and shows as one interactive,
+force-directed voronoi wall of poster tiles that you can filter by mood, type
+or genre.
+
+Q: Where can I use what2watch?
+A: what2watch is live at https://what2watch.swymble.com. It runs in the
+browser and needs no account.
+
+### Watch Paint Dry
+
+Page: https://swymble.com/labs/watchpaintdry
+Category: DIGITAL ZEN · Status: Live · Last updated: Jul 2026
+Tags: Zen, Toy, Public
+
+Watch Paint Dry is exactly what the name says, taken seriously. You open it, a
+wall of fresh paint starts drying, and a timer counts how long you have
+watched. That is the entire premise.
+
+What makes it stick is that the pointlessness is fully built out. Staring
+earns patience levels and unlockable achievements, and the site keeps your
+session stats — longest stare, total visits, total clicks — so there is a
+record of time you deliberately wasted. Everything is stored locally in your
+browser; there are no accounts.
+
+Ambient audio scenes and slow-changing backdrops make it usable as a
+background: a piece of digital zen rather than a joke you close after ten
+seconds.
+
+Watch Paint Dry lives on its own domain at watchpaintdry.net, built and
+deployed from the Swymble monorepo.
+
+Features:
+
+- Patience levels and achievements: Unlockables for how long you last, stored
+locally in the browser with no account required.
+- Ambient scenes: Ambient audio and slow-changing backdrops, made to leave
+running in the background.
+- Session stats: Longest stare, total visits and total clicks, kept as a
+record of time well wasted.
+
+At a glance:
+
+- Where: www.watchpaintdry.net
+- Price: Free, no account needed
+- Data storage: Local browser storage only
+- Status: Live
+
+Questions and answers:
+
+Q: What is Watch Paint Dry?
+A: Watch Paint Dry is a free browser toy by Swymble Labs. It shows a wall of
+fresh paint drying and times how long you stare at it, with patience levels,
+achievements and session stats stored locally in your browser.
+
+Q: Where can I play Watch Paint Dry?
+A: Watch Paint Dry is live at https://www.watchpaintdry.net. It runs in the
+browser with no account or download.
+
+### Territory
+
+Page: https://swymble.com/labs/territory
+Category: FITNESS & GAMING · Status: In Development · Last updated: May 2026
+Tags: Fitness, Gaming, Private
+
+Territory is a fitness tracker built as a map game. Instead of reporting your
+activity back to you as a chart, it converts the ground you actually cover
+into territory you claim on a virtual map — the further you move, the more of
+the map is yours.
+
+The design goal is motivation through exploration and competition rather than
+through streaks and guilt: covering new ground is the reward, and holding
+ground against other players is the reason to keep going.
+
+Territory is in development and currently in private alpha testing, with the
+map-based interface as the main focus of that round.
+
+At a glance:
+
+- Category: Fitness and gaming
+- Availability: Private alpha
+- Status: In development
+
+Questions and answers:
+
+Q: What is Territory?
+A: Territory is a fitness gamification app by Swymble Labs. It tracks your
+real-world movement and turns the distance you cover into territory you claim
+on a virtual map.
+
+Q: Can I try Territory?
+A: Not yet publicly. Territory is in development and currently running a
+private alpha. Get in touch through swymble.com/contact to ask about access.
+
+## Client projects
+
+### IB Solutions
+
+Client: IB Solutions (M) · Category: Company Profile · Status: Live
+Live at: https://ibsolutions.com.my
+
+I designed and built IB Solutions company profile from the ground up. They are
+a Malaysian professional services company specialising in corporate training
+and capability development.
+
+## Writing
+
+### Cortex - Part 1: The Introduction
+
+https://swymble.com/blog/cortex-part-1
+
+An introduction to Cortex, my proprietary cognitive platform focused on
+long-context memory and conversation.
+
+## Contact
+
+Email: hello@swymble.com
+Contact form: https://swymble.com/contact
