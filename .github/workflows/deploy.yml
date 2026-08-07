@@ -83,7 +83,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
       # Tells Bing (and Yandex/Seznam) that these URLs changed, instead of waiting to be
       # re-crawled. Runs after the deploy so the key file it references is already live.
