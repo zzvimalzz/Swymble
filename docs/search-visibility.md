@@ -208,23 +208,49 @@ gets its first non-brand traffic.
 
 ---
 
-## 4. Decisions still open
+## 4. Decisions
 
-Per-lab social cards used to be listed here. They shipped — `scripts/generate-og-cards.mjs`
-renders one per lab at build time; see [`agent-readiness.md`](agent-readiness.md) §1.5.
+**Settled:**
 
-What is left needs your details, not code:
+- **Per-lab social cards — done.** `scripts/generate-og-cards.mjs` renders one per lab at build
+  time; see [`agent-readiness.md`](agent-readiness.md) §1.5.
+- **First name only — deliberate.** The `Person` entity stays "Vimal". A full name would be a
+  stronger entity signal, and it was weighed against that; the privacy trade-off won. Do not
+  "fix" this in a later pass. If it is ever revisited, the name lives in `src/data/resume.ts` and
+  flows to the `Person` node in `index.html`.
 
-- **Use a full name.** The site names the engineer only as "Vimal" (in `src/data/resume.ts`),
-  which is what the `Person` entity in `index.html` uses. A full name plus a LinkedIn URL in
-  `sameAs` would let search engines and assistants connect the studio, the person and their work
-  history into one entity instead of three loose ones. It is a privacy trade-off, so it is your
-  call — but it is a real signal.
-- **More `sameAs` profiles.** The `Organization` and `Person` entities list only
-  `https://github.com/zzvimalzz`. `sameAs` is how an entity is corroborated across the web, and
-  one link is the weakest possible version of it. Every profile you actually control — LinkedIn,
-  X, Product Hunt, dev.to — belongs in both arrays in `index.html`. This is the single cheapest
-  entity signal left, and it is blocked only on you pasting the URLs.
+- **`sameAs` is GitHub only, and that is correct — not a gap.** Swymble is a name one engineer
+  freelances under, not a registered company. There is no company LinkedIn, no Crunchbase, no
+  team page, and inventing profiles to pad the array would be the exact opposite of what the
+  field is for. One real, reciprocal link beats five thin ones. Revisit only if a genuinely new
+  profile appears (a Product Hunt maker page when a lab launches is the most likely one).
+
+  Note what the markup does **not** claim, and keep it that way: no `legalName`, no
+  `foundingDate`, no employee count, no `LocalBusiness` type implying premises. `Organization` is
+  the right type for a sole trader — schema.org does not require incorporation — and the FAQ
+  already states the position plainly ("a solo studio… operating under the Swymble name rather
+  than as an agency with a team behind it"). An inflated claim here is worse than a modest one:
+  it is the sort of thing that gets an entity distrusted rather than promoted.
+
+### What `sameAs` does, for when a second profile exists
+
+`sameAs` is the field that says "this entity is the same thing as the entity at these other
+URLs". It is how a search engine corroborates a claim: this site asserting it is Swymble is one
+unverified statement, and with "Swymble" one letter from Swyvel, Swym and Swyble, one statement
+is not enough to resolve the name. Two or three independent domains describing the same entity
+consistently is what turns it into a known thing rather than an assumed typo.
+
+Two rules make it work, and both are easy to get wrong:
+
+- **Profiles that identify the entity, not links you like.** A LinkedIn profile, an X account, a
+  Product Hunt maker page, a dev.to profile, eventually a Wikidata item. Not a blog post, not a
+  client's site. Wrong entries dilute the signal rather than adding to it.
+- **Point both ways.** `sameAs` pointing at GitHub is a claim; the GitHub profile linking back to
+  `swymble.com` is what confirms it. A one-way `sameAs` is worth very little, which is why §3.4
+  leads with setting the repo homepage and profile website fields.
+
+Both arrays are in `index.html` — the `Organization` node takes the studio's profiles, the
+`Person` node takes the engineer's. They can legitimately differ.
 
 ---
 
