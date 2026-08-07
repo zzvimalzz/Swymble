@@ -1,4 +1,8 @@
-import { readFileSync } from 'node:fs';
+// Vite's `?raw` rather than node:fs — this file is compiled by tsc -b under tsconfig.app.json,
+// whose `types` is ["vite/client"] with no Node typings, so a `node:fs` import type-checks fine
+// in the editor and then fails the production build. Vitest resolves `?raw` through Vite the same
+// way the app would.
+import indexHtml from '../../index.html?raw';
 import { describe, expect, it } from 'vitest';
 import { SWYMBLE_DATA } from './config';
 import { parseDateKey } from '../components/desktop/CareerRepository/layout';
@@ -134,8 +138,6 @@ describe('labs', () => {
 // index.html and every reference becomes a dangling pointer: still valid JSON-LD, still parses,
 // silently describes nothing.
 describe('structured data anchors', () => {
-  const indexHtml = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
-
   const REFERENCED_IDS = [
     'https://swymble.com/#organization',
     'https://swymble.com/#person',
