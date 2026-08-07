@@ -4,6 +4,7 @@ import { SWYMBLE_DATA } from '../data/config';
 import type { SwymbleLab } from '../data/types';
 import { DEFAULT_SEO_IMAGE, SITE_NAME, SITE_URL, findSiteRoute } from '../routes';
 import { labJsonLd, labSeoDescription, labSeoTitle, labSocialImageUrl } from '../utils/labSeo';
+import { pageEntityJsonLd } from '../utils/pageSeo';
 
 type SeoPayload = {
   title: string;
@@ -17,6 +18,8 @@ type SeoPayload = {
   articleTitle?: string;
   /** Only set on /labs/<id>; drives the SoftwareApplication + breadcrumb + FAQ structured data. */
   lab?: SwymbleLab;
+  /** AboutPage/ProfilePage node tying /about and /resume to the sitewide entity — see pageSeo.ts. */
+  pageEntity?: object | null;
 };
 
 const ensureMetaTag = (selector: string, attributes: Record<string, string>) => {
@@ -99,6 +102,11 @@ const buildSeoPayload = (pathname: string): SeoPayload => {
       description: route.seoDescription,
       type: 'website',
       shouldIndex: route.shouldIndex,
+      pageEntity: pageEntityJsonLd({
+        path: route.path,
+        title: route.seoTitle,
+        description: route.seoDescription,
+      }),
     };
   }
 
@@ -189,6 +197,11 @@ export function useRouteSeo() {
     // One block per lab page carrying the product, its breadcrumbs and its FAQ. Removed on every
     // other route so a lab's structured data can't follow the reader onto the next page.
     setRouteJsonLd('lab', payload.lab ? labJsonLd(payload.lab) : null);
+
+    // Declares /about as the page about the Organization and /resume as the page about the
+    // Person. Null (and so removed) everywhere else — a page claiming to be the description of
+    // an entity it only mentions is a worse signal than staying quiet.
+    setRouteJsonLd('page', payload.pageEntity ?? null);
 
     if (payload.type === 'article' && payload.datePublished) {
       setPropertyMeta('article:published_time', payload.datePublished);

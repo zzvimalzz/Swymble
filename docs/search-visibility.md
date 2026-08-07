@@ -78,8 +78,9 @@ answer "what is Swymble?" — which is why IndexNow (section 2) and Bing Webmast
 | Product / breadcrumb / FAQ structured data per lab | `src/utils/labSeo.ts` | Ties each product to the Swymble organisation rather than leaving it a free-floating name |
 | `CollectionPage` + `ItemList` on `/labs` | `src/views/desktop/DesktopLabs.tsx` | States that the page is an index of six named products |
 | Sitewide entity graph: `Organization` + `Person` + `WebSite`, with `@id` anchors | `index.html` | One consistent entity across every page, with `alternateName`, location, founder and contact |
+| `AboutPage` on `/about` and `ProfilePage` on `/resume`, each with `mainEntity` pointing at the anchors above | `src/utils/pageSeo.ts` | Names which *page* is the authoritative description of which entity. Without it, `/about` is a page that mentions Swymble; with it, `/about` is declared to be the page **about** Swymble — the link a "what is Swymble?" query resolves through |
 | "In plain language" FAQ on `/about`, plus `FAQPage` schema | `src/data/home/faq.ts`, `src/components/desktop/About/FaqPanel.tsx` | The site never actually *stated* what Swymble is in indexable prose. This is the block answer engines quote |
-| Lab URLs in the sitemap, with `lastmod` | `scripts/generate-sitemap.mjs` | 13 indexable URLs, up from 7 |
+| Lab URLs in the sitemap, with `lastmod` | `scripts/generate-sitemap.mjs` | 14 indexable URLs, up from 7 |
 | Generated `llms.txt` + new `llms-full.txt` | `scripts/generate-llms.mjs` | Every lab described in plain text, generated from the same data the site renders so it cannot drift |
 | RSS feed at `/feed.xml` | `scripts/generate-feed.mjs` | A second machine-readable door; aggregators and crawlers poll feeds faster than they re-crawl pages |
 | Google / Bing verification meta tags, env-driven | `vite.config.ts` | Makes section 3 a variable change rather than a code change |
@@ -207,16 +208,23 @@ gets its first non-brand traffic.
 
 ---
 
-## 4. Two things worth deciding
+## 4. Decisions still open
+
+Per-lab social cards used to be listed here. They shipped — `scripts/generate-og-cards.mjs`
+renders one per lab at build time; see [`agent-readiness.md`](agent-readiness.md) §1.5.
+
+What is left needs your details, not code:
 
 - **Use a full name.** The site names the engineer only as "Vimal" (in `src/data/resume.ts`),
   which is what the `Person` entity in `index.html` uses. A full name plus a LinkedIn URL in
   `sameAs` would let search engines and assistants connect the studio, the person and their work
   history into one entity instead of three loose ones. It is a privacy trade-off, so it is your
   call — but it is a real signal.
-- **Per-lab social cards.** Lab pages currently use the lab's logo as the `og:image`. Logos are
-  roughly square and social cards want 1200×630, so shared links letterbox. Six dedicated cards
-  would fix it.
+- **More `sameAs` profiles.** The `Organization` and `Person` entities list only
+  `https://github.com/zzvimalzz`. `sameAs` is how an entity is corroborated across the web, and
+  one link is the weakest possible version of it. Every profile you actually control — LinkedIn,
+  X, Product Hunt, dev.to — belongs in both arrays in `index.html`. This is the single cheapest
+  entity signal left, and it is blocked only on you pasting the URLs.
 
 ---
 

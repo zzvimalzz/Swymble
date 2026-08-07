@@ -28,10 +28,10 @@ Swymble name rather than as an agency with a team behind it.
 
 ### What does Swymble build for clients?
 
-Company profile websites, product builds, and AI-powered systems. Each project
-is delivered solo from scoping and UI/UX through implementation, deployment
-and the support afterwards, using the engineering practices the same engineer
-applies to enterprise fintech platforms.
+Swymble builds company profile websites, product builds, and AI-powered
+systems. Each project is delivered solo from scoping and UI/UX through
+implementation, deployment and the support afterwards, using the engineering
+practices the same engineer applies to enterprise fintech platforms.
 
 ### What is Swymble Labs?
 

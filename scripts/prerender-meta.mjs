@@ -19,18 +19,13 @@ import path from 'node:path';
 import { ROOT_DIR, loadRouteData, loadBlogPosts } from './lib/route-data.mjs';
 import { loadLabs, labRoutePath, labSeoTitle, labSeoDescription } from './lib/lab-data.mjs';
 import { hasMarkdown, markdownUrlFor } from './lib/markdown-routes.mjs';
+import { escapeHtml, replaceMetaContent as replaceMeta } from './lib/html-meta.mjs';
 
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const INDEX_HTML_PATH = path.join(DIST_DIR, 'index.html');
 
-const escapeHtml = (value) =>
-  String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-
-const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const replaceMetaContent = (html, attr, attrValue, content) =>
+  replaceMeta(html, attr, attrValue, content, '[prerender-meta]');
 
 /**
  * Mirrors src/utils/jsonLd.ts — see that file for the reasoning. `JSON.stringify` leaves `<`
@@ -47,17 +42,6 @@ const serializeJsonLd = (data) => JSON.stringify(data).replace(/</g, '\\u003c');
 // ---------------------------------------------------------------------------
 
 const replaceTitle = (html, title) => html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`);
-
-const replaceMetaContent = (html, attr, attrValue, content) => {
-  const pattern = new RegExp(`(<meta ${attr}="${escapeRegExp(attrValue)}" content=")[^"]*(")`);
-
-  if (!pattern.test(html)) {
-    console.warn(`[prerender-meta] Could not find <meta ${attr}="${attrValue}"> to stamp.`);
-    return html;
-  }
-
-  return html.replace(pattern, (_match, pre, post) => `${pre}${escapeHtml(content)}${post}`);
-};
 
 const replaceCanonical = (html, href) => {
   const pattern = /(<link rel="canonical" href=")[^"]*(")/;

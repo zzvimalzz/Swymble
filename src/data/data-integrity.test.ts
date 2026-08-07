@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { SWYMBLE_DATA } from './config';
 import { parseDateKey } from '../components/desktop/CareerRepository/layout';
@@ -122,6 +123,60 @@ describe('labs', () => {
         lab.detail.oneLiner.toLowerCase(),
         `lab ${lab.id} oneLiner should contain "${labDisplayName(lab)}"`,
       ).toContain(labDisplayName(lab).toLowerCase());
+    }
+  });
+});
+
+// The sitewide entity graph lives in index.html; the per-page blocks (labSeo.ts, pageSeo.ts,
+// FaqPanel.tsx) don't restate it, they point at its `@id` anchors. That indirection is the whole
+// mechanism — it is what makes every page describe one Swymble rather than a new Organization
+// each time — and it is a plain string match with nothing checking it. Rename an anchor in
+// index.html and every reference becomes a dangling pointer: still valid JSON-LD, still parses,
+// silently describes nothing.
+describe('structured data anchors', () => {
+  const indexHtml = readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
+
+  const REFERENCED_IDS = [
+    'https://swymble.com/#organization',
+    'https://swymble.com/#person',
+    'https://swymble.com/#website',
+    'https://swymble.com/#logo',
+  ];
+
+  it.each(REFERENCED_IDS)('index.html defines the %s node referenced by page-level JSON-LD', (id) => {
+    expect(indexHtml).toContain(`"@id": "${id}"`);
+  });
+});
+
+describe('site FAQ', () => {
+  const answerFor = (question: string) =>
+    SWYMBLE_DATA.faq.find((entry) => entry.question === question)?.answer ?? '';
+
+  it('has unique questions', () => {
+    const questions = SWYMBLE_DATA.faq.map((entry) => entry.question);
+    expect(uniqueCount(questions)).toBe(questions.length);
+  });
+
+  // This answer is the block answer engines quote when asked "what is Swymble Labs?", and it
+  // names every product in hand-written prose. Prose cannot be generated from the lab data
+  // without reading worse than it does — so instead the two are pinned together here. Ship a lab
+  // and forget this sentence, and an assistant confidently lists a roster missing it.
+  it('names every public lab in the "What is Swymble Labs?" answer', () => {
+    const answer = answerFor('What is Swymble Labs?').toLowerCase();
+    expect(answer, 'the "What is Swymble Labs?" entry is missing').not.toBe('');
+
+    for (const lab of SWYMBLE_DATA.labs.filter((entry) => entry.visibility !== 'private')) {
+      expect(answer, `lab "${labDisplayName(lab)}" missing from the Swymble Labs FAQ answer`).toContain(
+        labDisplayName(lab).toLowerCase(),
+      );
+    }
+  });
+
+  // The same rule the file's own editing notes state: these answers get quoted with no
+  // surrounding page, so one that says "we" or "the studio" reads as being about someone else.
+  it('names Swymble in every answer, so a quoted answer is self-contained', () => {
+    for (const entry of SWYMBLE_DATA.faq) {
+      expect(entry.answer.toLowerCase(), `FAQ answer "${entry.question}"`).toContain('swymble');
     }
   });
 });

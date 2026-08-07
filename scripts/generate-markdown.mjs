@@ -302,8 +302,11 @@ const run = async () => {
     written.push(await writeMarkdown(labRoutePath(lab), buildLab({ siteUrl, lab })));
   }
 
+  // Not gated on `projects.length`: markdown-routes.mjs says /projects has a twin, and
+  // prerender-meta.mjs advertises it on that basis. Skipping the file when the list is empty
+  // would leave the page pointing an agent at a 404 — a thin page is the better failure.
   const projectsRoute = routeFor('/projects');
-  if (projectsRoute && projects.length) {
+  if (projectsRoute) {
     written.push(await writeMarkdown('/projects', buildProjects({ siteUrl, route: projectsRoute, projects })));
   }
 

@@ -19,9 +19,28 @@ import path from 'node:path';
 import puppeteer from 'puppeteer';
 import { ROOT_DIR, loadRouteData, loadBlogPosts } from './lib/route-data.mjs';
 import { loadLabs, labRoutePath } from './lib/lab-data.mjs';
+import { readMetaContent, replaceMetaContent } from './lib/html-meta.mjs';
 
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const SNAPSHOT_TIMEOUT_MS = 20_000;
+
+/**
+ * Social meta that prerender-meta.mjs, not the app, is the authority on.
+ *
+ * For most tags the two agree — both derive from src/data — so capturing the DOM loses nothing.
+ * These three are the exception. prerender-meta.mjs checks dist/images/og/manifest.json and falls
+ * back to the site's default card for any lab whose social card failed to render, and it stamps a
+ * per-lab og:image:alt; useRouteSeo.ts has no way to know which cards exist, so it names
+ * /images/og/<id>.png unconditionally and uses the generic sitewide alt text. Capturing the DOM
+ * over the top therefore threw the fallback away on every build where the snapshot succeeded —
+ * which is every build — leaving a failed card advertising an og:image that 404s. That unfurls
+ * worse than the generic card the manifest exists to fall back to.
+ */
+const PRESERVED_SOCIAL_META = [
+  ['property', 'og:image'],
+  ['property', 'og:image:alt'],
+  ['name', 'twitter:image'],
+];
 
 const CONTENT_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -86,15 +105,41 @@ const startStaticServer = () =>
     server.listen(0, '127.0.0.1', () => resolve(server));
   });
 
-const writeRouteFile = async (routePath, html) => {
+const routeFilePath = (routePath) => {
   const outDir = routePath === '/' ? DIST_DIR : path.join(DIST_DIR, routePath.replace(/^\//, ''));
-  const outFile = path.join(outDir, 'index.html');
-  await fs.mkdir(outDir, { recursive: true });
+  return path.join(outDir, 'index.html');
+};
+
+const writeRouteFile = async (routePath, html) => {
+  const outFile = routeFilePath(routePath);
+  await fs.mkdir(path.dirname(outFile), { recursive: true });
   await fs.writeFile(outFile, html, 'utf8');
+};
+
+/** Copies the tags listed in PRESERVED_SOCIAL_META from the stamped file back into the snapshot. */
+const preserveSocialMeta = (snapshotHtml, stampedHtml) => {
+  if (!stampedHtml) return snapshotHtml;
+
+  let html = snapshotHtml;
+
+  for (const [attr, attrValue] of PRESERVED_SOCIAL_META) {
+    const stamped = readMetaContent(stampedHtml, attr, attrValue);
+    if (stamped !== null) {
+      html = replaceMetaContent(html, attr, attrValue, stamped, '[prerender-snapshot]');
+    }
+  }
+
+  return html;
 };
 
 const snapshotRoute = async (page, baseUrl, routePath) => {
   const url = `${baseUrl}${routePath}`;
+
+  // Read before navigating: this is prerender-meta.mjs's output, and the page about to be
+  // captured will have overwritten some of it client-side. Missing is survivable — capture the
+  // page anyway rather than losing the whole snapshot over the social tags.
+  const stampedHtml = await fs.readFile(routeFilePath(routePath), 'utf8').catch(() => null);
+
   await page.goto(url, { waitUntil: 'networkidle0', timeout: SNAPSHOT_TIMEOUT_MS });
 
   await page.waitForFunction(
@@ -142,7 +187,7 @@ const snapshotRoute = async (page, baseUrl, routePath) => {
     );
   }
 
-  const html = await page.content();
+  const html = preserveSocialMeta(await page.content(), stampedHtml);
   await writeRouteFile(routePath, html);
 };
 

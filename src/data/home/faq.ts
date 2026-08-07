@@ -28,7 +28,7 @@ export const SWYMBLE_FAQ: SwymbleFaqEntry[] = [
   {
     question: 'What does Swymble build for clients?',
     answer:
-      'Company profile websites, product builds, and AI-powered systems. Each project is delivered solo from scoping and UI/UX through implementation, deployment and the support afterwards, using the engineering practices the same engineer applies to enterprise fintech platforms.',
+      'Swymble builds company profile websites, product builds, and AI-powered systems. Each project is delivered solo from scoping and UI/UX through implementation, deployment and the support afterwards, using the engineering practices the same engineer applies to enterprise fintech platforms.',
   },
   {
     question: 'What is Swymble Labs?',

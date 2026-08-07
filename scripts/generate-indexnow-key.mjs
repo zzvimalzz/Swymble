@@ -11,6 +11,34 @@ import { ROOT_DIR } from './lib/route-data.mjs';
 
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
 
+/** Checked-in .txt files in public/ — mirrors the negations in .gitignore. Never removed. */
+const KEEP = new Set(['robots.txt', 'llms.txt', 'llms-full.txt']);
+
+const KEY_SHAPE = /^[A-Za-z0-9-]{8,128}$/;
+
+/**
+ * Removes previously-written key files.
+ *
+ * Rotating the key writes a new file but left the old one in public/, so it kept shipping and
+ * kept verifying — the retired key stayed usable for submitting URLs on this domain forever,
+ * which defeats the point of rotating it. Only files whose name is itself key-shaped are touched,
+ * so nothing a human put in public/ can be caught by this.
+ */
+const removeStaleKeyFiles = async (currentFileName) => {
+  const entries = await fs.readdir(PUBLIC_DIR, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const { name } = entry;
+
+    if (!entry.isFile() || !name.endsWith('.txt')) continue;
+    if (KEEP.has(name) || name === currentFileName) continue;
+    if (!KEY_SHAPE.test(name.slice(0, -'.txt'.length))) continue;
+
+    await fs.rm(path.join(PUBLIC_DIR, name));
+    console.log('[indexnow] Removed stale key file:', name);
+  }
+};
+
 const run = async () => {
   const key = process.env.INDEXNOW_KEY?.trim();
 
@@ -24,7 +52,11 @@ const run = async () => {
     return;
   }
 
-  const keyFilePath = path.join(PUBLIC_DIR, `${key}.txt`);
+  const keyFileName = `${key}.txt`;
+
+  await removeStaleKeyFiles(keyFileName);
+
+  const keyFilePath = path.join(PUBLIC_DIR, keyFileName);
   await fs.writeFile(keyFilePath, `${key}\n`, 'utf8');
   console.log('[indexnow] Wrote key file:', keyFilePath);
 };

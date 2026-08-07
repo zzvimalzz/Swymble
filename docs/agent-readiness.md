@@ -36,8 +36,10 @@ by the script that writes them and the script that advertises them.
 
 ### Typed links (RFC 8288)
 
-Every page's `<head>` now carries the relations a static host can express — all registered IANA
-relation types, no invented ones:
+Every page's `<head>` now carries the relations a static host can express. All are
+[IANA-registered](https://www.iana.org/assignments/link-relations/link-relations.xhtml) — the one
+exception is `sitemap`, used only in the `Link` header below, which is unregistered but is the
+de-facto name and has no registered equivalent. Nothing here is invented:
 
 | Relation | Target |
 | --- | --- |
@@ -126,7 +128,7 @@ Cloudflare dashboard → `swymble.com` → Rules → Transform Rules → **Modif
 Create. Match `hostname equals swymble.com`, then *Set static* header `Link` to:
 
 ```
-</llms.txt>; rel="describedby"; type="text/plain", </llms-full.txt>; rel="describedby"; type="text/plain", </sitemap.xml>; rel="sitemap"; type="application/xml", </feed.xml>; rel="alternate"; type="application/rss+xml", </about>; rel="author", </>; rel="home"
+</llms.txt>; rel="describedby"; type="text/plain", </llms-full.txt>; rel="describedby"; type="text/plain", </sitemap.xml>; rel="sitemap"; type="application/xml", </feed.xml>; rel="alternate"; type="application/rss+xml", </about>; rel="author", </>; rel="index"
 ```
 
 This is static, so it cannot carry the per-page `alternate type="text/markdown"` link — the HTML

@@ -47,24 +47,60 @@ const markdownPathFor = (pathname) => {
 };
 
 /**
- * True when the client asked for Markdown *in preference to* HTML.
- *
- * Browsers send `Accept: text/html,...,*​/*;q=0.8`, so a naive substring check for `text/markdown`
- * is fine but a naive check for `*​/*` is not. The rule here: an explicit `text/markdown` that is
- * not q=0 wins, and anything else gets HTML. A human's browser must never be handed a .md file.
+ * The highest q-value the Accept header gives to any of `ranges`, or 0 if it names none of them.
+ * An absent or unparseable `q` parameter means 1, which is what RFC 9110 specifies for absent.
  */
-const prefersMarkdown = (request) => {
-  const accept = request.headers.get('Accept') ?? '';
-  const markdown = /text\/markdown(?:\s*;\s*q=(\d*\.?\d+))?/i.exec(accept);
+const acceptQuality = (accept, ...ranges) => {
+  let best = 0;
 
-  if (!markdown) return false;
+  for (const entry of accept.split(',')) {
+    const [range, ...parameters] = entry.trim().split(';').map((part) => part.trim());
 
-  return markdown[1] === undefined || Number(markdown[1]) > 0;
+    if (!ranges.includes(range.toLowerCase())) continue;
+
+    const quality = parameters.find((parameter) => /^q=/i.test(parameter));
+    const parsed = quality ? Number(quality.slice(2)) : 1;
+    const value = Number.isFinite(parsed) ? parsed : 1;
+
+    if (value > best) best = value;
+  }
+
+  return best;
 };
 
 /**
- * The typed links this site offers, per RFC 8288. Registered IANA relation types only —
- * an invented relation is a string an agent has no way to interpret.
+ * True when the client asked for Markdown *in preference to* HTML — compared by q-value, not by
+ * presence, because a human's browser must never be handed a .md file.
+ *
+ * Browsers send `Accept: text/html,application/xhtml+xml,...,*​/*;q=0.8`. They never name
+ * `text/markdown`, so the first check alone settles them; the comparison below is what stops a
+ * client that lists both (`text/markdown;q=0.1, text/html`) from being read as wanting Markdown
+ * when it plainly said the opposite.
+ *
+ * The wildcard is compared with `>=` rather than `>` on purpose. `Accept: text/markdown, *​/*` is
+ * the common agent header, and both entries carry q=1 — but the client named `text/markdown`
+ * explicitly and matched HTML only through a catch-all, and a more specific media range wins the
+ * match. Explicitly-named `text/html` still needs to be strictly beaten.
+ */
+const prefersMarkdown = (request) => {
+  const accept = (request.headers.get('Accept') ?? '').toLowerCase();
+  const markdown = acceptQuality(accept, 'text/markdown');
+
+  if (markdown <= 0) return false;
+
+  const html = acceptQuality(accept, 'text/html', 'application/xhtml+xml');
+  const wildcard = acceptQuality(accept, 'text/*', '*/*');
+
+  return markdown > html && markdown >= wildcard;
+};
+
+/**
+ * The typed links this site offers, per RFC 8288.
+ *
+ * All IANA-registered relation types bar one: `sitemap` is not in the registry, but it is the
+ * long-standing de-facto name for exactly this and no registered relation covers it. `home` was
+ * here and is now `index` — `home` is an HTML4 link type that never made it into the registry, so
+ * it was a string an agent has no way to interpret, which is the thing this list exists to avoid.
  */
 const buildLinkHeader = (url, { includeMarkdown }) => {
   const origin = 'https://swymble.com';
@@ -75,7 +111,7 @@ const buildLinkHeader = (url, { includeMarkdown }) => {
     `<${origin}/sitemap.xml>; rel="sitemap"; type="application/xml"`,
     `<${origin}/feed.xml>; rel="alternate"; type="application/rss+xml"; title="SWYMBLE Blog"`,
     `<${origin}/about>; rel="author"`,
-    `<${origin}/>; rel="home"`,
+    `<${origin}/>; rel="index"`,
   ];
 
   if (includeMarkdown) {
