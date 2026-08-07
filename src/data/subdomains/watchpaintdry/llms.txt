@@ -15,5 +15,7 @@ SWYMBLE software studio.
 
 ## Contact
 
-Site: https://swymble.com
+Full write-up: https://swymble.com/labs/watchpaintdry
+Studio: https://swymble.com
 Labs: https://swymble.com/labs
+Email: hello@swymble.com

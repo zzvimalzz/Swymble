@@ -26,6 +26,10 @@
     <meta property="twitter:image" content="https://www.watchpaintdry.net/preview.png">
     
     <link rel="canonical" href="https://www.watchpaintdry.net/">
+    <link rel="author" href="https://swymble.com/about">
+    <!-- Same relations the main site uses (see docs/agent-readiness.md) — `describedby` for the
+         plain-text summary, `author` for the studio behind it. Both IANA-registered. -->
+    <link rel="describedby" type="text/plain" href="https://www.watchpaintdry.net/llms.txt">
     
     <link rel="icon" type="image/png" href="assets/images/logo.png">
     
@@ -35,6 +39,13 @@
     
     <link rel="stylesheet" href="assets/css/styles.css">
     
+    <!--
+      creator/publisher/isPartOf point at the Swymble organisation on the other domain, reusing the
+      same @id anchor swymble.com/index.html declares. This is a different registrable domain
+      saying "the same organisation built this", which is corroboration a search engine cannot get
+      from swymble.com describing itself. Keep the @id string byte-identical to the one on the main
+      site — it is the join between the two documents.
+    -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -43,11 +54,25 @@
       "description": "A relaxing meditation timer where you watch paint dry. Perfect for stress relief and mindfulness.",
       "url": "https://www.watchpaintdry.net/",
       "applicationCategory": "Entertainment, Lifestyle",
+      "browserRequirements": "Requires JavaScript",
       "offers": {
         "@type": "Offer",
         "price": "0",
         "priceCurrency": "USD"
-      }
+      },
+      "creator": {
+        "@type": "Organization",
+        "@id": "https://swymble.com/#organization",
+        "name": "Swymble",
+        "url": "https://swymble.com"
+      },
+      "publisher": { "@id": "https://swymble.com/#organization" },
+      "isPartOf": {
+        "@type": "CreativeWorkSeries",
+        "name": "SWYMBLE Labs",
+        "url": "https://swymble.com/labs"
+      },
+      "sameAs": ["https://swymble.com/labs/watchpaintdry"]
     }
     </script>
 </head>
@@ -138,9 +163,14 @@
         <div class="message" id="message" role="alert" aria-live="polite">The paint is still wet!</div>
     </div>
     
-    <div class="timer" id="timer" role="timer" aria-label="Time spent watching paint dry">
+    <!-- role="timer" sits on the display, not the card: it marks a live region, and the credit
+         link below would otherwise be re-announced every time the clock ticks. -->
+    <div class="timer" id="timer">
         <div class="timer-label">You've Been Staring For</div>
-        <div class="timer-display" id="timerDisplay">00:00:00</div>
+        <div class="timer-display" id="timerDisplay" role="timer" aria-label="Time spent watching paint dry">00:00:00</div>
+        <a class="timer-credit" href="https://swymble.com/labs/watchpaintdry" target="_blank" rel="noopener">
+            A Swymble Labs experiment
+        </a>
     </div>
 
     <a href="https://www.buymeacoffee.com/cnso" target="_blank" class="mobile-bmc-btn" aria-label="Buy me a coffee">

@@ -163,6 +163,30 @@ body {
     letter-spacing: 0.04em;
 }
 
+/* Lives inside the timer card rather than as its own fixed element: every screen corner is
+   already taken (audio toggle, stats button, timer, Buy Me a Coffee), and riding along with the
+   timer means it stays clear of all of them at every breakpoint with no extra media queries. */
+.timer-credit {
+    display: block;
+    margin-top: 10px;
+    padding-top: 9px;
+    border-top: 1px solid var(--glass-border);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 700;
+    color: var(--muted-ink);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+.timer-credit:hover,
+.timer-credit:focus-visible {
+    color: var(--ink);
+    text-decoration: underline;
+}
+
 .unlock-notification {
     position: fixed;
     top: 30px;
