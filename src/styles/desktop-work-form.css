@@ -164,7 +164,10 @@
   width: 100%;
 }
 
-@media (max-width: 1000px) {
+/* The form's lines are written to read inline ("Hi, my name is ____."), which needs roughly 600px
+   of column. Between 1000px and 1200px the two-column split left it narrower than that and every
+   field dropped onto its own line, so the split now gives way while the sentences still fit. */
+@media (max-width: 1200px) {
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 4rem;

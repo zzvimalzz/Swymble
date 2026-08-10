@@ -215,8 +215,11 @@
   opacity: 0.55;
 }
 
+/* Once the positioning grid stacks, the 400px deck kept the right-column alignment it had beside
+   the statement, which left the other two thirds of the row empty. Centred, it reads as its own
+   block instead of a column that lost its neighbour. */
 @media screen and (max-width: 1100px) {
   .workdeck {
-    margin-left: 0;
+    margin-inline: auto;
   }
 }

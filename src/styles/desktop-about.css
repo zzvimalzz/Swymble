@@ -1010,10 +1010,12 @@
 }
 
 /* ── Responsive ── */
+/* The intro and the mosaic used to stack at 1180px, which left the 26rem panel sitting against a
+   half-empty row for the whole tablet range. The pair still fits side by side well below that —
+   it is the gap, not the columns, that runs out of room first. */
 @media screen and (max-width: 1180px) {
   .about-header__grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 2.5rem;
+    gap: 2.25rem;
   }
 
   .mosaic {
@@ -1024,15 +1026,42 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  /* Five stats across three columns leave a dead cell on the second row, same as the two-column
+     case below. */
+  .about-stats__item:last-child {
+    grid-column: span 2;
+  }
+
   .readme__body,
   .stack__domains {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* The three domains are a full row at three columns; at two they left a lit but empty panel
+     beside the last one, because these cells carry their own background and dividers. */
+  .stack__domain:last-child {
+    grid-column: 1 / -1;
   }
 
   .config__grid,
   .remote__grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 2rem;
+  }
+}
+
+/* Below this the intro column would be narrower than the panel beside it, so the header stacks and
+   the panel centres under the copy rather than hugging one edge of an otherwise empty row. */
+@media screen and (max-width: 900px) {
+  .about-header__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+
+  .mosaic {
+    width: 100%;
+    max-width: 30rem;
+    margin-inline: auto;
   }
 }
 

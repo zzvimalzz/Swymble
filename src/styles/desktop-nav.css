@@ -1,4 +1,16 @@
+/* The bar carries seven links plus a wordmark between 861px (where it collapses into the thumb
+   sheet) and the full desktop width. At fixed sizes that set needs ~965px of run, so anything
+   under ~1080px squeezed the flex gaps to zero — the wordmark ran into HOME and the CTA broke
+   across two lines. Every size that contributes to the bar's width is fluid instead, tuned to
+   reach its full value at 1280px and its floor just under the collapse breakpoint. The compact
+   (scrolled) state gets its own, smaller set of the same variables. */
 .desktop-nav {
+  --nav-brand-base: clamp(1.45rem, 2.1vw + 0.32rem, 2rem);
+  --nav-link-base: clamp(0.9rem, 0.66rem + 0.44vw, 1rem);
+  --nav-gap-base: clamp(1.5rem, 5.73vw - 1.58rem, 3rem);
+  --nav-brand-size: var(--nav-brand-base);
+  --nav-link-size: var(--nav-link-base);
+  --nav-gap: var(--nav-gap-base);
   position: fixed;
   top: 0;
   left: 0;
@@ -7,6 +19,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  /* space-between alone lets the two sides meet once the content stops fitting. */
+  column-gap: 1.75rem;
   z-index: 100;
   pointer-events: auto;
   background: rgba(5, 5, 5, 0.74);
@@ -17,6 +31,12 @@
 }
 
 .desktop-nav.is-compact {
+  /* Ratios rather than a second set of clamps: at full width these land back on the values the
+     compact bar was designed with (2rem→1.34rem, 1rem→0.85rem, 3rem→1.86rem) and they stay
+     proportionally smaller than the resting bar all the way down. */
+  --nav-brand-size: calc(var(--nav-brand-base) * 0.67);
+  --nav-link-size: calc(var(--nav-link-base) * 0.85);
+  --nav-gap: calc(var(--nav-gap-base) * 0.62);
   padding-block: 0.78rem;
   background: rgba(5, 5, 5, 0.54);
   border-bottom-color: rgba(255, 255, 255, 0.09);
@@ -26,48 +46,44 @@
 
 .nav-brand {
   pointer-events: auto;
+  flex: 0 0 auto;
 }
 
 .nav-brand a {
+  display: inline-block;
   font-family: var(--font-logo);
-  font-size: 2rem;
+  font-size: var(--nav-brand-size);
   color: var(--text-main);
   text-decoration: none;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  white-space: nowrap;
   transition: color 0.32s ease, font-size 0.42s cubic-bezier(0.19, 1, 0.22, 1), letter-spacing 0.42s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 .desktop-nav.is-compact .nav-brand a {
-  font-size: 1.34rem;
   letter-spacing: 0.08em;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 3rem;
+  flex-wrap: nowrap;
+  gap: var(--nav-gap);
   pointer-events: auto;
   transition: gap 0.42s cubic-bezier(0.19, 1, 0.22, 1);
 }
 
-.desktop-nav.is-compact .nav-links {
-  gap: 1.85rem;
-}
-
 .nav-link {
   font-family: var(--font-mono);
-  font-size: 1rem;
+  font-size: var(--nav-link-size);
   font-weight: 700;
+  white-space: nowrap;
   color: var(--text-main);
   text-decoration: none;
   text-transform: uppercase;
   transition: color 0.3s ease, font-size 0.42s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.32s ease;
   position: relative;
-}
-
-.desktop-nav.is-compact .nav-link {
-  font-size: 0.82rem;
 }
 
 .nav-link::after {
@@ -115,7 +131,7 @@
   line-height: 1;
   border-radius: var(--sw-radius-pill);
   padding: 0.7em 1.1em;
-  margin-left: 0.75rem;
+  margin-left: clamp(0.15rem, 2.29vw - 1.08rem, 0.75rem);
   transition: background var(--sw-motion-fast) var(--sw-ease-standard), color var(--sw-motion-fast) var(--sw-ease-standard);
 }
 
