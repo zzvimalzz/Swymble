@@ -2,7 +2,8 @@
    main.js — orchestration
    ============================================================ */
 
-import "./style.css";
+// style.css is linked from index.html <head>, not imported here: see the
+// comment on that <link> for why a JS-injected stylesheet flashed
 import QRCode from "qrcode";
 import { createMoon } from "./moon.js";
 import { createViewer } from "./viewer.js";
@@ -11,26 +12,39 @@ import {
   prefetchModelAssets
 } from "./models.js";
 import { buildTicket } from "./ticket.js";
+import { createFete } from "./fete.js";
 import { buildCertificate } from "./certificate.js";
 import {
-  geocode, historicalWeather, onThisDay, yearEvents, countryFacts
+  geocode, historicalWeather, onThisDay, yearEvents, countryFacts, searchPlaces,
+  countryIndicators, spaceWeather
 } from "./apis.js";
 import {
   moonPhase, zodiac, chineseZodiac, birthstone, birthFlower,
   weekday, monthName, prettyDate, ageInfo, lunarMonthsLived,
-  generation, lifePath, cosmicOdometer, sunTimes, planetAges
+  generation, lifePath, cosmicOdometer, sunTimes, planetAges,
+  planetLongitudes, nextBirthday, milestones, skyReturn, ordinal
 } from "./astro.js";
 import {
   movieOfYear, songOfYear, leaderAt, COUNTRIES, worldPopulationAt,
   leadersOf, leadersThatYear
 } from "./data.js";
 import { GEM_COLORS, ZODIAC_READINGS } from "./cosmos.js";
+import { buildProfile, dailySkyHTML, wireDailySky, wireClock, spaceModuleHTML } from "./today.js";
+import { signIcon } from "./glyphs.js";
+// aliased: renderResult already has a local `track` for the leader timeline
+// element, and an import cannot be shadowed quietly without this kind of bug
+import { initAnalytics, track as trackEvent, watchCompletion, EVENTS } from "./analytics.js";
+
+// inert unless a provider is configured; see the header of analytics.js
+initAnalytics();
 
 /* ---------- starfield ---------- */
 (function starfield() {
   const canvas = document.getElementById("starfield");
   const ctx = canvas.getContext("2d");
-  let stars = [], shooting = null, w, h, dpr, t = 0;
+  let stars = [], shooting = null, w, h, dpr, t = 0, scrollY = 0;
+  const FIELD = 2.4;            // screen-heights the star field spans
+  const PARALLAX = 0.14;        // how far the field travels per pixel scrolled
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -38,15 +52,25 @@ import { GEM_COLORS, ZODIAC_READINGS } from "./cosmos.js";
     h = canvas.height = innerHeight * dpr;
     canvas.style.width = innerWidth + "px";
     canvas.style.height = innerHeight + "px";
+    /*
+       Stars are laid out over 2.4 screen-heights and each carries a depth.
+       On scroll they shift by an amount proportional to that depth and wrap,
+       so the field separates into layers that slide past each other instead
+       of sitting flat behind the page. Ported from ORBIT.
+    */
     const count = Math.round((innerWidth * innerHeight) / 6500);
-    stars = Array.from({ length: count }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      r: (Math.random() * 1.3 + 0.2) * dpr,
-      tw: Math.random() * Math.PI * 2,
-      sp: Math.random() * 0.9 + 0.2,
-      hue: Math.random() < 0.15 ? 250 : (Math.random() < 0.5 ? 45 : 220)
-    }));
+    stars = Array.from({ length: count }, () => {
+      const depth = Math.random();
+      return {
+        x: Math.random() * w,
+        y: Math.random() * h * FIELD,
+        r: (0.25 + Math.random() * 1.25 * (0.4 + depth)) * dpr,
+        tw: Math.random() * Math.PI * 2,
+        sp: Math.random() * 0.9 + 0.2,
+        depth,
+        hue: Math.random() < 0.15 ? 250 : (Math.random() < 0.5 ? 45 : 220)
+      };
+    });
   }
 
   function maybeShoot() {
@@ -64,12 +88,24 @@ import { GEM_COLORS, ZODIAC_READINGS } from "./cosmos.js";
   function frame() {
     t += 0.016;
     ctx.clearRect(0, 0, w, h);
+    const span = h * FIELD;
+    const off = scrollY * dpr * PARALLAX;
     for (const s of stars) {
+      // deeper stars drift less, and the column wraps so it never runs out
+      const y = (((s.y - off * (0.25 + s.depth * 0.9)) % span) + span) % span - h * 0.6;
+      if (y < -8 || y > h + 8) continue;
       const a = 0.35 + Math.sin(t * s.sp + s.tw) * 0.35;
       ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.arc(s.x, y, s.r, 0, Math.PI * 2);
       ctx.fillStyle = `hsla(${s.hue}, 70%, 88%, ${Math.max(0.05, a)})`;
       ctx.fill();
+      // the brightest few get a soft bloom, which is what sells the depth
+      if (s.r > 1.3 * dpr) {
+        ctx.beginPath();
+        ctx.arc(s.x, y, s.r * 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${s.hue}, 70%, 88%, ${Math.max(0.02, a * 0.07)})`;
+        ctx.fill();
+      }
     }
     maybeShoot();
     if (shooting) {
@@ -91,6 +127,7 @@ import { GEM_COLORS, ZODIAC_READINGS } from "./cosmos.js";
     requestAnimationFrame(frame);
   }
 
+  addEventListener("scroll", () => { scrollY = window.scrollY; }, { passive: true });
   addEventListener("resize", resize);
   resize();
   frame();
@@ -106,20 +143,91 @@ addEventListener("pointermove", (e) => {
   });
 });
 
-/* ---------- populate form selects ---------- */
-const monthSel = document.getElementById("f-month");
-for (let m = 1; m <= 12; m++) {
-  const o = document.createElement("option");
-  o.value = m;
-  o.textContent = monthName(m);
-  monthSel.appendChild(o);
-}
-const dl = document.getElementById("country-list");
-COUNTRIES.forEach((c) => {
-  const o = document.createElement("option");
-  o.value = c;
-  dl.appendChild(o);
-});
+/* ---------- the month field ---------- */
+/** Set by initMonthField so the deep-link path can fill the month control. */
+let setMonthField = () => {};
+
+/*
+   A combobox rather than a native <select>, so it matches the birthplace
+   field beside it: same typing, same list, same keys. A native select on a
+   dark page also renders in the platform's own chrome, which was the one
+   control on the form that didn't belong to the design.
+*/
+(function initMonthField() {
+  const input = document.getElementById("f-month-text");
+  const hidden = document.getElementById("f-month");
+  const list = document.getElementById("month-results");
+  const field = document.getElementById("month-field");
+  if (!input || !list) return;
+
+  const MONTHS = Array.from({ length: 12 }, (_, i) => ({ n: i + 1, name: monthName(i + 1) }));
+  let items = MONTHS, active = -1;
+
+  const close = () => {
+    list.hidden = true;
+    input.setAttribute("aria-expanded", "false");
+    active = -1;
+  };
+  const paint = () => {
+    list.innerHTML = items.map((m, i) => `
+      <li role="option" aria-selected="${i === active}"
+          class="placelist__item${i === active ? " is-active" : ""}" data-i="${i}">
+        <span class="placelist__name">${m.name}</span>
+      </li>`).join("");
+    list.hidden = !items.length;
+    input.setAttribute("aria-expanded", String(!!items.length));
+  };
+  const choose = (m) => {
+    hidden.value = m.n;
+    input.value = m.name;
+    field.classList.add("is-resolved");
+    close();
+  };
+  const filter = (q) => {
+    const s = q.trim().toLowerCase();
+    items = s ? MONTHS.filter((m) => m.name.toLowerCase().startsWith(s)) : MONTHS;
+    active = -1;
+    paint();
+  };
+
+  input.addEventListener("focus", () => filter(""));
+  input.addEventListener("input", () => {
+    hidden.value = "";
+    field.classList.remove("is-resolved");
+    filter(input.value);
+  });
+  input.addEventListener("keydown", (e) => {
+    if (list.hidden || !items.length) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      active = (active + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+      paint();
+    } else if (e.key === "Enter" && active >= 0) {
+      e.preventDefault();
+      choose(items[active]);
+    } else if (e.key === "Escape") {
+      close();
+    }
+  });
+  list.addEventListener("mousedown", (e) => {
+    const li = e.target.closest("[data-i]");
+    if (li) { e.preventDefault(); choose(items[+li.dataset.i]); }
+  });
+  input.addEventListener("blur", () => setTimeout(() => {
+    // a typed-but-unpicked month still resolves, rather than silently failing
+    if (!hidden.value) {
+      const m = MONTHS.find((x) => x.name.toLowerCase().startsWith(input.value.trim().toLowerCase()));
+      if (m && input.value.trim()) choose(m);
+    }
+    close();
+  }, 120));
+
+  // deep links call this to fill both halves of the control at once
+  setMonthField = (n) => {
+    const m = MONTHS.find((x) => x.n === Number(n));
+    if (m) choose(m);
+  };
+})();
 
 /* ---------- reveal observer + scroll meridian ---------- */
 const revealObserver = new IntersectionObserver(
@@ -180,10 +288,10 @@ form.addEventListener("submit", (e) => {
     day: parseInt(data.get("day"), 10),
     month: parseInt(data.get("month"), 10),
     year: parseInt(data.get("year"), 10),
-    country: (data.get("country") || "").toString().trim(),
-    time: (data.get("time") || "").toString(),
-    city: (data.get("city") || "").toString().trim(),
-    state: (data.get("state") || "").toString().trim()
+    placeLabel: (data.get("place") || "").toString().trim(),
+    // only set when the visitor actually picked from the list
+    place: selectedPlace,
+    time: (data.get("time") || "").toString()
   };
 
   const err = validate(inputs);
@@ -192,22 +300,32 @@ form.addEventListener("submit", (e) => {
     errorEl.hidden = false;
     return;
   }
+  trackEvent(EVENTS.ARCHIVE_START, { entry: "form" });
   runGeneration(inputs);
 });
 
 /** Encode a person's inputs into a revisitable URL (drives the QR code). */
 function buildShareURL(i) {
   const p = new URLSearchParams();
-  p.set("n", i.name); p.set("d", i.day); p.set("m", i.month);
-  p.set("y", i.year); p.set("c", i.country);
-  if (i.city) p.set("city", i.city);
-  if (i.state) p.set("s", i.state);
+  p.set("n", i.name); p.set("d", i.day); p.set("m", i.month); p.set("y", i.year);
+  p.set("p", i.placeLabel || i.country || "");
+  // carrying the resolved fix means a shared link never has to geocode again
+  if (i.place) {
+    p.set("la", i.place.lat.toFixed(4));
+    p.set("lo", i.place.lon.toFixed(4));
+    if (i.place.timezone) p.set("tz", i.place.timezone);
+    if (i.place.countryCode) p.set("cc", i.place.countryCode);
+  }
   if (i.time) p.set("t", i.time);
   return `${location.origin}${location.pathname}?${p.toString()}`;
 }
 
 async function runGeneration(inputs) {
-  const { name, day, month, year, country, time, city, state } = inputs;
+  const startedAt = performance.now();
+  const { name, day, month, year, time, place, placeLabel } = inputs;
+  const country = place?.country || inputs.country || "";
+  const city = place?.name || "";
+  const state = place?.admin1 || "";
   const shareURL = buildShareURL(inputs);
   try { history.replaceState(null, "", shareURL); } catch {}
 
@@ -243,37 +361,39 @@ async function runGeneration(inputs) {
   const odo = cosmicOdometer(birthDate, today);
   const planets = planetAges(odo.orbits);
   const population = worldPopulationAt(year);
+  // the returnability set: where the sky was, what's next, and when you come back
+  const skyThen = planetLongitudes(birthDate);
+  const nextReturn = nextBirthday(month, day, today);
+  const nextMilestones = milestones(birthDate, today, 6);
+  const returning = skyReturn(birthDate, today);
 
-  // ---- live fetches (fail soft, in parallel) ----
-  const iso = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-  const placeQuery = [city, state, country].filter(Boolean).join(", ");
-
-  const geoP = geocode(placeQuery)
-    .then((g) => g || (city ? geocode(`${city}, ${country}`) : null))
-    .then((g) => g || geocode(country));
-  const otdP = onThisDay(month, day).catch(() => null);
-  const geo = await geoP;
-  const [weather, yearNews, otd, homeland] = await Promise.all([
-    geo ? historicalWeather(geo.lat, geo.lon, iso).catch(() => null) : Promise.resolve(null),
-    yearEvents(year).catch(() => null),
-    otdP,
-    countryFacts(geo?.countryCode, geo?.country || country).catch(() => null)
-  ]);
-
-  const sun = geo ? sunTimes(geo.lat, geo.lon, birthDate, geo.timezone) : null;
-  const leader = leaderAt(geo?.countryCode, year);
   const movie = movieOfYear(year);
   const song = songOfYear(year);
 
+  /*
+     Everything above needs no network at all, so the page is painted from it
+     immediately. The veil used to stay up until Open-Meteo and Wikipedia had
+     both answered, which meant a slow archive — or no connection — held the
+     whole reveal hostage. Now the computed day appears at once and the fetched
+     material arrives into its own slots afterwards.
+  */
   const payload = {
     name, day, month, year, country, city, state, time,
     birthDate, today, moon: moonData, zod, cz, stone, flower, dow, age, fullMoons,
-    gen, lp, odo, planets, population, geo, weather, sun, yearNews, otd,
-    leader, movie, song, homeland, shareURL
+    gen, lp, odo, planets, population, movie, song, shareURL,
+    skyThen, nextReturn, nextMilestones, returning,
+    placeLabel,
+    // a picked suggestion already carries a fix, so the sun is exact from frame one
+    geo: place || null,
+    sun: place ? sunTimes(place.lat, place.lon, birthDate, place.timezone) : null,
+    weather: null, yearNews: null, otd: null,
+    leader: place ? leaderAt(place.countryCode, year) : null,
+    homeland: null, pending: true
   };
 
   clearInterval(lineTimer);
-  await new Promise((r) => setTimeout(r, 350)); // let the last veil line register
+  // hold the veil only long enough to register as a curtain, never for the network
+  await new Promise((r) => setTimeout(r, Math.max(0, MIN_VEIL_MS - (performance.now() - startedAt))));
 
   renderResult(payload);
 
@@ -281,48 +401,287 @@ async function runGeneration(inputs) {
   intro.style.display = "none";
   result.hidden = false;
   scrollTo({ top: 0, behavior: "auto" });
+
+  enhance(payload);
 }
 
-function validate({ name, day, month, year, country }) {
+/** How long the loading veil is held, at minimum, before the reveal. */
+const MIN_VEIL_MS = 420;
+
+/**
+ * The progressive half: fetch what needs the network, then fill the waiting
+ * slots. Every step fails soft — a section that never resolves keeps its
+ * "still listening" state instead of breaking the page.
+ */
+async function enhance(d) {
+  const iso = `${d.year}-${String(d.month).padStart(2, "0")}-${String(d.day).padStart(2, "0")}`;
+  const placeQuery = d.placeLabel || [d.city, d.state, d.country].filter(Boolean).join(", ");
+
+  const otdP = onThisDay(d.month, d.day).catch(() => null);
+  const yearP = yearEvents(d.year).catch(() => null);
+
+  // if the visitor picked a suggestion we already have the fix; only free text
+  // typed straight past the list still needs resolving
+  const geoP = (d.geo
+    ? Promise.resolve(d.geo)
+    : placeQuery
+      ? geocode(placeQuery)
+          .then((g) => g || (d.city && d.country ? geocode(`${d.city}, ${d.country}`) : null))
+          .then((g) => g || (d.country ? geocode(d.country) : null))
+      : Promise.resolve(null)
+  ).catch(() => null);
+
+  // place-dependent material, hydrated as one group once we know where "there" is
+  geoP.then(async (geo) => {
+    d.geo = geo;
+    if (geo) {
+      d.sun = sunTimes(geo.lat, geo.lon, d.birthDate, geo.timezone);
+      d.leader = leaderAt(geo.countryCode, d.year);
+    }
+    hydrate(d, ["weather", "leader", "homeland"], { weatherPending: !!geo });
+
+    const [weather, homeland, indicators] = await Promise.all([
+      geo ? historicalWeather(geo.lat, geo.lon, iso).catch(() => null) : Promise.resolve(null),
+      countryFacts(geo?.countryCode, geo?.country || d.country).catch(() => null),
+      countryIndicators(geo?.countryCode, d.year).catch(() => null)
+    ]);
+    d.weather = weather;
+    d.homeland = homeland;
+    d.indicators = indicators;
+    // a centroid from the bundled place table has no zone, so the sun was
+    // read off the longitude; the archive just told us the real one
+    if (geo && !geo.timezone && weather?.timezone) {
+      geo.timezone = weather.timezone;
+      d.sun = sunTimes(geo.lat, geo.lon, d.birthDate, weather.timezone);
+    }
+    hydrate(d, ["weather", "homeland"]);
+    refreshKeepsakes(d);
+  });
+
+  otdP.then((otd) => { d.otd = otd; hydrate(d, ["people"]); });
+  yearP.then((yn) => { d.yearNews = yn; hydrate(d, ["news"]); });
+}
+
+/** The sections that arrive over the network, keyed by slot id. */
+const ASYNC_SECTIONS = {
+  weather: (d) => renderWeather(d, placeLabelFor(d)),
+  news: (d) => renderYearNews(d),
+  people: (d) => renderBirthdayPeople(d),
+  leader: (d) => renderLeader(d),
+  homeland: (d) => renderHomeland(d),
+};
+
+/** A quiet holding state — never a spinner, never a wall of skeletons. */
+function slotHTML(key, d) {
+  return `<div class="async-slot" data-slot="${key}">${
+    d.pending ? "" : ASYNC_SECTIONS[key](d)
+  }</div>`;
+}
+
+/** Swap freshly-arrived sections into their slots and wake their animations. */
+function hydrate(d, keys, opts = {}) {
+  for (const key of keys) {
+    const slot = result.querySelector(`[data-slot="${key}"]`);
+    if (!slot) continue;
+    // while the place is known but its weather isn't, leave the slot alone
+    if (key === "weather" && opts.weatherPending && !d.weather) continue;
+    const html = ASYNC_SECTIONS[key]({ ...d, pending: false });
+    if (slot.innerHTML.trim() === (html || "").trim()) continue;
+    slot.innerHTML = html;
+    observeReveals(slot);
+    animateCounts(slot);
+    wireTempDial(slot);
+  }
+  const track = document.getElementById("leader-track");
+  const chip = track?.querySelector("[data-active]");
+  if (track && chip) track.scrollLeft = chip.offsetLeft - track.clientWidth / 2 + chip.clientWidth / 2;
+
+  // the rail is built from the chapters present at the time; sections that
+  // arrive over the network need it rebuilt or they never get a mark
+  buildChapterRail();
+}
+
+function placeLabelFor(d) {
+  return [d.city, d.state, d.geo?.country || d.country].filter(Boolean).join(", ")
+    || "an unrecorded corner of Earth";
+}
+
+/*
+   Name, date and birthplace. Free text is accepted rather than rejected: if the
+   visitor typed straight past the suggestion list we resolve it afterwards,
+   instead of throwing them back to the field, which was the old failure mode.
+*/
+function validate({ name, day, month, year, placeLabel }) {
+  if (!placeLabel || placeLabel.trim().length < 2) {
+    if (name && day && month && year) return "Tell us where you were born. A town, a state or a country all work.";
+  }
   if (!name) return "We need a name to address the ticket to.";
-  if (!day || day < 1 || day > 31) return "That day doesn't look right (1–31).";
+  if (!day || day < 1 || day > 31) return "That day doesn't look right (1 to 31).";
   if (!month || month < 1 || month > 12) return "Please choose a month.";
   if (!year || year < 1900 || year > 2026) return "Please enter a year between 1900 and 2026.";
-  // basic real-date check
   const test = new Date(Date.UTC(year, month - 1, day));
   if (test.getUTCMonth() !== month - 1) return "That date doesn't exist on the calendar.";
-  if (!country) return "Tell us the country you were born in.";
-  if (!COUNTRIES.some((c) => c.toLowerCase() === country.toLowerCase())) {
-    return "Please choose a country from the suggested list.";
+  if (!placeLabel || placeLabel.trim().length < 2) {
+    return "Tell us where you were born. A town, a state or a country all work.";
   }
   return null;
 }
+
+/** Resolve free text to a known country: exact, then prefix, then contains. */
+function resolveCountry(input) {
+  const q = (input || "").trim().toLowerCase();
+  if (!q) return "";
+  return COUNTRIES.find((c) => c.toLowerCase() === q)
+    || COUNTRIES.find((c) => c.toLowerCase().startsWith(q))
+    || COUNTRIES.find((c) => c.toLowerCase().includes(q))
+    || input.trim();
+}
+
+/* ---------- birthplace combobox ---------- */
+/*
+   Backed by Open-Meteo's geocoder rather than a bundled list, so every town,
+   state and country on Earth is reachable and always current. Picking a
+   suggestion carries exact coordinates and an IANA timezone straight into the
+   engine, which removes the geocoding round trip and makes sunrise and the
+   historical weather correct rather than approximate.
+*/
+function initPlaceField() {
+  const input = document.getElementById("f-place");
+  const list = document.getElementById("place-results");
+  const spin = document.getElementById("place-spin");
+  const field = document.getElementById("place-field");
+  if (!input || !list) return;
+
+  let items = [];
+  let active = -1;
+  let seq = 0;
+  let timer = 0;
+
+  const close = () => {
+    list.hidden = true;
+    list.innerHTML = "";
+    input.setAttribute("aria-expanded", "false");
+    active = -1;
+  };
+
+  const choose = (place) => {
+    selectedPlace = place;
+    input.value = place.label;
+    field.classList.add("is-resolved");
+    close();
+  };
+
+  const paint = () => {
+    list.innerHTML = items.map((p, i) => `
+      <li role="option" id="place-opt-${i}" aria-selected="${i === active}"
+          class="placelist__item${i === active ? " is-active" : ""}" data-i="${i}">
+        <span class="placelist__name">${esc(p.name)}</span>
+        <span class="placelist__where">${esc(
+          p.kind === "country" ? "Country"
+            : p.kind === "region" ? `State or region, ${p.country}`
+            : [p.admin1, p.country].filter(Boolean).join(", ")
+        )}</span>
+      </li>`).join("");
+    list.hidden = !items.length;
+    input.setAttribute("aria-expanded", String(!!items.length));
+  };
+
+  /*
+     Two sources, deliberately. The live geocoder is a city database, so
+     searching it alone for "Texas" or "Bavaria" returns villages of that name
+     instead of the state. The bundled country/region table answers those, and
+     is merged in front; towns still come from the network. The table is
+     imported on demand so it costs nothing until someone starts typing.
+  */
+  let regionsModule = null;
+  const localMatches = async (q) => {
+    try {
+      regionsModule ||= await import("./places.js");
+      return regionsModule.searchRegions(q, 4);
+    } catch {
+      return [];
+    }
+  };
+
+  const search = async (q) => {
+    const mine = ++seq;
+    spin.hidden = false;
+    const [local, remote] = await Promise.all([localMatches(q), searchPlaces(q, 8)]);
+    if (mine !== seq) return;                 // a later keystroke already won
+    spin.hidden = true;
+
+    const seen = new Set();
+    items = [...local, ...remote].filter((p) => {
+      const key = p.label.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 8);
+
+    active = -1;
+    paint();
+  };
+
+  input.addEventListener("input", () => {
+    selectedPlace = null;
+    field.classList.remove("is-resolved");
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 2) { close(); spin.hidden = true; return; }
+    timer = setTimeout(() => search(q), 220);  // debounce, one request per pause
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (list.hidden || !items.length) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      active = (active + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+      paint();
+      input.setAttribute("aria-activedescendant", `place-opt-${active}`);
+    } else if (e.key === "Enter" && active >= 0) {
+      e.preventDefault();
+      choose(items[active]);
+    } else if (e.key === "Escape") {
+      close();
+    }
+  });
+
+  list.addEventListener("mousedown", (e) => {
+    const li = e.target.closest("[data-i]");
+    if (li) { e.preventDefault(); choose(items[+li.dataset.i]); }
+  });
+
+  input.addEventListener("blur", () => setTimeout(close, 120));
+}
+
+/** The birthplace the visitor picked from the suggestions, if they picked one. */
+let selectedPlace = null;
 
 /* ============================================================
    RENDER
    ============================================================ */
 function renderResult(d) {
-  const placeLabel = [d.city, d.state, d.geo?.country || d.country].filter(Boolean).join(", ");
+  const placeLabel = placeLabelFor(d);
+  d._keepsakeLabel = placeLabel;
   const longDate = prettyDate(d.day, d.month, d.year);
 
   result.innerHTML = `
     <div class="wrap">
 
       <!-- HERO -->
-      <header class="block r-hero">
-        <p class="kicker" data-reveal>Transmission recovered</p>
-        <h1 class="r-hero__name" data-reveal>Hello,<br/><em>${esc(d.name)}.</em></h1>
-        <dl class="r-hero__meta" data-reveal>
-          <div><dt>You arrived</dt><dd>${esc(longDate)}</dd></div>
-          <div><dt>It was a</dt><dd>${esc(d.dow)}</dd></div>
-          <div><dt>On Earth, at</dt><dd>${esc(placeLabel)}</dd></div>
-          ${Number.isFinite(d.age.age) ? `<div><dt>That makes you</dt><dd>${d.age.age} years old</dd></div>` : ""}
-        </dl>
+      <header class="block r-hero r-hero--centred">
+        <p class="r-hero__hello" data-reveal>Hello, <em>${esc(d.name)}</em></p>
+        <h1 class="r-hero__date" data-reveal>${esc(ordinal(d.day))} ${esc(monthName(d.month))} <em>${d.year}</em></h1>
+        <p class="r-hero__line" data-reveal>
+          A <b>${esc(d.dow)}</b>, the ${esc(ordinal(dayOfYear(d.month, d.day)))} day of ${d.year},
+          under a <b>${esc(d.moon.name.toLowerCase())}</b>${placeLabel ? `, over ${esc(placeLabel)}` : ""}.
+        </p>
+        ${Number.isFinite(d.age.age) ? `<p class="r-hero__orbit" data-reveal>currently riding orbit no. ${d.age.age + 1}</p>` : ""}
         <span class="scroll-cue" data-reveal>Scroll to begin<span></span></span>
       </header>
 
       <!-- MOON -->
-      <section class="block">
+      <section class="block moon-section">
         <p class="kicker" data-reveal>The sky overhead</p>
         <h2 class="h-section" data-reveal>The moon held a <em>${esc(d.moon.name.toLowerCase())}</em><br/>the night you began.</h2>
         <div class="moon-block mt-l">
@@ -331,49 +690,52 @@ function renderResult(d) {
             <div id="result-moon" style="position:absolute;inset:0;"></div>
           </div>
           <div class="moon-facts" data-reveal>
-            <p class="moon-phase-name">${esc(d.moon.name)} ${d.moon.emoji}</p>
-            <div>
-              <div class="illum-bar"><span id="illum-fill"></span></div>
-              <p class="source"><span id="illum-num">0</span>% illuminated · ${d.moon.age.toFixed(1)} days into the lunar cycle</p>
-            </div>
+            <p class="moon-phase-name">
+              ${esc(d.moon.name)} <em>&middot; ${(d.moon.illumination * 100).toFixed(1)}% lit</em>
+            </p>
+            <p class="moon-reading">
+              ${d.moon.age.toFixed(1)} days into its cycle, and
+              ${d.moon.waxing ? "gathering light" : "giving light back"}.
+            </p>
             <dl class="facts">
               <div class="fact"><dt>Phase</dt><dd>${esc(d.moon.name)}</dd></div>
               <div class="fact"><dt>Direction</dt><dd>${d.moon.waxing ? "Waxing" : "Waning"}</dd></div>
               <div class="fact"><dt>Moons since</dt><dd data-count="${d.fullMoons}">0<small>full cycles lived</small></dd></div>
             </dl>
-            <p class="source source--live">Computed from orbital mechanics · drag to turn the moon — the phase holds true.</p>
+            <p class="source source--live">Drag to turn the moon. The phase holds true at every angle.</p>
           </div>
         </div>
       </section>
 
-      <!-- YOU / SIGNS — four objects from the almanac, in 3D -->
+      <!-- YOU / SIGNS: four objects from the almanac, in 3D -->
       <section class="block">
         <p class="kicker" data-reveal>Written in the calendar</p>
         <h2 class="h-section" data-reveal>What the date <em>says about you.</em></h2>
         <div class="plates mt-l">
-          ${plateHTML("stage-sign", "Star sign", `${d.zod.symbol}&nbsp; ${esc(d.zod.sign)}`, `${esc(d.zod.element)} sign · its constellation, charted`)}
+          ${plateHTML("stage-sign", "Star sign", `${signIcon(d.zod.sign, { size: "1.05em", cls: "inline-glyph" })} ${esc(d.zod.sign)}`, `${esc(d.zod.element)} sign · its constellation, charted`)}
           ${plateHTML("stage-stone", "Birthstone", esc(d.stone), `${esc(monthName(d.month))}'s stone · cut &amp; lit in 3D`)}
           ${plateHTML("stage-animal", "Chinese zodiac", esc(d.cz.animal), `${esc(d.cz.label)} · the lunar year's animal`)}
           ${plateHTML("stage-flower", "Birth flower", esc(d.flower), `${esc(monthName(d.month))}'s bloom`)}
         </div>
-        <p class="source" data-reveal>Drag any object to turn it — it settles back on its own.</p>
-        <dl class="facts mt-l" data-reveal>
-          <div class="fact"><dt>Day you landed</dt><dd>${esc(d.dow)}</dd></div>
-          <div class="fact"><dt>Next birthday</dt><dd data-count="${d.age.daysUntil}">0<small>days away — a ${esc(d.age.nextWeekday)}</small></dd></div>
-        </dl>
       </section>
 
       ${renderNumberEra(d)}
 
       ${renderAstrology(d)}
 
+      ${renderSkyThen(d)}
+
       ${renderOdometer(d)}
+
+      ${renderMilestones(d)}
+
+      ${renderReturn(d)}
 
       ${renderCosmosWide(d)}
 
-      ${renderWeather(d, placeLabel)}
+      ${slotHTML("weather", d)}
 
-      ${renderHomeland(d)}
+      ${slotHTML("homeland", d)}
 
       <!-- SOUND & SCREEN -->
       <section class="block">
@@ -381,17 +743,17 @@ function renderResult(d) {
         <h2 class="h-section" data-reveal>The soundtrack &amp; spectacle<br/>of <em>${d.year}.</em></h2>
         <div class="media mt-l" data-reveal>
           <div class="media__item" style="--glow:rgba(154,127,240,0.18)">
-            <div class="media__icon">♫</div>
+            <div class="media__icon">Sound</div>
             <p class="media__type">Defining song</p>
             ${d.song
-              ? `<h3 class="media__title">${esc(d.song.split(" — ")[0])}</h3>
-                 <p class="media__by">${esc(d.song.split(" — ")[1] || "")}</p>
+              ? `<h3 class="media__title">${esc(d.song.split(" | ")[0])}</h3>
+                 <p class="media__by">${esc(d.song.split(" | ")[1] || "")}</p>
                  ${musicLinks(d.song)}`
               : `<h3 class="media__title">Off the charts</h3><p class="media__by">Our archive doesn't reach ${d.year} yet.</p>`}
             <p class="media__note source--curated">From our archive of the year</p>
           </div>
           <div class="media__item" style="--glow:rgba(236,217,172,0.16)">
-            <div class="media__icon">🎬</div>
+            <div class="media__icon">Screen</div>
             <p class="media__type">Biggest film</p>
             ${d.movie
               ? `<h3 class="media__title">${esc(d.movie)}</h3><p class="media__by">topped the box office</p>`
@@ -401,22 +763,22 @@ function renderResult(d) {
         </div>
       </section>
 
-      ${renderYearNews(d)}
+      ${slotHTML("news", d)}
 
-      ${renderBirthdayPeople(d)}
+      ${slotHTML("people", d)}
 
-      ${renderLeader(d)}
+      ${slotHTML("leader", d)}
 
       <!-- TICKET -->
       <section class="block ticket-block">
         <p class="kicker center" data-reveal style="justify-content:center">One for the road ahead</p>
         <h2 class="h-section center" data-reveal style="text-align:center">Your boarding pass<br/>to <em>everything next.</em></h2>
         <p class="sub center" data-reveal style="margin:0 auto 50px;text-align:center">
-          We've stamped a one-of-a-kind ticket — issued from the day you landed, bound for the future.
+          We've stamped a one-of-a-kind ticket, issued from the day you landed, bound for the future.
         </p>
         <div id="ticket-mount" data-reveal></div>
         <div class="ticket-actions" data-reveal>
-          <button class="btn-ghost" id="save-ticket">⤓ Save ticket</button>
+          <button class="btn-ghost" id="save-ticket">Save ticket</button>
         </div>
       </section>
 
@@ -425,7 +787,7 @@ function renderResult(d) {
         <p class="kicker center" data-reveal style="justify-content:center">A keepsake to print</p>
         <h2 class="h-section center" data-reveal style="text-align:center">Your <em>Certificate of Birth.</em></h2>
         <p class="sub center" data-reveal style="margin:0 auto 40px;text-align:center">
-          One card — click it to turn it over. The back holds your day's details and a QR code
+          One card. Click it to turn it over. The back holds your day's details and a QR code
           that brings anyone straight back to this page.
         </p>
         <div class="cert-controls" data-reveal>
@@ -435,12 +797,13 @@ function renderResult(d) {
             <button type="button" data-size="letter">Letter</button>
             <button type="button" data-size="card">Card</button>
           </div>
-          <button type="button" class="cert-flip-btn" id="cert-flip-btn">⤺ Turn it over</button>
+          <button type="button" class="cert-flip-btn" id="cert-flip-btn">Turn it over</button>
         </div>
         <div id="cert-view" data-reveal></div>
         <div class="ticket-actions" data-reveal>
-          <button class="btn-ghost" id="save-cert">⤓ Save as PDF</button>
-          <button class="btn-ghost" id="copy-link">⧉ Copy my link</button>
+          <button class="btn-ghost" id="save-cert-png">Save as image</button>
+          <button class="btn-ghost" id="save-cert">Save as PDF</button>
+          <button class="btn-ghost" id="copy-link">Copy my link</button>
           <button class="btn-ghost" id="restart">Recover another day</button>
         </div>
       </section>
@@ -459,75 +822,34 @@ function renderResult(d) {
   // mount the four almanac objects
   mountPlates(d);
 
-  // ticket — build, mount, then inject QR code into the stub
-  const ticketEl = buildTicket({
-    name: d.name, day: d.day, month: d.month, year: d.year,
-    origin: placeLabel, moon: d.moon, today: d.today, age: d.age.age,
-    countryCode: d.geo?.countryCode || "",
-    shareURL: d.shareURL
-  });
-  const ticketMount = document.getElementById("ticket-mount");
-  ticketMount.appendChild(ticketEl);
-  fitToContainer(ticketMount, ticketEl);
-  QRCode.toDataURL(d.shareURL, {
-    margin: 1, width: 200, errorCorrectionLevel: "M",
-    color: { dark: "#e8e4f4", light: "#0d0f20" }
-  })
-    .then((url) => {
-      ticketEl.querySelectorAll("[data-ticket-qr]").forEach((img) => (img.src = url));
-    })
-    .catch(() => {});
-
-  // certificate (front + back) — QR is filled in asynchronously
-  const certView = document.getElementById("cert-view");
-  let fitCert = () => {};
-  if (certView) {
-    const cert = buildCertificate(d, placeLabel);
-    certView.appendChild(cert);
-    fitCert = fitToContainer(cert, document.getElementById("cert-flip"));
-    QRCode.toDataURL(d.shareURL, {
-      margin: 1, width: 320, errorCorrectionLevel: "M",
-      color: { dark: "#ddd8f0", light: "#060918" }
-    })
-      .then((url) => {
-        cert.querySelectorAll("[data-qr]").forEach((img) => (img.src = url));
-      })
-      .catch(() => {});
-  }
-
-  // certificate flip + size controls
-  const flip = document.getElementById("cert-flip");
-  const flipBtn = document.getElementById("cert-flip-btn");
-  if (flip && flipBtn) {
-    const toggle = () => {
-      flip.classList.toggle("flipped");
-      flipBtn.textContent = flip.classList.contains("flipped") ? "⤻ Back to the front" : "⤺ Turn it over";
-    };
-    flipBtn.addEventListener("click", toggle);
-    flip.addEventListener("click", toggle);
-    document.querySelectorAll("[data-size]").forEach((b) =>
-      b.addEventListener("click", (e) => {
-        e.stopPropagation();
-        flip.classList.remove("size-a4", "size-letter", "size-card");
-        flip.classList.add("size-" + b.dataset.size);
-        document.querySelectorAll("[data-size]").forEach((x) => x.classList.toggle("is-active", x === b));
-        fitCert();
-      })
-    );
-  }
+  mountKeepsakes(d, placeLabel);
 
   // wire actions
   const saveTicketBtn = document.getElementById("save-ticket");
   saveTicketBtn.addEventListener("click", () =>
-    runSaveAction(saveTicketBtn, () => saveTicketImage(document.getElementById("boarding-pass"), d.name))
+    runSaveAction(saveTicketBtn, () => { trackEvent(EVENTS.KEEPSAKE, { kind: "ticket" }); return saveTicketImage(document.getElementById("boarding-pass"), d.name); })
   );
   const saveCertBtn = document.getElementById("save-cert");
   saveCertBtn.addEventListener("click", () =>
-    runSaveAction(saveCertBtn, () => saveCertificatePDF(document.getElementById("cert-flip"), d.name))
+    runSaveAction(saveCertBtn, () => { trackEvent(EVENTS.KEEPSAKE, { kind: "certificate_pdf" }); return saveCertificatePDF(document.getElementById("cert-flip"), d.name); })
   );
-  document.getElementById("restart").addEventListener("click", () => { location.href = location.pathname; });
+  const saveCertPngBtn = document.getElementById("save-cert-png");
+  if (saveCertPngBtn) {
+    saveCertPngBtn.addEventListener("click", () =>
+      runSaveAction(saveCertPngBtn, () => { trackEvent(EVENTS.KEEPSAKE, { kind: "certificate_png" }); return saveCertificatePNG(document.getElementById("cert-flip"), d.name); })
+    );
+  }
+  /*
+     "Recover another day" asks for the form, so it has to say so. Dropping
+     the query string alone reloaded onto whatever the root tab is, and once
+     a day has been saved the root tab is Today: the button appeared to send
+     people to the wrong screen. The hash survives the reload and pins it.
+  */
+  document.getElementById("restart").addEventListener("click", () => {
+    location.href = `${location.pathname}#new`;
+  });
   const copyBtn = document.getElementById("copy-link");
-  if (copyBtn) copyBtn.addEventListener("click", () => copyLink(copyBtn, d.shareURL));
+  if (copyBtn) copyBtn.addEventListener("click", () => { trackEvent(EVENTS.SHARE_COPY, { kind: "link" }); copyLink(copyBtn, d.shareURL); });
 
   // animations
   observeReveals(result);
@@ -540,6 +862,15 @@ function renderResult(d) {
     track.scrollLeft = activeChip.offsetLeft - track.clientWidth / 2 + activeChip.clientWidth / 2;
   }
 
+  // the countdown to the next solar return — runs from the moment it exists,
+  // not on scroll, because the numbers must agree with the clock on arrival
+  const returnBlock = result.querySelector("[data-return]");
+  if (returnBlock) startCountdown(returnBlock);
+
+  wireOrrery(result);
+  wireFete(d);
+  buildChapterRail();
+
   // live, ever-climbing odometer (starts when it scrolls into view)
   const odo = result.querySelector("[data-odometer]");
   if (odo) {
@@ -548,17 +879,35 @@ function renderResult(d) {
     }, { threshold: 0.3 });
     oObs.observe(odo);
   }
-  requestAnimationFrame(() => {
-    const fill = document.getElementById("illum-fill");
-    if (fill) fill.style.width = Math.round(d.moon.illumination * 100) + "%";
-    const num = document.getElementById("illum-num");
-    if (num) animateNumber(num, Math.round(d.moon.illumination * 100), 1500);
-    const dial = document.getElementById("temp-arc");
-    if (dial) requestAnimationFrame(() => { dial.style.strokeDasharray = dial.getAttribute("data-target"); });
-  });
+  wireTempDial(result);
+
+  /*
+     The two halves of the completion rate the plan is gated on: this fires
+     when the archive is ready, and watchCompletion fires again only if the
+     reader actually reaches the last chapter. See analytics.js.
+  */
+  trackEvent(EVENTS.ARCHIVE_READY);
+  watchCompletion(result);
 
   // persist this result to saves
   persistSave(d);
+}
+
+/*
+   The temperature gauge sweeps from empty to its reading by swapping the
+   dash array one frame after the arc is in the DOM. It used to be kicked
+   once, from renderResult, but the weather chapter arrives over the network
+   and is written into its slot later — so the arc it looked for did not
+   exist yet and the gauge stayed at zero forever. Now every render of the
+   slot re-arms it.
+*/
+function wireTempDial(root) {
+  const dial = root.querySelector("#temp-arc");
+  if (!dial || dial.dataset.swept) return;
+  dial.dataset.swept = "1";
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    dial.style.strokeDasharray = dial.getAttribute("data-target");
+  }));
 }
 
 /* ---- weather section ---- */
@@ -568,7 +917,7 @@ function renderWeather(d, placeLabel) {
       <section class="block">
         <p class="kicker" data-reveal>The weather overhead</p>
         <h2 class="h-section" data-reveal>The skies kept <em>no record.</em></h2>
-        <p class="sub" data-reveal>Reliable daily weather only reaches back to 1940, and not every coordinate is covered. For ${esc(placeLabel)} on your day, the archive came back empty — but the sky still ran on schedule.</p>
+        <p class="sub" data-reveal>Reliable daily weather only reaches back to 1940, and not every coordinate is covered. For ${esc(placeLabel)} on your day, the archive came back empty, but the sky still ran on schedule.</p>
         ${d.sun ? `<dl class="facts mt-l" data-reveal>${sunFactsHTML(d.sun)}</dl>` : ""}
       </section>`;
   }
@@ -603,17 +952,17 @@ function renderWeather(d, placeLabel) {
           </svg>
           <div class="temp-dial__center">
             <b>${mean}°<span style="font-size:0.4em;vertical-align:super">C</span></b>
-            <span>${w.glyph} mean temp</span>
+            <span>mean temp</span>
           </div>
         </div>
         <dl class="facts" data-reveal>
           <div class="fact"><dt>High</dt><dd>${Math.round(w.max)}°C</dd></div>
           <div class="fact"><dt>Low</dt><dd>${Math.round(w.min)}°C</dd></div>
           <div class="fact"><dt>Rain</dt><dd>${w.precip != null ? w.precip.toFixed(1) : "0"}<small>mm of precipitation</small></dd></div>
-          <div class="fact"><dt>Wind</dt><dd>${w.wind != null ? Math.round(w.wind) : "—"}<small>km/h peak gust</small></dd></div>
+          <div class="fact"><dt>Wind</dt><dd>${w.wind != null ? Math.round(w.wind) : "·"}<small>km/h peak gust</small></dd></div>
           ${sunFactsHTML(d.sun)}
-          <div class="fact"><dt>Conditions</dt><dd>${w.glyph} ${esc(w.summary)}</dd></div>
-          <div class="fact"><dt>Source</dt><dd style="font-size:1rem" class="source--live">ERA5 reanalysis<small>via Open-Meteo · measured, not guessed</small></dd></div>
+          <div class="fact"><dt>Conditions</dt><dd>${esc(w.summary)}</dd></div>
+          <div class="fact"><dt>Source</dt><dd style="font-size:1rem" class="source--live">ERA5 reanalysis<small>the archive for ${esc(prettyDate(d.day, d.month, d.year))} at ${d.geo ? `${d.geo.lat.toFixed(2)}, ${d.geo.lon.toFixed(2)}` : "that place"} · measured on the day, not today's forecast</small></dd></div>
         </dl>
       </div>
     </section>`;
@@ -624,15 +973,18 @@ function sunFactsHTML(sun) {
   if (sun.polar) {
     return `<div class="fact"><dt>Daylight</dt><dd>${sun.polar === "day" ? "Midnight sun" : "Polar night"}<small>the sun ${sun.polar === "day" ? "never set" : "never rose"} that day</small></dd></div>`;
   }
+  // an exact place carries its IANA zone; a country or region centroid does
+  // not, and saying so is better than printing a clock that looks certain
+  const zoneNote = sun.approxZone ? "solar time at that longitude" : "local time";
   return `
-    <div class="fact"><dt>Sunrise</dt><dd>${esc(sun.sunrise)}<small>local time</small></dd></div>
-    <div class="fact"><dt>Sunset</dt><dd>${esc(sun.sunset)}<small>local time</small></dd></div>
+    <div class="fact"><dt>Sunrise</dt><dd>${esc(sun.sunrise)}<small>${zoneNote}</small></dd></div>
+    <div class="fact"><dt>Sunset</dt><dd>${esc(sun.sunset)}<small>${zoneNote}</small></dd></div>
     <div class="fact"><dt>Daylight</dt><dd>${sun.daylightHours.toFixed(1)}<small>hours of sun</small></dd></div>`;
 }
 
 /* ---- music links ---- */
 function musicLinks(song) {
-  const q = song.replace(/ — /g, " ");
+  const q = song.replace(/ \| /g, " ");
   const yt = `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
   const sp = `https://open.spotify.com/search/${encodeURIComponent(q)}`;
   return `
@@ -660,9 +1012,9 @@ function plateHTML(id, type, title, sub) {
 function mountPlates(d) {
   const plates = [
     { id: "stage-sign", glyph: d.zod.symbol, build: () => constellationObject(d.zod.sign) },
-    { id: "stage-stone", glyph: "◆", build: () => gemstoneObject(d.stone, GEM_COLORS[d.stone] || { base: "#9a7ff0", glow: "#ecd9ac" }) },
-    { id: "stage-animal", glyph: "福", build: () => zodiacAnimalObject(d.cz.animal, d.cz.element) },
-    { id: "stage-flower", glyph: "✿", build: () => flowerObject(d.flower) },
+    { id: "stage-stone", glyph: "Stone", build: () => gemstoneObject(d.stone, GEM_COLORS[d.stone] || { base: "#9a7ff0", glow: "#ecd9ac" }) },
+    { id: "stage-animal", glyph: "Animal", build: () => zodiacAnimalObject(d.cz.animal, d.cz.element) },
+    { id: "stage-flower", glyph: "Flower", build: () => flowerObject(d.flower) },
   ];
   for (const plate of plates) {
     const el = document.getElementById(plate.id);
@@ -674,9 +1026,9 @@ function mountPlates(d) {
       .then((object) => viewer.setObject(object))
       .catch((err) => {
         // model failed to load — show the glyph rather than an empty stage
-        console.warn(`mybirth: ${plate.id} fell back to glyph —`, err);
+        console.warn(`mybirth: ${plate.id} fell back to glyph:`, err);
         el.classList.add("is-fallback");
-        el.insertAdjacentHTML("beforeend", `<span class="plate__glyph" aria-hidden="true">${plate.glyph}</span>`);
+        el.insertAdjacentHTML("beforeend", `<span class="plate__glyph">${plate.glyph}</span>`);
       });
   }
 }
@@ -699,7 +1051,7 @@ function renderNumberEra(d) {
           </div>
         </div>
         <div class="duo__panel" data-reveal>
-          <div class="era__mark">${gen ? esc(gen.label.split(" ").map((w) => w[0]).join("").slice(0, 2)) : "—"}</div>
+          <div class="era__mark">${gen ? esc(gen.label.split(" ").map((w) => w[0]).join("").slice(0, 2)) : "·"}</div>
           <div>
             <p class="duo__type">Your generation</p>
             <h3 class="duo__title">${gen ? esc(gen.label) : "Beyond our chart"}</h3>
@@ -729,9 +1081,9 @@ function renderAstrology(d) {
     <section class="block">
       <p class="kicker" data-reveal>Written in the stars</p>
       <h2 class="h-section" data-reveal>${esc(first)}, the <em>${esc(d.zod.sign)}.</em></h2>
-      <p class="astro-note" data-reveal>★ If you believe in astrology, this one's for you. If you don't — enjoy it purely as a fun read.</p>
+      <p class="astro-note" data-reveal>If you believe in astrology, this one's for you. If you don't, enjoy it purely as a fun read.</p>
       <div class="astro mt-l" data-reveal>
-        <div class="astro__glyph" aria-hidden="true">${d.zod.symbol}</div>
+        <div class="astro__glyph" aria-hidden="true">${signIcon(d.zod.sign, { size: "1em" })}</div>
         <div class="astro__body">
           <p class="astro__reading">${esc(r.reading)}</p>
           <dl class="astro__facts">
@@ -763,7 +1115,7 @@ function renderOdometer(d) {
     <section class="block">
       <p class="kicker" data-reveal>Since you arrived</p>
       <h2 class="h-section" data-reveal>Your life, <em>by the numbers.</em></h2>
-      <p class="sub" data-reveal>Counting in real time — every figure is climbing as you read this.</p>
+      <p class="sub" data-reveal>Counting in real time. Every figure is climbing as you read this.</p>
       <div class="odometer mt-l" data-odometer data-birth="${d.birthDate.getTime()}">${rows}</div>
     </section>`;
 }
@@ -797,24 +1149,24 @@ function renderYearNews(d) {
       <section class="block">
         <p class="kicker" data-reveal>The year the world turned</p>
         <h2 class="h-section" data-reveal>The archive went <em>quiet.</em></h2>
-        <p class="sub" data-reveal>We couldn't pull ${d.year}'s chronicle from Wikipedia just now — refresh and the year should speak up.</p>
+        <p class="sub" data-reveal>We couldn't pull ${d.year}'s chronicle from Wikipedia just now. Refresh and the year should speak up.</p>
       </section>`;
   }
   return `
     <section class="block">
       <p class="kicker" data-reveal>The year the world turned</p>
       <h2 class="h-section" data-reveal>What <em>${d.year}</em> was made of.</h2>
-      <p class="sub" data-reveal>Pulled live from Wikipedia's chronicle of the year — each headline links to its source article.</p>
+      <p class="sub" data-reveal>Pulled live from Wikipedia's chronicle of the year. Each headline links to its source article.</p>
 
       ${yn.world && yn.world.length ? `
         <div class="news-scope" data-reveal>
-          <h3 class="news-scope__h">🌍 Across the world</h3>
+          <h3 class="news-scope__h">Across the world</h3>
           ${newsList(yn.world)}
         </div>` : ""}
 
       ${yn.malaysia && yn.malaysia.length ? `
         <div class="news-scope" data-reveal>
-          <h3 class="news-scope__h">📍 In Malaysia</h3>
+          <h3 class="news-scope__h">In Malaysia</h3>
           ${newsList(yn.malaysia)}
         </div>` : `
         <p class="source" data-reveal style="margin-top:30px">No dedicated “${d.year} in Malaysia” chronicle was found on Wikipedia.</p>`}
@@ -878,7 +1230,7 @@ function renderLeader(d) {
         <p class="leader__name">${esc(l.name)}</p>
         <p class="leader__years">In office ${l.from}–${l.to ?? "present"}</p>
       </div>
-    </div>` : `<p class="sub" data-reveal>Our archive doesn't reach ${esc(d.geo?.country || d.country)}'s leaders yet — but here's how the rest of the world looked.</p>`;
+    </div>` : `<p class="sub" data-reveal>Our archive doesn't reach ${esc(d.geo?.country || d.country)}'s leaders yet, but here's how the rest of the world looked.</p>`;
 
   const track = timeline ? `
     <h3 class="lead-sub" data-reveal>Every ${esc(timeline.list[0].title.toLowerCase())} of ${esc(timeline.country)}, in sequence</h3>
@@ -904,7 +1256,7 @@ function renderLeader(d) {
                loading="lazy"
                width="80" height="54"/>
           <span class="wleader__country">${esc(w.country)}</span>
-          <span class="wleader__name">${w.name ? esc(w.name) : "—"}</span>
+          <span class="wleader__name">${w.name ? esc(w.name) : "·"}</span>
           <span class="wleader__title">${w.title ? esc(w.title) : "not in archive"}</span>
         </div>`).join("")}
     </div>` : "";
@@ -962,39 +1314,544 @@ function esc(s) {
 }
 
 /* ---- the wider universe: world population + age across planets ---- */
+/* An orrery you can poke: real orbital periods, real ages, schematic distances. */
+const ORRERY = [
+  { name: "Mercury", glyph: "☿", period: 0.2408467, r: 52, size: 3.4, color: "#b9b2a6",
+    note: "A year here lasts 88 days. You would have had a birthday every three months." },
+  { name: "Venus", glyph: "♀", period: 0.6151972, r: 76, size: 5.0, color: "#e5c07a",
+    note: "Venus turns so slowly that its day is longer than its year." },
+  { name: "Earth", glyph: "⊕", period: 1, r: 102, size: 5.2, color: "#6fe3d2",
+    note: "The only lap anyone counts, and the one this whole page is built on." },
+  { name: "Mars", glyph: "♂", period: 1.8808158, r: 130, size: 4.0, color: "#f08a6f",
+    note: "A Martian year runs 687 days, so you age there at roughly half speed." },
+  { name: "Jupiter", glyph: "♃", period: 11.862615, r: 164, size: 9.0, color: "#d9a86a",
+    note: "One Jovian lap takes almost twelve of ours." },
+  { name: "Saturn", glyph: "♄", period: 29.447498, r: 196, size: 7.6, color: "#e0cf9a",
+    note: "A Saturn return takes about 29 and a half years, the one orbit even astrologers agree matters." },
+];
+
 function renderCosmosWide(d) {
   const popBillions = d.population ? (d.population / 1e9).toFixed(2) : null;
-  const planets = (d.planets || [])
-    .map((p) => `
-      <div class="planet" data-reveal>
-        <span class="planet__glyph">${p.glyph}</span>
-        <b>${p.age >= 100 ? Math.round(p.age).toLocaleString() : p.age.toFixed(1)}</b>
-        <span class="planet__name">${esc(p.name)}-years old</span>
-      </div>`)
-    .join("");
+  const orbits = d.odo.orbits;
+  const C = 220;
+
+  const rings = ORRERY.map((b) =>
+    `<circle class="orr-ring" cx="${C}" cy="${C}" r="${b.r}"/>`).join("");
+
+  const planets = ORRERY.map((b, i) => {
+    const age = orbits / b.period;
+    const ageStr = age >= 100 ? Math.round(age).toLocaleString() : age.toFixed(1);
+    // Earth's lap is 12s on screen; everything else keeps its true relative pace
+    const dur = (b.period * 12).toFixed(2);
+    const start = (i * 47) % 360;
+    return `
+      <g class="orr-body" style="--dur:${dur}s;--start:${start}deg"
+         data-planet="${esc(b.name)}" data-age="${ageStr}" data-note="${esc(b.note)}"
+         data-period="${b.period < 1 ? (b.period * 365.2422).toFixed(0) + " Earth days" : b.period.toFixed(2) + " Earth years"}"
+         tabindex="0" role="button"
+         aria-label="${esc(b.name)}: you are ${ageStr} ${esc(b.name)}-years old">
+        <circle class="orr-hit" cx="${C + b.r}" cy="${C}" r="16"/>
+        <circle class="orr-dot" cx="${C + b.r}" cy="${C}" r="${b.size}" style="fill:${b.color}"/>
+      </g>`;
+  }).join("");
+
+  const first = ORRERY[2]; // open on Earth
+  const earthAge = (orbits / first.period).toFixed(1);
+
   return `
     <section class="block">
       <p class="kicker" data-reveal>Out past the atmosphere</p>
       <h2 class="h-section" data-reveal>You against <em>the solar system.</em></h2>
       ${popBillions ? `
         <p class="sub" data-reveal>When you arrived, Earth was already home to about
-          <strong style="color:var(--lunar)">${popBillions} billion</strong> people — and it has been
+          <strong style="color:var(--lunar)">${popBillions} billion</strong> people, and it has been
           carrying you around the sun ever since.</p>` : ""}
-      <div class="planets mt-l">${planets}</div>
-      <p class="source mt-l">Ages scaled by each planet's orbital period · population from UN estimates.</p>
+
+      <div class="orrery mt-l" data-orrery data-reveal>
+        <svg class="orr-svg" viewBox="0 0 440 440" role="group" aria-label="Interactive orrery, choose a planet">
+          ${rings}
+          <circle class="orr-sun-glow" cx="${C}" cy="${C}" r="26"/>
+          <circle class="orr-sun" cx="${C}" cy="${C}" r="12"/>
+          ${planets}
+        </svg>
+        <div class="orr-read" aria-live="polite">
+          <p class="orr-read__k">Your age on</p>
+          <p class="orr-read__name" data-orr-name>${first.name}</p>
+          <p class="orr-read__age"><b data-orr-age>${earthAge}</b> <span>${first.name}-years</span></p>
+          <p class="orr-read__period" data-orr-period>one lap · 1.00 Earth years</p>
+          <p class="orr-read__note" data-orr-note>${esc(first.note)}</p>
+          <p class="orr-read__hint">Tap a planet to switch</p>
+        </div>
+      </div>
+      <p class="source mt-l">Ages from real orbital periods · orbit sizes are schematic, not to scale · population from UN estimates.</p>
     </section>`;
+}
+
+/** Wire the orrery's planets to its readout panel. */
+function wireOrrery(root) {
+  const orr = root.querySelector("[data-orrery]");
+  if (!orr) return;
+  const out = {
+    name: orr.querySelector("[data-orr-name]"),
+    age: orr.querySelector("[data-orr-age]"),
+    unit: orr.querySelector(".orr-read__age span"),
+    period: orr.querySelector("[data-orr-period]"),
+    note: orr.querySelector("[data-orr-note]"),
+  };
+  const bodies = [...orr.querySelectorAll(".orr-body")];
+
+  const select = (g) => {
+    bodies.forEach((b) => b.classList.toggle("is-active", b === g));
+    out.name.textContent = g.dataset.planet;
+    out.age.textContent = g.dataset.age;
+    out.unit.textContent = `${g.dataset.planet}-years`;
+    out.period.textContent = `one lap · ${g.dataset.period}`;
+    out.note.textContent = g.dataset.note;
+  };
+
+  bodies.forEach((g) => {
+    g.addEventListener("click", () => select(g));
+    g.addEventListener("mouseenter", () => select(g));
+    g.addEventListener("focus", () => select(g));
+    g.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(g); }
+    });
+  });
+  const earth = bodies.find((b) => b.dataset.planet === "Earth");
+  if (earth) earth.classList.add("is-active");
+}
+
+/* ---- the two keepsakes: boarding pass and certificate ---- */
+function mountKeepsakes(d, placeLabel) {
+  const ticketMount = document.getElementById("ticket-mount");
+  const certView = document.getElementById("cert-view");
+  if (ticketMount) ticketMount.innerHTML = "";
+  if (certView) certView.innerHTML = "";
+
+  // ticket — build, mount, then inject QR code into the stub
+  const ticketEl = buildTicket({
+    name: d.name, day: d.day, month: d.month, year: d.year,
+    origin: placeLabel, moon: d.moon, today: d.today, age: d.age.age,
+    countryCode: d.geo?.countryCode || "",
+    shareURL: d.shareURL
+  });
+  if (ticketMount) {
+    ticketMount.appendChild(ticketEl);
+    fitToContainer(ticketMount, ticketEl);
+    QRCode.toDataURL(d.shareURL, {
+      margin: 1, width: 200, errorCorrectionLevel: "M",
+      color: { dark: "#e8e4f4", light: "#0d0f20" }
+    })
+      .then((url) => {
+        ticketEl.querySelectorAll("[data-ticket-qr]").forEach((img) => (img.src = url));
+      })
+      .catch(() => {});
+  }
+
+  // certificate (front + back) — QR is filled in asynchronously
+  let fitCert = () => {};
+  if (certView) {
+    const cert = buildCertificate(d, placeLabel);
+    certView.appendChild(cert);
+    fitCert = fitToContainer(cert, document.getElementById("cert-flip"));
+    QRCode.toDataURL(d.shareURL, {
+      margin: 1, width: 320, errorCorrectionLevel: "M",
+      color: { dark: "#ddd8f0", light: "#060918" }
+    })
+      .then((url) => {
+        cert.querySelectorAll("[data-qr]").forEach((img) => (img.src = url));
+      })
+      .catch(() => {});
+  }
+
+  // certificate flip + size controls
+  const flip = document.getElementById("cert-flip");
+  const flipBtn = document.getElementById("cert-flip-btn");
+  if (flip && flipBtn) {
+    const toggle = () => {
+      flip.classList.toggle("flipped");
+      flipBtn.textContent = flip.classList.contains("flipped") ? "Back to the front" : "Turn it over";
+    };
+    flipBtn.addEventListener("click", toggle);
+    flip.addEventListener("click", toggle);
+    document.querySelectorAll("[data-size]").forEach((b) =>
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        flip.classList.remove("size-a4", "size-letter", "size-card");
+        flip.classList.add("size-" + b.dataset.size);
+        document.querySelectorAll("[data-size]").forEach((x) => x.classList.toggle("is-active", x === b));
+        fitCert();
+      })
+    );
+  }
+}
+
+/** Geocoding can sharpen the place name and add a flag — redraw if it did. */
+function refreshKeepsakes(d) {
+  const label = placeLabelFor(d);
+  if (label === d._keepsakeLabel && !d.geo?.countryCode) return;
+  d._keepsakeLabel = label;
+  mountKeepsakes(d, label);
+}
+
+/* ---- the sky itself: where the planets actually stood that day ---- */
+function renderSkyThen(d) {
+  const sky = d.skyThen;
+  if (!sky || !sky.length) return "";
+  /*
+     One 360-degree axis of the ecliptic with every wanderer pinned at its true
+     longitude. Cards would have listed the same numbers; the track shows the
+     thing the numbers describe, which is where they stood in relation to each
+     other. Stacking rows keeps close conjunctions from overlapping.
+  */
+  const SIGNS = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
+  const ticks = SIGNS.map((s, i) => `
+    <div class="ps-tick" style="left:${((i * 30) / 360 * 100).toFixed(3)}%">
+      <span class="ps-tick__glyph">${signIcon(s, { size: "1em" })}</span>
+      <span class="ps-tick__name">${esc(s.slice(0, 3))}</span>
+    </div>`).join("");
+
+  // sort by longitude, then bump anything within 7 degrees onto the next row
+  const ordered = [...sky].sort((a, b) => a.longitude - b.longitude);
+  const rowEnds = [];
+  const pins = ordered.map((p) => {
+    // a label is ~120px wide on a ~1100px track, so it needs roughly 34
+    // degrees of clear sky before a neighbour can share its row
+    let row = rowEnds.findIndex((end) => p.longitude - end > 34);
+    if (row === -1) { row = rowEnds.length; rowEnds.push(0); }
+    rowEnds[row] = p.longitude;
+    return `
+      <div class="ps-pin" style="left:${(p.longitude / 360 * 100).toFixed(3)}%;--row:${row}">
+        <span class="ps-pin__stem"></span>
+        <span class="ps-pin__dot"></span>
+        <span class="ps-pin__label">
+          <b>${p.glyph}&#xFE0E; ${esc(p.name)}</b>
+          <i>${esc(p.sign)} ${p.degreeInSign.toFixed(1)}°</i>
+        </span>
+      </div>`;
+  }).join("");
+  const rows = rowEnds.length;
+
+  return `
+    <section class="block">
+      <div class="chapter-plate">
+        <p class="kicker" data-reveal>The sky, exactly as it stood</p>
+        <h2 class="h-section" data-reveal>Where the wanderers <em>stood.</em></h2>
+        <p class="ch-sub" data-reveal>
+          Not a reading, a position. This is the ecliptic on your date, with each
+          naked-eye planet at the longitude it actually held.
+        </p>
+      </div>
+      <div class="ps-strip mt-l" data-reveal style="--rows:${rows}">
+        <div class="ps-track">
+          <div class="ps-axis"></div>
+          ${ticks}
+          ${pins}
+        </div>
+      </div>
+      <p class="source center mt-l">Geocentric longitudes from JPL Keplerian elements, accurate to a few arcminutes.</p>
+    </section>`;
+}
+
+/* ---- milestones: the next times this life crosses a round number ---- */
+function renderMilestones(d) {
+  const ms = d.nextMilestones;
+  if (!ms || !ms.length) return "";
+  const fmt = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  const rows = ms.map((m) => {
+    const away = Math.round((m.date - d.today) / 86400000);
+    return `
+      <div class="mile" data-reveal>
+        <b class="mile__label">${esc(m.label)}</b>
+        <span class="mile__date">${fmt.format(m.date)}</span>
+        <span class="mile__away">${away.toLocaleString()} days away</span>
+      </div>`;
+  }).join("");
+  return `
+    <section class="block">
+      <p class="kicker" data-reveal>Still ahead of you</p>
+      <h2 class="h-section" data-reveal>The next times you cross<br/><em>a round number.</em></h2>
+      <p class="sub" data-reveal>Every one of these has a date. Come back on any of them and this page will say so.</p>
+      <div class="miles mt-l">${rows}</div>
+    </section>`;
+}
+
+/* ---- the return: Earth coming back to where it was when you arrived ---- */
+/* days elapsed at the start of each month, for placing the wheel's labels */
+const MONTH_STARTS = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+const MONTH_ABBR = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+const doyAngle = (m, day) => ((MONTH_STARTS[m - 1] + day - 1) / 365.2422) * 360;
+const dayOfYear = (m, day) => MONTH_STARTS[m - 1] + day;
+
+/**
+ * The year as a wheel: the sun at the centre, your day marked on the rim, and
+ * Earth somewhere along it. The drawn arc is what's *left* of the lap — the
+ * distance the planet still has to cover before it's back where you started.
+ */
+function yearWheelSVG(d) {
+  const W = 420, C = 210, R = 168, RAD = Math.PI / 180;
+  const pt = (a, rad) => [C + rad * Math.cos((a - 90) * RAD), C + rad * Math.sin((a - 90) * RAD)];
+
+  const birthA = doyAngle(d.month, d.day);
+  const now = d.today;
+  const nowA = doyAngle(now.getMonth() + 1, now.getDate());
+  // floor, so this agrees with the "days" cell of the live countdown beside it
+  const daysLeft = Math.max(0, Math.floor((d.nextReturn.date - now) / 86400000));
+
+  const ticks = MONTH_ABBR.map((mn, i) => {
+    const a = (MONTH_STARTS[i] / 365.2422) * 360;
+    const [x1, y1] = pt(a, R), [x2, y2] = pt(a, R - 8);
+    const [tx, ty] = pt(a + 15, R - 26);
+    return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" class="yw-tick"/>
+      <text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" dominant-baseline="middle" class="yw-month">${mn}</text>`;
+  }).join("");
+
+  const sweep = ((birthA - nowA) % 360 + 360) % 360;
+  const large = sweep > 180 ? 1 : 0;
+  const [sx, sy] = pt(nowA, R), [ex, ey] = pt(birthA, R);
+  const [bx, by] = [ex, ey], [nx, ny] = [sx, sy];
+
+  return `
+    <svg class="yearwheel" viewBox="0 0 ${W} ${W}" role="img"
+         aria-label="Year wheel: Earth is ${daysLeft} days from returning to where it was when you were born">
+      <circle cx="${C}" cy="${C}" r="${R}" class="yw-ring"/>
+      <circle cx="${C}" cy="${C}" r="${R - 42}" class="yw-ring-inner"/>
+      ${ticks}
+      <path d="M ${sx.toFixed(1)} ${sy.toFixed(1)} A ${R} ${R} 0 ${large} 1 ${ex.toFixed(1)} ${ey.toFixed(1)}" class="yw-arc"/>
+      <circle cx="${C}" cy="${C - 58}" r="7" class="yw-sun"/>
+      <text x="${C}" y="${C - 36}" text-anchor="middle" class="yw-sunlab">SUN</text>
+      <circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="5" class="yw-earth"/>
+      <text x="${(nx + (nx > C ? 14 : -14)).toFixed(1)}" y="${ny.toFixed(1)}" text-anchor="${nx > C ? "start" : "end"}"
+            dominant-baseline="middle" class="yw-lab">EARTH · NOW</text>
+      <circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="8" class="yw-mark"/>
+      <circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="3" class="yw-mark-dot"/>
+      <text x="${(bx + (bx > C ? 16 : -16)).toFixed(1)}" y="${(by - 4).toFixed(1)}" text-anchor="${bx > C ? "start" : "end"}"
+            class="yw-lab yw-lab--gold">YOUR DAY</text>
+      <text x="${C}" y="${C + 16}" text-anchor="middle" class="yw-days">${daysLeft}</text>
+      <text x="${C}" y="${C + 38}" text-anchor="middle" class="yw-dayslab">DAYS TO GO</text>
+    </svg>`;
+}
+
+function renderReturn(d) {
+  const nb = d.nextReturn;
+  if (!nb) return "";
+  const wd = nb.weekday;
+  const orbitNo = Number.isFinite(d.age.age) ? d.age.age + 1 : null;
+  const first = esc(d.name.split(/\s+/)[0] || d.name);
+
+  if (nb.isToday) {
+    return `
+      <section class="block return-block is-today" data-return data-target="${nb.date.getTime()}">
+        <div class="chapter-plate">
+          <p class="kicker" data-reveal>The return</p>
+          <h2 class="h-section" data-reveal>The <em>return</em></h2>
+          <p class="return-today" data-reveal>It&rsquo;s <em>today.</em></p>
+          <p class="return-line" data-reveal>
+            Orbit № ${orbitNo ?? ""} complete. The sun is exactly where it was the moment you began.
+            Happy birthday, <b>${first}</b>.
+          </p>
+          <div class="return-cta" data-reveal>
+            <button type="button" class="btn-ghost" data-fete>Light the candles</button>
+          </div>
+          <div data-reveal>${yearWheelSVG(d)}</div>
+        </div>
+      </section>`;
+  }
+
+  return `
+    <section class="block return-block" data-return data-target="${nb.date.getTime()}">
+      <div class="chapter-plate">
+        <p class="kicker" data-reveal>The return</p>
+        <h2 class="h-section" data-reveal>The <em>return</em></h2>
+        <p class="ch-sub" data-reveal>
+          Earth is swinging back to the exact stretch of its orbit where you began.
+        </p>
+        <div class="countdown" data-reveal>
+          <div class="cd-cell"><p class="cd-n" data-cd="d">00</p><p class="cd-k">days</p></div>
+          <p class="cd-sep">:</p>
+          <div class="cd-cell"><p class="cd-n" data-cd="h">00</p><p class="cd-k">hours</p></div>
+          <p class="cd-sep">:</p>
+          <div class="cd-cell"><p class="cd-n" data-cd="m">00</p><p class="cd-k">min</p></div>
+          <p class="cd-sep">:</p>
+          <div class="cd-cell"><p class="cd-n" data-cd="s">00</p><p class="cd-k">sec</p></div>
+        </div>
+        <p class="return-line" data-reveal>
+          ${orbitNo !== null ? `Your <b>${ordinal(orbitNo)}</b> solar return lands on a` : "Your next solar return lands on a"}
+          <b>${esc(wd)}</b>${nb.note ? ` <em>(${esc(nb.note)})</em>` : ""},
+          under a <b>${esc(nb.moon.name.toLowerCase())}</b> at
+          <b>${Math.round(nb.moon.illumination * 100)}%</b> lit.
+          Open this page that day and it will know.
+        </p>
+        <p class="return-sub" data-reveal>
+          The moon returns to your birth phase in
+          <b data-count="${Math.round(d.returning.daysToMoonMatch)}">0</b> days.
+        </p>
+        <div class="return-cta" data-reveal>
+          <button type="button" class="btn-ghost" data-fete>Rehearse the day</button>
+        </div>
+        <div data-reveal>${yearWheelSVG(d)}</div>
+      </div>
+    </section>`;
+}
+
+/**
+ * A rail of chapter marks down the right edge.
+ *
+ * The archive is a dozen full-height chapters and the only orientation was a
+ * one-pixel progress meridian, which tells you how far through you are but not
+ * what you are in or what is left. Each mark names its chapter on hover and
+ * jumps to it on click.
+ */
+function buildChapterRail() {
+  document.getElementById("chapter-rail")?.remove();
+
+  // the kicker is the chapter's own name, so the rail never invents labels
+  const chapters = [...result.querySelectorAll(".block")]
+    .map((el) => {
+      const label = el.querySelector(".kicker")?.textContent?.trim();
+      return label ? { el, label } : null;
+    })
+    .filter(Boolean);
+  if (chapters.length < 3) return;
+
+  const rail = document.createElement("nav");
+  rail.id = "chapter-rail";
+  rail.className = "rail";
+  rail.setAttribute("aria-label", "Chapters");
+  // hydration rebuilds this while the visitor may be reading another tab
+  rail.hidden = currentTab() !== "archive";
+  rail.innerHTML = chapters.map((c, i) => `
+    <button type="button" class="rail__mark" data-i="${i}">
+      <span class="rail__label">${esc(c.label)}</span>
+    </button>`).join("");
+  document.body.appendChild(rail);
+
+  const marks = [...rail.querySelectorAll(".rail__mark")];
+  marks.forEach((m, i) => {
+    m.addEventListener("click", () => {
+      chapters[i].el.scrollIntoView({ behavior: REDUCED_MOTION ? "auto" : "smooth", block: "start" });
+    });
+  });
+
+  // highlight whichever chapter owns the middle of the viewport
+  const spy = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      const i = chapters.findIndex((c) => c.el === e.target);
+      marks.forEach((m, j) => m.classList.toggle("is-here", j === i));
+    }
+  }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
+  chapters.forEach((c) => spy.observe(c.el));
+}
+
+const REDUCED_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * Wire the celebration to its button, and open it unprompted on the day.
+ *
+ * The auto-open is locked to once per person per day in sessionStorage: it
+ * should feel like the page greeting you, not like a modal that reappears
+ * every time you scroll back up.
+ */
+function wireFete(d) {
+  const first = d.name.split(/\s+/)[0] || d.name;
+  const isToday = !!d.nextReturn?.isToday;
+  const age = Number.isFinite(d.age.age) ? (isToday ? d.age.age : d.age.age + 1) : 0;
+
+  const open = (rehearsal) => {
+    const fete = createFete({
+      name: first,
+      age,
+      dateLabel: `${ordinal(d.day)} ${monthName(d.month)}`,
+      rehearsal,
+    });
+    fete.open();
+  };
+
+  result.querySelectorAll("[data-fete]").forEach((btn) => {
+    btn.addEventListener("click", () => open(!isToday));
+  });
+
+  if (!isToday) return;
+  const stamp = `mybirth.fete.${d.name}|${d.day}|${d.month}.${d.today.toDateString()}`;
+  try {
+    if (sessionStorage.getItem(stamp)) return;
+    sessionStorage.setItem(stamp, "1");
+  } catch {}
+  setTimeout(() => open(false), 900);
+}
+
+/** Ticks the countdown to the next solar return, once a second. */
+function startCountdown(section) {
+  const target = parseFloat(section.dataset.target);
+  const cells = {};
+  for (const k of ["d", "h", "m", "s"]) cells[k] = section.querySelector(`[data-cd="${k}"]`);
+  if (!cells.d) return;
+
+  const tick = () => {
+    let left = Math.max(0, target - Date.now());
+    const dd = Math.floor(left / 86400000); left -= dd * 86400000;
+    const hh = Math.floor(left / 3600000); left -= hh * 3600000;
+    const mm = Math.floor(left / 60000); left -= mm * 60000;
+    const ss = Math.floor(left / 1000);
+    cells.d.textContent = dd.toLocaleString();
+    cells.h.textContent = String(hh).padStart(2, "0");
+    cells.m.textContent = String(mm).padStart(2, "0");
+    cells.s.textContent = String(ss).padStart(2, "0");
+  };
+  tick();
+  // returned so callers that rebuild their section can stop the old tick
+  return setInterval(tick, 1000);
 }
 
 /* ---- homeland (Wikipedia summary + geocoding) ---- */
 function renderHomeland(d) {
   const h = d.homeland;
   if (!h || (!h.extract && !h.flag)) return "";
-  const coords = d.geo ? `${d.geo.lat.toFixed(2)}°, ${d.geo.lon.toFixed(2)}°` : null;
-  const facts = [
-    d.geo?.timezone && ["Time zone", d.geo.timezone.replace(/_/g, " ")],
-    coords && ["Coordinates", coords],
-    h.description && ["In short", h.description]
-  ].filter(Boolean);
+  const ind = d.indicators;
+  const num = (n) => Math.round(n).toLocaleString("en-US");
+
+  /*
+     The old version was a Wikipedia paragraph plus a timezone, which said the
+     same dull thing about every country. These lines are specific to *this*
+     country in *this* birth year, and come from World Bank open data, so they
+     work as well for Peru or Nigeria as for Malaysia.
+  */
+  const story = [];
+  if (ind?.populationThen) {
+    story.push(`When you arrived, ${esc(h.name)} held <b>${num(ind.populationThen)}</b> people.`);
+  }
+  if (ind?.populationThen && ind?.populationNow) {
+    const mult = ind.populationNow / ind.populationThen;
+    const grown = ind.populationNow - ind.populationThen;
+    story.push(grown > 0
+      ? `Today it holds <b>${num(ind.populationNow)}</b>, which is <b>${num(grown)}</b> more, ${mult.toFixed(2)} times the country you were born into.`
+      : `Today it holds <b>${num(ind.populationNow)}</b>, fewer than the country you were born into.`);
+  }
+  if (ind?.lifeExpectancyThen) {
+    story.push(`A child born there that year could expect <b>${ind.lifeExpectancyThen.toFixed(1)}</b> years of life.`);
+  }
+
+  // where on Earth that puts you, computed rather than looked up
+  const geoFacts = [];
+  if (d.geo) {
+    const { lat, lon } = d.geo;
+    const hemi = `${lat >= 0 ? "Northern" : "Southern"} and ${lon >= 0 ? "Eastern" : "Western"}`;
+    const fromEquator = Math.abs(lat) * 111.32;
+    const antiLat = -lat;
+    const antiLon = lon > 0 ? lon - 180 : lon + 180;
+    geoFacts.push(["Hemispheres", hemi]);
+    geoFacts.push(["From the equator", `${num(fromEquator)} km`]);
+    geoFacts.push(["Directly opposite", `${Math.abs(antiLat).toFixed(1)}° ${antiLat >= 0 ? "N" : "S"}, ${Math.abs(antiLon).toFixed(1)}° ${antiLon >= 0 ? "E" : "W"}`]);
+    if (d.geo.timezone) geoFacts.push(["Time zone", d.geo.timezone.replace(/_/g, " ")]);
+  }
+
+  // trim Wikipedia's opening to its first two sentences; the full extract was
+  // a wall of border geography nobody reads
+  const brief = h.extract
+    ? (h.extract.match(/[^.!?]+[.!?]+/g) || [h.extract]).slice(0, 2).join("").trim()
+    : "";
 
   return `
     <section class="block">
@@ -1002,16 +1859,17 @@ function renderHomeland(d) {
       <h2 class="h-section" data-reveal>The country that <em>claimed you first.</em></h2>
       <div class="homeland mt-l" data-reveal>
         <div class="homeland__flag">
-          <span class="homeland__emoji">${esc(h.flag || "🏳️")}</span>
-          ${h.thumb ? `<img src="${esc(h.thumb)}" alt="${esc(h.name)}" loading="lazy"/>` : ""}
+          ${h.flag ? `<img class="homeland__flag-img" src="${esc(h.flag)}" alt="Flag of ${esc(h.name)}" loading="lazy"/>` : ""}
           <span class="homeland__name">${esc(h.name)}</span>
+          ${h.description ? `<span class="homeland__desc">${esc(h.description)}</span>` : ""}
         </div>
         <div class="homeland__body">
-          ${h.extract ? `<p class="homeland__extract">${esc(h.extract)}</p>` : ""}
-          ${facts.length ? `<dl class="facts homeland__facts">${facts.map(([k, v]) => `<div class="fact"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>` : ""}
+          ${story.length ? `<p class="homeland__story">${story.join(" ")}</p>` : ""}
+          ${brief ? `<p class="homeland__extract">${esc(brief)}</p>` : ""}
+          ${geoFacts.length ? `<dl class="facts homeland__facts">${geoFacts.map(([k, v]) => `<div class="fact"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>` : ""}
         </div>
       </div>
-      <p class="source source--live mt-l">Summary live from Wikipedia · location from Open-Meteo.</p>
+      <p class="source source--live mt-l">Population and life expectancy from World Bank open data · summary from Wikipedia · position from Open-Meteo.</p>
     </section>`;
 }
 
@@ -1024,9 +1882,9 @@ async function runSaveAction(btn, action) {
   btn.textContent = "Saving…";
   try {
     await action();
-    btn.textContent = "✓ Saved";
+    btn.textContent = "Saved";
   } catch (err) {
-    console.warn("mybirth: save failed —", err);
+    console.warn("mybirth: save failed:", err);
     btn.textContent = "Save failed";
   }
   setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 2200);
@@ -1142,20 +2000,49 @@ async function saveCertificatePDF(flipEl, name) {
   pdf.save(`mybirth-certificate-${slugify(name)}.pdf`);
 }
 
+/**
+ * The certificate front as a single high-resolution PNG.
+ *
+ * The PDF is the thing you print; this is the thing you send. It renders at
+ * whatever scale gets the long edge to 1754px (A4 at 150dpi), which is large
+ * enough to print at postcard size and still sharp on a phone screen.
+ */
+async function saveCertificatePNG(flipEl, name) {
+  const w = flipEl.offsetWidth;
+  const h = flipEl.offsetHeight;
+  const front = flipEl.querySelector(".cert-front");
+  if (!front) throw new Error("certificate front not found");
+
+  const TARGET_LONG_EDGE = 1754;
+  const scale = Math.min(4, Math.max(2, TARGET_LONG_EDGE / Math.max(w, h)));
+  const canvas = await renderNodeToCanvas(front, w, h, scale);
+
+  const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
+  if (!blob) throw new Error("could not encode the certificate");
+  downloadBlob(blob, `mybirth-certificate-${slugify(name)}.png`);
+}
+
 async function copyLink(btn, url) {
   const original = btn.textContent;
   try {
     await navigator.clipboard.writeText(url);
-    btn.textContent = "✓ Link copied";
+    btn.textContent = "Link copied";
   } catch {
-    btn.textContent = "Copy failed — long-press the URL";
+    btn.textContent = "Copy failed, long-press the URL";
   }
   setTimeout(() => (btn.textContent = original), 2200);
 }
 
 /* ---------- tab navigation ---------- */
-const PANELS = { home: "panel-home", compare: "panel-compare", saves: "panel-saves" };
-const tabs = document.querySelectorAll(".brand__tab");
+/*
+   The shell used to be Home / Saves, built for a visit that happens once.
+   With the Daily Sky it becomes Today / Archive / People: a returning
+   visitor lands on the sky, and the form — which they have already filled
+   in — is one tab away rather than in the way.
+*/
+const PANELS = { today: "panel-today", archive: "panel-home", people: "panel-saves" };
+// an array, not a NodeList: the arrow-key handler needs find/findIndex
+const tabs = [...document.querySelectorAll(".brand__tab")];
 const tabPill = document.getElementById("brand-pill");
 
 /* the pill glides to sit under the active tab */
@@ -1166,24 +2053,162 @@ function movePill() {
   tabPill.style.transform = `translateX(${active.offsetLeft}px)`;
 }
 
-function activateTab(name) {
+/*
+   A radial wipe between worlds.
+
+   Moving from the archive to the Daily Sky changes the ground the whole
+   site stands on, and cross-fading the colours left the two palettes
+   briefly muddled together in the middle. This instead takes a snapshot
+   of the old page, paints the new one over it, and reveals it through a
+   circle growing out of whatever was pressed, so the change reads as one
+   deliberate movement with a source rather than as a repaint.
+
+   `startViewTransition` is Chromium-only today. Everywhere else, and for
+   anyone who has asked for less motion, `swap()` simply runs and the
+   colours travel on their own CSS transitions as before. Nothing depends
+   on the animation having happened.
+*/
+function radialSwap(origin, swap) {
+  if (!document.startViewTransition || REDUCED_MOTION) { swap(); return; }
+
+  const x = origin?.x ?? innerWidth / 2;
+  const y = origin?.y ?? 0;
+  // the circle has to reach the furthest corner, or a wedge of the old
+  // page is still showing when the animation ends
+  const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+
+  const t = document.startViewTransition(swap);
+  t.ready.then(() => {
+    document.documentElement.animate(
+      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
+      { duration: 620, easing: "cubic-bezier(0.65, 0, 0.35, 1)", pseudoElement: "::view-transition-new(root)" },
+    );
+  }).catch(() => {});
+}
+
+/** Where a pointer event happened, for the wipe to grow from. */
+function originOf(el) {
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}
+
+function activateTab(name, { focus = false, origin = null } = {}) {
+  const from = currentTab();
+  // only the paper/ink boundary is worth a wipe; archive to people is two
+  // pages of the same world and a wipe there would be decoration
+  const crossesWorlds = (from === "today") !== (name === "today");
+  if (crossesWorlds) {
+    radialSwap(origin || originOf(tabs.find((t) => t.dataset.tab === name)), () => applyTab(name, focus));
+    return;
+  }
+  applyTab(name, focus);
+}
+
+function applyTab(name, focus) {
   tabs.forEach((t) => {
     const active = t.dataset.tab === name;
     t.classList.toggle("is-active", active);
     t.setAttribute("aria-selected", String(active));
+    // roving tabindex: only the selected tab is in the tab order, so Tab moves
+    // out of the tablist rather than through every tab in it
+    t.tabIndex = active ? 0 : -1;
+    if (active && focus) t.focus();
   });
   movePill();
   Object.entries(PANELS).forEach(([key, id]) => {
     const panel = document.getElementById(id);
     if (panel) panel.hidden = key !== name;
   });
-  if (name === "saves") renderSaves();
+  if (name === "people") { renderSaves(); trackEvent(EVENTS.PEOPLE_OPEN); }
+  if (name === "today") { renderToday(); trackEvent(EVENTS.TODAY_OPEN); }
+  /*
+     The Daily Sky runs on its own palette, a deliberate break from the rest
+     of the site (see today.js). The starfield, aurora and grain are fixed to
+     <body> behind every panel, so the switch has to happen at that level
+     rather than inside the panel. Every colour involved carries a CSS
+     transition, so the two worlds cross-fade instead of cutting.
+  */
+  document.body.classList.toggle("on-paper", name === "today");
+  // unconditionally: leaving Today has to take the sun/moon control out of
+  // the tab order again, not only entering it has to put it in
+  applySkyTheme(skyTheme());
+
+  /*
+     Within one world the arriving panel still lifts into place. Across the
+     paper/ink boundary it must not: the wipe is already carrying the whole
+     page, and a second animation underneath it reads as a stutter.
+  */
+  const panel = document.getElementById(PANELS[name]);
+  if (panel && !document.startViewTransition) {
+    panel.classList.remove("is-entering");
+    // reading offsetWidth forces the class removal to land before it is
+    // re-added, or the animation never restarts on a repeat switch
+    void panel.offsetWidth;
+    panel.classList.add("is-entering");
+  }
+
+  // the rail belongs to the archive's long scroll; it is appended to <body>
+  // rather than to the panel, so it has to be told when it is off-stage
+  const rail = document.getElementById("chapter-rail");
+  if (rail) rail.hidden = name !== "archive";
   scrollTo({ top: 0, behavior: "auto" });
 }
 
-tabs.forEach((t) => {
-  t.addEventListener("click", () => activateTab(t.dataset.tab));
+/** Paper or ink, set on <body> so the fixed backdrop and the nav follow it. */
+function applySkyTheme(theme) {
+  const dark = theme === "dark";
+  document.body.classList.toggle("sky-dark", dark);
+  const sw = document.getElementById("daynight");
+  if (sw) {
+    sw.setAttribute("aria-pressed", String(dark));
+    // the label names the destination, not the state: a control announced as
+    // "ink" while already ink tells a screen-reader user nothing useful
+    sw.setAttribute("aria-label", dark ? "Switch the daily sky to paper" : "Switch the daily sky to ink");
+    sw.title = dark ? "Paper" : "Ink";
+    // out of the tab order entirely while it is off-stage
+    sw.tabIndex = document.body.classList.contains("on-paper") ? 0 : -1;
+  }
+}
+
+/* the sun becomes a moon, and the page turns over from where it was pressed */
+document.getElementById("daynight")?.addEventListener("click", (e) => {
+  const next = skyTheme() === "dark" ? "light" : "dark";
+  radialSwap(
+    e.clientX || e.clientY ? { x: e.clientX, y: e.clientY } : originOf(e.currentTarget),
+    () => {
+      try { localStorage.setItem(SKY_THEME_KEY, next); } catch {}
+      applySkyTheme(next);
+      renderToday();
+    },
+  );
 });
+
+tabs.forEach((t) => {
+  // the wipe grows from the pointer itself when there is one, and from the
+  // middle of the tab when the press came from the keyboard
+  t.addEventListener("click", (e) => activateTab(t.dataset.tab, {
+    origin: e.clientX || e.clientY ? { x: e.clientX, y: e.clientY } : originOf(t),
+  }));
+});
+
+/* Arrow keys move between tabs, Home and End jump to the ends: the rest of the
+   WAI-ARIA tabs pattern that the markup was already claiming to implement. */
+document.getElementById("brand-nav")?.addEventListener("keydown", (e) => {
+  const keys = ["ArrowRight", "ArrowLeft", "Home", "End"];
+  if (!keys.includes(e.key)) return;
+  e.preventDefault();
+  const i = tabs.findIndex((t) => t.dataset.tab === currentTab());
+  const next =
+    e.key === "Home" ? 0
+    : e.key === "End" ? tabs.length - 1
+    : (i + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+  activateTab(tabs[next].dataset.tab, { focus: true });
+});
+
+function currentTab() {
+  return (tabs.find((t) => t.getAttribute("aria-selected") === "true") || tabs[0]).dataset.tab;
+}
 
 /* first position without a transition, then let it glide */
 movePill();
@@ -1193,14 +2218,21 @@ if (document.fonts?.ready) document.fonts.ready.then(movePill);
 
 /* ---------- brand wordmark: back to start ---------- */
 document.getElementById("brand-home").addEventListener("click", () => {
-  const homeActive = document.querySelector("[data-tab='home']")?.classList.contains("is-active");
-  if (!homeActive) {
-    activateTab("home");
+  const home = rootTab();
+  if (currentTab() !== home) {
+    activateTab(home);
     return;
   }
-  if (!result.hidden) location.href = location.pathname;
+  if (home === "archive" && !result.hidden) location.href = location.pathname;
   else scrollTo({ top: 0, behavior: "smooth" });
 });
+
+/** Where the wordmark goes, and where a plain visit lands. */
+function rootTab() {
+  // "#new" means the visitor asked for the form, so it beats the saved-day rule
+  if (location.hash === "#new") return "archive";
+  return loadSaves().length ? "today" : "archive";
+}
 
 /* ---------- saves: persist to localStorage ---------- */
 const SAVES_KEY = "mybirth:saves";
@@ -1212,8 +2244,7 @@ function loadSaves() {
 function persistSave(d) {
   const saves = loadSaves();
   const key = `${d.name}|${d.day}|${d.month}|${d.year}`;
-  if (saves.some((s) => s.key === key)) return;
-  saves.unshift({
+  const record = {
     key,
     name: d.name,
     day: d.day,
@@ -1221,27 +2252,236 @@ function persistSave(d) {
     year: d.year,
     moon: d.moon?.name || "",
     shareURL: d.shareURL || "",
-  });
+    // the Daily Sky recomputes from these rather than from the rendered page.
+    // The coordinates and the zone are what the Ascendant needs, and without
+    // an Ascendant there are no sectors and so no reading.
+    time: d.time || "",
+    placeLabel: d.placeLabel || "",
+    lat: d.geo?.lat ?? null,
+    lon: d.geo?.lon ?? null,
+    tz: d.geo?.timezone || "",
+  };
+  const at = saves.findIndex((s) => s.key === key);
+  // an older record is upgraded in place, so a returning visitor gains the
+  // birth time and place the Daily Sky wants without re-entering anything
+  if (at >= 0) saves[at] = { ...saves[at], ...record };
+  else saves.unshift(record);
   try { localStorage.setItem(SAVES_KEY, JSON.stringify(saves.slice(0, 50))); } catch {}
+  // the day you just recovered is the one the Daily Sky should open on
+  activeProfileKey = key;
+  try { localStorage.setItem(TODAY_KEY, key); } catch {}
+  if (at < 0) trackEvent(EVENTS.PERSON_SAVED);
 }
 
+/* ---------- the Daily Sky ---------- */
+/*
+   The habit half of the product. It owns no data of its own: it reads the
+   saved people, picks one, and recomputes the whole screen from the engine
+   on every open. Which person, and whether the astrology reading shows,
+   are the only two things it remembers.
+*/
+const TODAY_KEY = "mybirth:today";
+const ASTRO_KEY = "mybirth:astro";
+const SKY_THEME_KEY = "mybirth:sky-theme";
+
+let activeProfileKey = (() => {
+  try { return localStorage.getItem(TODAY_KEY) || ""; } catch { return ""; }
+})();
+
+/** Paper by default; the choice, once made, is remembered. */
+function skyTheme() {
+  try { return localStorage.getItem(SKY_THEME_KEY) === "dark" ? "dark" : "light"; } catch { return "light"; }
+}
+
+/*
+   A short journal of which reading each person has already been shown.
+
+   It does two jobs. Reading it back means today's reading is stable: a
+   reload finds its own entry and reuses it rather than rerolling. And it
+   lets dailyReading refuse a variant it has used recently, which is what
+   turns "probably different" into "cannot be the same". Thirty entries is
+   about a month, which is roughly how long a sentence stays memorable.
+*/
+const JOURNAL_KEY = "mybirth:read";
+const JOURNAL_LEN = 30;
+
+function readJournal(key) {
+  try { return JSON.parse(localStorage.getItem(`${JOURNAL_KEY}:${key}`) || "[]"); } catch { return []; }
+}
+
+function recordReading(key, entry) {
+  const journal = readJournal(key).filter((e) => e.d !== entry.d);
+  journal.unshift(entry);
+  try {
+    localStorage.setItem(`${JOURNAL_KEY}:${key}`, JSON.stringify(journal.slice(0, JOURNAL_LEN)));
+  } catch {}
+}
+
+function renderToday() {
+  const mount = document.getElementById("today-mount");
+  if (!mount) return;
+
+  const profiles = loadSaves().map(buildProfile).filter(Boolean);
+  const active = profiles.find((p) => p.key === activeProfileKey) || profiles[0] || null;
+  if (active) activeProfileKey = active.key;
+
+  let astro = false;
+  try { astro = localStorage.getItem(ASTRO_KEY) === "1"; } catch {}
+  const theme = skyTheme();
+  applySkyTheme(theme);
+
+  mount.innerHTML = dailySkyHTML(active, {
+    astro, profiles, theme,
+    journal: active ? readJournal(active.key) : [],
+    onReading: (entry) => active && recordReading(active.key, entry),
+  });
+
+  /*
+     Whether a visit to Today produced a reading or the birth-time ask.
+     The ratio between these two is the only way to know whether requiring
+     a time is costing more than it buys.
+  */
+  trackEvent(EVENTS.TODAY_READ, { had_time: active?.ascendant ? "yes" : "no", theme });
+
+
+  // whose sky
+  mount.querySelectorAll("[data-profile]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeProfileKey = btn.dataset.profile;
+      try { localStorage.setItem(TODAY_KEY, activeProfileKey); } catch {}
+      renderToday();
+    });
+  });
+  // the archive is always one press away, from the empty state too
+  mount.querySelectorAll("[data-goto-archive]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (active?.shareURL) location.href = active.shareURL;
+      else activateTab("archive");
+    });
+  });
+  /* the birth time this tab asks for when a save has none */
+  wireClock(mount, {
+    onValid: (time) => {
+      if (!active) return;
+      const saves = loadSaves();
+      const at = saves.findIndex((x) => x.key === active.key);
+      if (at < 0) return;
+      saves[at] = { ...saves[at], time };
+      try { localStorage.setItem(SAVES_KEY, JSON.stringify(saves)); } catch {}
+      // did the birth-time ask convert? that is the whole question about it
+      trackEvent(EVENTS.TIME_ADDED);
+      renderToday();
+    },
+  });
+
+  /* astrology is off by default: the astronomy has to stand on its own first */
+  mount.querySelector("[data-astro]")?.addEventListener("click", () => {
+    try { localStorage.setItem(ASTRO_KEY, astro ? "0" : "1"); } catch {}
+    renderToday();
+  });
+
+  // the screen is rebuilt on every open and on every profile switch, so the
+  // previous tick has to be dropped or they stack up writing to dead nodes
+  clearInterval(skyCountdown);
+  wireDailySky(mount, { onCountdown: (block) => { skyCountdown = startCountdown(block); } });
+
+  mount.querySelector("[data-fete]")?.addEventListener("click", () => {
+    createFete({
+      name: active.first,
+      age: ageInfo(active.day, active.month, active.year, new Date()).age || 0,
+      dateLabel: `${ordinal(active.day)} ${monthName(active.month)}`,
+      rehearsal: false,
+    }).open();
+  });
+
+  /*
+     The one thing here that has to be fetched. It arrives into its own
+     slot after the rest has painted, exactly as the archive's chapters
+     do, and if it never arrives the slot stays empty rather than the
+     page waiting on it.
+  */
+  if (active) {
+    spaceWeather().then((w) => {
+      const slot = mount.querySelector('[data-slot="space"]');
+      if (slot && w) slot.innerHTML = spaceModuleHTML(w);
+    });
+  }
+}
+let skyCountdown = null;
+
+/** Astrology is off by default: the astronomy has to stand on its own first. */
 function renderSaves() {
   const list = document.getElementById("saves-list");
   const empty = document.getElementById("saves-empty");
   if (!list) return;
-  const saves = loadSaves();
+  /*
+     Records written by earlier versions of the site are still in people's
+     browsers, so anything without a usable date is dropped rather than allowed
+     to throw on the way into nextBirthday(). The storage key has never changed,
+     so there is nothing to migrate, only to tolerate.
+  */
+  const saves = loadSaves().filter((s) => (
+    s && s.name
+    && Number.isFinite(+s.day) && +s.day >= 1 && +s.day <= 31
+    && Number.isFinite(+s.month) && +s.month >= 1 && +s.month <= 12
+    && Number.isFinite(+s.year)
+  ));
   if (!saves.length) {
     list.innerHTML = "";
     if (empty) empty.hidden = false;
     return;
   }
   if (empty) empty.hidden = true;
-  list.innerHTML = saves.map((s) => `
-    <div class="save-card" data-url="${esc(s.shareURL)}" tabindex="0" role="button">
-      <p class="save-card__name">${esc(s.name)}</p>
-      <p class="save-card__date">${ordinalShort(s.day)} · ${monthName(s.month)} · ${s.year}</p>
-      ${s.moon ? `<p class="save-card__moon">${esc(s.moon)}</p>` : ""}
-    </div>`).join("");
+
+  /*
+     Sorted by whose return comes next, not by when they were saved. That one
+     change turns a list of past lookups into a calendar of upcoming days,
+     which is the thing worth opening the page for.
+  */
+  const now = new Date();
+  const enriched = saves.map((s) => {
+    const nb = nextBirthday(s.month, s.day, now);
+    const age = ageInfo(s.day, s.month, s.year, now);
+    return { ...s, nb, age, days: nb ? Math.floor(nb.msUntil / 86400000) : 9999 };
+  }).sort((a, b) => a.days - b.days);
+
+  const fmt = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long" });
+
+  list.innerHTML = enriched.map((s) => {
+    const today = s.nb?.isToday;
+    const soon = !today && s.days <= 30;
+    const when = today ? "Today"
+      : s.days === 1 ? "Tomorrow"
+      : `${s.days} days`;
+    return `
+    <div class="save-card${today ? " is-today" : ""}${soon ? " is-soon" : ""}"
+         data-url="${esc(s.shareURL)}" tabindex="0" role="button"
+         aria-label="${esc(s.name)}, born ${ordinalShort(s.day)} ${monthName(s.month)} ${s.year}">
+      <div class="save-card__top">
+        <p class="save-card__name">${esc(s.name)}</p>
+        <span class="save-card__countdown">${esc(when)}</span>
+      </div>
+      <p class="save-card__date">${ordinalShort(s.day)} ${monthName(s.month)} ${s.year}</p>
+      <div class="save-card__meta">
+        ${Number.isFinite(s.age.age) ? `<span>Turning ${s.age.age + 1}</span>` : ""}
+        ${s.nb ? `<span>${esc(fmt.format(s.nb.date))}, a ${esc(s.nb.weekday)}</span>` : ""}
+      </div>
+      ${s.moon ? `<p class="save-card__moon">Born under a ${esc(s.moon.toLowerCase())}</p>` : ""}
+      <button class="save-card__remove" data-remove="${esc(s.key)}"
+              aria-label="Remove ${esc(s.name)}" title="Remove">Remove</button>
+    </div>`;
+  }).join("");
+
+  list.querySelectorAll("[data-remove]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const key = btn.dataset.remove;
+      try {
+        localStorage.setItem(SAVES_KEY, JSON.stringify(loadSaves().filter((x) => x.key !== key)));
+      } catch {}
+      renderSaves();
+    });
+  });
   list.querySelectorAll(".save-card").forEach((card) => {
     const url = card.dataset.url;
     if (!url) return;
@@ -1253,25 +2493,58 @@ function renderSaves() {
 
 /* ---------- arrive via a shared link → prefill + auto-generate ---------- */
 (function fromURL() {
+  initPlaceField();
+
   const p = new URLSearchParams(location.search);
-  if (!p.get("n") || !p.get("d") || !p.get("m") || !p.get("y") || !p.get("c")) return;
+  if (!p.get("n") || !p.get("d") || !p.get("m") || !p.get("y")) {
+    /*
+       A plain visit with nothing in the URL. A first-time visitor gets the
+       form, which is the whole product to them. Anyone who has saved a day
+       has already filled that form in and should never be shown it again as
+       a front door: they get the Daily Sky, which is different every morning.
+    */
+    activateTab(rootTab());
+    return;
+  }
+
+  // links written before the birthplace field carried a country in "c"
+  const placeLabel = (p.get("p") || p.get("c") || "").trim();
+  const lat = parseFloat(p.get("la")), lon = parseFloat(p.get("lo"));
+  // "Town, State, Country" or "Town, Country" or just "Country": the middle
+  // slot only exists when there are three parts, or the label reads back
+  // duplicated as "Town, Country, Country"
+  const parts = placeLabel.split(",").map((s) => s.trim()).filter(Boolean);
+  const place = Number.isFinite(lat) && Number.isFinite(lon)
+    ? {
+        lat, lon, label: placeLabel,
+        name: parts[0] || "",
+        admin1: parts.length >= 3 ? parts[1] : "",
+        country: parts.length >= 2 ? parts[parts.length - 1] : "",
+        countryCode: (p.get("cc") || "").trim(),
+        timezone: (p.get("tz") || "").trim(),
+      }
+    : null;
+
   const inputs = {
     name: p.get("n").trim(),
     day: parseInt(p.get("d"), 10),
     month: parseInt(p.get("m"), 10),
     year: parseInt(p.get("y"), 10),
-    country: p.get("c").trim(),
-    city: (p.get("city") || "").trim(),
-    state: (p.get("s") || "").trim(),
+    placeLabel, place,
     time: (p.get("t") || "").trim()
   };
-  if (validate(inputs)) return; // malformed link → just show the landing
+  if (validate(inputs)) return; // malformed link, just show the landing
+  trackEvent(EVENTS.ARCHIVE_START, { entry: "link" });
 
   // reflect into the form so "recover another" and re-edits stay consistent
   const set = (id, v) => { const el = document.getElementById(id); if (el != null && v) el.value = v; };
-  set("f-name", inputs.name); set("f-day", inputs.day); set("f-month", inputs.month);
-  set("f-year", inputs.year); set("f-country", inputs.country);
-  set("f-city", inputs.city); set("f-state", inputs.state); set("f-time", inputs.time);
+  set("f-name", inputs.name); set("f-day", inputs.day);
+  set("f-year", inputs.year); set("f-place", placeLabel); set("f-time", inputs.time);
+  setMonthField(inputs.month);
+  if (place) {
+    selectedPlace = place;
+    document.getElementById("place-field")?.classList.add("is-resolved");
+  }
 
   runGeneration(inputs);
 })();

@@ -17,7 +17,7 @@ const MOON_MODEL_URL = "/models/mybirth/moon.glb";
 export function createMoon() {
   const viewer = createViewer({
     fov: 32,
-    cameraZ: 4.3,
+    cameraZ: 3.5,        // pulled in so the disc fills more of its ring
     studioRig: false,     // the moon has exactly one light: the sun
     environment: false,
     toneMapped: false,    // keep the terminator contrast crisp
@@ -41,7 +41,9 @@ export function createMoon() {
     opacity: 0.55,
   });
   const halo = new THREE.Sprite(haloMat);
-  halo.scale.set(3.4, 3.4, 1);
+  // must fall to zero inside the frame: any wider and the closer camera clips
+  // the gradient at the canvas edge, which reads as a square around the moon
+  halo.scale.set(2.2, 2.2, 1);
   halo.position.z = -0.6;
   scene.add(halo);
 

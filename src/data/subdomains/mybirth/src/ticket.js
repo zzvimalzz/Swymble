@@ -67,7 +67,7 @@ export function buildTicket(p) {
             </div>
             <div class="bp__runway">
               <span class="bp__runway-dot bp__runway-dot--l"></span>
-              <span class="bp__runway-spark" aria-hidden="true">✦</span>
+              <span class="bp__runway-spark" aria-hidden="true"></span>
               <span class="bp__runway-dot bp__runway-dot--r"></span>
             </div>
             <div class="bp__port bp__port--r">

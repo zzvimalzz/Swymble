@@ -1,0 +1,44 @@
+{
+  "_comment": [
+    "The third sentence: timing. Seven transiting bodies, two states each.",
+    "Index 0 is applying (still tightening towards exact), index 1 is",
+    "separating (already past it).",
+    "",
+    "The two entries per body differ in TIMESCALE rather than in flavour,",
+    "because that is the genuinely body-specific part: the Moon finishes an",
+    "aspect in hours and Saturn takes months. They deliberately carry none of",
+    "the transiting planet's character. An earlier version did, and a Mercury",
+    "clause about things being said kept landing under a Venus headline about",
+    "making a room nicer, which read as two sentences from different pages."
+  ],
+  "motion": {
+    "moon": [
+      "This is still tightening, and it peaks later today.",
+      "It passed exact earlier today and is already letting go."
+    ],
+    "sun": [
+      "It is still closing, so tomorrow is more of this rather than less.",
+      "The exact point is a day or two behind you now."
+    ],
+    "mercury": [
+      "It is still closing, and it holds for another day or so.",
+      "It has passed exact; what is left of it goes quickly."
+    ],
+    "venus": [
+      "Still tightening. It has a couple of days left to run.",
+      "Past exact now, and fading over the next few days."
+    ],
+    "mars": [
+      "Still building. This one has the better part of a week in it.",
+      "It broke a few days ago. The rest is aftermath."
+    ],
+    "jupiter": [
+      "Still closing, and slowly: this one is measured in weeks.",
+      "Past its closest point, and it will take weeks to clear."
+    ],
+    "saturn": [
+      "Still tightening, and it will be months before it is done.",
+      "It has turned the corner, though it will lift only gradually."
+    ]
+  }
+}

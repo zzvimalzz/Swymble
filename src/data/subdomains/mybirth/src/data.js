@@ -1,5 +1,5 @@
 /* ============================================================
-   data.js — curated, best-effort historical reference data.
+   data.js | curated, best-effort historical reference data.
    These are hand-compiled facts (top film, defining song,
    head of government). They're real but, unlike the live feeds,
    labelled "from our archive" in the UI so nothing is passed
@@ -38,55 +38,57 @@ export const MOVIES_BY_YEAR = {
   2024: "Inside Out 2", 2025: "Ne Zha 2"
 };
 
-/* ---------- defining #1 song by year (US year-end / global icon) ---------- */
+/* ---------- defining #1 song by year (US year-end / global icon) ----------
+   Stored as "Title | Artist". The pipe is structure, never rendered: every
+   reader of this table splits on it and lays the two halves out itself. */
 export const SONGS_BY_YEAR = {
-  1940: "I'll Never Smile Again — Tommy Dorsey", 1941: "Chattanooga Choo Choo — Glenn Miller",
-  1942: "White Christmas — Bing Crosby", 1943: "I've Heard That Song Before — Harry James",
-  1944: "Swinging on a Star — Bing Crosby", 1945: "Rum and Coca-Cola — The Andrews Sisters",
-  1946: "Prisoner of Love — Perry Como", 1947: "Near You — Francis Craig",
-  1948: "Twelfth Street Rag — Pee Wee Hunt", 1949: "Riders in the Sky — Vaughn Monroe",
-  1950: "Goodnight Irene — The Weavers", 1951: "Too Young — Nat King Cole",
-  1952: "Blue Tango — Leroy Anderson", 1953: "Song from Moulin Rouge — Percy Faith",
-  1954: "Little Things Mean a Lot — Kitty Kallen", 1955: "Cherry Pink and Apple Blossom White — Pérez Prado",
-  1956: "Heartbreak Hotel — Elvis Presley", 1957: "All Shook Up — Elvis Presley",
-  1958: "Nel blu dipinto di blu (Volare) — Domenico Modugno", 1959: "Mack the Knife — Bobby Darin",
-  1960: "Theme from A Summer Place — Percy Faith", 1961: "Tossin' and Turnin' — Bobby Lewis",
-  1962: "Stranger on the Shore — Acker Bilk", 1963: "Sugar Shack — Jimmy Gilmer and the Fireballs",
-  1964: "I Want to Hold Your Hand — The Beatles", 1965: "Wooly Bully — Sam the Sham and the Pharaohs",
-  1966: "The Ballad of the Green Berets — SSgt Barry Sadler", 1967: "To Sir, with Love — Lulu",
-  1968: "Hey Jude — The Beatles", 1969: "Sugar, Sugar — The Archies",
-  1970: "Bridge over Troubled Water — Simon & Garfunkel", 1971: "Joy to the World — Three Dog Night",
-  1972: "The First Time Ever I Saw Your Face — Roberta Flack", 1973: "Tie a Yellow Ribbon — Tony Orlando and Dawn",
-  1974: "The Way We Were — Barbra Streisand", 1975: "Love Will Keep Us Together — Captain & Tennille",
-  1976: "Silly Love Songs — Wings", 1977: "Tonight's the Night — Rod Stewart",
-  1978: "Shadow Dancing — Andy Gibb", 1979: "My Sharona — The Knack",
-  1980: "Call Me — Blondie", 1981: "Bette Davis Eyes — Kim Carnes",
-  1982: "Physical — Olivia Newton-John", 1983: "Every Breath You Take — The Police",
-  1984: "When Doves Cry — Prince", 1985: "Careless Whisper — George Michael",
-  1986: "That's What Friends Are For — Dionne & Friends", 1987: "Walk Like an Egyptian — The Bangles",
-  1988: "Faith — George Michael", 1989: "Look Away — Chicago",
-  1990: "Hold On — Wilson Phillips", 1991: "(Everything I Do) I Do It for You — Bryan Adams",
-  1992: "End of the Road — Boyz II Men", 1993: "I Will Always Love You — Whitney Houston",
-  1994: "The Sign — Ace of Base", 1995: "Gangsta's Paradise — Coolio",
-  1996: "Macarena — Los del Río", 1997: "Candle in the Wind 1997 — Elton John",
-  1998: "Too Close — Next", 1999: "Believe — Cher",
-  2000: "Breathe — Faith Hill", 2001: "Hanging by a Moment — Lifehouse",
-  2002: "How You Remind Me — Nickelback", 2003: "In da Club — 50 Cent",
-  2004: "Yeah! — Usher feat. Lil Jon & Ludacris", 2005: "We Belong Together — Mariah Carey",
-  2006: "Bad Day — Daniel Powter", 2007: "Irreplaceable — Beyoncé",
-  2008: "Low — Flo Rida feat. T-Pain", 2009: "Boom Boom Pow — The Black Eyed Peas",
-  2010: "Tik Tok — Kesha", 2011: "Rolling in the Deep — Adele",
-  2012: "Somebody That I Used to Know — Gotye feat. Kimbra", 2013: "Thrift Shop — Macklemore & Ryan Lewis",
-  2014: "Happy — Pharrell Williams", 2015: "Uptown Funk — Mark Ronson feat. Bruno Mars",
-  2016: "Love Yourself — Justin Bieber", 2017: "Shape of You — Ed Sheeran",
-  2018: "God's Plan — Drake", 2019: "Old Town Road — Lil Nas X feat. Billy Ray Cyrus",
-  2020: "Blinding Lights — The Weeknd", 2021: "Levitating — Dua Lipa",
-  2022: "As It Was — Harry Styles", 2023: "Flowers — Miley Cyrus",
-  2024: "A Bar Song (Tipsy) — Shaboozey"
+  1940: "I'll Never Smile Again | Tommy Dorsey", 1941: "Chattanooga Choo Choo | Glenn Miller",
+  1942: "White Christmas | Bing Crosby", 1943: "I've Heard That Song Before | Harry James",
+  1944: "Swinging on a Star | Bing Crosby", 1945: "Rum and Coca-Cola | The Andrews Sisters",
+  1946: "Prisoner of Love | Perry Como", 1947: "Near You | Francis Craig",
+  1948: "Twelfth Street Rag | Pee Wee Hunt", 1949: "Riders in the Sky | Vaughn Monroe",
+  1950: "Goodnight Irene | The Weavers", 1951: "Too Young | Nat King Cole",
+  1952: "Blue Tango | Leroy Anderson", 1953: "Song from Moulin Rouge | Percy Faith",
+  1954: "Little Things Mean a Lot | Kitty Kallen", 1955: "Cherry Pink and Apple Blossom White | Pérez Prado",
+  1956: "Heartbreak Hotel | Elvis Presley", 1957: "All Shook Up | Elvis Presley",
+  1958: "Nel blu dipinto di blu (Volare) | Domenico Modugno", 1959: "Mack the Knife | Bobby Darin",
+  1960: "Theme from A Summer Place | Percy Faith", 1961: "Tossin' and Turnin' | Bobby Lewis",
+  1962: "Stranger on the Shore | Acker Bilk", 1963: "Sugar Shack | Jimmy Gilmer and the Fireballs",
+  1964: "I Want to Hold Your Hand | The Beatles", 1965: "Wooly Bully | Sam the Sham and the Pharaohs",
+  1966: "The Ballad of the Green Berets | SSgt Barry Sadler", 1967: "To Sir, with Love | Lulu",
+  1968: "Hey Jude | The Beatles", 1969: "Sugar, Sugar | The Archies",
+  1970: "Bridge over Troubled Water | Simon & Garfunkel", 1971: "Joy to the World | Three Dog Night",
+  1972: "The First Time Ever I Saw Your Face | Roberta Flack", 1973: "Tie a Yellow Ribbon | Tony Orlando and Dawn",
+  1974: "The Way We Were | Barbra Streisand", 1975: "Love Will Keep Us Together | Captain & Tennille",
+  1976: "Silly Love Songs | Wings", 1977: "Tonight's the Night | Rod Stewart",
+  1978: "Shadow Dancing | Andy Gibb", 1979: "My Sharona | The Knack",
+  1980: "Call Me | Blondie", 1981: "Bette Davis Eyes | Kim Carnes",
+  1982: "Physical | Olivia Newton-John", 1983: "Every Breath You Take | The Police",
+  1984: "When Doves Cry | Prince", 1985: "Careless Whisper | George Michael",
+  1986: "That's What Friends Are For | Dionne & Friends", 1987: "Walk Like an Egyptian | The Bangles",
+  1988: "Faith | George Michael", 1989: "Look Away | Chicago",
+  1990: "Hold On | Wilson Phillips", 1991: "(Everything I Do) I Do It for You | Bryan Adams",
+  1992: "End of the Road | Boyz II Men", 1993: "I Will Always Love You | Whitney Houston",
+  1994: "The Sign | Ace of Base", 1995: "Gangsta's Paradise | Coolio",
+  1996: "Macarena | Los del Río", 1997: "Candle in the Wind 1997 | Elton John",
+  1998: "Too Close | Next", 1999: "Believe | Cher",
+  2000: "Breathe | Faith Hill", 2001: "Hanging by a Moment | Lifehouse",
+  2002: "How You Remind Me | Nickelback", 2003: "In da Club | 50 Cent",
+  2004: "Yeah! | Usher feat. Lil Jon & Ludacris", 2005: "We Belong Together | Mariah Carey",
+  2006: "Bad Day | Daniel Powter", 2007: "Irreplaceable | Beyoncé",
+  2008: "Low | Flo Rida feat. T-Pain", 2009: "Boom Boom Pow | The Black Eyed Peas",
+  2010: "Tik Tok | Kesha", 2011: "Rolling in the Deep | Adele",
+  2012: "Somebody That I Used to Know | Gotye feat. Kimbra", 2013: "Thrift Shop | Macklemore & Ryan Lewis",
+  2014: "Happy | Pharrell Williams", 2015: "Uptown Funk | Mark Ronson feat. Bruno Mars",
+  2016: "Love Yourself | Justin Bieber", 2017: "Shape of You | Ed Sheeran",
+  2018: "God's Plan | Drake", 2019: "Old Town Road | Lil Nas X feat. Billy Ray Cyrus",
+  2020: "Blinding Lights | The Weeknd", 2021: "Levitating | Dua Lipa",
+  2022: "As It Was | Harry Styles", 2023: "Flowers | Miley Cyrus",
+  2024: "A Bar Song (Tipsy) | Shaboozey"
 };
 
 /* ---------- heads of government / state, by country (ISO2) ---------- */
-// { name, title, from, to } — `to: null` means still in office.
+// { name, title, from, to } | `to: null` means still in office.
 export const LEADERS = {
   US: { country: "United States", list: [
     ["Franklin D. Roosevelt", "President", 1933, 1945], ["Harry S. Truman", "President", 1945, 1953],

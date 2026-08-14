@@ -1,11 +1,11 @@
 /* ============================================================
-   cosmos.js — visual reference data
+   cosmos.js: visual reference data
      • stylised zodiac constellation patterns (normalised 0..1,
        y measured from the top) for the SVG star-map
      • gemstone colours for the 3D birthstone
    ============================================================ */
 
-// Each: { stars: [[x,y], ...], lines: [[i,j], ...] }  — recognisable, stylised.
+// Each: { stars: [[x,y], ...], lines: [[i,j], ...] }. Recognisable, stylised.
 export const CONSTELLATIONS = {
   Aries: {
     stars: [[0.18, 0.58], [0.42, 0.5], [0.62, 0.42], [0.82, 0.32]],
@@ -57,20 +57,20 @@ export const CONSTELLATIONS = {
   }
 };
 
-// a characterful, deterministic "reading" per sign — for the astrology section
+// a characterful, deterministic "reading" per sign, for the astrology section
 export const ZODIAC_READINGS = {
-  Aries: { ruler: "Mars", reading: "You meet life the way a match meets air — fast, bright, unafraid. The stars cast you as the one who moves first, while everyone else is still deciding.", strengths: "Courage, drive, honesty", growth: "Learning that patience can be its own kind of power.", day: "Tuesday", color: "Scarlet" },
-  Taurus: { ruler: "Venus", reading: "You were built for the long, good things — comfort, loyalty, beauty that lasts. Where others chase, you cultivate, and what you grow tends to stay.", strengths: "Steadiness, devotion, taste", growth: "Letting change in before it forces the door.", day: "Friday", color: "Emerald" },
-  Gemini: { ruler: "Mercury", reading: "Two minds and one restless heart — curious, quick, impossible to bore. The cosmos handed you language, wit, and a hunger to know a little of everything.", strengths: "Wit, adaptability, charm", growth: "Finishing the one thing among the many.", day: "Wednesday", color: "Citrine yellow" },
+  Aries: { ruler: "Mars", reading: "You meet life the way a match meets air: fast, bright, unafraid. The stars cast you as the one who moves first, while everyone else is still deciding.", strengths: "Courage, drive, honesty", growth: "Learning that patience can be its own kind of power.", day: "Tuesday", color: "Scarlet" },
+  Taurus: { ruler: "Venus", reading: "You were built for the long, good things: comfort, loyalty, beauty that lasts. Where others chase, you cultivate, and what you grow tends to stay.", strengths: "Steadiness, devotion, taste", growth: "Letting change in before it forces the door.", day: "Friday", color: "Emerald" },
+  Gemini: { ruler: "Mercury", reading: "Two minds and one restless heart: curious, quick, impossible to bore. The cosmos handed you language, wit, and a hunger to know a little of everything.", strengths: "Wit, adaptability, charm", growth: "Finishing the one thing among the many.", day: "Wednesday", color: "Citrine yellow" },
   Cancer: { ruler: "the Moon", reading: "Ruled by the very moon you were born under, you feel in tides. Home, memory and the people you love are your truest north.", strengths: "Empathy, loyalty, intuition", growth: "Protecting your softness without building walls.", day: "Monday", color: "Silver" },
-  Leo: { ruler: "the Sun", reading: "You were born to be seen — warm, generous, a little theatrical. The stars gave you the sun itself, and a heart that shines for the people around you.", strengths: "Confidence, warmth, generosity", growth: "Remembering the spotlight is kinder when it's shared.", day: "Sunday", color: "Gold" },
-  Virgo: { ruler: "Mercury", reading: "You see what others miss — the detail, the fix, the better way. Precise and quietly kind, you improve every room you walk into.", strengths: "Precision, devotion, cleverness", growth: "Letting 'good enough' be enough, sometimes.", day: "Wednesday", color: "Sage green" },
-  Libra: { ruler: "Venus", reading: "You came in search of balance and beauty. Fair-minded and disarmingly charming, you weigh the world with care and tilt it toward harmony.", strengths: "Diplomacy, grace, fairness", growth: "Choosing decisively — for yourself first.", day: "Friday", color: "Blush rose" },
-  Scorpio: { ruler: "Pluto", reading: "Intense, magnetic, all depth — you simply don't do shallow. The stars gave you the power to transform: to feel everything, and survive it.", strengths: "Passion, loyalty, resilience", growth: "Trusting a little before you're certain.", day: "Tuesday", color: "Crimson" },
+  Leo: { ruler: "the Sun", reading: "You were born to be seen: warm, generous, a little theatrical. The stars gave you the sun itself, and a heart that shines for the people around you.", strengths: "Confidence, warmth, generosity", growth: "Remembering the spotlight is kinder when it's shared.", day: "Sunday", color: "Gold" },
+  Virgo: { ruler: "Mercury", reading: "You see what others miss: the detail, the fix, the better way. Precise and quietly kind, you improve every room you walk into.", strengths: "Precision, devotion, cleverness", growth: "Letting 'good enough' be enough, sometimes.", day: "Wednesday", color: "Sage green" },
+  Libra: { ruler: "Venus", reading: "You came in search of balance and beauty. Fair-minded and disarmingly charming, you weigh the world with care and tilt it toward harmony.", strengths: "Diplomacy, grace, fairness", growth: "Choosing decisively, for yourself first.", day: "Friday", color: "Blush rose" },
+  Scorpio: { ruler: "Pluto", reading: "Intense, magnetic, all depth. You simply don't do shallow. The stars gave you the power to transform: to feel everything, and survive it.", strengths: "Passion, loyalty, resilience", growth: "Trusting a little before you're certain.", day: "Tuesday", color: "Crimson" },
   Sagittarius: { ruler: "Jupiter", reading: "Born restless and wide-eyed, you chase horizons. The cosmos packed your bags with optimism and a need to see what's over the next hill.", strengths: "Optimism, honesty, adventure", growth: "Staying long enough to put down roots.", day: "Thursday", color: "Indigo" },
   Capricorn: { ruler: "Saturn", reading: "You play the long game better than anyone. Disciplined and quietly ambitious, you climb steadily toward summits others only talk about.", strengths: "Discipline, patience, integrity", growth: "Letting joy in before the work is finished.", day: "Saturday", color: "Slate grey" },
-  Aquarius: { ruler: "Uranus", reading: "You think in tomorrows. Original and deeply humane, you were born a little ahead of your time — here to imagine what the rest of us haven't yet.", strengths: "Originality, vision, fairness", growth: "Letting people close, not just causes.", day: "Saturday", color: "Electric blue" },
-  Pisces: { ruler: "Neptune", reading: "Dreamer, feeler, gentle soul — you live half in this world and half in a richer one. Compassion is both your superpower and your tide.", strengths: "Imagination, empathy, artistry", growth: "Keeping one foot on solid ground.", day: "Thursday", color: "Seafoam" }
+  Aquarius: { ruler: "Uranus", reading: "You think in tomorrows. Original and deeply humane, you were born a little ahead of your time, here to imagine what the rest of us haven't yet.", strengths: "Originality, vision, fairness", growth: "Letting people close, not just causes.", day: "Saturday", color: "Electric blue" },
+  Pisces: { ruler: "Neptune", reading: "Dreamer, feeler, gentle soul. You live half in this world and half in a richer one. Compassion is both your superpower and your tide.", strengths: "Imagination, empathy, artistry", growth: "Keeping one foot on solid ground.", day: "Thursday", color: "Seafoam" }
 };
 
 // base = body colour, glow = highlight/rim colour

@@ -1,0 +1,916 @@
+{
+  "_comment": [
+    "The headline and the opening sentence, indexed by area then by tone.",
+    "Eight areas by five tones by five variants: 200 written pairs.",
+    "",
+    "Tone is the aspect: charged = conjunction, open = sextile,",
+    "friction = square, easy = trine, pull = opposition.",
+    "",
+    "Each entry is [headline, body]. The headline is the screenshot and should",
+    "be a short declarative with no hedging. The body is ONE sentence: the",
+    "reading is completed by a clause about which part of the chart was struck",
+    "(touches.json) and a clause about timing (motion.json), so three sentences",
+    "of writing arrive from three separate tables and the index multiplies.",
+    "",
+    "Everything here is written to be true of the *aspect*, never of the",
+    "reader. The specificity comes from the measurement printed underneath."
+  ],
+  "readings": {
+    "self": {
+      "charged": [
+        [
+          "Today is about being seen accurately.",
+          "Something you have been doing quietly is about to be noticed, and it is better noticed as it is than dressed up first."
+        ],
+        [
+          "You are the subject today, not the author.",
+          "How you are read matters more than what you meant by it, which is uncomfortable and also useful."
+        ],
+        [
+          "Take the compliment properly.",
+          "Deflecting is a habit rather than modesty, and it teaches people to stop trying."
+        ],
+        [
+          "You are being quoted today.",
+          "What you say offhand travels further than the thing you prepared."
+        ],
+        [
+          "Stop auditioning.",
+          "The part is already yours and the performance is costing you the ease that got it."
+        ]
+      ],
+      "open": [
+        [
+          "The door is already open.",
+          "You do not have to build the case; the thing you would have argued for is available if you ask plainly."
+        ],
+        [
+          "Being visible costs less today.",
+          "What you would normally do quietly is worth doing where people can actually see it."
+        ],
+        [
+          "Ask before you over-prepare.",
+          "The permission you are assembling an argument for has probably already been given."
+        ],
+        [
+          "Go as you are today.",
+          "The version of you that has not been arranged is the one that works this morning."
+        ],
+        [
+          "Occupy the space you have already earned.",
+          "Nobody is going to hand it over more formally than this."
+        ]
+      ],
+      "friction": [
+        [
+          "Being right is not the same as being heard.",
+          "Something is pushing back on how you want to be seen, and arguing with it today costs more than it returns."
+        ],
+        [
+          "Do not defend it yet.",
+          "The urge to explain yourself will arrive well before the second half of the story does."
+        ],
+        [
+          "The room is not about you today.",
+          "Something else is competing for the same attention and it is not a slight."
+        ],
+        [
+          "You are not the problem, but you are in it.",
+          "Separating those two is most of today's work."
+        ],
+        [
+          "Let the misreading stand for a day.",
+          "Correcting it now makes it larger; by tomorrow it will have moved on without you."
+        ]
+      ],
+      "easy": [
+        [
+          "You can take up the whole room today.",
+          "Whatever you have been doing at half volume is worth doing at full volume."
+        ],
+        [
+          "Put your name on it.",
+          "The work you have been letting speak for itself will speak louder with your name attached."
+        ],
+        [
+          "Lead the thing you keep almost leading.",
+          "The hesitation is habit rather than judgement, and today the room will follow."
+        ],
+        [
+          "You are easy to be around today. Use it.",
+          "Ask for the thing while the room is on your side."
+        ],
+        [
+          "Say the thing you are known for saying.",
+          "It is not a cliche if it is true, and today somebody needs it."
+        ]
+      ],
+      "pull": [
+        [
+          "Two versions of you want different things.",
+          "One wants recognition and one wants to be left alone, and neither is wrong."
+        ],
+        [
+          "Your work and your name are pulling apart.",
+          "One is asking to be finished and the other to be shown, and today only fits one."
+        ],
+        [
+          "Being wanted and being known are different.",
+          "You are being offered plenty of the first; notice which one you actually came for."
+        ],
+        [
+          "You are being asked to be two people.",
+          "Pick the one you can sustain past Thursday."
+        ],
+        [
+          "Your reputation is ahead of you.",
+          "Either catch up to it or correct it, but do not keep living behind it."
+        ]
+      ]
+    },
+    "work": {
+      "charged": [
+        [
+          "Ask for the number you think is too high.",
+          "It is roughly the right one, and this is a bad day for pre-emptive modesty."
+        ],
+        [
+          "The boring version is the correct one.",
+          "Something wants doing properly rather than quickly, and no shortcut here is worth the debt."
+        ],
+        [
+          "What you are worth is a fact today, not a feeling.",
+          "Look at the actual figures before you decide how to feel about them."
+        ],
+        [
+          "Do the thing you have been delegating to next week.",
+          "Next week has its own list and it has not been consulted."
+        ],
+        [
+          "Name the price out loud.",
+          "Whatever it is, saying it costs less than the ambiguity has been costing."
+        ]
+      ],
+      "open": [
+        [
+          "Structure is a kindness today.",
+          "Put the dull scaffolding under the thing you care about; it is the difference between it surviving the month and not."
+        ],
+        [
+          "Ask for the thing you have been earning.",
+          "It costs one conversation, and the answer is likelier to be yes than you are assuming."
+        ],
+        [
+          "Take the meeting slightly above your level.",
+          "The gap between rooms is always smaller than it looks from below."
+        ],
+        [
+          "The favour you need is one message away.",
+          "You have been solving alone something somebody would answer in a sentence."
+        ],
+        [
+          "Tidy the system, not the desk.",
+          "One process fixed today saves the same hour every week after it."
+        ]
+      ],
+      "friction": [
+        [
+          "The wall is real. Stop testing it.",
+          "Something is not going to move today however it is approached, and the effort is needed elsewhere."
+        ],
+        [
+          "Do less, properly.",
+          "Half the list done well will be worth more on Friday than all of it done at this speed."
+        ],
+        [
+          "Check the arithmetic before you agree to the date.",
+          "Optimism is doing the sums for you and it has never been good at them."
+        ],
+        [
+          "Working harder is the wrong lever today.",
+          "Something upstream is broken and effort is only making more of it."
+        ],
+        [
+          "Do not decide it while tired.",
+          "The judgement is off by exactly as much as the sleep is."
+        ]
+      ],
+      "easy": [
+        [
+          "Your effort converts today.",
+          "The work-to-result ratio is better than usual, so point it at the stuck thing rather than the easy one."
+        ],
+        [
+          "Finish the thing that is at eighty per cent.",
+          "Not a new one: the one that has sat nearly done for a month."
+        ],
+        [
+          "Discipline is cheap today. Bank some.",
+          "Start the habit small enough that tomorrow-you cannot find an argument against it."
+        ],
+        [
+          "Ship it before you improve it.",
+          "The improvement will be better informed once it is out of your hands."
+        ],
+        [
+          "Say yes to the boring opportunity.",
+          "It is the one that is still paying in a year."
+        ]
+      ],
+      "pull": [
+        [
+          "What you owe and what you want are not aligned.",
+          "Attend to the quieter one first, because it is the one that compounds."
+        ],
+        [
+          "The long thing and the urgent thing are not the same thing.",
+          "Only one of them will actually move today, and it is not the urgent one."
+        ],
+        [
+          "Money and meaning are asking for different hours.",
+          "You can serve both this week but not both this afternoon."
+        ],
+        [
+          "Ambition and rest are both correct today.",
+          "They are not compatible before six, so sequence them rather than blending them."
+        ],
+        [
+          "The job and the work are not the same thing.",
+          "One of them pays and one of them matters; today they want opposite hours."
+        ]
+      ]
+    },
+    "talk": {
+      "charged": [
+        [
+          "Someone needs your praise.",
+          "Skip the suggestions for improvement entirely and name what they are already doing right."
+        ],
+        [
+          "The message you send today gets read closely.",
+          "Every word is doing more work than usual, and that cuts in both directions."
+        ],
+        [
+          "Say the specific thing.",
+          "General encouragement bounces off; name the actual sentence, the actual hour of work."
+        ],
+        [
+          "Somebody is waiting for you to go first.",
+          "The silence is not agreement, it is politeness, and it will hold all week."
+        ],
+        [
+          "Put the difficult thing in one sentence.",
+          "If it takes a paragraph you have not decided what you think yet."
+        ]
+      ],
+      "open": [
+        [
+          "The conversation you have been avoiding goes fine.",
+          "It is shorter and far less dramatic than the version you have been rehearsing."
+        ],
+        [
+          "Ask the question you think is obvious.",
+          "Nobody else has asked it, and the answer changes what everyone does next."
+        ],
+        [
+          "Reach out to the one you keep meaning to.",
+          "Today it takes a message; in a month it takes an explanation."
+        ],
+        [
+          "Answer the message you have been leaving.",
+          "It is a two-line reply and it has been a three-week weight."
+        ],
+        [
+          "Say the good thing about someone to someone else.",
+          "It gets back, and it is worth more secondhand."
+        ]
+      ],
+      "friction": [
+        [
+          "Read it twice before you send it.",
+          "What you mean and what lands are further apart than usual, and softer wording is not the fix."
+        ],
+        [
+          "Half the argument is a definition.",
+          "Find the word you are each using differently before you defend anything."
+        ],
+        [
+          "Do not explain it a third time.",
+          "Repetition is not clarification; change the medium or leave it until tomorrow."
+        ],
+        [
+          "Assume they meant the kinder version.",
+          "They probably did, and if they did not, you have lost nothing."
+        ],
+        [
+          "Take the argument off the screen.",
+          "Whatever it is, text is the worst possible room for it."
+        ]
+      ],
+      "easy": [
+        [
+          "You can explain the difficult thing today.",
+          "The words are unusually available, so spend them on what you have been putting off."
+        ],
+        [
+          "Teach it to somebody.",
+          "Whatever you half-know finishes assembling itself the moment you have to say it aloud."
+        ],
+        [
+          "Introduce two people who should know each other.",
+          "It costs a minute, and today it actually lands."
+        ],
+        [
+          "Ask for the introduction.",
+          "Today it costs one line and it will not stay this cheap."
+        ],
+        [
+          "Have the long conversation.",
+          "The one that never fits; today it fits."
+        ]
+      ],
+      "pull": [
+        [
+          "Listening is the harder half.",
+          "The information you need is inside the part you would otherwise have talked over."
+        ],
+        [
+          "Two true things are being said at once.",
+          "You are trying to pick a winner; both of them holding is the actual answer."
+        ],
+        [
+          "The group and the person want different things from you.",
+          "Answer the person. The group will not notice either way."
+        ],
+        [
+          "You are talking to two audiences at once.",
+          "Write it for one of them and let the other overhear."
+        ],
+        [
+          "Being understood and being agreed with are different.",
+          "Today you can have the first. Take it and stop pushing for the second."
+        ]
+      ]
+    },
+    "home": {
+      "charged": [
+        [
+          "Home is louder than usual today.",
+          "Something domestic is asking to be dealt with rather than tidied around."
+        ],
+        [
+          "Call the person you are from.",
+          "Not because it is owed, but because today it will be shorter and easier than you expect."
+        ],
+        [
+          "The house is telling you something.",
+          "Whatever you keep stepping over on the way past is the thing."
+        ],
+        [
+          "The thing in the hallway is not about the hallway.",
+          "Deal with the object and the feeling underneath it comes loose too."
+        ],
+        [
+          "Somebody at home needs to be asked twice.",
+          "The first answer was the polite one."
+        ]
+      ],
+      "open": [
+        [
+          "Twenty minutes on the room buys back the afternoon.",
+          "Sort the space before you try to do anything difficult inside it."
+        ],
+        [
+          "Say the softer thing at home first.",
+          "There is unusually little cost today to admitting how you actually feel."
+        ],
+        [
+          "Let someone in slightly early.",
+          "The version of this you would share in a month is the version to share now."
+        ],
+        [
+          "Make one room work properly.",
+          "Not the whole flat. One room, finished, changes the week."
+        ],
+        [
+          "Invite somebody in.",
+          "The house does not have to be ready; it has never been the point."
+        ]
+      ],
+      "friction": [
+        [
+          "Not everything at home wants fixing today.",
+          "Something small will feel much larger than it is, and recognising that is the whole task."
+        ],
+        [
+          "Do not renovate the feeling.",
+          "Making the room nicer will not answer the question you have been avoiding inside it."
+        ],
+        [
+          "The old argument is not today's argument.",
+          "You are answering something from years ago; notice that, then stop."
+        ],
+        [
+          "Do not reorganise your way out of it.",
+          "The tidying is real work and it is also the avoidance."
+        ],
+        [
+          "The family script is running.",
+          "You have heard yourself say this sentence before. Say a different one."
+        ]
+      ],
+      "easy": [
+        [
+          "Rest counts as productivity today.",
+          "The thing you would normally push through will go better if you stop first."
+        ],
+        [
+          "Cook for somebody.",
+          "It is the oldest and least complicated way to close a distance, and today it works."
+        ],
+        [
+          "Go where you are already comfortable.",
+          "The familiar room, the same walk, the person who needs no context from you."
+        ],
+        [
+          "Stay in tonight.",
+          "The invitation you would normally take is worth less than the evening you would spend."
+        ],
+        [
+          "Fix the small broken thing.",
+          "It has cost you a second of irritation daily for months. Today it takes ten minutes."
+        ]
+      ],
+      "pull": [
+        [
+          "Home and everything else are pulling opposite ways.",
+          "Choose one of them properly rather than doing both of them badly."
+        ],
+        [
+          "Where you are from and where you are going disagree.",
+          "They do not have to be reconciled today, only admitted to."
+        ],
+        [
+          "You cannot be the steady one everywhere.",
+          "Decide on purpose who gets your patience, rather than finding out by accident."
+        ],
+        [
+          "Roots and reach want different things today.",
+          "You can leave and still belong, but not without saying so."
+        ],
+        [
+          "Two houses want you in them.",
+          "The one you did not choose will understand better than you expect."
+        ]
+      ]
+    },
+    "making": {
+      "charged": [
+        [
+          "Start it today or admit you won't.",
+          "The energy is here and it is not here tomorrow in the same shape."
+        ],
+        [
+          "The idea is ready before you are.",
+          "Waiting for confidence is the same delay wearing a better coat."
+        ],
+        [
+          "Make the thing badly, on purpose.",
+          "A bad first version is information; a perfect plan is not."
+        ],
+        [
+          "The good idea arrived at a bad time.",
+          "Write it down properly now; it will not survive being remembered."
+        ],
+        [
+          "Show it to one person today.",
+          "Not the crowd. One person whose opinion you would actually change your mind for."
+        ]
+      ],
+      "open": [
+        [
+          "Play with it before you plan it.",
+          "The good version arrives through the hands rather than through the outline."
+        ],
+        [
+          "Say yes to the thing that scares you slightly.",
+          "Not the terrifying one: the one only just outside what you have already done."
+        ],
+        [
+          "Learn it sideways.",
+          "An hour on something adjacent will do more than another hour on the problem itself."
+        ],
+        [
+          "Reuse the thing you already made.",
+          "It is better than you remember and it is half of the next one."
+        ],
+        [
+          "Work somewhere else today.",
+          "The room has run out of ideas, not you."
+        ]
+      ],
+      "friction": [
+        [
+          "The blank page is not the enemy today.",
+          "The standard you are holding it to is; lower that and begin."
+        ],
+        [
+          "Do not add a new thing today.",
+          "The appetite is real and the capacity is not, so write it down for a fortnight from now."
+        ],
+        [
+          "Stop polishing.",
+          "It has been finished for a while and you are postponing finding out what people think."
+        ],
+        [
+          "It is not blocked, it is unfinished.",
+          "The part you are avoiding is small and dull, and it is the whole obstacle."
+        ],
+        [
+          "Comparing is not research.",
+          "An hour looking at other people's work today will cost you two of your own."
+        ]
+      ],
+      "easy": [
+        [
+          "It comes easily today. Do the hard part.",
+          "Spend the good conditions on the piece you have been going around."
+        ],
+        [
+          "Go one step past the plan.",
+          "The extra effort costs less today and compounds more than it will next week."
+        ],
+        [
+          "Make the generous version.",
+          "Whatever you make, cook, write or send will land better than it strictly deserves to."
+        ],
+        [
+          "Do the version you would do if nobody saw it.",
+          "That one is better, and today it also happens to be the one that lands."
+        ],
+        [
+          "Follow the tangent.",
+          "The detour is where the actual idea is, and today you have time for it."
+        ]
+      ],
+      "pull": [
+        [
+          "The idea and the deadline want different things.",
+          "One of them is negotiable and you already know which."
+        ],
+        [
+          "Finishing and starting are competing.",
+          "There is only enough for one of them today, so finish."
+        ],
+        [
+          "Play and duty are both legitimate.",
+          "Give each an hour and stop arguing with yourself about the split."
+        ],
+        [
+          "The thing you want to make and the thing you owe are different.",
+          "Give the owed one the morning and the wanted one the evening."
+        ],
+        [
+          "Craft and speed are both defensible.",
+          "Only one of them fits today; pick before you start, not halfway."
+        ]
+      ]
+    },
+    "love": {
+      "charged": [
+        [
+          "What you want is obvious to everyone but you.",
+          "It is close enough to name today, and naming it costs less than the circling does."
+        ],
+        [
+          "Say the thing you like out loud.",
+          "Enthusiasm kept private stops being enthusiasm and quietly becomes a secret."
+        ],
+        [
+          "The other person is not a puzzle.",
+          "Ask them; it is faster than another week of interpretation."
+        ],
+        [
+          "Somebody is deciding about you today.",
+          "Give them the accurate version rather than the appealing one."
+        ],
+        [
+          "Say the unglamorous true thing.",
+          "It will land better than the good line, and it is the one they will remember."
+        ]
+      ],
+      "open": [
+        [
+          "Say yes to the small invitation.",
+          "The unremarkable one, not the exciting one: it is the one that goes somewhere."
+        ],
+        [
+          "Go first.",
+          "The gesture you have been waiting to receive is the one to make."
+        ],
+        [
+          "Ask how they actually are.",
+          "Not the greeting version; today the second question gets an honest answer."
+        ],
+        [
+          "Make the ordinary plan.",
+          "Tuesday, something small, nothing to live up to. That is where it actually happens."
+        ],
+        [
+          "Let them help.",
+          "Refusing is a habit and it reads as distance rather than as strength."
+        ]
+      ],
+      "friction": [
+        [
+          "Wanting it does not make it good.",
+          "Something attractive is available today and it is not free, so work out the price first."
+        ],
+        [
+          "The nice option is not the kind one.",
+          "Agreeing buys quiet and costs the week; say the awkward sentence while it is still small."
+        ],
+        [
+          "You are negotiating with someone who is not in the room.",
+          "Have the conversation with the actual person instead."
+        ],
+        [
+          "Do not test it.",
+          "Whatever answer you get from a test, you will not believe it."
+        ],
+        [
+          "The complaint underneath is not the complaint.",
+          "Ask what the actual one is before you defend against this one."
+        ]
+      ],
+      "easy": [
+        [
+          "Beauty is cheap today. Spend it.",
+          "Do the generous version of whatever you were going to do anyway."
+        ],
+        [
+          "The difficult conversation goes well today.",
+          "It will be shorter and warmer than the rehearsal led you to expect."
+        ],
+        [
+          "Be easy to love today.",
+          "It is not a performance; it is answering the message."
+        ],
+        [
+          "Say the thing you assume they know.",
+          "They do not, and hearing it is not the same as assuming it."
+        ],
+        [
+          "Do the small maintenance.",
+          "The message, the errand, the thing they mentioned once. Today it counts double."
+        ]
+      ],
+      "pull": [
+        [
+          "Comfort and desire are not the same thing.",
+          "One of them is asking you to stay and one is asking you to move."
+        ],
+        [
+          "Two people want different amounts of you.",
+          "Say the real number rather than quietly splitting the difference."
+        ],
+        [
+          "Independence and closeness are trading places.",
+          "You are allowed both, just not in the same hour."
+        ],
+        [
+          "You want to be chosen and you want to be free.",
+          "Both are allowed; only one of them can lead this week."
+        ],
+        [
+          "Somebody is closer than you are.",
+          "Either close the gap or say plainly that you are not going to."
+        ]
+      ]
+    },
+    "sex": {
+      "charged": [
+        [
+          "Say what you actually want.",
+          "The guessing has already cost more than the sentence will."
+        ],
+        [
+          "Something shared needs naming today.",
+          "Money, a bed, a debt: whichever it is, the vagueness is the problem rather than the thing."
+        ],
+        [
+          "Intensity is not the same as intimacy.",
+          "Notice which one is on offer before you agree to it."
+        ],
+        [
+          "The thing you have not said is the whole weather.",
+          "It is not going to come up naturally. It never was."
+        ],
+        [
+          "What you are owed and what you will ask for are different numbers.",
+          "Today, say the first one."
+        ]
+      ],
+      "open": [
+        [
+          "The honest version is available today.",
+          "Whatever you have been softening can be said plainly, and it will land."
+        ],
+        [
+          "Ask for the thing you assume is unreasonable.",
+          "It is considerably more reasonable than the assumption."
+        ],
+        [
+          "Let it be uncomplicated.",
+          "Not everything has to mean something in order to be worth doing."
+        ],
+        [
+          "Be direct rather than clever.",
+          "The clever version has been misread twice already."
+        ],
+        [
+          "Settle the money question while it is small.",
+          "It is a ten-minute conversation this week and an argument next month."
+        ]
+      ],
+      "friction": [
+        [
+          "The power question is the real question.",
+          "It is not about the thing the two of you are arguing about."
+        ],
+        [
+          "Do not settle this in the dark.",
+          "Whatever it is, it goes better in daylight and in words."
+        ],
+        [
+          "Withholding is a decision too.",
+          "Silence is not neutral today, and it is being read as an answer."
+        ],
+        [
+          "Do not trade honesty for peace.",
+          "The peace lasts until Thursday and the honesty was going to be needed anyway."
+        ],
+        [
+          "Jealousy is data, not instruction.",
+          "It is telling you what you want. It is not telling you what to do."
+        ]
+      ],
+      "easy": [
+        [
+          "Closeness is cheap today. Take it.",
+          "The wall you usually maintain costs more to hold up than to let down."
+        ],
+        [
+          "Sort the shared arithmetic.",
+          "Money, favours, whose turn: today it is a ten-minute conversation rather than a row."
+        ],
+        [
+          "Trust it slightly earlier than usual.",
+          "The evidence has been in for a while; you are waiting out of habit."
+        ],
+        [
+          "Say yes without the qualification.",
+          "The hedge you were about to add is protecting nothing."
+        ],
+        [
+          "Let somebody give you something.",
+          "Receiving badly is a habit, and today it would cost them more than it costs you."
+        ]
+      ],
+      "pull": [
+        [
+          "What is yours and what is ours are unclear.",
+          "Draw the line today rather than discovering where it was afterwards."
+        ],
+        [
+          "Depth and ease are pulling apart.",
+          "One of them is what you need and one is what you want."
+        ],
+        [
+          "You are keeping score and so are they.",
+          "Say the total out loud; it is smaller than it has been feeling."
+        ],
+        [
+          "Merging and staying yourself are both on the table.",
+          "You do not have to choose forever, only for tonight."
+        ],
+        [
+          "One of you is keeping the accounts.",
+          "Say so. Accounts kept privately always come out wrong."
+        ]
+      ]
+    },
+    "belief": {
+      "charged": [
+        [
+          "Something you believed is being tested.",
+          "It is not an attack; it is the first honest look you have had at it in years."
+        ],
+        [
+          "The far-off thing is closer than it looks.",
+          "Book it, apply for it, or admit out loud that you are not going to."
+        ],
+        [
+          "You know more than you are acting on.",
+          "The information has been in for a while and the delay is not analysis."
+        ],
+        [
+          "The question is bigger than today and today is where it landed.",
+          "Sit with it rather than solving it before lunch."
+        ],
+        [
+          "Something you were told is not yours.",
+          "You have been carrying somebody else's conclusion and calling it a principle."
+        ]
+      ],
+      "open": [
+        [
+          "There is more room than you are using.",
+          "You have been working inside limits nobody is enforcing, so test one today."
+        ],
+        [
+          "Say yes to the thing that widens you.",
+          "Not the terrifying one: the one that is only slightly further out than usual."
+        ],
+        [
+          "The generous read is the accurate one.",
+          "Where you could assume the worst of someone, the better assumption also happens to be true."
+        ],
+        [
+          "Read the thing you have been meaning to.",
+          "Today it will actually go in, which is not true every week."
+        ],
+        [
+          "Ask somebody older.",
+          "Not for permission. For the version of this they have already been through."
+        ]
+      ],
+      "friction": [
+        [
+          "More is not the answer today.",
+          "The instinct to widen, add, or say yes to everything is the thing that will cost you."
+        ],
+        [
+          "Certainty is not the same as being right.",
+          "The thing you are most sure of is the one worth re-examining first."
+        ],
+        [
+          "You are further from home than you meant to be.",
+          "Not geographically. Come back a little."
+        ],
+        [
+          "Do not argue about the big thing today.",
+          "Neither of you is going to move and both of you will remember it."
+        ],
+        [
+          "The doubt is doing its job.",
+          "It is not a failure of faith, it is the part where you check the load-bearing walls."
+        ]
+      ],
+      "easy": [
+        [
+          "Take the long view today. It is unusually clear.",
+          "The decision that has been confusing for a month resolves at a distance."
+        ],
+        [
+          "Learn something with no use.",
+          "It will turn out to have one, though not today and not obviously."
+        ],
+        [
+          "Go somewhere you have not been.",
+          "Even a different street; it does more than it has any right to."
+        ],
+        [
+          "Zoom out and the decision makes itself.",
+          "At a month's distance there is only one sensible answer and you can see it today."
+        ],
+        [
+          "Say what you actually believe.",
+          "Out loud, to somebody. It is different once it has left your head."
+        ]
+      ],
+      "pull": [
+        [
+          "Growth and stability are trading places.",
+          "You cannot have both of them moving at once, so decide which gets this week."
+        ],
+        [
+          "What you believe and what you do are apart today.",
+          "Close the gap in either direction, but do not pretend it is not there."
+        ],
+        [
+          "The private half and the public half disagree.",
+          "One of them is telling the truth, and it is usually the quiet one."
+        ],
+        [
+          "Faith and evidence are both asking for you today.",
+          "They are not enemies; they just want different hours."
+        ],
+        [
+          "What you say you value and what you spend on are apart.",
+          "Move one of them. Either is honest; the gap is not."
+        ]
+      ]
+    }
+  }
+}

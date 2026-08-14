@@ -1,0 +1,63 @@
+{
+  "_comment": [
+    "The second sentence of a reading: which part of the chart was struck.",
+    "Seven natal bodies by five tones, 35 clauses.",
+    "",
+    "This is the dimension that turns one area's reading into seven. The area",
+    "says WHERE in a life it lands; this says WHICH PART OF YOU took it. They",
+    "are written to sit after the body sentence in readings.json and before the",
+    "timing clause in motion.json, so any of the 120 openings can be followed",
+    "by any of these and then by any of the 14 timings."
+  ],
+  "touches": {
+    "sun": {
+      "charged": "Your sense of yourself is doing the reacting, which is why it feels personal.",
+      "open": "Your sense of yourself is the part with room in it today.",
+      "friction": "It is your sense of yourself under the pressure, so it will read as criticism even where none is meant.",
+      "easy": "Your sense of yourself is steady underneath it, which is why none of this costs much.",
+      "pull": "Your sense of yourself is on one end of this and something else is on the other."
+    },
+    "moon": {
+      "charged": "It is landing on your mood rather than your judgement, and mood always arrives first.",
+      "open": "What you need is easier to say than usual today, and easier to hear.",
+      "friction": "It is your need for things to be settled that is taking the strain.",
+      "easy": "Your footing is good, so you can afford to feel the whole of it.",
+      "pull": "What you need and what is being asked of you are at opposite ends of this."
+    },
+    "mercury": {
+      "charged": "It is landing on how you put things, so the wording matters more today than the point.",
+      "open": "The words are the part that has room in them today.",
+      "friction": "It is your way of putting things under strain, not what you actually mean by them.",
+      "easy": "The talking is the easy part today, which is not always true.",
+      "pull": "What you want to say and what wants saying are pulling in different directions."
+    },
+    "venus": {
+      "charged": "It is landing on what you want, which is why it will not stay quiet.",
+      "open": "What you are drawn to is unusually within reach today.",
+      "friction": "It is what you want that is under strain, and wanting has never been a plan.",
+      "easy": "What you want and what is available are close together today.",
+      "pull": "What you want is on one side of this and what you already have is on the other."
+    },
+    "mars": {
+      "charged": "It is landing on your drive, which is why it will present itself as urgency.",
+      "open": "The push is available today without having to be forced.",
+      "friction": "It is your drive taking the resistance, which is why it reads as frustration.",
+      "easy": "The effort goes in cleanly today, which is not the usual rate of exchange.",
+      "pull": "Your pace and somebody else's are at opposite ends of this."
+    },
+    "jupiter": {
+      "charged": "It is landing on the part of you that wants more, and that part is not subtle.",
+      "open": "The room to grow is genuinely there today rather than imagined.",
+      "friction": "It is your appetite for more being checked, and the check is a fair one.",
+      "easy": "Growth costs less than usual today, so it is worth spending on.",
+      "pull": "Wanting more and holding steady are at opposite ends of this."
+    },
+    "saturn": {
+      "charged": "It is landing on the part of you that carries things, and that part is already tired.",
+      "open": "The structure you have been needing is unusually easy to put in place today.",
+      "friction": "It is the part of you that carries things taking the weight, which is why it feels heavy.",
+      "easy": "The discipline is available today without costing what it usually costs.",
+      "pull": "What is owed and what is wanted are at opposite ends of this."
+    }
+  }
+}

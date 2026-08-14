@@ -44,18 +44,54 @@ export async function geocode(place) {
   }
 }
 
+/**
+ * Live place search for the birthplace field.
+ *
+ * Open-Meteo's geocoder already backs every city, town and administrative
+ * region on Earth, so the form searches it directly rather than shipping a
+ * frozen list of countries and states that would always be incomplete.
+ * Picking a suggestion hands the engine exact coordinates and an IANA
+ * timezone, which is what sunrise and the historical weather actually need.
+ */
+export async function searchPlaces(query, count = 8) {
+  const q = (query || "").trim();
+  if (q.length < 2) return [];
+  try {
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+      q
+    )}&count=${count}&language=en&format=json`;
+    const data = await getJSON(url);
+    return (data?.results || []).map((r) => ({
+      id: r.id,
+      lat: r.latitude,
+      lon: r.longitude,
+      name: r.name,
+      admin1: r.admin1 || "",
+      admin2: r.admin2 || "",
+      country: r.country || "",
+      countryCode: r.country_code || "",
+      timezone: r.timezone || "",
+      population: r.population || 0,
+      /** "Kuala Lumpur, Kuala Lumpur, Malaysia" */
+      label: [r.name, r.admin1, r.country].filter(Boolean).join(", "),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 /* ---------- country facts (Wikipedia summary + flag emoji, key-free) ---------- */
 // REST Countries now 301-redirects to a static file and drops the country
 // code, so we use Wikipedia's reliable, CORS-friendly page summary instead.
-export function flagEmoji(code) {
+/** A real flag image rather than a regional-indicator emoji, which renders
+    inconsistently across platforms and reads as decoration next to the type. */
+export function flagImage(code) {
   if (!code || code.length !== 2) return "";
-  return String.fromCodePoint(
-    ...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65)
-  );
+  return `https://flagcdn.com/w80/${code.toLowerCase()}.png`;
 }
 
 export async function countryFacts(code, name) {
-  const flag = flagEmoji(code);
+  const flag = flagImage(code);
   if (!name) return null;
   try {
     const data = await getJSON(
@@ -71,6 +107,44 @@ export async function countryFacts(code, name) {
   } catch {
     return { name, flag, thumb: null, extract: null, description: null };
   }
+}
+
+/**
+ * What the country was like the year you arrived, and what it is now.
+ *
+ * The World Bank's open data API is key-free, CORS-friendly and covers every
+ * country, which is what lets this section say something specific about
+ * Nigeria or Peru rather than only about the handful of places a curated
+ * table would have reached.
+ */
+export async function countryIndicators(code, year) {
+  if (!code || !year) return null;
+  const series = async (indicator) => {
+    try {
+      const url = `https://api.worldbank.org/v2/country/${encodeURIComponent(code)}` +
+        `/indicator/${indicator}?date=${year}:2024&format=json&per_page=120`;
+      const data = await getJSON(url);
+      return Array.isArray(data) && Array.isArray(data[1]) ? data[1] : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const [pop, life] = await Promise.all([
+    series("SP.POP.TOTL"),
+    series("SP.DYN.LE00.IN"),
+  ]);
+  const at = (rows, y) => rows.find((r) => r.date === String(y) && r.value != null)?.value ?? null;
+  const newest = (rows) => rows.find((r) => r.value != null) || null;
+
+  const then = at(pop, year);
+  const latest = newest(pop);
+  return {
+    populationThen: then,
+    populationNow: latest?.value ?? null,
+    populationNowYear: latest?.date ?? null,
+    lifeExpectancyThen: at(life, year),
+  };
 }
 
 /* ---------- historical weather ---------- */
@@ -92,6 +166,10 @@ export async function historicalWeather(lat, lon, isoDate) {
       precip: dly.precipitation_sum?.[0],
       wind: dly.windspeed_10m_max?.[0],
       code: dly.weathercode?.[0],
+      // timezone=auto makes the archive resolve the real IANA zone for these
+      // coordinates; a place picked off the bundled centroid table has none,
+      // so this is the chance to upgrade its sunrise from a longitude guess
+      timezone: data?.timezone || "",
       ...describeWeather(dly.weathercode?.[0])
     };
   } catch {
@@ -99,7 +177,7 @@ export async function historicalWeather(lat, lon, isoDate) {
   }
 }
 
-// WMO weather interpretation codes → words + glyph
+// WMO weather interpretation codes, mapped to words
 function describeWeather(code) {
   const map = {
     0: ["Clear sky", "☀️"],
@@ -127,8 +205,8 @@ function describeWeather(code) {
     96: ["Storm w/ hail", "⛈️"],
     99: ["Severe storm", "🌩️"]
   };
-  const [summary, glyph] = map[code] || ["Unrecorded skies", "🌗"];
-  return { summary, glyph };
+  const entry = map[code];
+  return { summary: Array.isArray(entry) ? entry[0] : entry || "Unrecorded skies" };
 }
 
 /* ---------- Wikipedia: people who share the date ---------- */
@@ -154,7 +232,9 @@ function shapePeople(list, n) {
       const page = p.pages?.[0];
       return {
         year: p.year,
-        name: (p.text.split(/,| – | — /)[0] || p.text).trim(),
+        // Wikipedia's own copy uses en and em dashes, so the splitter has to
+      // know about them even though we never write one ourselves
+      name: (p.text.split(/,| – | — /)[0] || p.text).trim(),
         desc: page?.description || cleanDesc(p.text),
         thumb: page?.thumbnail?.source || null,
         url: page?.content_urls?.desktop?.page || null
@@ -246,4 +326,48 @@ function cleanLi(li) {
   const t = (c.textContent || "").replace(/\[\d+\]/g, "").replace(/\s+/g, " ").trim();
   if (t.length < 12 || t.length > 240) return null;
   return { text: t, url };
+}
+
+/* ---------- space weather (NOAA SWPC, free, keyless, CORS-open) ---------- */
+/*
+   The one live feed on the Daily Sky.
+
+   Everything else on that screen is computed here from orbital mechanics,
+   which means it is knowable years ahead: true, but not news. The Sun is
+   the opposite. Its activity is genuinely unpredictable, it changes by the
+   hour, and NOAA publishes it as plain JSON with no key and no origin
+   restriction. So it is the one thing on the page that nobody, including
+   us, could have known yesterday.
+
+   Kp is the planetary geomagnetic index, 0 to 9, reported every three
+   hours. Failure is silent: the module simply does not appear.
+*/
+const KP_BANDS = [
+  [0.5, "still", "The Earth's magnetic field is quiet."],
+  [2.5, "settled", "The field is settled. Nothing much is arriving."],
+  [3.5, "unsettled", "The field is unsettled: the solar wind is pushing on it."],
+  [4.5, "active", "The field is active. Aurora is possible at high latitudes."],
+  [5.5, "storming", "A minor geomagnetic storm is under way."],
+  [6.5, "storming", "A moderate geomagnetic storm is under way."],
+  [99, "storming", "A strong geomagnetic storm is under way."],
+];
+
+export async function spaceWeather() {
+  try {
+    const rows = await getJSON("https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json");
+    if (!Array.isArray(rows) || !rows.length) return null;
+    const last = rows[rows.length - 1];
+    /*
+       SWPC is not consistent across its products: some return a header
+       row followed by plain arrays, this one returns objects. Read either,
+       because the shape is theirs to change and a silent null here would
+       just make the module quietly stop appearing one day.
+    */
+    const kp = Number(Array.isArray(last) ? last[1] : (last?.Kp ?? last?.kp));
+    if (!Number.isFinite(kp)) return null;
+    const band = KP_BANDS.find(([max]) => kp < max) || KP_BANDS[KP_BANDS.length - 1];
+    return { kp, state: band[1], line: band[2], at: Array.isArray(last) ? last[0] : last?.time_tag };
+  } catch {
+    return null;
+  }
 }

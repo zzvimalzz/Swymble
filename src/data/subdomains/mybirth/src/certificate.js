@@ -9,6 +9,9 @@
    ============================================================ */
 
 import { monthName, ordinal } from "./astro.js";
+// a real <img>, not the masked mark: html2canvas rasterises this card for
+// export and does not implement CSS masks (see .sign-img in style.css)
+import { signImage } from "./glyphs.js";
 
 const SITE = "mybirth";
 
@@ -58,7 +61,7 @@ export function buildCertificate(d, placeLabel) {
             beneath a <strong>${esc(d.moon.name)}</strong> in <strong>${esc(placeLabel)}</strong>.
           </p>
           <dl class="cert-micro">
-            <div><dt>Star sign</dt><dd>${esc(d.zod.symbol)} ${esc(d.zod.sign)}</dd></div>
+            <div><dt>Star sign</dt><dd>${signImage(d.zod.sign, { size: "0.95em", cls: "inline-glyph" })} ${esc(d.zod.sign)}</dd></div>
             <div><dt>Lunar phase</dt><dd>${esc(d.moon.name)}</dd></div>
             <div><dt>Life path</dt><dd>${d.lp.number} · ${esc(d.lp.title)}</dd></div>
           </dl>
@@ -129,7 +132,8 @@ function backFacts(d) {
   const out = [];
   out.push(["Day of the week", d.dow]);
   out.push(["Moon", `${d.moon.name} · ${Math.round(d.moon.illumination * 100)}% lit`]);
-  if (d.song) out.push(["№1 song", d.song]);
+  // the dataset stores "Title | Artist"; the certificate shows it as "Title, Artist"
+  if (d.song) out.push(["№1 song", d.song.replace(" | ", ", ")]);
   if (d.movie) out.push(["Biggest film", d.movie]);
   if (d.weather && d.weather.mean != null) out.push(["Weather", `${Math.round(d.weather.mean)}°C, ${d.weather.summary.toLowerCase()}`]);
   if (d.sun && !d.sun.polar) out.push(["Sun", `rose ${d.sun.sunrise}, set ${d.sun.sunset}`]);

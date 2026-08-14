@@ -28,12 +28,18 @@
     <meta name="twitter:image" content="https://swymble.com/images/mybirth_logo.png" />
     <title>MyBirth | The Day You Arrived</title>
     <link rel="icon" type="image/png" href="https://swymble.com/images/mybirth_logo.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Space+Grotesk:wght@300..700&family=Spline+Sans+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <!--
+      The stylesheet is linked here rather than imported from main.js.
+      Imported from the module it is injected by script, which means the
+      browser paints the form once with no styles at all before the module
+      has even parsed: a flash of black-on-white input boxes on every load.
+      Linked here it is a render-blocking stylesheet in dev and a hashed
+      file in the build, and that flash cannot happen in either.
+    -->
+    <link rel="stylesheet" href="/src/style.css" />
+    <!-- fonts are self-hosted, see the @font-face block in src/style.css -->
+    <link rel="preload" href="/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <!-- deep-space backdrop layers -->
@@ -47,14 +53,44 @@
 
     <!-- top nav bar -->
     <header class="brand" id="brand">
-      <button class="brand__wordmark" id="brand-home" aria-label="mybirth — back to home">
-        <span class="brand__name">mybirth</span>
+      <button class="brand__wordmark" id="brand-home" aria-label="mybirth, back to home">
+        <span class="brand__name"><b>my</b>birth</span>
       </button>
+      <!--
+        Paper or ink for the Daily Sky. It sits beside the tabs rather than
+        inside them, because a tablist may only contain tabs, and it fades
+        in only while Today is open: it changes nothing anywhere else, and a
+        control that does nothing visible when pressed is worse than absent.
+      -->
+      <button class="daynight" id="daynight" type="button" aria-pressed="false"
+              aria-label="Switch the daily sky to ink" title="Ink" tabindex="-1">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <mask id="daynight-bite">
+            <rect x="0" y="0" width="24" height="24" fill="#fff" />
+            <circle class="daynight__bite" cx="17" cy="6" r="6" fill="#000" />
+          </mask>
+          <circle class="daynight__core" cx="12" cy="12" r="5.2" mask="url(#daynight-bite)" />
+          <g class="daynight__rays" stroke-linecap="round">
+            <line x1="12" y1="1.4" x2="12" y2="3.6" />
+            <line x1="12" y1="20.4" x2="12" y2="22.6" />
+            <line x1="1.4" y1="12" x2="3.6" y2="12" />
+            <line x1="20.4" y1="12" x2="22.6" y2="12" />
+            <line x1="4.5" y1="4.5" x2="6.1" y2="6.1" />
+            <line x1="17.9" y1="17.9" x2="19.5" y2="19.5" />
+            <line x1="4.5" y1="19.5" x2="6.1" y2="17.9" />
+            <line x1="17.9" y1="6.1" x2="19.5" y2="4.5" />
+          </g>
+        </svg>
+      </button>
+
       <nav class="brand__nav" id="brand-nav" role="tablist" aria-label="Site sections">
         <span class="brand__pill" id="brand-pill" aria-hidden="true"></span>
-        <button class="brand__tab is-active" data-tab="home" role="tab" aria-selected="true">Home</button>
-        <button class="brand__tab" data-tab="compare" role="tab" aria-selected="false">Compare</button>
-        <button class="brand__tab" data-tab="saves" role="tab" aria-selected="false">Saves</button>
+        <button class="brand__tab" data-tab="today" role="tab" id="tab-today"
+                aria-selected="false" aria-controls="panel-today" tabindex="-1">Today</button>
+        <button class="brand__tab is-active" data-tab="archive" role="tab" id="tab-archive"
+                aria-selected="true" aria-controls="panel-home" tabindex="0">Archive</button>
+        <button class="brand__tab" data-tab="people" role="tab" id="tab-people"
+                aria-selected="false" aria-controls="panel-saves" tabindex="-1">People</button>
       </nav>
     </header>
 
@@ -62,8 +98,13 @@
     <div class="meridian" aria-hidden="true"><span id="meridian-fill"></span></div>
 
     <main id="app">
-      <!-- ░░ HOME PANEL ░░ -->
-      <div id="panel-home">
+      <!-- ░░ TODAY PANEL · the Daily Sky, built at runtime ░░ -->
+      <div id="panel-today" role="tabpanel" aria-labelledby="tab-today" tabindex="0" hidden>
+        <section class="stage stage--sky" id="today-mount"></section>
+      </div>
+
+      <!-- ░░ ARCHIVE PANEL ░░ -->
+      <div id="panel-home" role="tabpanel" aria-labelledby="tab-archive" tabindex="0">
       <!-- ░░ LANDING / CONSOLE ░░ -->
       <section class="stage stage--intro" id="intro">
         <div class="intro__inner">
@@ -72,8 +113,8 @@
             The sky kept a record<br />of the moment <em>you began.</em>
           </h1>
           <p class="lede" data-reveal>
-            A name and a date is all we need. We&rsquo;ll recover the moon, the weather,
-            the music and the world of that exact day — and hand you a certificate to keep.
+            A name, a date and a birthplace. We&rsquo;ll recover the moon, the weather,
+            the music and the world of that exact day, and hand you a certificate to keep.
           </p>
 
           <form class="console" id="birth-form" novalidate data-reveal>
@@ -91,13 +132,20 @@
                 <span class="field__label">Day</span>
                 <span class="field__line"></span>
               </label>
-              <label class="field field--month">
-                <select name="month" id="f-month" required>
-                  <option value="" selected disabled hidden></option>
-                </select>
+              <div class="field field--month placefield" id="month-field">
+                <input
+                  type="text" id="f-month-text" placeholder=" " required
+                  autocomplete="off" autocapitalize="words" spellcheck="false"
+                  role="combobox" aria-expanded="false" aria-autocomplete="list"
+                  aria-controls="month-results"
+                />
+                <!-- the floating-label rules key off the input immediately before
+                     .field__label, so the hidden twin has to sit after it -->
                 <span class="field__label">Month</span>
                 <span class="field__line"></span>
-              </label>
+                <input type="hidden" name="month" id="f-month" />
+                <ul class="placelist" id="month-results" role="listbox" aria-label="Months" hidden></ul>
+              </div>
               <label class="field field--year">
                 <input type="number" name="year" id="f-year" min="1900" max="2026" placeholder=" " inputmode="numeric" required />
                 <span class="field__label">Year</span>
@@ -106,12 +154,25 @@
             </div>
 
             <div class="console__row">
-              <label class="field field--wide">
-                <input type="text" name="country" id="f-country" list="country-list" placeholder=" " autocomplete="country-name" required />
-                <span class="field__label">Country you were born in</span>
+              <div class="field field--wide placefield" id="place-field">
+                <input
+                  type="text" name="place" id="f-place" placeholder=" " required
+                  autocomplete="off" autocapitalize="words" spellcheck="false"
+                  role="combobox" aria-expanded="false" aria-autocomplete="list"
+                  aria-controls="place-results" aria-describedby="place-status"
+                />
+                <!-- short enough to fit a 375px field: the note below carries
+                     the detail this label used to spell out -->
+                <span class="field__label">Where you were born</span>
                 <span class="field__line"></span>
-              </label>
+                <span class="placefield__spin" id="place-spin" hidden aria-hidden="true"></span>
+                <ul class="placelist" id="place-results" role="listbox" aria-label="Matching places" hidden></ul>
+              </div>
             </div>
+            <p class="console__place-note" id="place-status" role="status">
+              Start typing and pick your birthplace. Choosing one gives us the exact
+              coordinates and time zone, which is what makes the sunrise and weather true.
+            </p>
 
             <button type="button" class="console__more" id="toggle-optional" aria-expanded="false">
               <span class="console__more-plus">+</span> add the fine detail <span class="console__more-hint">(optional)</span>
@@ -119,19 +180,9 @@
 
             <div class="console__optional" id="optional-fields" inert>
               <div class="console__optional-inner">
-                <p class="console__hint">The more precise the birthplace, the truer the moon, weather &amp; sunrise.</p>
-                <div class="console__row console__row--split">
-                  <label class="field">
-                    <input type="text" name="city" id="f-city" placeholder=" " autocomplete="off" />
-                    <span class="field__label">City / town of birth</span>
-                    <span class="field__line"></span>
-                  </label>
-                  <label class="field">
-                    <input type="text" name="state" id="f-state" placeholder=" " autocomplete="off" />
-                    <span class="field__label">State / province / region</span>
-                    <span class="field__line"></span>
-                  </label>
-                </div>
+                <p class="console__hint">
+                  A birth time sharpens the moon&rsquo;s face and the sunrise.
+                </p>
                 <div class="console__row console__row--split">
                   <label class="field">
                     <input type="time" name="time" id="f-time" placeholder=" " />
@@ -139,7 +190,7 @@
                     <span class="field__line"></span>
                   </label>
                   <label class="field">
-                    <input type="text" name="current" id="f-current" list="country-list" placeholder=" " />
+                    <input type="text" name="current" id="f-current" placeholder=" " autocomplete="off" />
                     <span class="field__label">Where you live now</span>
                     <span class="field__line"></span>
                   </label>
@@ -161,8 +212,7 @@
           </form>
 
           <p class="intro__foot" data-reveal>
-            Moon phase computed from orbital mechanics · weather &amp; headlines pulled live ·
-            no account, no tracking.
+            No account, no tracking, nothing stored anywhere but this browser.
           </p>
         </div>
       </section>
@@ -171,27 +221,17 @@
       <section class="result" id="result" hidden></section>
       </div><!-- /panel-home -->
 
-      <!-- ░░ COMPARE PANEL ░░ -->
-      <div id="panel-compare" hidden>
+      <!-- ░░ PEOPLE PANEL ░░ -->
+      <div id="panel-saves" role="tabpanel" aria-labelledby="tab-people" tabindex="0" hidden>
         <section class="stage stage--panel">
           <div class="panel-inner">
-            <p class="kicker">Side by side</p>
-            <h1 class="display">Compare <em>two days.</em></h1>
-            <p class="lede">Enter a second birth date to see how two cosmic snapshots stack up against each other — same moon, different sky.</p>
-            <p class="panel-soon">Coming soon</p>
-          </div>
-        </section>
-      </div><!-- /panel-compare -->
-
-      <!-- ░░ SAVES PANEL ░░ -->
-      <div id="panel-saves" hidden>
-        <section class="stage stage--panel">
-          <div class="panel-inner">
-            <p class="kicker">Your archive</p>
-            <h1 class="display">Saved <em>days.</em></h1>
-            <p class="lede">Birth days you've recovered are stored here so you can revisit them without re-entering the details.</p>
+            <p class="kicker">Your people</p>
+            <h1 class="display">The days <em>coming back.</em></h1>
+            <p class="lede">
+              Everyone you&rsquo;ve recovered, ordered by whose return arrives next.
+            </p>
             <div id="saves-list" class="saves-list"></div>
-            <p class="panel-empty" id="saves-empty">No saves yet — generate a result and it will appear here.</p>
+            <p class="panel-empty" id="saves-empty">No saves yet. Generate a result and it will appear here.</p>
           </div>
         </section>
       </div><!-- /panel-saves -->

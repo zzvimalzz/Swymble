@@ -3,6 +3,70 @@
    A deep-space, editorial, low-AI-slop aesthetic.
    ============================================================ */
 
+/*
+   Fonts are self-hosted rather than pulled from the Google CDN, which removes
+   a render-blocking request to a third party from every page load.
+
+   Latin subsets only. Fraunces, Space Grotesk and Spline Sans Mono are
+   variable, so one file covers each family's whole weight range: Spline Sans
+   Mono was previously declared three times over, at 400, 500 and 600, all
+   pointing at the same file.
+
+   Cormorant Garamond is static, so it needs a file per weight. It is loaded
+   lazily rather than up front because it is used by exactly one component,
+   the certificate, which sits at the very bottom of a long page.
+*/
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 300 600;
+  font-display: swap;
+  src: url("/fonts/fraunces.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Fraunces";
+  font-style: italic;
+  font-weight: 300 500;
+  font-display: swap;
+  src: url("/fonts/fraunces-italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("/fonts/space-grotesk.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Spline Sans Mono";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/spline-sans-mono.woff2") format("woff2");
+}
+
+/* the certificate's typeface: five static cuts, fetched only when it renders */
+@font-face {
+  font-family: "Cormorant Garamond"; font-style: normal; font-weight: 400;
+  font-display: swap; src: url("/fonts/cormorant-garamond-normal-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cormorant Garamond"; font-style: normal; font-weight: 500;
+  font-display: swap; src: url("/fonts/cormorant-garamond-normal-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cormorant Garamond"; font-style: normal; font-weight: 600;
+  font-display: swap; src: url("/fonts/cormorant-garamond-normal-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cormorant Garamond"; font-style: italic; font-weight: 400;
+  font-display: swap; src: url("/fonts/cormorant-garamond-italic-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cormorant Garamond"; font-style: italic; font-weight: 500;
+  font-display: swap; src: url("/fonts/cormorant-garamond-italic-500.woff2") format("woff2");
+}
+
 :root {
   /* palette */
   --ink: #05060c;
@@ -128,9 +192,23 @@ button { font-family: inherit; cursor: pointer; }
 @keyframes drift3 { to { transform: translate(-12vmax, 8vmax) scale(0.9); } }
 
 /* film grain for texture (kills the flat-gradient AI look) */
+/*
+   `inset: 0` with the bleed as a transform, not `inset: -50%`.
+
+   A fixed element is not clipped by an ancestor's overflow, so it sizes
+   the initial containing block, and everything else positioned against
+   the viewport sizes against *that*. At `inset: -50%` this box was 200%
+   of the viewport, so on a phone the fixed top bar stretched to 462px in
+   a 393px window and the People tab sat 51px off the right edge, off
+   screen and unreachable. It was only visible on the archive result,
+   because that is the page long enough to notice.
+
+   A transform is paint-only and extends nothing, so the same bleed
+   costs nothing: scale for the margin, translate in pixels for the jitter.
+*/
 .grain {
   position: fixed;
-  inset: -50%;
+  inset: 0;
   z-index: 1;
   pointer-events: none;
   opacity: 0.045;
@@ -138,10 +216,10 @@ button { font-family: inherit; cursor: pointer; }
   animation: grain 6s steps(4) infinite;
 }
 @keyframes grain {
-  0%,100% { transform: translate(0,0); }
-  25% { transform: translate(-3%, 2%); }
-  50% { transform: translate(2%, -3%); }
-  75% { transform: translate(-2%, -2%); }
+  0%,100% { transform: scale(1.1) translate(0,0); }
+  25% { transform: scale(1.1) translate(-9px, 6px); }
+  50% { transform: scale(1.1) translate(6px, -9px); }
+  75% { transform: scale(1.1) translate(-6px, -6px); }
 }
 
 /* ---------- brand / top nav ---------- */
@@ -156,10 +234,9 @@ button { font-family: inherit; cursor: pointer; }
   align-items: center;
   justify-content: space-between;
   padding: 0 clamp(18px, 4vw, 48px);
-  background: rgba(7, 8, 16, 0.78);
-  backdrop-filter: blur(22px) saturate(1.5);
-  -webkit-backdrop-filter: blur(22px) saturate(1.5);
-  border-bottom: 1px solid var(--line);
+  /* fully transparent: the parallax sky should run unbroken behind the bar */
+  background: transparent;
+  border-bottom: 0;
 }
 .brand__wordmark {
   background: none; border: 0; padding: 0;
@@ -173,11 +250,14 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 1.18rem;
   letter-spacing: 0.01em;
 }
+.brand__name b { font-weight: inherit; color: var(--lunar); }
 .brand__nav {
   position: relative;
   display: flex;
   align-items: center;
   gap: 4px;
+  /* after .daynight, which carries the auto margin (see there) */
+  order: 2;
 }
 /* the indicator that glides between tabs */
 .brand__pill {
@@ -269,6 +349,7 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 }
 .panel-inner {
   width: 100%;
+  /* prose wants a measure; a grid of cards wants the room (see below) */
   max-width: 660px;
   display: flex;
   flex-direction: column;
@@ -289,27 +370,81 @@ main { position: relative; z-index: 2; padding-top: 56px; }
   border: 1px dashed var(--line-strong);
   border-radius: var(--r-pill);
 }
+/*
+   The People panel is the one panel whose content is a grid rather than a
+   column of prose. Its heading and lede still want the 660px measure, so
+   the list breaks out of it and takes the width of the stage instead:
+   four cards across on a desktop, and auto-fill down to one on a phone.
+*/
+.panel-inner:has(.saves-list) { max-width: 1180px; }
+.panel-inner:has(.saves-list) .kicker,
+.panel-inner:has(.saves-list) .display,
+.panel-inner:has(.saves-list) .lede { max-width: 660px; }
 .saves-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
   gap: 16px;
   width: 100%;
   text-align: left;
   margin-bottom: 20px;
 }
 .save-card {
-  padding: 22px 24px;
+  position: relative;
+  padding: 24px 26px 26px;
   border: 1px solid var(--line);
   border-radius: var(--r-card);
-  background: linear-gradient(180deg, rgba(255,255,255,0.018), transparent);
+  background: linear-gradient(180deg, rgba(255,255,255,0.022), transparent);
   cursor: pointer;
-  transition: border-color 0.4s var(--ease), transform 0.4s var(--ease);
+  transition: border-color 0.4s var(--ease), transform 0.4s var(--ease), background 0.4s var(--ease);
   text-align: left;
+  overflow: hidden;
 }
+.save-card::before {
+  /* a thin gold edge that only lights up as the day approaches */
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: var(--lunar); opacity: 0; transition: opacity 0.4s var(--ease);
+}
+.save-card.is-soon::before { opacity: 0.45; }
+.save-card.is-today::before { opacity: 1; }
+.save-card.is-today { border-color: rgba(236, 217, 172, 0.45); background: rgba(236, 217, 172, 0.05); }
 .save-card:hover { border-color: var(--line-strong); transform: translateY(-3px); }
-.save-card__name { font-family: var(--display); font-weight: 300; font-size: 1.4rem; color: var(--paper); margin: 0 0 6px; }
-.save-card__date { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-mute); }
-.save-card__moon { font-size: 0.88rem; color: var(--paper-soft); margin-top: 10px; }
+
+.save-card__top { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+.save-card__name {
+  font-family: var(--display); font-weight: 300; font-size: 1.45rem;
+  color: var(--paper); margin: 0; line-height: 1.15;
+}
+.save-card__countdown {
+  flex: none;
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--paper-mute); white-space: nowrap;
+}
+.save-card.is-soon .save-card__countdown { color: var(--lunar); }
+.save-card.is-today .save-card__countdown { color: var(--ember); }
+
+.save-card__date {
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--paper-mute); margin: 10px 0 0;
+}
+.save-card__meta {
+  display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 16px;
+  padding-top: 14px; border-top: 1px solid var(--line);
+}
+.save-card__meta span {
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.08em; color: var(--paper-soft);
+}
+.save-card__moon { font-size: 0.86rem; color: var(--paper-mute); margin: 12px 0 0; font-style: italic; }
+
+.save-card__remove {
+  position: absolute; right: 12px; bottom: 12px;
+  background: none; border: 0; padding: 6px 8px;
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--paper-mute);
+  opacity: 0; transition: opacity 0.3s var(--ease), color 0.3s var(--ease);
+}
+.save-card:hover .save-card__remove,
+.save-card__remove:focus-visible { opacity: 1; }
+.save-card__remove:hover { color: var(--ember); }
 .panel-empty { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.12em; color: var(--paper-mute); }
 .intro__inner {
   width: 100%;
@@ -356,7 +491,7 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 .console__row--date { gap: 12px; }
 .console__row--split { gap: 14px; }
 .console__hint {
-  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.04em;
+  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.04em;
   color: var(--paper-mute); margin: 2px 0 4px; text-align: center;
 }
 .field--wide { flex: 1; }
@@ -417,7 +552,7 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 .field select:focus + .field__label,
 .field select:valid + .field__label {
   top: 0;
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-family: var(--mono);
@@ -432,6 +567,7 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 .console__more {
   align-self: center;
   margin-top: 20px;
+  padding: 10px 14px;
   background: none; border: 0;
   color: var(--paper-soft);
   font-family: var(--mono);
@@ -523,7 +659,7 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 .intro__foot {
   margin: 48px auto 0;
   font-family: var(--mono);
-  font-size: 0.64rem;
+  font-size: 0.7rem;
   letter-spacing: 0.05em;
   color: var(--paper-mute);
   max-width: 46ch;
@@ -654,8 +790,10 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 .wrap { width: min(var(--maxw), 94vw); margin: 0 auto; }
 
 /* section rhythm */
-.block { padding: clamp(70px, 13vh, 150px) 0; position: relative; }
-.block + .block { border-top: 1px solid var(--line); }
+/* No rule between chapters. ORBIT lets each one occupy its own stretch of
+   sky and relies on the generous padding to separate them, which reads as
+   one continuous descent rather than a stack of cards. */
+.block { padding: clamp(80px, 15vh, 170px) 0; position: relative; }
 
 .kicker {
   font-family: var(--mono);
@@ -685,11 +823,11 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 
 /* ---- HERO of result ---- */
 .r-hero {
-  min-height: 92vh;
+  min-height: 88vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 22vh 0 12vh;
+  padding: 14vh 0 10vh;
 }
 .r-hero__name {
   font-family: var(--display);
@@ -762,7 +900,7 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 }
 .moon-stage:has(.is-ready)::before { opacity: 0; animation: none; }
 .moon-stage__ring {
-  position: absolute; inset: -4%;
+  position: absolute; inset: 11%;
   border-radius: 50%;
   border: 1px solid var(--line);
   pointer-events: none;
@@ -831,6 +969,11 @@ main { position: relative; z-index: 2; padding-top: 56px; }
   width: min(280px, 70vw);
   aspect-ratio: 1;
   margin: 0 auto;
+  /* the svg inside is rotated 135deg, and rotating a square grows its
+     bounding box to the diagonal: 280px becomes 396px, which reached past
+     the left edge of a landscape phone. The gauge itself is a circle well
+     inside the square, so clipping to the square loses nothing drawn. */
+  overflow: hidden;
 }
 .temp-dial svg { width: 100%; height: 100%; transform: rotate(135deg); }
 .temp-dial__track { fill: none; stroke: rgba(255,255,255,0.07); stroke-width: 10; }
@@ -983,7 +1126,7 @@ main { position: relative; z-index: 2; padding-top: 56px; }
   margin-bottom: 14px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
-.wleader__country { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-soft); }
+.wleader__country { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-soft); }
 .wleader__name { font-family: var(--display); font-weight: 300; font-size: 1.3rem; color: var(--paper); line-height: 1.12; }
 .wleader__title { font-size: 0.82rem; color: var(--paper-soft); }
 
@@ -1076,8 +1219,8 @@ main { position: relative; z-index: 2; padding-top: 56px; }
   letter-spacing: 0.22em; text-transform: uppercase; color: var(--lunar);
 }
 .bp__one-way {
-  display: block; font-family: var(--mono); font-size: 0.6rem;
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--paper-soft);
+  display: block; font-family: var(--mono); font-size: 0.68rem;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--paper-soft);
   margin-top: 4px;
 }
 
@@ -1252,10 +1395,10 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 /* ---- footer ---- */
 .r-foot { text-align: center; padding: 80px 0 60px; border-top: 1px solid var(--line); }
 .r-foot p { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--paper-soft); margin: 8px 0; }
-.r-foot a { color: var(--paper-soft); }
+.r-foot a { color: var(--paper-soft); display: inline-block; padding: 6px 2px; }
 
 /* small print / source tag */
-.source { font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.04em; color: var(--paper-soft); margin-top: 14px; }
+.source { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.04em; color: var(--paper-soft); margin-top: 14px; }
 .source--live { color: var(--teal); }
 .source--curated { color: var(--lunar); }
 
@@ -1386,10 +1529,37 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 .astro { display: grid; grid-template-columns: auto 1fr; gap: clamp(24px, 4vw, 56px); align-items: start; }
 @media (max-width: 700px) { .astro { grid-template-columns: 1fr; } }
 .astro__glyph {
-  font-family: var(--display);
-  font-size: clamp(4rem, 12vw, 8rem); line-height: 0.9; color: var(--lunar);
-  text-shadow: 0 0 50px rgba(236, 217, 172, 0.4);
+  position: relative;
+  /*
+     Sized to the glyph, not to its grid column.
+
+     Left to stretch, this box became the full 369px width of a phone
+     column, and the glow below is inset by a *percentage* of it: -22% of
+     369 is 81px of bleed each side. That widened the initial containing
+     block to 462px, and since the fixed top bar is positioned against the
+     same block, the nav went 51px off the right of a 393px screen and the
+     People tab could not be reached. One decorative gradient, and the
+     navigation left the building.
+  */
+  width: 1em; height: 1em; flex: none;
+  font-size: clamp(4rem, 12vw, 8rem); line-height: 1; color: var(--lunar);
 }
+/*
+   The glow used to be `filter: drop-shadow()` on this element. A filter on
+   the parent of a masked child breaks the mask outright: the sign came out
+   as a filled gold square with the mark knocked out of it. So the glow is
+   a real gradient behind the mark instead, which composites cleanly and is
+   easier to aim.
+*/
+.astro__glyph::before {
+  content: "";
+  position: absolute; inset: -22%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(236, 217, 172, 0.3), transparent 72%);
+  pointer-events: none;
+}
+/* block, not inline: at 8rem an inline box would clip against line-height */
+.astro__glyph .glyph { display: block; position: relative; vertical-align: 0; }
 .astro__reading {
   font-family: var(--display); font-weight: 300; font-style: italic;
   font-size: clamp(1.2rem, 2.4vw, 1.7rem); line-height: 1.42;
@@ -1532,6 +1702,23 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 .homeland { display: grid; grid-template-columns: auto 1fr; gap: clamp(28px, 4vw, 60px); align-items: center; }
 @media (max-width: 740px) { .homeland { grid-template-columns: 1fr; } }
 .homeland__flag { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+.homeland__flag-img {
+  width: 110px; height: auto; border-radius: 4px; display: block; margin: 0 auto 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+.homeland__desc {
+  display: block; margin-top: 8px;
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--paper-mute);
+}
+.homeland__story {
+  font-size: clamp(1.08rem, 1.9vw, 1.32rem);
+  line-height: 1.55;
+  color: var(--paper-soft);
+  margin: 0 0 22px;
+  text-wrap: pretty;
+}
+.homeland__story b { color: var(--lunar); font-weight: 400; font-family: var(--display); }
 .homeland__emoji { font-size: clamp(3.4rem, 8vw, 5rem); line-height: 1; filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.5)); }
 .homeland__flag img {
   width: 170px; max-width: 50vw; border-radius: var(--r-card);
@@ -1694,6 +1881,1475 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 .cert-foot--back { margin-top: auto; padding: clamp(10px, 1.6cqw, 18px) 0 0; border-top: 1px solid rgba(236, 217, 172, 0.16); }
 .cert-foot--back span { font-family: var(--mono); font-size: clamp(0.4rem, 1cqw, 0.52rem); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(221, 216, 240, 0.5); }
 
+/* ---- The Card size, front.
+   Same constraint as the back below: at 1.5:1 the seal, the title, the
+   name, the body paragraph, the micro row and the signature block came to
+   more than the frame's height, so the signature and the certificate
+   number were being clipped by .cert-face's overflow. Trimmed where it
+   costs least — the seal and the name, which are the two largest items,
+   and the paragraph, which was set at nearly the A4 size. ---- */
+.cert-flip.size-card .cert-seal { width: clamp(30px, 6cqw, 48px); margin-bottom: 1cqw; }
+.cert-flip.size-card .cert-title { font-size: clamp(0.95rem, 4.6cqw, 2rem); }
+.cert-flip.size-card .cert-rule { margin: 0.7cqw 0 1cqw; }
+.cert-flip.size-card .cert-rule span { width: clamp(38px, 10cqw, 90px); }
+.cert-flip.size-card .cert-intro { font-size: clamp(0.62rem, 1.7cqw, 0.95rem); margin-bottom: 0.4cqw; }
+.cert-flip.size-card .cert-name { font-size: clamp(1.1rem, 7cqw, 3rem); margin-bottom: 1cqw; }
+.cert-flip.size-card .cert-body { font-size: clamp(0.6rem, 1.65cqw, 0.95rem); line-height: 1.42; margin-bottom: 1.4cqw; }
+.cert-flip.size-card .cert-micro { gap: 5px clamp(14px, 3.2cqw, 34px); }
+.cert-flip.size-card .cert-sign__name { font-size: clamp(0.8rem, 2.6cqw, 1.5rem); }
+
+/* ---- Card is the one format the back does not fit in.
+   Every size on the card scales with container width (cqw), but at 1.5:1
+   the constraint is height: twelve dossier rows, the QR block, the twins
+   line and the footer added up to more than the frame could hold, and
+   .cert-face's overflow:hidden cut the last line in half. So tighten the
+   vertical rhythm for this size only — A4 and Letter are unaffected. ---- */
+.cert-flip.size-card .cert-back-title {
+  font-size: clamp(0.95rem, 3.6cqw, 1.6rem);
+  margin: 1.2cqw 0 1.6cqw;
+}
+.cert-flip.size-card .cert-back-grid { gap: clamp(14px, 3cqw, 34px); }
+.cert-flip.size-card .cert-dossier div { padding: 0.55cqw 10px 0.55cqw 0; }
+.cert-flip.size-card .cert-dossier dd { font-size: clamp(0.6rem, 1.5cqw, 0.85rem); line-height: 1.2; }
+.cert-flip.size-card .cert-qr img { width: clamp(84px, 18cqw, 120px); padding: 1.6cqw; }
+.cert-flip.size-card .cert-qr__cap { margin: 7px 0 3px; }
+.cert-flip.size-card .cert-twins {
+  margin-top: 1.2cqw;
+  font-size: clamp(0.62rem, 1.45cqw, 0.85rem);
+  /* three long names can run to four lines; two is all the card has room for */
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.cert-flip.size-card .cert-foot--back { padding-top: 1cqw; }
+
+/* ---- where the wanderers stood: the ecliptic as one axis ---- */
+.ps-strip { overflow-x: auto; overflow-y: hidden; padding-bottom: 6px; }
+.ps-track {
+  position: relative;
+  min-width: 720px;
+  height: calc(96px + var(--rows, 1) * 46px);
+  margin: 0 auto;
+  max-width: 1100px;
+}
+.ps-axis {
+  position: absolute; left: 0; right: 0; top: 74px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-strong) 6%, var(--line-strong) 94%, transparent);
+}
+
+.ps-tick { position: absolute; top: 40px; transform: translateX(-50%); text-align: center; }
+.ps-tick::after {
+  content: ""; position: absolute; left: 50%; top: 30px; width: 1px; height: 10px;
+  background: var(--line-strong);
+}
+.ps-tick__glyph { display: block; font-size: 0.95rem; color: var(--paper-mute); line-height: 1; }
+.ps-tick__name {
+  display: block; margin-top: 4px;
+  font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--paper-mute);
+}
+
+.ps-pin { position: absolute; top: 74px; transform: translateX(-50%); }
+.ps-pin__stem {
+  position: absolute; left: 50%; top: 0; width: 1px;
+  height: calc(16px + var(--row) * 46px);
+  background: var(--line-strong);
+}
+.ps-pin__dot {
+  position: absolute; left: 50%; top: -3.5px; width: 7px; height: 7px;
+  margin-left: -3.5px; border-radius: 50%;
+  background: var(--lunar); box-shadow: 0 0 10px rgba(236, 217, 172, 0.6);
+}
+.ps-pin__label {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  top: calc(20px + var(--row) * 46px);
+  white-space: nowrap; text-align: center;
+}
+.ps-pin__label b {
+  display: block; font-family: var(--mono); font-weight: 500;
+  font-size: 0.7rem; letter-spacing: 0.1em; color: var(--paper);
+}
+.ps-pin__label i {
+  display: block; margin-top: 3px; font-style: normal;
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.06em;
+  color: var(--teal);
+}
+
+/* ---- milestones ahead ---- */
+.miles { border-top: 1px solid var(--line); }
+.mile {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: clamp(12px, 3vw, 40px);
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+.mile__label {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+}
+.mile__date {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  color: var(--lunar);
+  white-space: nowrap;
+}
+.mile__away {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-mute);
+  white-space: nowrap;
+}
+@media (max-width: 620px) {
+  .mile { grid-template-columns: 1fr auto; }
+  .mile__away { grid-column: 1 / -1; }
+}
+
+/* ---- centred chapters (hero, moon, the return) ---- */
+/* NB: `.plate` is already taken by the almanac object cards — do not reuse it */
+.chapter-plate { width: 100%; max-width: 860px; margin: 0 auto; text-align: center; }
+.chapter-plate .kicker { justify-content: center; }
+.chapter-plate .h-section { text-align: center; }
+.ch-sub {
+  color: var(--paper-soft);
+  max-width: 58ch;
+  margin: 20px auto 0;
+  font-size: var(--fs-body);
+  text-wrap: pretty;
+}
+
+.r-hero--centred { text-align: center; }
+.r-hero--centred .kicker { justify-content: center; }
+/* block-level, or it sits on the same line as the orbit pill;
+   column direction because the cue's trailing rule reads as a stray mark
+   once the whole column is centred */
+.r-hero--centred .scroll-cue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: 54px;
+}
+
+/* the greeting is a caption; the date is the headline */
+.r-hero__hello {
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--paper-soft);
+  margin: 0 0 34px;
+  padding-left: 0.42em;
+}
+.r-hero__hello em { font-style: normal; color: var(--paper); }
+
+/* one line: "9th July 2002" wrapping onto two lines broke the date in half
+   and left the year stranded. The clamp is sized so the longest date
+   ("30th September 2002") still fits a narrow viewport without breaking. */
+.r-hero__date {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(2rem, 5.6vw, 4.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 30px;
+  white-space: nowrap;
+}
+.r-hero__date em { font-style: italic; color: var(--lunar); }
+@media (max-width: 520px) {
+  .r-hero__date { white-space: normal; font-size: clamp(1.9rem, 8.5vw, 2.6rem); }
+}
+
+.r-hero__line {
+  color: var(--paper-soft);
+  font-size: clamp(1.02rem, 1.8vw, 1.28rem);
+  max-width: 52ch;
+  margin: 0 auto;
+  text-wrap: pretty;
+}
+.r-hero__line b { color: var(--paper); font-weight: 500; }
+
+.r-hero__orbit {
+  /* the hero is a flex column, which blockifies inline-block and stretched
+     this pill across the full width; align-self shrink-wraps it again */
+  display: inline-block;
+  align-self: center;
+  margin: 46px 0 0;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--lunar);
+  border: 1px solid rgba(236, 217, 172, 0.32);
+  border-radius: var(--r-pill);
+  padding: 10px 26px;
+}
+
+.moon-section { text-align: center; }
+.moon-section .kicker { justify-content: center; }
+.moon-section .moon-block {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.moon-section .moon-facts { width: 100%; text-align: center; gap: 22px; }
+.moon-section .moon-phase-name em { font-style: italic; color: var(--lunar); }
+.moon-reading {
+  color: var(--paper-soft);
+  font-size: 1.02rem;
+  max-width: 46ch;
+  margin: 0 auto;
+}
+
+/* ---- the return ---- */
+.countdown {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(10px, 3.4vw, 40px);
+  margin: 52px 0 18px;
+}
+.cd-n {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 7.2vw, 4.4rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--paper);
+  margin: 0;
+}
+.cd-k {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--lunar);
+  margin: 12px 0 0;
+}
+.cd-sep {
+  font-weight: 200;
+  font-size: clamp(1.8rem, 5.6vw, 3.4rem);
+  color: var(--paper-mute);
+  line-height: 1.15;
+  margin: 0;
+}
+.return-line {
+  color: var(--paper-soft);
+  font-size: 1.08rem;
+  max-width: 56ch;
+  margin: 26px auto 0;
+  text-wrap: pretty;
+}
+.return-line b { color: var(--paper); font-weight: 500; }
+.return-line em { font-style: italic; color: var(--paper-mute); }
+.return-sub {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--paper-mute);
+  margin: 18px auto 0;
+}
+.return-sub b { color: var(--teal); font-weight: 500; }
+.return-today {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(2.2rem, 7vw, 4.5rem);
+  line-height: 1.05;
+  margin: 34px 0 0;
+}
+.return-today em { font-style: italic; color: var(--ember); }
+
+/* the year wheel */
+.yearwheel { width: min(420px, 84vw); margin: 54px auto 0; display: block; height: auto; overflow: visible; }
+.yw-ring { fill: none; stroke: var(--line-strong); }
+.yw-ring-inner { fill: none; stroke: var(--line); stroke-dasharray: 2 6; }
+.yw-tick { stroke: var(--line-strong); }
+.yw-month {
+  font-family: var(--mono); font-size: 11.5px; letter-spacing: 1.2px;
+  fill: var(--paper-mute);
+}
+.yw-arc { fill: none; stroke: var(--lunar); stroke-width: 2.5; stroke-linecap: round; opacity: 0.8; }
+.yw-sun { fill: var(--lunar); opacity: 0.9; }
+.yw-sunlab { font-family: var(--mono); font-size: 11px; letter-spacing: 2.2px; fill: rgba(236, 217, 172, 0.7); }
+.yw-earth { fill: var(--teal); }
+.yw-mark { fill: none; stroke: var(--lunar); stroke-width: 1.5; }
+.yw-mark-dot { fill: var(--lunar); }
+.yw-lab { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; fill: var(--paper-soft); }
+.yw-lab--gold { fill: var(--lunar); }
+.yw-days {
+  font-family: var(--mono); font-size: 30px; fill: var(--paper);
+  font-variant-numeric: tabular-nums;
+}
+.yw-dayslab { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; fill: var(--paper-mute); }
+
+/* ---- interactive orrery ---- */
+.orrery {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: center;
+}
+@media (max-width: 820px) { .orrery { grid-template-columns: 1fr; } }
+
+.orr-svg { width: 100%; height: auto; max-width: 440px; margin: 0 auto; display: block; overflow: visible; }
+.orr-ring { fill: none; stroke: var(--line); }
+.orr-sun { fill: var(--lunar); }
+.orr-sun-glow { fill: var(--lunar); opacity: 0.1; }
+
+/* transform-box: view-box is load-bearing — without it the rotation pivot
+   resolves in CSS pixels rather than viewBox units and the planets swing off
+   their rings entirely. */
+.orr-body { cursor: pointer; transform-box: view-box; transform-origin: 220px 220px; }
+.orr-hit { fill: transparent; }
+.orr-dot { transition: r 0.25s var(--ease); }
+.orr-body:hover .orr-dot,
+.orr-body:focus-visible .orr-dot,
+.orr-body.is-active .orr-dot { filter: drop-shadow(0 0 8px currentColor); }
+.orr-body.is-active .orr-hit { stroke: var(--line-strong); stroke-width: 1; fill: rgba(236, 217, 172, 0.05); }
+.orr-body:focus { outline: none; }
+.orr-body:focus-visible .orr-hit { stroke: var(--lunar); stroke-width: 1.5; fill: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .orr-body { animation: orr-spin var(--dur, 12s) linear infinite; }
+}
+@keyframes orr-spin {
+  from { transform: rotate(var(--start, 0deg)); }
+  to   { transform: rotate(calc(var(--start, 0deg) + 360deg)); }
+}
+
+.orr-read {
+  border-left: 1px solid var(--line);
+  padding-left: clamp(18px, 3vw, 34px);
+}
+@media (max-width: 820px) {
+  .orr-read { border-left: 0; border-top: 1px solid var(--line); padding: var(--sp-4) 0 0; text-align: center; }
+}
+.orr-read__k {
+  font-family: var(--mono); font-size: var(--fs-micro); letter-spacing: var(--track-micro);
+  text-transform: uppercase; color: var(--paper-mute); margin: 0;
+}
+.orr-read__name {
+  font-family: var(--display); font-weight: 300;
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem); line-height: 1.05; margin: 10px 0 0;
+}
+.orr-read__age { margin: 18px 0 0; }
+.orr-read__age b {
+  font-family: var(--display); font-weight: 300;
+  font-size: clamp(2rem, 4vw, 2.8rem); color: var(--lunar);
+  font-variant-numeric: tabular-nums;
+  margin-right: 8px;
+}
+.orr-read__age span { font-family: var(--mono); font-size: 0.78rem; letter-spacing: 0.1em; color: var(--paper-soft); }
+.orr-read__period {
+  font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--teal); margin: 14px 0 0;
+}
+.orr-read__note { color: var(--paper-soft); font-size: 0.94rem; margin: 18px 0 0; max-width: 42ch; }
+@media (max-width: 820px) { .orr-read__note { margin-inline: auto; } }
+.orr-read__hint {
+  font-family: var(--mono); font-size: var(--fs-micro); letter-spacing: var(--track-micro);
+  text-transform: uppercase; color: var(--paper-mute); margin: 26px 0 0;
+}
+
+/* a section still waiting on the network holds its space quietly */
+.async-slot:empty { display: none; }
+
+/* ---- birthplace combobox ---- */
+.placefield { position: relative; }
+.placefield.is-resolved .field__line { background: var(--teal); opacity: 0.7; }
+
+.placefield__spin {
+  position: absolute; right: 4px; top: 50%; margin-top: -7px;
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 1.5px solid var(--line-strong); border-top-color: var(--lunar);
+  animation: place-spin 0.7s linear infinite;
+}
+@keyframes place-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .placefield__spin { animation: none; } }
+
+.placelist {
+  position: absolute; z-index: 40; left: 0; right: 0; top: calc(100% + 8px);
+  margin: 0; padding: 6px; list-style: none;
+  max-height: 300px; overflow-y: auto;
+  background: rgba(10, 12, 22, 0.97);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-field);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+}
+.placelist__item {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 10px 12px; border-radius: 8px; cursor: pointer;
+}
+.placelist__item.is-active,
+.placelist__item:hover { background: rgba(154, 127, 240, 0.16); }
+.placelist__name { font-size: 0.98rem; color: var(--paper); }
+.placelist__where {
+  font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em;
+  color: var(--paper-mute);
+}
+
+/* the month column is narrow; its list needs room for "September" */
+#month-field .placelist { min-width: 190px; max-height: 260px; }
+
+.console__place-note {
+  margin: 12px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--paper-mute);
+  max-width: 52ch;
+}
+
+.return-cta { margin-top: 36px; display: flex; justify-content: center; }
+
+/* ---- chapter rail ---- */
+.rail {
+  position: fixed; right: clamp(10px, 1.6vw, 22px); top: 50%;
+  transform: translateY(-50%);
+  z-index: 35;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 12px;
+}
+@media (max-width: 900px) { .rail { display: none; } }
+/* the rail is appended to <body>, so [hidden] has to beat its own display:flex */
+.rail[hidden] { display: none; }
+
+.rail__mark {
+  position: relative;
+  display: flex; align-items: center; justify-content: flex-end;
+  background: none; border: 0; padding: 4px 0 4px 12px;
+}
+.rail__mark::after {
+  content: ""; width: 16px; height: 1px; background: var(--line-strong);
+  transition: width 0.35s var(--ease), background 0.35s var(--ease);
+}
+.rail__mark:hover::after { width: 26px; background: var(--paper-soft); }
+.rail__mark.is-here::after { width: 32px; background: var(--lunar); }
+
+.rail__label {
+  font-family: var(--mono); font-size: 0.56rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--paper-soft); white-space: nowrap;
+  margin-right: 10px;
+  opacity: 0; transform: translateX(6px);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.rail__mark:hover .rail__label,
+.rail__mark:focus-visible .rail__label { opacity: 1; transform: none; }
+.rail__mark.is-here .rail__label { opacity: 0.75; transform: none; color: var(--lunar); }
+
+/* ---- the day itself ---- */
+.fete {
+  position: fixed; inset: 0; z-index: 200;
+  display: grid; place-items: center;
+  background: radial-gradient(120% 100% at 50% 110%, #0d0b18 0%, #05060c 60%, #020308 100%);
+  opacity: 0; transition: opacity 0.6s var(--ease);
+}
+.fete.is-open { opacity: 1; }
+.fete__cv { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.fete__stage {
+  position: relative; z-index: 2;
+  text-align: center;
+  padding: 0 clamp(18px, 5vw, 48px);
+  pointer-events: none;
+}
+.fete__stage .fete__btn { pointer-events: auto; }
+
+.fete__kicker {
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: var(--track-micro); text-transform: uppercase;
+  color: var(--paper-mute); margin: 0 0 clamp(24px, 5vh, 52px);
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.7s var(--ease) 0.15s, transform 0.7s var(--ease) 0.15s;
+}
+.fete.is-open .fete__kicker { opacity: 1; transform: none; }
+
+.fete__digits {
+  display: flex; justify-content: center; align-items: flex-end;
+  gap: clamp(10px, 2.4vw, 26px);
+  /* headroom above the numerals for the tapers and their flames */
+  padding-top: clamp(104px, 15vh, 150px);
+  margin-bottom: clamp(18px, 3vh, 32px);
+}
+.fete__digit {
+  font-family: var(--display); font-weight: 200;
+  font-size: clamp(4.2rem, 17vw, 11rem);
+  line-height: 0.9; color: var(--paper);
+  opacity: 0; transform: translateY(16px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.fete.is-open .fete__digit { opacity: 1; transform: none; }
+.fete__digit:nth-child(2) { transition-delay: 0.1s; }
+.fete__digit:nth-child(3) { transition-delay: 0.2s; }
+
+.fete__caption {
+  font-family: var(--mono); font-size: var(--fs-micro);
+  letter-spacing: var(--track-micro); text-transform: uppercase;
+  color: var(--paper-mute); margin: 0;
+  opacity: 0; transition: opacity 0.7s var(--ease) 0.5s;
+}
+.fete.is-open .fete__caption { opacity: 1; }
+
+.fete__prompt {
+  font-family: var(--mono); font-size: 0.66rem;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--lunar); margin: 26px 0 0;
+  opacity: 0; transition: opacity 0.6s var(--ease) 1.6s;
+}
+.fete.is-open .fete__prompt { opacity: 0.75; }
+.fete.is-finished .fete__prompt { opacity: 0; transition-delay: 0s; }
+
+.fete__line {
+  margin: 26px 0 0; max-width: 44ch; margin-inline: auto;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 0.9s var(--ease) 0.35s, transform 0.9s var(--ease) 0.35s;
+}
+.fete__line span {
+  display: block; font-family: var(--display); font-weight: 300;
+  font-size: clamp(1.35rem, 3.2vw, 2.1rem); color: var(--paper);
+}
+.fete__line em {
+  display: block; margin-top: 12px; font-style: italic;
+  font-size: 1rem; color: var(--paper-soft);
+}
+.fete.is-finished .fete__line { opacity: 1; transform: none; }
+
+.fete__actions {
+  display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;
+  margin-top: clamp(30px, 6vh, 54px);
+  opacity: 0; transition: opacity 0.6s var(--ease) 1.9s;
+}
+.fete.is-open .fete__actions { opacity: 1; }
+.fete__btn {
+  background: none; border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill); padding: 12px 26px;
+  font-family: var(--mono); font-size: 0.62rem;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--paper); transition: border-color 0.3s var(--ease), color 0.3s var(--ease);
+}
+.fete__btn:hover { border-color: var(--lunar); color: var(--lunar); }
+.fete__btn--quiet { border-color: transparent; color: var(--paper-mute); }
+.fete__btn--quiet:hover { color: var(--paper); border-color: var(--line); }
+.fete.is-finished [data-blow] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fete, .fete__kicker, .fete__digit, .fete__caption, .fete__line, .fete__actions {
+    transition-duration: 0.001ms !important;
+  }
+}
+
+
+/* ============================================================
+   THE DAILY SKY — paper, ink and gold
+
+   Scoped entirely to `#panel-today` and `body.on-paper`. The archive is a
+   deep-space object; a daily reading is a printed page. Switching tabs
+   should feel like putting down a telescope and picking up a card, so
+   this tab drops the whole violet/teal palette, and the parallax sky with
+   it, and runs on three values: paper, ink, and one gold.
+
+   Nothing below leaks into the archive — every selector sits under
+   #panel-today, except the body-level swap, which has to reach the fixed
+   backdrop layers and the nav.
+   ============================================================ */
+/*
+   Two readings of one palette. Paper is the default because this screen is
+   opened in the morning; ink exists so that opening it at midnight does not
+   hurt. Every value below is the same colour role with paper and ink
+   exchanged, which is why there is one set of rules underneath rather than
+   two designs to keep in step.
+
+   The mutes were originally two steps lighter. At 0.56rem on paper that put
+   several labels near the contrast floor and they read as smudges rather
+   than as words, so the greys were darkened and the small sizes raised.
+*/
+#panel-today {
+  --pp: #f2efe7;          /* paper */
+  --pp-raised: #fbf9f4;   /* a card lifted off it */
+  --pi: #14120d;          /* ink */
+  --pi-soft: #3d382f;
+  --pi-mute: #6b6457;
+  --pg: #8a6712;          /* gold, dark enough to carry small type on paper */
+  --pg-soft: #b08c2a;
+  --pl: rgba(20, 18, 13, 0.2);
+  --pl-soft: rgba(20, 18, 13, 0.11);
+}
+body.sky-dark #panel-today {
+  --pp: #12110e;
+  --pp-raised: #1b1915;
+  --pi: #f4f1e9;
+  --pi-soft: #cfc9bb;
+  --pi-mute: #9a9385;
+  --pg: #e0bc63;
+  --pg-soft: #c9a94f;
+  --pl: rgba(244, 241, 233, 0.2);
+  --pl-soft: rgba(244, 241, 233, 0.1);
+}
+
+/* ---- the body-level swap ----
+   Moving between the archive and the Daily Sky changes the ground the whole
+   site stands on, so it is done as a cross-fade rather than a cut: the body
+   colour travels, the starfield and aurora dissolve out over the same beat,
+   the nav's own colours follow on a slightly slower curve so the wordmark
+   does not appear to flicker, and the arriving panel lifts into place on top
+   (see .is-entering). Nothing here is instant. */
+body { transition: background-color 0.55s var(--ease); }
+body.on-paper { background: #f2efe7; }
+body.on-paper.sky-dark { background: #12110e; }
+
+/* the sky belongs to the archive; on paper it is simply not there */
+body.on-paper #starfield,
+body.on-paper .aurora,
+body.on-paper .grain { opacity: 0; pointer-events: none; }
+#starfield, .aurora, .grain { transition: opacity 0.55s var(--ease); }
+
+/* the nav inverts with it, or it stays white on white */
+.brand__name, .brand__name b, .brand__tab, .brand__pill, .meridian {
+  transition: color 0.45s var(--ease) 0.06s, background-color 0.45s var(--ease) 0.06s, opacity 0.45s var(--ease);
+}
+body.on-paper .brand__name { color: #14120d; }
+body.on-paper .brand__name b { color: #8a6712; }
+body.on-paper .brand__tab { color: rgba(20, 18, 13, 0.5); }
+body.on-paper .brand__tab:hover { color: #14120d; }
+body.on-paper .brand__tab.is-active { color: #f2efe7; }
+body.on-paper .brand__pill { background: #14120d; }
+body.on-paper .meridian { opacity: 0; }
+
+body.on-paper.sky-dark .brand__name { color: #f4f1e9; }
+body.on-paper.sky-dark .brand__name b { color: #e0bc63; }
+body.on-paper.sky-dark .brand__tab { color: rgba(244, 241, 233, 0.5); }
+body.on-paper.sky-dark .brand__tab:hover { color: #f4f1e9; }
+body.on-paper.sky-dark .brand__tab.is-active { color: #12110e; }
+body.on-paper.sky-dark .brand__pill { background: #f4f1e9; }
+
+/* the arriving panel lifts in, which hides the tail of the backdrop fade */
+@keyframes sky-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+#panel-today.is-entering,
+#panel-home.is-entering,
+#panel-saves.is-entering { animation: sky-enter 0.5s var(--ease) both; }
+@media (prefers-reduced-motion: reduce) {
+  body, #starfield, .aurora, .grain,
+  .brand__name, .brand__name b, .brand__tab, .brand__pill, .meridian { transition-duration: 0.001ms !important; }
+  #panel-today.is-entering,
+  #panel-home.is-entering,
+  #panel-saves.is-entering { animation: none; }
+}
+
+/* every colour inside the sky travels too, so the paper/ink switch reads as
+   one movement rather than as a repaint */
+#panel-today,
+#panel-today .sky-mod,
+#panel-today .sky-btn,
+#panel-today .sky-who__btn,
+#panel-today .sky-theme__track { transition: background-color 0.5s var(--ease), color 0.5s var(--ease), border-color 0.5s var(--ease); }
+
+.stage--sky {
+  min-height: calc(100svh - 56px);
+  display: block;
+  padding: clamp(74px, 12vh, 120px) clamp(20px, 5vw, 40px) clamp(70px, 12vh, 120px);
+  color: var(--pi);
+}
+.sky { width: 100%; max-width: 940px; margin: 0 auto; }
+
+/* ---- shared marks ---- */
+.sky-label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--pg);
+  margin: 0 0 18px;
+}
+.sky-kick {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--pi-mute);
+  margin: 0;
+}
+
+.sky-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--pl);
+}
+
+.sky-head__right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.sky-who { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* paper / ink */
+.sky-theme {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: none; border: 0; padding: 4px 0; cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pi-mute);
+  transition: color 0.25s var(--ease);
+}
+.sky-theme:hover { color: var(--pi); }
+.sky-theme__track {
+  position: relative;
+  width: 34px; height: 18px;
+  border-radius: 100px;
+  border: 1px solid var(--pl);
+  background: var(--pl-soft);
+}
+.sky-theme__knob {
+  position: absolute; top: 2px; left: 2px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--pi);
+  transition: transform 0.35s var(--ease-spring), background-color 0.35s var(--ease);
+}
+.sky-theme[aria-pressed="true"] .sky-theme__knob { transform: translateX(16px); background: var(--pg); }
+.sky--empty .sky-theme { margin-bottom: 30px; }
+.sky-who__btn {
+  background: none;
+  border: 1px solid var(--pl);
+  border-radius: 100px;
+  padding: 6px 15px;
+  color: var(--pi-mute);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.25s var(--ease), color 0.25s var(--ease), background 0.25s var(--ease);
+}
+.sky-who__btn:hover { color: var(--pi); border-color: var(--pi-mute); }
+.sky-who__btn.is-active { background: var(--pi); border-color: var(--pi); color: var(--pp); }
+
+/* ---- 1. the reading ---- */
+.sky-read { padding: clamp(44px, 8vh, 82px) 0 clamp(38px, 6vh, 60px); }
+.sky-headline {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(2.5rem, 7.4vw, 5rem);
+  line-height: 1.02;
+  letter-spacing: -0.018em;
+  color: var(--pi);
+  margin: 0;
+  text-wrap: balance;
+  max-width: 16ch;
+}
+.sky-body {
+  font-size: clamp(1.02rem, 1.9vw, 1.24rem);
+  line-height: 1.62;
+  color: var(--pi-soft);
+  max-width: 46ch;
+  margin: clamp(22px, 3.4vh, 34px) 0 0;
+  text-wrap: pretty;
+}
+
+/* The two columns are noun phrases rather than instructions, which is why
+   they read as aphorism and not as advice. Set in the serif, because that
+   half is the half people screenshot. */
+.sky-dd {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(20px, 5vw, 64px);
+  max-width: 620px;
+  margin: clamp(34px, 5vh, 52px) 0 0;
+}
+.sky-dd__head {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--pi-mute);
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--pl);
+}
+.sky-dd ul { list-style: none; margin: 0; padding: 0; }
+.sky-dd li {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(1.1rem, 2.3vw, 1.5rem);
+  line-height: 1.42;
+  color: var(--pi);
+}
+
+/* ---- 2. the measurement ---- */
+.sky-proof {
+  border-top: 1px solid var(--pl);
+  border-bottom: 1px solid var(--pl);
+  padding: clamp(32px, 5vh, 46px) 0;
+}
+.sky-proof__lead {
+  font-size: clamp(1rem, 1.8vw, 1.14rem);
+  line-height: 1.6;
+  color: var(--pi);
+  max-width: 60ch;
+  margin: 0;
+  text-wrap: pretty;
+}
+.sky-proof__note {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--pi-soft);
+  max-width: 62ch;
+  margin: 22px 0 0;
+  text-wrap: pretty;
+}
+.sky-proof__note--astro {
+  border-left: 2px solid var(--pg-soft);
+  padding-left: 14px;
+  font-style: italic;
+}
+
+.sky-asps { list-style: none; margin: 26px 0 0; padding: 0; }
+.sky-asp {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-top: 1px solid var(--pl-soft);
+}
+.sky-asp:first-child { border-top: 0; }
+.sky-asp__bodies { display: flex; align-items: center; gap: 7px; min-width: 0; flex-wrap: wrap; }
+.sky-asp__bodies b { font-weight: 500; font-size: 0.98rem; color: var(--pi); }
+.sky-asp__op { font-size: 1rem; color: var(--pg); margin: 0 3px; }
+.sky-asp__ico { width: 1.05em; height: 1.05em; color: var(--pi-mute); flex: none; }
+.sky-asp__sign {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--pi-soft);
+  white-space: nowrap;
+}
+.sky-asp__orb {
+  font-family: var(--mono);
+  font-size: 0.94rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--pi);
+  text-align: right;
+  white-space: nowrap;
+}
+.sky-asp__orb small {
+  display: block;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pi-mute);
+  margin-top: 2px;
+}
+
+/* ---- 3-5. the modules ---- */
+/*
+   The rules between cards are a 1px outline on each card, overlapping in
+   the 1px gap so they read as one hairline and never double at a join.
+
+   This used to be a tinted background on the grid showing through the
+   gaps, which was tidier to write and wrong: a row that does not fill
+   its tracks has no elements in the leftover cells, so the tint showed
+   through as a large grey block beside the last module. An outline is
+   drawn by the cards, so empty space stays empty.
+*/
+/* 330px, not 400: at 400 a 768px tablet fell to a single column and left
+   the whole right half of the screen empty */
+.sky-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+  gap: 1px;
+}
+.sky-mod {
+  background: var(--pp);
+  box-shadow: 0 0 0 1px var(--pl);
+  padding: clamp(28px, 4vw, 40px) clamp(20px, 2.6vw, 30px);
+  display: flex;
+  flex-direction: column;
+}
+/* the live module's slot before it has anything to show */
+.sky-grid > .async-slot:empty { display: none; }
+.sky-mod.is-today { background: var(--pp-raised); box-shadow: inset 0 3px 0 var(--pg); }
+.sky-mod__line {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--pi-soft);
+  margin: 16px 0 0;
+  text-wrap: pretty;
+}
+.sky-mod__line b { font-weight: 600; color: var(--pi); }
+
+.sky-figure {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(2.6rem, 6vw, 3.6rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 0.98;
+  color: var(--pi);
+  margin: 0;
+}
+.sky-figure span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pi-mute);
+  margin-top: 14px;
+  line-height: 1.5;
+}
+
+/* moon discs */
+.sky-moons { display: flex; justify-content: flex-start; gap: clamp(16px, 3vw, 30px); }
+.sky-moons figure { margin: 0; flex: none; }
+.sky-moons figcaption { margin-top: 12px; }
+.sky-moons figcaption b {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 400;
+  color: var(--pg);
+}
+.sky-moons figcaption span {
+  display: block;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--pi-soft);
+  margin-top: 5px;
+}
+.mdisc { display: block; }
+.mdisc__mare { fill: rgba(120, 108, 78, 0.18); }
+/*
+   The unlit limb is ink on both themes. It was briefly a tint of the paper,
+   on the theory that a new moon should read as an empty ruled circle rather
+   than a blot. In practice that put the shadow within a few percent of the
+   lit cream, so a two-percent crescent was invisible and every early phase
+   looked like the same blank disc. Shadow is dark. The rim keeps the
+   silhouette when a new moon is almost entirely shadow.
+*/
+.mdisc__dark { fill: #14120d; }
+.mdisc__rim { fill: none; stroke: rgba(20, 18, 13, 0.42); stroke-width: 1.1; }
+
+/* meters */
+.sky-meter { height: 2px; background: var(--pl); margin-top: auto; overflow: hidden; }
+.sky-meter > span { display: block; height: 100%; background: var(--pg); }
+.sky-meter__cap {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pi-mute);
+  margin: 10px 0 0;
+}
+.sky-mod .sky-meter { margin-top: 26px; }
+
+/* the countdown, reduced to a strip */
+.sky-cd { display: flex; gap: 14px; margin: 18px 0 0; }
+.sky-cd span {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  color: var(--pi-mute);
+}
+.sky-cd b {
+  font-weight: 400;
+  font-size: 1.12rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--pi);
+  letter-spacing: 0;
+}
+
+/* milestones */
+.sky-ms { list-style: none; margin: 26px 0 0; padding: 0; }
+.sky-ms li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 11px 0;
+  border-top: 1px solid var(--pl-soft);
+}
+.sky-ms li:first-child { border-top: 0; }
+/* the row is explicitly placed: a long label wrapping to two lines would
+   otherwise drag the day count down out of line with its own heading */
+.sky-ms__label { grid-row: 1; grid-column: 1; font-size: 0.96rem; color: var(--pi); }
+.sky-ms__days {
+  grid-row: 1; grid-column: 2;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--pg);
+  text-align: right;
+}
+.sky-ms__when {
+  grid-row: 2; grid-column: 1 / -1;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--pi-mute);
+}
+
+/* ---- buttons, links, footer ---- */
+.sky-btn {
+  align-self: flex-start;
+  margin-top: 20px;
+  background: var(--pi);
+  border: 1px solid var(--pi);
+  border-radius: 100px;
+  padding: 11px 24px;
+  color: var(--pp);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.25s var(--ease), color 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.sky-btn:hover { background: var(--pg); border-color: var(--pg); color: #fff; }
+
+.sky-foot { padding: clamp(30px, 5vh, 44px) 0 0; }
+.sky-foot p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--pi-soft);
+  max-width: 60ch;
+  margin: 0;
+  text-wrap: pretty;
+}
+.sky-foot__row { display: flex; flex-wrap: wrap; gap: 8px 26px; margin-top: 18px; }
+.sky-link {
+  background: none;
+  border: 0;
+  padding: 0 0 3px;
+  color: var(--pi-soft);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-bottom: 1px solid var(--pl);
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.sky-link:hover { color: var(--pg); border-color: var(--pg); }
+
+/* ---- empty state ---- */
+.sky--empty { max-width: 640px; padding-top: clamp(40px, 10vh, 90px); }
+.sky-head__title {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(2.4rem, 6.4vw, 4rem);
+  line-height: 1.04;
+  color: var(--pi);
+  margin: 20px 0 0;
+}
+.sky-head__title em { font-style: italic; color: var(--pg); }
+.sky-lede {
+  font-size: 1.04rem;
+  line-height: 1.62;
+  color: var(--pi-soft);
+  max-width: 48ch;
+  margin: 24px 0 0;
+  text-wrap: pretty;
+}
+.sky--empty .sky-btn { margin-top: 32px; }
+
+@media (max-width: 640px) {
+  .sky-dd { grid-template-columns: 1fr; gap: 26px; }
+  /* two rows: the pair of bodies, then the sign and the orb beneath it,
+     rather than three columns squeezed into a phone's width */
+  .sky-asp {
+    grid-template-columns: 1fr auto;
+    row-gap: 6px;
+  }
+  .sky-asp__bodies { grid-column: 1 / -1; }
+  .sky-asp__sign { grid-column: 1; }
+  .sky-asp__orb { grid-column: 2; text-align: right; }
+  .sky-asp__orb small { display: inline; margin-left: 6px; }
+  .sky-moons { gap: 18px; }
+  .sky-moons .mdisc { width: 84px; height: 84px; }
+}
+
+/* ---- the glyphs (see glyphs.js) ----
+   Sized in `em` so a mark inherits the size of whatever it sits in, and
+   painted with `currentColor` so it inherits the colour too. `-0.12em`
+   drops the optical centre onto the text baseline, which is where a real
+   font glyph would sit. */
+.glyph { display: inline-block; vertical-align: -0.12em; }
+.inline-glyph { margin-right: 0.24em; }
+
+/* The twelve signs are artwork, not paths, so they are painted as a mask
+   filled with the current text colour. Same result as the planets' inline
+   SVG: one mark that follows the type it sits in, on paper, on ink, and in
+   the gold of the certificate. */
+.sign-mark {
+  background-color: currentColor;
+  -webkit-mask-image: var(--sign);
+  mask-image: var(--sign);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  vertical-align: -0.16em;
+}
+/* html2canvas, which rasterises the certificate for export, does not
+   implement CSS masks: the mark would come out as a filled square. There
+   the artwork goes in as a real <img> and is inverted to the certificate's
+   pale ink instead. */
+.sign-img { display: inline-block; vertical-align: -0.18em; object-fit: contain; }
+.cert-face .sign-img { filter: invert(1) brightness(1.06); opacity: 0.92; }
+
+
+/* ============================================================
+   SMALL SCREENS AND TOUCH
+
+   Two separate concerns, deliberately keyed off two different things.
+
+   `max-width` handles *size*: the mono labels in this design are set
+   small on purpose, but a scale tuned on a 1440px screen put a dozen of
+   them between 9 and 10 pixels on a phone, which is below the point at
+   which small-caps mono is comfortably readable. Raising the floor is
+   not a redesign; it keeps the same hierarchy at a legible size.
+
+   `hover: none` / `pointer: coarse` handles *input*: a control that only
+   appears on hover does not exist on a touch screen, and a 24px-tall tap
+   target is a miss waiting to happen. Neither has anything to do with
+   how wide the screen is, which is why they are not in the same query.
+   ============================================================ */
+
+@media (max-width: 720px) {
+  :root {
+    /* the mono label size the whole site keys off */
+    --fs-micro: 0.72rem;
+    --fs-caption: 0.9rem;
+    --track-micro: 0.2em;
+  }
+
+  /* the shell */
+  .brand__tab { font-size: 0.72rem; padding: 8px 12px; }
+  .brand__name { font-size: 1.12rem; }
+
+  /* the landing form */
+  .console__hint { font-size: 0.74rem; }
+  .intro__foot { font-size: 0.76rem; }
+  .console__place-note { font-size: 0.82rem; }
+  .field__label { font-size: 0.98rem; }
+  .field input:focus + .field__label,
+  .field input:not(:placeholder-shown) + .field__label { font-size: 0.68rem; }
+
+  /* the archive */
+  .source { font-size: 0.74rem; }
+  .r-hero__orbit, .scroll-cue { font-size: 0.72rem; }
+  .facts dt, .fact dt { font-size: 0.72rem; }
+  .fact dd small { font-size: 0.7rem; }
+  .ps-tick__name { font-size: 0.64rem; }
+  .plate__type, .duo__type { font-size: 0.74rem; letter-spacing: 0.16em; }
+  .astro-note { font-size: 0.76rem; }
+  .r-foot p { font-size: 0.74rem; }
+  .cd-k { font-size: 0.7rem; }
+
+  /* the people cards */
+  .save-card__date, .save-card__countdown { font-size: 0.72rem; }
+  .save-card__meta span { font-size: 0.74rem; }
+  .save-card__remove { font-size: 0.68rem; }
+  .panel-empty { font-size: 0.8rem; }
+
+  /* the daily sky */
+  .sky-who__btn, .sky-theme__label, .sky-link, .sky-btn { font-size: 0.74rem; }
+  .sky-dd__head, .sky-label, .sky-kick { font-size: 0.74rem; }
+  .sky-figure span, .sky-meter__cap, .sky-moons figcaption b { font-size: 0.7rem; }
+  .sky-asp__orb small { font-size: 0.66rem; letter-spacing: 0.08em; }
+  .sky-ms__when { font-size: 0.74rem; }
+  .sky-proof__note, .sky-foot p { font-size: 0.92rem; }
+}
+
+/* a phone in portrait: give the reading the full measure */
+@media (max-width: 480px) {
+  .sky-headline { font-size: clamp(2.1rem, 10vw, 2.9rem); max-width: none; }
+  .sky-body { max-width: none; }
+  .sky-head { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .sky-head__right { width: 100%; justify-content: space-between; }
+  .sky-read { padding-top: 34px; }
+  .sky-mod { padding: 26px 20px; }
+}
+
+/* ---- touch ---- */
+@media (hover: none) {
+  /*
+     Revealed on hover, this control did not exist on a phone: there was
+     no way to remove a saved person on the device most people use. It is
+     always present where there is no pointer, just quieter.
+  */
+  .save-card__remove { opacity: 0.55; }
+  .save-card__remove:active { opacity: 1; color: var(--ember); }
+}
+
+@media (pointer: coarse) {
+  /* 44px is the target every platform's guidance agrees on. These were
+     between 20 and 28 tall, which is a coin toss on a moving thumb. */
+  .brand__tab { min-height: 40px; display: inline-flex; align-items: center; }
+  .brand__wordmark { min-height: 44px; display: inline-flex; align-items: center; }
+  /* the pill is height:100% of the nav and is positioned from the tabs'
+     own offsetLeft/offsetWidth, so it follows them without help */
+  .save-card__remove { min-height: 40px; padding: 10px 12px; right: 6px; bottom: 6px; }
+  .console__more { min-height: 44px; padding: 12px 16px; }
+  .sky-who__btn { min-height: 40px; padding: 10px 16px; }
+  .sky-theme { min-height: 44px; }
+  .sky-link { min-height: 40px; display: inline-flex; align-items: center; }
+  .btn-ghost, .sky-btn { min-height: 44px; }
+  .placelist__item { min-height: 44px; display: flex; align-items: center; }
+  .cert-controls button, .ticket-actions button { min-height: 44px; }
+  .r-foot a { padding: 10px 4px; }
+  /* headline links are inline inside a sentence, so they cannot simply be
+     made 44px tall without breaking the paragraph. Padding the row they
+     sit in gives the thumb the same room without touching the type. */
+  .news-list li { padding-top: 14px; padding-bottom: 14px; }
+  .news-list a { line-height: 1.75; }
+  /* the chapter rail is a hover affordance on a long scroll; on a phone it
+     is 17 marks a few pixels apart down the edge of the reading area */
+  .rail { display: none; }
+}
+
 /* utility */
 .center { text-align: center; }
 .mt-l { margin-top: 40px; }
+
+/* ---- the birth-time gate on the Daily Sky ----
+   One question, two fields, one button. Everything that was explanation
+   has gone; the readout under the fields teaches the 24-hour format by
+   showing the time back in words, which nobody skips the way they skip
+   an instruction. ---- */
+.sky-ask { padding: clamp(52px, 10vh, 96px) 0 0; max-width: 620px; }
+.sky-ask .sky-headline { max-width: 14ch; }
+.sky-ask .sky-body { margin-top: 22px; }
+
+.clock { margin-top: clamp(36px, 6vh, 56px); }
+.clock__row { display: flex; align-items: center; gap: 4px; }
+.clock__unit {
+  width: 2.4ch;
+  padding: 0 0 10px;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid var(--pl);
+  border-radius: 0;
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(3.4rem, 11vw, 5rem);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--pi);
+  caret-color: var(--pg);
+  transition: border-color 0.25s var(--ease);
+  -moz-appearance: textfield;
+}
+.clock__unit::-webkit-outer-spin-button,
+.clock__unit::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.clock__unit::placeholder { color: var(--pl); }
+.clock__unit:focus { outline: none; border-bottom-color: var(--pg); }
+.clock__unit::selection { background: var(--pg); color: var(--pp); }
+.clock__colon {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(3rem, 9vw, 4.2rem);
+  line-height: 1;
+  color: var(--pi-mute);
+  padding-bottom: 10px;
+}
+.clock__read {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pg);
+  margin: 18px 0 0;
+  min-height: 1.2em;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+}
+.clock__read.is-set { opacity: 1; }
+.clock .sky-btn { margin-top: 26px; }
+.clock .sky-btn[disabled] { opacity: 0.32; cursor: default; }
+.clock .sky-btn[disabled]:hover { background: var(--pi); border-color: var(--pi); color: var(--pp); }
+
+/* which area of a life the aspect lands in: the fourth dimension, shown */
+.sky-asp__area {
+  font-weight: 400;
+  color: var(--pg);
+  letter-spacing: 0.02em;
+  margin-left: 6px;
+}
+
+/* ============================================================
+   SUN AND MOON
+
+   One shape doing both jobs. The disc is masked by a second circle that
+   sits well clear of it in the sun state and slides across to bite a
+   crescent out of it in the moon state; the rays shrink into the disc and
+   rotate as it happens. Nothing cross-fades and nothing is swapped, so
+   there is only ever one object on screen changing shape.
+
+   It fades in only while the Daily Sky is open, because that is the only
+   place the setting does anything.
+   ============================================================ */
+.daynight {
+  /*
+     The bar is space-between with three children now. `margin-left: auto`
+     absorbs the free space so the wordmark stays left and this rides
+     immediately before the tabs; the explicit orders keep it there whatever
+     the DOM does. Without them it landed to the right of the tabs.
+  */
+  order: 1;
+  margin-left: auto;
+  margin-right: clamp(10px, 1.6vw, 18px);
+  width: 0;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--paper-soft);
+  cursor: pointer;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.7);
+  transition:
+    width 0.45s var(--ease),
+    opacity 0.35s var(--ease),
+    transform 0.45s var(--ease-spring),
+    margin 0.45s var(--ease),
+    color 0.4s var(--ease);
+}
+body.on-paper .daynight {
+  width: 34px;
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+.daynight svg { display: block; width: 34px; height: 34px; padding: 5px; overflow: visible; }
+.daynight:hover { color: var(--lunar); }
+.daynight:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 50%; }
+
+.daynight__core { fill: currentColor; transition: r 0.5s var(--ease-spring); }
+.daynight__bite { transform: translate(9px, -9px); transition: transform 0.5s var(--ease-spring); }
+.daynight__rays {
+  stroke: currentColor;
+  stroke-width: 1.9;
+  transform-origin: 12px 12px;
+  transition: transform 0.5s var(--ease-spring), opacity 0.4s var(--ease);
+}
+
+/* the moon: the bite slides home, the disc grows, the rays fold away */
+.daynight[aria-pressed="true"] .daynight__bite { transform: translate(0, 0); }
+.daynight[aria-pressed="true"] .daynight__core { r: 7.4; }
+.daynight[aria-pressed="true"] .daynight__rays { transform: rotate(45deg) scale(0.3); opacity: 0; }
+
+/* on paper it is ink-coloured like the rest of the inverted bar */
+body.on-paper .daynight { color: rgba(20, 18, 13, 0.55); }
+body.on-paper .daynight:hover { color: #8a6712; }
+body.on-paper.sky-dark .daynight { color: rgba(244, 241, 233, 0.6); }
+body.on-paper.sky-dark .daynight:hover { color: #e0bc63; }
+
+@media (prefers-reduced-motion: reduce) {
+  .daynight, .daynight__core, .daynight__bite, .daynight__rays { transition-duration: 0.001ms !important; }
+}
+
+/* ---- very small phones (320px is still a real device) ----
+   Three tabs, a wordmark and the sun/moon do not fit at 320 with the
+   desktop padding: the People tab was pushed past the right edge. */
+@media (max-width: 359px) {
+  .brand { padding: 0 12px; }
+  .brand__name { font-size: 1rem; }
+  .brand__tab { padding: 8px 8px; font-size: 0.68rem; letter-spacing: 0.12em; }
+  .brand__nav { gap: 0; }
+  .daynight { margin-right: 6px; }
+  body.on-paper .daynight { width: 28px; }
+  .daynight svg { width: 28px; height: 28px; padding: 4px; }
+}
+
+/* ---- the measurement rows at phone widths ----
+   The body pair, the sign and the orb were laid out as three columns and
+   overflowed a 375px screen. Below 640 they stack, and every cell is
+   allowed to shrink: without `min-width: 0` a flex item refuses to go
+   narrower than its content and pushes the row out instead of wrapping. */
+@media (max-width: 640px) {
+  .sky-asp { grid-template-columns: minmax(0, 1fr) auto; }
+  .sky-asp__bodies { min-width: 0; flex-wrap: wrap; row-gap: 2px; }
+  .sky-asp__bodies b { font-size: 0.92rem; }
+  .sky-asp__sign { min-width: 0; white-space: normal; }
+  .sky-asp__area { display: block; margin-left: 0; margin-top: 2px; }
+  .sky-asp__orb { white-space: nowrap; }
+}
+
+/* ============================================================
+   PHONE: THE TABS GO TO THE BOTTOM
+
+   Three tabs, a wordmark and the sun/moon in a 56px bar is a lot of
+   cramming at 375px, and it puts navigation at the far end of a reach.
+   On a phone the tabs become a floating pill at the bottom, where a thumb
+   already is, and the top bar keeps only the two things that belong in
+   corners: the name on the left, the sun/moon on the right.
+
+   Same DOM, same tab semantics, same roving tabindex, and the sliding
+   pill indicator still works because it is positioned from the tabs'
+   own offsets inside the nav rather than from the page.
+   ============================================================ */
+@media (max-width: 720px) {
+  .brand { justify-content: space-between; }
+
+  .brand__nav {
+    position: fixed;
+    left: 50%;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    z-index: 45;
+    order: 0;
+    gap: 2px;
+    padding: 5px;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: rgba(12, 14, 26, 0.72);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    backdrop-filter: blur(20px) saturate(1.5);
+    box-shadow: 0 14px 44px -14px rgba(0, 0, 0, 0.8);
+    transition: background 0.5s var(--ease), border-color 0.5s var(--ease);
+  }
+  .brand__tab { padding: 10px 18px; }
+
+  /* the sun and moon take the corner the tabs left */
+  .daynight { order: 2; margin-left: auto; margin-right: 0; }
+
+  /* room under the last line of every page for the floating bar to sit over */
+  #app { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
+
+  /* the paper tab, and its ink twin */
+  body.on-paper .brand__nav {
+    background: rgba(250, 248, 242, 0.82);
+    border-color: rgba(20, 18, 13, 0.16);
+    box-shadow: 0 14px 40px -16px rgba(20, 18, 13, 0.4);
+  }
+  body.on-paper.sky-dark .brand__nav {
+    background: rgba(22, 21, 17, 0.84);
+    border-color: rgba(244, 241, 233, 0.18);
+    box-shadow: 0 14px 44px -14px rgba(0, 0, 0, 0.9);
+  }
+}
+
+/* very small phones: the pill still has to fit inside 320px */
+@media (max-width: 359px) {
+  .brand__nav { gap: 0; padding: 4px; }
+  .brand__tab { padding: 10px 12px; font-size: 0.66rem; letter-spacing: 0.1em; }
+}

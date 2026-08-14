@@ -1,0 +1,34 @@
+{
+  "_comment": [
+    "The Do and Don't columns, by tone. Three of each are drawn per day.",
+    "",
+    "Noun phrases rather than instructions, so they read as aphorism rather",
+    "than as advice: 'Happy hour' invites a thought, 'go to happy hour'",
+    "issues an order and gets ignored. Keep them short, concrete and slightly",
+    "oblique. Anything that reads as a self-help imperative belongs somewhere",
+    "else. Add freely: more entries here cost nothing and the picker takes",
+    "three at random from whatever is present."
+  ],
+  "columns": {
+    "charged": {
+      "do": ["Saying it first", "The direct question", "Eye contact", "Naming the number", "Hot honey", "Being early", "The unedited draft", "One clear sentence", "Turning the phone over"],
+      "dont": ["Hedging", "The group chat", "Rehearsing", "Waiting for permission", "Itineraries", "Second-guessing", "The softened version", "Reading the room twice"]
+    },
+    "open": {
+      "do": ["Happy hour", "Side conversation", "The small invitation", "Open windows", "Asking twice", "Long walks", "The second coffee", "Saying it plainly", "Leaving early"],
+      "dont": ["Main character", "Overbooking", "Conductor's baton", "The long explanation", "Closing tabs", "Being coy", "Waiting to be asked", "The elaborate plan"]
+    },
+    "friction": {
+      "do": ["One thing at a time", "Sleeping on it", "The short reply", "Cold water", "Leaving the room", "Writing it down", "Plain food", "Going for the walk", "The unglamorous fix"],
+      "dont": ["Winning", "The reply-all", "Fixing other people", "Caffeine after four", "New commitments", "Sharp edges", "The last word", "Doing it twice"]
+    },
+    "easy": {
+      "do": ["Momentum", "The generous version", "Saying yes", "Cooking for people", "Loud music", "Finishing it", "The good plates", "Going one further", "Calling first"],
+      "dont": ["Coasting", "Saving it for later", "Small talk", "The safe option", "Perfectionism", "Keeping score", "Waiting for Monday", "The rehearsal"]
+    },
+    "pull": {
+      "do": ["Choosing one", "Honest arithmetic", "The phone call", "Half measures, admitted", "Quiet mornings", "Naming the trade", "Going home", "The shorter list", "Saying the real number"],
+      "dont": ["Doing both", "Splitting the difference", "Martyrdom", "Vague yeses", "Borrowed urgency", "Staying late", "The compromise nobody wanted", "Counting"]
+    }
+  }
+}
