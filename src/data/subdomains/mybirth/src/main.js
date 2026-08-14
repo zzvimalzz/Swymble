@@ -321,25 +321,38 @@ function buildShareURL(i) {
   return `${location.origin}${location.pathname}?${p.toString()}`;
 }
 
-async function runGeneration(inputs) {
+/**
+ * Recover a day.
+ *
+ * `reveal` is false when the archive is being rebuilt behind another tab —
+ * a reload of a shared link by somebody who was last reading Today. The
+ * result is still built, so the Archive tab has it ready the moment it is
+ * asked for, but it does so without the veil, without stealing the scroll
+ * and without yanking the visitor off the tab they were on.
+ */
+async function runGeneration(inputs, { reveal = true } = {}) {
   const startedAt = performance.now();
   const { name, day, month, year, time, placeLabel } = inputs;
   const shareURL = buildShareURL(inputs);
-  // keep whichever tab the visitor is on; the share URL itself is built
-  // from scratch in buildShareURL and never carries a hash
-  try { history.replaceState(null, "", shareURL + location.hash); } catch {}
+  lastShareURL = shareURL;
+  // the address bar only carries the day while the archive is the thing on
+  // screen; rememberTab parks and restores it as the visitor moves about
+  if (reveal) { try { history.replaceState(null, "", shareURL + location.hash); } catch {} }
 
   // start pulling the 3D assets while the veil is up
   prefetchModelAssets();
 
   // show veil + rotate lines
-  veil.hidden = false;
-  let li = 0;
-  veilText.textContent = VEIL_LINES[0];
-  const lineTimer = setInterval(() => {
-    li = (li + 1) % VEIL_LINES.length;
-    veilText.textContent = VEIL_LINES[li];
-  }, 900);
+  let lineTimer = 0;
+  if (reveal) {
+    await showVeil("archive");
+    let li = 0;
+    veilText.textContent = VEIL_LINES[0];
+    lineTimer = setInterval(() => {
+      li = (li + 1) % VEIL_LINES.length;
+      veilText.textContent = VEIL_LINES[li];
+    }, 900);
+  }
 
   /*
      The birthplace has to be known before the sky can be, because a wall
@@ -429,14 +442,22 @@ async function runGeneration(inputs) {
 
   clearInterval(lineTimer);
   // hold the veil only long enough to register as a curtain, never for the network
-  await new Promise((r) => setTimeout(r, Math.max(0, MIN_VEIL_MS - (performance.now() - startedAt))));
+  if (reveal) {
+    await new Promise((r) => setTimeout(r, Math.max(0, MIN_VEIL_MS - (performance.now() - startedAt))));
+  }
 
   renderResult(payload);
 
-  veil.hidden = true;
   intro.style.display = "none";
   result.hidden = false;
-  scrollTo({ top: 0, behavior: "auto" });
+  if (reveal) {
+    hideVeil();
+    scrollTo({ top: 0, behavior: "auto" });
+  } else {
+    // built off-stage: the address bar still describes the tab in front,
+    // and only names the day again if the visitor asks for the archive
+    rememberTab(currentTab());
+  }
 
   enhance(payload);
 }
@@ -445,6 +466,67 @@ async function runGeneration(inputs) {
 const MIN_VEIL_MS = 420;
 /** How long we will wait on a geocoder for a birthplace's time zone. */
 const MAX_ZONE_WAIT_MS = 1200;
+
+/*
+   The veil comes in two worlds, because the site does.
+
+   The archive's is deep space: an orrery turning in the dark, which is the
+   thing the visitor is about to be shown. The Daily Sky's is paper, because
+   arriving there behind a black screen and then being handed a cream card
+   is a jolt, and a loading screen exists precisely to avoid one. Same
+   markup, same rhythm, different ground.
+*/
+const VEIL_COPY = {
+  archive: ["Recovering your day", "Aligning the heavens…"],
+  sky: ["Turning to today", "Reading the sky…"],
+};
+
+function dressVeil(world) {
+  const sky = world === "sky";
+  veil.classList.toggle("veil--sky", sky);
+  veil.classList.toggle("is-dark", sky && skyTheme() === "dark");
+  const [eyebrow, line] = VEIL_COPY[sky ? "sky" : "archive"];
+  const eb = document.getElementById("veil-eyebrow");
+  if (eb) eb.textContent = eyebrow;
+  veilText.textContent = line;
+  // the real element is on stage now, so the CSS-only boot curtain stands down
+  document.documentElement.removeAttribute("data-boot");
+  document.documentElement.removeAttribute("data-boot-dark");
+}
+
+function showVeil(world = "archive") {
+  dressVeil(world);
+  veil.classList.remove("is-leaving");
+  veil.hidden = false;
+  // let the browser paint the veil before whatever comes next blocks the
+  // main thread, or the curtain goes up after the show has already started
+  return new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+}
+
+function hideVeil() {
+  // fade out rather than cut, then stand down once the transition has run
+  veil.classList.add("is-leaving");
+  setTimeout(() => {
+    veil.hidden = true;
+    veil.classList.remove("is-leaving", "veil--sky", "is-dark");
+  }, VEIL_FADE_MS);
+}
+
+/**
+ * Hand the boot curtain over to the real veil and take it down.
+ *
+ * The curtain is pure CSS driven by an attribute the inline script writes,
+ * so it cannot fade itself out. Showing the element underneath first means
+ * the visitor sees one continuous screen dissolve rather than a cut.
+ */
+function dropBootVeil(world) {
+  if (!document.documentElement.hasAttribute("data-boot")) return;
+  dressVeil(world);
+  veil.hidden = false;
+  hideVeil();
+}
+
+const VEIL_FADE_MS = 420;
 
 /**
  * The progressive half: fetch what needs the network, then fill the waiting
@@ -2261,20 +2343,31 @@ function applyTab(name, focus) {
 }
 
 /*
-   Which tab you are on belongs in the URL.
+   Which tab you are on belongs in the URL, and the birth details do not
+   belong there while you are somewhere else.
 
-   A shared link carries the birth details in its query string, and that
-   query string stays put while you move between tabs. So a reload from
-   People or Today re-read the query, found a day to recover, and dropped
-   you back on the Archive: the tab you were looking at was never written
-   down anywhere. The hash is, it survives a reload, and it costs nothing
-   to a shared link because share URLs are built from scratch elsewhere.
+   The query string describes a day in the archive. Carrying it around
+   while the visitor reads Today or People meant a reload had two answers
+   to the same question: the query said "recover this day", the tab said
+   "I was on Today". Naming the tab in the hash settled the argument, but
+   only after the archive had already started rendering underneath, which
+   is the flicker of the wrong tab appearing first.
+
+   So the query travels with the tab it belongs to. Leaving the archive
+   parks it, and coming back restores it, which keeps the address bar
+   honest about what is on screen and makes a reload from Today a plain
+   visit with nothing to undo.
 */
+let lastShareURL = "";
+
 function rememberTab(name) {
   try {
-    const want = `#${name}`;
-    if (location.hash === want) return;
-    history.replaceState(null, "", location.pathname + location.search + want);
+    const search = name === "archive" && !result.hidden && lastShareURL
+      ? new URL(lastShareURL, location.origin).search
+      : "";
+    const want = `${location.pathname}${search}#${name}`;
+    if (location.pathname + location.search + location.hash === want) return;
+    history.replaceState(null, "", want);
   } catch { /* a hostile history stack is not worth failing over */ }
 }
 
@@ -2635,7 +2728,9 @@ function renderSaves() {
        has already filled that form in and should never be shown it again as
        a front door: they get the Daily Sky, which is different every morning.
     */
-    activateTab(rootTab());
+    const landing = rootTab();
+    activateTab(landing);
+    dropBootVeil(landing === "today" ? "sky" : "space");
     return;
   }
 
@@ -2669,11 +2764,12 @@ function renderSaves() {
   trackEvent(EVENTS.ARCHIVE_START, { entry: "link" });
   /*
      The link is recovered either way, but the tab the visitor was last on
-     wins. Without this a reload from People or Today landed back on the
-     Archive, because the query string is still in the URL and this branch
-     never asked which tab was wanted.
+     wins, and it has to win *before* anything renders. Deciding first and
+     recovering second is what stops the archive appearing for a beat in
+     front of somebody who was reading Today.
   */
-  activateTab(rootTab({ fromLink: true }));
+  const landing = rootTab({ fromLink: true });
+  activateTab(landing);
 
   // reflect into the form so "recover another" and re-edits stay consistent
   const set = (id, v) => { const el = document.getElementById(id); if (el != null && v) el.value = v; };
@@ -2685,5 +2781,12 @@ function renderSaves() {
     document.getElementById("place-field")?.classList.add("is-resolved");
   }
 
-  runGeneration(inputs);
+  /*
+     Landing on the archive, runGeneration raises its own veil and takes the
+     boot curtain over with it. Landing anywhere else, the tab in front is
+     already painted, so the curtain comes down now and the archive is built
+     quietly behind it.
+  */
+  if (landing !== "archive") dropBootVeil(landing === "today" ? "sky" : "space");
+  runGeneration(inputs, { reveal: landing === "archive" });
 })();

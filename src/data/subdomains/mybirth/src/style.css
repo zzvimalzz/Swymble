@@ -667,8 +667,29 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 
 /* ============================================================
    LOADING VEIL
+
+   Two worlds, one set of markup.
+
+   The archive's veil is deep space: an orrery tilted away from the viewer,
+   which is the thing about to be revealed rather than a spinner standing in
+   for it. The Daily Sky's is paper, because arriving there behind a black
+   screen and then being handed a cream card is exactly the jolt a loading
+   screen exists to prevent. Everything below is written as the space design
+   plus a `.veil--sky` override, so the two cannot drift apart.
+
+   The veil also covers the boot. Until main.js has parsed and decided which
+   tab it is opening, the raw document shows the archive's form, and that
+   flash of the wrong page was the first thing anybody noticed on a reload.
+   An inline script in <head> raises the curtain before the browser paints
+   and the app drops it once it has something to show.
    ============================================================ */
 .veil {
+  --v-ink: #ece9f5;
+  --v-mute: rgba(236,233,245,0.62);
+  --v-accent: var(--lunar);
+  --v-line: rgba(236,217,172,0.22);
+  --v-shadow: #04050c;      /* the night the moon is shadowed against */
+
   position: fixed;
   inset: 0;
   z-index: 90;
@@ -676,109 +697,249 @@ main { position: relative; z-index: 2; padding-top: 56px; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 52px;
-  background: radial-gradient(130% 130% at 50% 45%, rgba(10,11,22,0.92), rgba(2,3,8,0.99));
-  backdrop-filter: blur(14px);
-  animation: fadeIn 0.55s var(--ease);
+  gap: clamp(34px, 6vh, 52px);
+  /* fully opaque: a loading screen that lets the page show through is a
+     smear rather than a curtain, and the whole point is to hide a swap */
+  background: radial-gradient(120% 120% at 50% 38%, #10112a, #020308);
+  animation: veil-in 0.5s var(--ease) both;
+  transition: opacity 0.42s var(--ease);
 }
 .veil[hidden] { display: none; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.veil.is-leaving { opacity: 0; pointer-events: none; }
+@keyframes veil-in { from { opacity: 0; } to { opacity: 1; } }
 
-/* orrery: the concentric orbital rings + moon in the centre */
-.veil__orrery {
+/* ---- the boot curtain ----
+   The attribute is written by the inline script in <head> and cleared by
+   main.js, so the veil is up from the first paint rather than from the
+   first frame of JavaScript. The 8s fallback in that script means a module
+   that never loads cannot leave somebody staring at a moon forever. */
+html[data-boot] .veil[hidden] { display: flex; animation: none; }
+
+/* Both worlds' copy is in the markup so the curtain reads correctly before
+   any script runs. Whichever world is not showing is simply not there. */
+.veil [data-world="sky"] { display: none; }
+html[data-boot="sky"] .veil [data-world="sky"] { display: inline; }
+html[data-boot="sky"] .veil [data-world="space"] { display: none; }
+
+/* ---- the orrery ---- */
+.veil__stage {
   position: relative;
-  width: 260px;
-  height: 260px;
+  width: min(280px, 62vw);
+  aspect-ratio: 1;
   display: grid;
   place-items: center;
+  /* tilted away from the viewer, so the rings read as orbits rather than
+     as three concentric circles drawn flat on the screen */
+  perspective: 620px;
+}
+.veil__orrery {
+  position: absolute;
+  inset: 0;
+  transform: rotateX(64deg);
+  transform-style: preserve-3d;
 }
 
-.veil__ring {
+.veil__orbit {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1px solid;
+  border: 1px solid var(--v-line);
+  animation: orbit-spin var(--dur, 14s) linear infinite;
 }
-.veil__ring--outer {
-  border-color: rgba(154,127,240,0.3);
-  animation: ring-spin 14s linear infinite;
-}
-.veil__ring--mid {
-  inset: 28px;
-  border-color: rgba(236,217,172,0.24);
-  animation: ring-spin 9s linear infinite reverse;
-}
-.veil__ring--inner {
-  inset: 58px;
-  border-color: rgba(111,227,210,0.16);
-  animation: ring-spin 5.5s linear infinite;
-}
-@keyframes ring-spin { to { transform: rotate(360deg); } }
-
-/* the small glowing dot that orbits on each ring */
-.veil__spark {
+.veil__orbit i {
   position: absolute;
   top: 50%;
-  left: -6px;
-  width: 12px;
-  height: 12px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
   border-radius: 50%;
-  transform: translateY(-50%);
+  background: var(--dot, var(--v-accent));
+  box-shadow: 0 0 12px var(--dot, var(--v-accent)), 0 0 26px var(--dot, var(--v-accent));
 }
-.veil__ring--outer .veil__spark {
-  background: var(--violet);
-  box-shadow: 0 0 18px rgba(154,127,240,1), 0 0 36px rgba(154,127,240,0.5);
-}
-.veil__ring--mid .veil__spark {
-  left: -5px;
-  width: 10px;
-  height: 10px;
-  background: var(--lunar);
-  box-shadow: 0 0 14px rgba(236,217,172,1), 0 0 28px rgba(236,217,172,0.6);
-}
+.veil__orbit--1 { --dur: 15s; --dot: var(--violet); border-color: rgba(154,127,240,0.28); }
+.veil__orbit--2 { inset: 15%; --dur: 9.5s; --dot: var(--lunar); animation-direction: reverse; }
+.veil__orbit--3 { inset: 31%; --dur: 6s; --dot: var(--teal); border-color: rgba(111,227,210,0.18); }
+@keyframes orbit-spin { to { transform: rotate(360deg); } }
 
+/* the moon sits upright in the middle of the tilted rings */
 .veil__moon {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 34% 31%, #fff 0%, #fff8e8 14%, var(--lunar) 42%, #8b6e2e 72%, #4a3810 100%);
-  box-shadow:
-    0 0 90px rgba(236,217,172,0.6),
-    0 0 40px rgba(236,217,172,0.35),
-    0 0 14px rgba(236,217,172,0.2),
-    inset -22px -14px 40px rgba(0,0,0,0.65),
-    inset 6px 5px 18px rgba(255,255,240,0.12);
-  animation: bob 3s var(--ease-soft) infinite;
   position: relative;
   z-index: 2;
+  width: 27%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 34% 30%, #fffdf6 0%, #fdf4dd 18%, var(--lunar) 48%, #97783a 76%, #4a3810 100%);
+  box-shadow:
+    0 0 70px rgba(236,217,172,0.34),
+    0 0 26px rgba(236,217,172,0.22),
+    inset -14px -10px 30px rgba(0,0,0,0.55),
+    inset 5px 4px 14px rgba(255,255,240,0.14);
+  animation: veil-bob 4.2s var(--ease-soft) infinite;
 }
-@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-11px); } }
+/*
+   The shadow half, waxing and waning across the disc.
 
-/* text block below the orrery */
+   The first attempt slid a half-disc across on translateX, which spends most
+   of a cycle entirely off the moon: the render caught it empty, and on paper
+   an empty ring reads as a component that failed to load. Clipping the
+   shadow instead means there is always a moon there, and it grows and
+   shrinks the way one actually does.
+*/
+.veil__moon i {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: var(--v-shadow, #04050c);
+  animation: veil-phase 7s var(--ease-soft) infinite alternate;
+}
+@keyframes veil-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@keyframes veil-phase {
+  from { clip-path: inset(0 0 0 6%); }    /* a thin crescent lit */
+  to   { clip-path: inset(0 0 0 100%); }  /* full */
+}
+
+/* ---- copy ---- */
 .veil__copy {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   text-align: center;
+  padding: 0 24px;
 }
 .veil__eyebrow {
+  margin: 0;
   font-family: var(--display);
   font-style: italic;
   font-weight: 300;
-  font-size: 1.15rem;
-  color: rgba(236,233,245,0.75);
-  margin: 0;
+  font-size: clamp(1.05rem, 3.4vw, 1.3rem);
+  color: var(--v-ink);
   letter-spacing: 0.01em;
 }
 .veil__text {
   margin: 0;
   font-family: var(--mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.3em;
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--paper-soft);
+  color: var(--v-mute);
   min-height: 1.6em;
+  /* each new line arrives rather than swapping */
+  animation: veil-line 0.9s var(--ease);
+}
+@keyframes veil-line { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* An honest indeterminate bar. There is no percentage to report, so it
+   never pretends to have one: it sweeps, and it stops when the veil goes. */
+.veil__bar {
+  position: relative;
+  width: min(190px, 46vw);
+  height: 1px;
+  margin-top: 6px;
+  background: var(--v-line);
+  overflow: hidden;
+}
+.veil__bar i {
+  position: absolute;
+  inset: 0;
+  width: 38%;
+  background: linear-gradient(90deg, transparent, var(--v-accent), transparent);
+  animation: veil-sweep 1.5s var(--ease-soft) infinite;
+}
+@keyframes veil-sweep {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(370%); }
+}
+
+/* ============================================================
+   THE PAPER VEIL
+
+   Same bones, opposite world. The orrery flattens to a single hairline
+   ring and one printed moon disc, because that is how the Daily Sky draws
+   its own moon: an SVG on a card, not a lit sphere in the dark.
+   ============================================================ */
+/* Two selectors carry every rule here: the class main.js sets once it is
+   awake, and the boot attribute the inline script writes before it is. They
+   describe the same design and must not be allowed to drift, so they are
+   always written as a pair. */
+.veil--sky,
+html[data-boot="sky"] .veil {
+  --v-ink: #14120d;
+  --v-mute: #6b6457;
+  --v-accent: #8a6712;
+  --v-line: rgba(20,18,13,0.18);
+  --v-shadow: #fbf9f4;      /* on paper the shadow is the page showing back through */
+  background: radial-gradient(120% 120% at 50% 34%, #fbf9f4, #efece3 68%, #e7e3d8);
+}
+.veil--sky.is-dark,
+html[data-boot="sky"][data-boot-dark] .veil {
+  --v-ink: #f4f1e9;
+  --v-mute: #9a9385;
+  --v-accent: #e0bc63;
+  --v-line: rgba(244,241,233,0.18);
+  --v-shadow: #1b1915;
+  background: radial-gradient(120% 120% at 50% 34%, #1b1915, #12110e 70%, #0d0c0a);
+}
+
+/* flat on the page: no tilt, no perspective, one ring */
+.veil--sky .veil__orrery,
+html[data-boot="sky"] .veil__orrery { transform: none; }
+.veil--sky .veil__orbit,
+html[data-boot="sky"] .veil__orbit { animation: none; border-color: transparent; }
+.veil--sky .veil__orbit i,
+html[data-boot="sky"] .veil__orbit i { display: none; }
+.veil--sky .veil__orbit--1,
+html[data-boot="sky"] .veil__orbit--1 {
+  border-color: var(--v-line);
+  /* one hairline breathing, the way a compass would lay it down */
+  animation: sky-draw 2.8s var(--ease-soft) infinite;
+}
+@keyframes sky-draw {
+  0%, 100% { opacity: 0.34; transform: scale(0.97); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/*
+   The printed moon.
+
+   Not a lit sphere: an inked outline with the phase filled in, which is how
+   the Daily Sky draws its own moon and how an almanac prints one. The first
+   pass filled the whole disc with gold and it read as a mustard blob, so the
+   ground is paper, the rule is ink, and the gold is only the lit part.
+*/
+.veil--sky .veil__moon,
+html[data-boot="sky"] .veil__moon {
+  width: 32%;
+  /* gold is the lit surface; the shadow above it is the paper showing back
+     through, which is exactly how the disc is printed on the Today card */
+  background: var(--v-accent);
+  box-shadow: inset 0 0 0 1.5px var(--v-ink);
+  animation: none;
+}
+.veil--sky .veil__moon i,
+html[data-boot="sky"] .veil__moon i {
+  inset: 0;
+  animation-duration: 6.5s;
+}
+
+.veil--sky .veil__eyebrow,
+html[data-boot="sky"] .veil__eyebrow { font-style: normal; font-weight: 400; }
+
+/* ---- motion sensitivity ----
+   The veil still appears, because it is telling you the page is working.
+   Nothing in it spins, sweeps or travels. */
+@media (prefers-reduced-motion: reduce) {
+  .veil,
+  .veil__orbit,
+  .veil__moon,
+  .veil__moon i,
+  .veil__text,
+  .veil__bar i { animation: none !important; }
+  /* the moon still shows a phase, it just holds still at one */
+  .veil__moon i { clip-path: inset(0 0 0 52%); }
+  .veil__bar i { width: 100%; opacity: 0.45; }
 }
 
 /* ============================================================

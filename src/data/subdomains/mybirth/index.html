@@ -40,6 +40,47 @@
     <!-- fonts are self-hosted, see the @font-face block in src/style.css -->
     <link rel="preload" href="/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/space-grotesk.woff2" as="font" type="font/woff2" crossorigin />
+    <!--
+      Raise the loading veil before the first paint.
+
+      main.js is a module, so it runs after the document has been parsed and
+      painted. For that gap the browser shows the archive's form, which is
+      the wrong page for anyone whose last tab was Today and is jarring for
+      everybody: the fields appear, then vanish. This decides which world is
+      being opened using the same rule main.js will, writes it onto <html>,
+      and lets the stylesheet put the curtain up. main.js clears the
+      attribute once it has something real to show.
+
+      It duplicates a few lines of rootTab() on purpose. Importing anything
+      here would defeat the point, which is to run before any module does.
+    -->
+    <script>
+      (function () {
+        var el = document.documentElement;
+        try {
+          var hash = location.hash.replace("#", "");
+          var tab =
+            hash === "today" || hash === "people" || hash === "archive"
+              ? hash
+              : hash === "new" || /[?&]n=/.test(location.search)
+                ? "archive"
+                : JSON.parse(localStorage.getItem("mybirth:saves") || "[]").length
+                  ? "today"
+                  : "archive";
+          el.setAttribute("data-boot", tab === "today" ? "sky" : "space");
+          if (tab === "today" && localStorage.getItem("mybirth:sky-theme") === "dark") {
+            el.setAttribute("data-boot-dark", "1");
+          }
+        } catch (e) {
+          el.setAttribute("data-boot", "space");
+        }
+        // a module that never loads must not leave anybody staring at a moon
+        setTimeout(function () {
+          el.removeAttribute("data-boot");
+          el.removeAttribute("data-boot-dark");
+        }, 8000);
+      })();
+    </script>
   </head>
   <body>
     <!-- deep-space backdrop layers -->
@@ -236,17 +277,35 @@
       </div><!-- /panel-saves -->
     </main>
 
-    <!-- loading veil -->
+    <!--
+      Loading veil. One set of markup for both worlds: the archive styles it
+      as a tilted orrery in deep space, the Daily Sky as a printed disc on
+      paper. See the LOADING VEIL block in style.css.
+    -->
     <div class="veil" id="veil" hidden>
-      <div class="veil__orrery">
-        <div class="veil__ring veil__ring--outer"><span class="veil__spark"></span></div>
-        <div class="veil__ring veil__ring--mid"><span class="veil__spark"></span></div>
-        <div class="veil__ring veil__ring--inner"></div>
-        <div class="veil__moon"></div>
+      <div class="veil__stage" aria-hidden="true">
+        <div class="veil__orrery">
+          <span class="veil__orbit veil__orbit--1"><i></i></span>
+          <span class="veil__orbit veil__orbit--2"><i></i></span>
+          <span class="veil__orbit veil__orbit--3"><i></i></span>
+        </div>
+        <div class="veil__moon"><i></i></div>
       </div>
-      <div class="veil__copy">
-        <p class="veil__eyebrow">Recovering your day</p>
-        <p class="veil__text" id="veil-text">Aligning the heavens&hellip;</p>
+      <!--
+        Both worlds' copy ships in the markup so the boot curtain reads
+        correctly before any script has run. Once main.js is awake it sets
+        the line directly and these spans are replaced.
+      -->
+      <div class="veil__copy" role="status" aria-live="polite">
+        <p class="veil__eyebrow" id="veil-eyebrow">
+          <span data-world="space">Recovering your day</span>
+          <span data-world="sky">Turning to today</span>
+        </p>
+        <p class="veil__text" id="veil-text">
+          <span data-world="space">Aligning the heavens&hellip;</span>
+          <span data-world="sky">Reading the sky&hellip;</span>
+        </p>
+        <span class="veil__bar" aria-hidden="true"><i></i></span>
       </div>
     </div>
 
