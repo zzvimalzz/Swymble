@@ -1,0 +1,87 @@
+{
+  "_comment": [
+    "The line of the day. One declarative, generated from the leading aspect.",
+    "",
+    "This is the notification, built before the notifications exist. Roadmap",
+    "task 1.5 puts it here on purpose: a push payload that has been read on a",
+    "page for months is one somebody has already caught the bad sentences in,",
+    "and a bad sentence on a lock screen is the one people uninstall over.",
+    "",
+    "So it is held to the constraints of a push rather than the constraints of",
+    "a card. 72 characters, because that is roughly what a lock screen shows",
+    "before it truncates. No area label above it and no measurement below it,",
+    "because a notification carries neither. It has to stand up alone.",
+    "",
+    "Keyed area by tone, the same address the card headline uses, but written",
+    "to a different brief: the headline sits under a label that says which",
+    "area it is about, and this does not, so it has to carry that itself.",
+    "",
+    "check-voice.mjs enforces the 72 characters and the no-question rule on",
+    "this file the same way it does on readings.json."
+  ],
+  "lines": {
+    "self": {
+      "charged": "Something you did quietly is about to be seen. Let it be seen plainly.",
+      "open": "The room is easier to enter today than you are expecting it to be.",
+      "friction": "How you land and how you meant to land are not the same today.",
+      "easy": "You are being read accurately today. Say the thing you mean.",
+      "pull": "Who you are and what is wanted are at opposite ends of today."
+    },
+    "money": {
+      "charged": "Say the number out loud today, and say the one you rounded down.",
+      "open": "Somebody says yes to a figure today. Ask for the whole of it.",
+      "friction": "The expense you are avoiding costing out is the one to cost out.",
+      "easy": "Your effort is worth more today than usual. Point it somewhere.",
+      "pull": "You cannot have both prices today. Choose the one you would defend."
+    },
+    "talk": {
+      "charged": "The sentence lands harder than you mean it to today. Send it anyway.",
+      "open": "Introduce two people today. It costs nothing and it compounds.",
+      "friction": "The short reply is the right one today. Do not explain twice.",
+      "easy": "The long conversation goes well today. Have it while it is going.",
+      "pull": "What you are saying and what is heard are pulling apart today."
+    },
+    "home": {
+      "charged": "Home is louder than usual today, and it is not asking politely.",
+      "open": "A small thing at home is worth fixing today. Just the small one.",
+      "friction": "Not everything at home wants fixing today. Leave one of them.",
+      "easy": "The house is on your side today. Cook for somebody in it.",
+      "pull": "Where you are from and where you sleep are pulling apart today."
+    },
+    "making": {
+      "charged": "Make the thing badly today, on purpose, and finish it that way.",
+      "open": "The idea is available today. It will not be this cheap in a week.",
+      "friction": "The work resists today. Do the unglamorous half of it instead.",
+      "easy": "It comes out clean today. Point that at the thing that was stuck.",
+      "pull": "Making it and showing it are pulling in different directions today."
+    },
+    "work": {
+      "charged": "Something you have built quietly gets looked at today. Let it.",
+      "open": "Take the meeting slightly above your level today. Ask for it.",
+      "friction": "The wall at work is real today. Stop testing it and go around.",
+      "easy": "Your effort converts today. Point it at the stuck thing.",
+      "pull": "What you do and what you are known for are not the same today."
+    },
+    "love": {
+      "charged": "Say the direct thing to them today. The softened version will not land.",
+      "open": "The difficult conversation goes better today than it will tomorrow.",
+      "friction": "You are not going to win this one today. Try not needing to.",
+      "easy": "Warmth is cheap today. Spend it on the person, not on the plan.",
+      "pull": "What you want and what they want are at opposite ends of today."
+    },
+    "sex": {
+      "charged": "What you keep below the surface is close to it today.",
+      "open": "Say the thing you were going to keep. It is easier to hear today.",
+      "friction": "Withholding is a decision too, and it is the expensive one today.",
+      "easy": "You can go a long way down today without it costing the climb back.",
+      "pull": "What you will not let go of and what will not stay is today."
+    },
+    "belief": {
+      "charged": "Something you believed is being tested today. Let it be tested.",
+      "open": "The far-off thing is closer today. Look at it properly.",
+      "friction": "Do not argue the big thing today. Argue the small true one.",
+      "easy": "The generous reading is also the accurate one today.",
+      "pull": "What you hold true and what you can show are pulling apart today."
+    }
+  }
+}

@@ -407,6 +407,155 @@ export function sunTimes(lat, lon, date, timeZone) {
   return { sunrise: fmt(rise), sunset: fmt(set), daylightHours, approxZone };
 }
 
+/* ---------- rarity: how unusual your sky was ---------- */
+
+/*
+   Roadmap 1.7.
+
+   "About three per cent of birthdays have a moon like yours" is the most
+   shareable sentence the product can produce, and the only way to say it
+   honestly is to count. So this counts: it walks a whole Metonic cycle, a
+   day at a time, and asks how many of those days had a moon within one
+   percentage point of the one you were born under.
+
+   Nineteen years is the right window and not an arbitrary one. 235 lunar
+   months come to within two hours of 19 solar years, so a Metonic cycle is
+   the shortest span over which every phase falls on every part of the
+   calendar a roughly equal number of times. A shorter sample would report
+   a share that depends on which years it happened to catch.
+
+   6,940 cheap trigonometric evaluations, which is a few milliseconds, and
+   the figure it returns is one anybody with an ephemeris can reproduce.
+*/
+const METONIC_DAYS = 6940;
+
+export function moonPhaseRarity(birthDate, { tolerance = 0.01 } = {}) {
+  const mine = moonPhase(birthDate).illumination;
+  const start = new Date(birthDate.getTime());
+  let matches = 0;
+
+  for (let i = 0; i < METONIC_DAYS; i++) {
+    const d = new Date(start.getTime() + i * 86400000);
+    if (Math.abs(moonPhase(d).illumination - mine) <= tolerance) matches++;
+  }
+
+  return {
+    illumination: mine,
+    /** how close a day has to be to count, as a fraction of the disc */
+    tolerance,
+    matches,
+    days: METONIC_DAYS,
+    share: matches / METONIC_DAYS,
+    /*
+       Named so the copy never has to round it itself. Below a tenth of a
+       per cent the honest thing is to say so rather than to print 0.0.
+    */
+    percent: (matches / METONIC_DAYS) * 100,
+  };
+}
+
+/* ---------- tonight's sky against your sky ---------- */
+
+/*
+   Roadmap 1.8. The moon-return module, extended to everything else.
+
+   The moon one asks a good question: how far round its cycle is the moon
+   from the face it wore when you were born? Every other body has the same
+   question and nobody asks it, because the answers are long. Saturn takes
+   29 years to come back to where it was; the first Saturn return is the
+   one people have heard of, and this is the arithmetic underneath it.
+
+   `elapsed` is the angle a body has travelled since your birth, modulo a
+   full turn. `progress` is how far round that is. `returns` is how many
+   complete circuits it has made, which for the moon is a large number and
+   for Pluto is usually zero, and both of those facts are interesting for
+   opposite reasons.
+
+   Periods are sidereal years, the time to come back to the same longitude
+   as seen from the sun. Geocentric motion loops and retrogrades on the way,
+   so a date computed from the mean period is good to a few days for the
+   inner bodies and a few weeks for the outer ones. That uncertainty is
+   returned rather than hidden, so the caller can decide how precisely to
+   speak.
+*/
+const RETURN_PERIODS = {
+  moon: 27.321661 / 365.25,
+  sun: 1,
+  mercury: 0.2408467,
+  venus: 0.61519726,
+  mars: 1.8808158,
+  jupiter: 11.862615,
+  saturn: 29.447498,
+  uranus: 84.016846,
+  neptune: 164.79132,
+  pluto: 247.94,
+};
+
+/**
+ * Where every body stands now against where it stood at a birth.
+ *
+ * `chartOf` is passed in rather than imported so this stays inside the
+ * astronomy layer: reading.js owns what counts as a chart.
+ */
+export function skyAgainstBirth(natalChart, todayChart, birthDate, now = new Date()) {
+  const out = [];
+  const ageDays = (now - birthDate) / 86400000;
+
+  for (const [key, years] of Object.entries(RETURN_PERIODS)) {
+    const natal = natalChart[key];
+    const today = todayChart[key];
+    if (!Number.isFinite(natal) || !Number.isFinite(today)) continue;
+
+    const elapsed = norm360(today - natal);
+    const remaining = 360 - elapsed;
+    const periodDays = years * 365.25;
+    const daysToReturn = (remaining / 360) * periodDays;
+
+    /*
+       Completed circuits, counted so that they cannot disagree with the
+       part-circuit beside them.
+
+       The obvious way to get this is `floor(age / period)`, and it is
+       wrong at exactly the moment anybody is looking: a body a few days
+       either side of a return has an age-over-period of 2.97 while its
+       real position says it has just finished its third lap. Printing
+       "2 returns so far" under a bar showing one per cent is the kind of
+       error a reader spots instantly and cannot unsee.
+
+       So the whole turns are derived from the fraction rather than
+       independently of it. Age over period gives the total number of
+       turns including the part one; subtract the part one, measured from
+       real longitudes, and round. The two numbers are then two halves of
+       the same quantity by construction.
+    */
+    const returns = Math.max(0, Math.round(ageDays / periodDays - elapsed / 360));
+
+    out.push({
+      key,
+      natal,
+      today,
+      /** degrees travelled since birth, within the current circuit */
+      elapsed,
+      /** 0 just after a return, 1 arriving at the next one */
+      progress: elapsed / 360,
+      /** complete circuits since birth, consistent with `progress` */
+      returns,
+      daysToReturn,
+      returnDate: new Date(now.getTime() + daysToReturn * 86400000),
+      periodDays,
+      /*
+         Mean motion, so the date drifts. Two per cent of a period states
+         that fairly for the slow bodies and generously for the fast ones;
+         the caller prints a month rather than a day when it is large,
+         which is the whole reason it is returned.
+      */
+      uncertaintyDays: Math.min(periodDays * 0.02, 60),
+    });
+  }
+
+  return out.sort((a, b) => a.periodDays - b.periodDays);
+}
+
 /* ---------- your age across the solar system ---------- */
 const PLANETS = [
   { name: "Mercury", glyph: "☿", period: 0.2408467 },
@@ -439,7 +588,27 @@ const PLANET_ELEMENTS = [
   { name: "Venus", glyph: "♀", el: [0.72333566, 0.00677672, 3.39467605, 181.97909950, 131.60246718, 76.67984255], r: [0.00000390, -0.00004107, -0.00078890, 58517.81538729, 0.00268329, -0.27769418] },
   { name: "Mars", glyph: "♂", el: [1.52371034, 0.09339410, 1.84969142, -4.55343205, -23.94362959, 49.55953891], r: [0.00001847, 0.00007882, -0.00813131, 19140.30268499, 0.44441088, -0.29257343] },
   { name: "Jupiter", glyph: "♃", el: [5.20288700, 0.04838624, 1.30439695, 34.39644051, 14.72847983, 100.47390909], r: [-0.00011607, -0.00013253, -0.00183714, 3034.74612775, 0.21252668, 0.20469106] },
-  { name: "Saturn", glyph: "♄", el: [9.53667594, 0.05386179, 2.48599187, 49.95424423, 92.59887831, 113.66242448], r: [-0.00125060, -0.00050991, 0.00193609, 1222.49362201, -0.41897216, -0.28867794] }
+  { name: "Saturn", glyph: "♄", el: [9.53667594, 0.05386179, 2.48599187, 49.95424423, 92.59887831, 113.66242448], r: [-0.00125060, -0.00050991, 0.00193609, 1222.49362201, -0.41897216, -0.28867794] },
+  /*
+     The outer three, added later.
+
+     They are the reason a chart has something to say about most of its
+     sectors: seven bodies leave half a chart empty, ten do not. As sources
+     of a *daily* reading they are close to useless, since Pluto covers
+     about two arcseconds a day and would narrate the same headline for a
+     season, and the speed weighting in reading.js scores them down for
+     exactly that. As targets they matter as much as any other point.
+
+     Accuracy: the inner five are good to a few arcminutes across
+     1900-2100. These are good to a few arcminutes for Uranus and Neptune
+     and to roughly a tenth of a degree for Pluto, whose 17-degree
+     inclination and eccentricity strain a two-body approximation. That is
+     inside what the page prints, and it is the reason Pluto is never used
+     to claim an exact time.
+  */
+  { name: "Uranus", glyph: "♅", el: [19.18916464, 0.04725744, 0.77263783, 313.23810451, 170.95427630, 74.01692503], r: [-0.00196176, -0.00004397, -0.00242939, 428.48202785, 0.40805281, 0.04240589] },
+  { name: "Neptune", glyph: "♆", el: [30.06992276, 0.00859048, 1.77004347, -55.12002969, 44.96476227, 131.78422574], r: [0.00026291, 0.00005105, 0.00035372, 218.45945325, -0.32241464, -0.00508664] },
+  { name: "Pluto", glyph: "♇", el: [39.48211675, 0.24882730, 17.14001206, 238.92903833, 224.06891629, 110.30393684], r: [-0.00031596, 0.00005170, 0.00004818, 145.20780515, -0.04062942, -0.01183482] }
 ];
 
 const SIGN_NAMES = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",

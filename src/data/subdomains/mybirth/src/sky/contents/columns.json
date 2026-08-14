@@ -1,6 +1,9 @@
 {
   "_comment": [
-    "The Do and Don't columns, by tone. Three of each are drawn per day.",
+    "The two columns, by tone. Three of each are drawn per day, and they",
+    "render under the headings 'More of' and 'Less of'. The keys stay 'do'",
+    "and 'dont' because renaming them would rewrite 200 lines of content to",
+    "no purpose; the heading is the part a reader sees.",
     "",
     "Noun phrases rather than instructions, so they read as aphorism rather",
     "than as advice: 'Happy hour' invites a thought, 'go to happy hour'",

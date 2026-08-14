@@ -210,9 +210,6 @@
                 <ul class="placelist" id="place-results" role="listbox" aria-label="Matching places" hidden></ul>
               </div>
             </div>
-            <p class="console__place-note" id="place-status" role="status">
-              Pick one from the list.
-            </p>
 
             <button type="button" class="console__more" id="toggle-optional" aria-expanded="false">
               <span class="console__more-plus">+</span> add the fine detail <span class="console__more-hint">(optional)</span>
@@ -221,19 +218,39 @@
             <div class="console__optional" id="optional-fields" inert>
               <div class="console__optional-inner">
                 <p class="console__hint">
-                  A birth time sharpens the moon&rsquo;s face and the sunrise.
+                  A birth time sharpens the moon&rsquo;s face and the sunrise, and it is
+                  the whole of what the Daily Sky needs.
                 </p>
-                <div class="console__row console__row--split">
-                  <label class="field">
-                    <input type="time" name="time" id="f-time" placeholder=" " />
-                    <span class="field__label">Time you were born</span>
-                    <span class="field__line"></span>
-                  </label>
-                  <label class="field">
-                    <input type="text" name="current" id="f-current" placeholder=" " autocomplete="off" />
-                    <span class="field__label">Where you live now</span>
-                    <span class="field__line"></span>
-                  </label>
+                <!--
+                  Two number fields rather than <input type="time">.
+
+                  The native control renders as a different thing in every
+                  browser, drags a spinner and an AM/PM select in on desktop,
+                  opens a scroll wheel on iOS, and none of those match a form
+                  that is otherwise four bare underlines. These are two boxes
+                  and a sentence underneath that reads the time back in words,
+                  which is also how the field teaches the 24-hour format
+                  without an instruction above it. Same markup and the same
+                  wiring as the birth-time gate on the Daily Sky.
+
+                  "Where you live now" used to sit beside this. Nothing read
+                  it: no generator, no reading, no certificate. A field that
+                  collects a birthplace-adjacent piece of personal data and
+                  then does nothing with it is worse than clutter.
+                -->
+                <div class="console__clock" data-clock>
+                  <div class="clock__row">
+                    <input class="clock__unit" data-unit="h" id="f-time-h" inputmode="numeric"
+                           autocomplete="off" maxlength="2" placeholder="00"
+                           aria-label="Hour you were born, 0 to 23" />
+                    <span class="clock__colon" aria-hidden="true">:</span>
+                    <input class="clock__unit" data-unit="m" id="f-time-m" inputmode="numeric"
+                           autocomplete="off" maxlength="2" placeholder="00"
+                           aria-label="Minute you were born, 0 to 59" />
+                    <span class="console__clock-label">Time you were born</span>
+                  </div>
+                  <p class="clock__read" data-clock-read role="status">&nbsp;</p>
+                  <input type="hidden" name="time" id="f-time" />
                 </div>
               </div>
             </div>

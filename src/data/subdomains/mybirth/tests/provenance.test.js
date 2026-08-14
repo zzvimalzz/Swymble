@@ -10,8 +10,8 @@
 */
 
 import { describe, it, expect } from "vitest";
-import { fact, isFact, valueOf, mark, scopeNote, KIND } from "./subdomains/mybirth/src/provenance.js";
-import { movieOfYear, songOfYear, leaderAt, worldPopulationAt } from "./subdomains/mybirth/src/data.js";
+import { fact, isFact, valueOf, mark, scopeNote, KIND } from "../src/facts/provenance.js";
+import { movieOfYear, songOfYear, leaderAt, worldPopulationAt } from "../src/facts/data.js";
 
 describe("fact()", () => {
   it("refuses to exist without a source", () => {

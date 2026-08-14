@@ -494,6 +494,53 @@ main { position: relative; z-index: 2; padding-top: 56px; }
   font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.04em;
   color: var(--paper-mute); margin: 2px 0 4px; text-align: center;
 }
+/*
+   The optional birth time, on the archive's dark console.
+
+   Same markup and the same wiring as the Daily Sky's birth-time gate, so
+   the two controls cannot drift, but restyled for this page: the gate is
+   the only thing on its screen and sets its digits at five rem, and here
+   the field sits under four others and has to sit down beside them.
+
+   `<input type="time">` is what this replaced. It rendered as a different
+   control in every browser, dragged a spinner and an AM/PM select onto
+   desktop and a scroll wheel onto iOS, and was the one thing on the form
+   wearing the platform's chrome instead of the page's.
+*/
+.console__clock { padding: 4px 0 2px; }
+.console__clock .clock__row { gap: 6px; }
+.console__clock .clock__unit {
+  width: 2.2ch;
+  padding: 0 0 8px;
+  border-bottom: 2px solid var(--line-strong);
+  font-size: clamp(2rem, 6vw, 2.6rem);
+  color: var(--paper);
+}
+.console__clock .clock__unit::placeholder { color: rgba(255, 255, 255, 0.18); }
+.console__clock .clock__unit:focus { border-bottom-color: var(--lunar); }
+.console__clock .clock__colon {
+  font-size: clamp(1.7rem, 5vw, 2.2rem);
+  padding-bottom: 8px;
+  color: var(--paper-mute);
+}
+/* the label sits beside the boxes rather than floating over them: there is
+   no placeholder to float away from when the field is a pair of numerals */
+.console__clock-label {
+  margin-left: 14px;
+  align-self: flex-end;
+  padding-bottom: 12px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper-mute);
+}
+.console__clock .clock__read {
+  font-size: 0.7rem;
+  margin: 10px 0 0;
+  color: var(--lunar);
+}
+
 .field--wide { flex: 1; }
 .field--day { width: 88px; }
 .field--month { flex: 1; }
@@ -2876,6 +2923,39 @@ body.on-paper.sky-dark .brand__pill { background: #f4f1e9; }
   margin: 0;
 }
 
+/* ---- the polarity mark ---- */
+/*
+   Set in the same mono at the same size as the label it sits beside, so
+   it reads as part of that line rather than as a badge. No colour: the
+   whole argument for printing the axis at all is that support and strain
+   are descriptions of an angle, and a green pill would quietly turn one
+   of them into good news.
+*/
+.sky-label--pol {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.sky-pol {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--pi-mute);
+  white-space: nowrap;
+  /* the note lives in the title attribute; the cursor is what says so */
+  cursor: help;
+}
+/* a hard angle is the one worth noticing at a glance, so it alone takes
+   the ink colour — the rank is in the weight, not in a hue */
+.sky-pol[data-polarity="strain"] { color: var(--pi); }
+.sky-pol__mark { flex: none; overflow: visible; }
+
 .sky-head {
   display: flex;
   align-items: center;
@@ -2934,6 +3014,24 @@ body.on-paper.sky-dark .brand__pill { background: #f4f1e9; }
 
 /* ---- 1. the reading ---- */
 .sky-read { padding: clamp(44px, 8vh, 82px) 0 clamp(38px, 6vh, 60px); }
+
+/*
+   The line of the day. Set in the mono at notification size on purpose:
+   it is a lock screen sentence and it should look like one on the page,
+   so that a line that reads badly as a notification reads badly here too.
+*/
+.sky-line {
+  font-family: var(--mono);
+  font-size: clamp(0.82rem, 1.5vw, 0.94rem);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--pi);
+  margin: 0 0 clamp(26px, 4vh, 38px);
+  padding-left: 14px;
+  border-left: 2px solid var(--pg);
+  max-width: 44ch;
+  text-wrap: pretty;
+}
 .sky-headline {
   font-family: var(--display);
   font-weight: 300;
@@ -2981,6 +3079,152 @@ body.on-paper.sky-dark .brand__pill { background: #f4f1e9; }
   font-size: clamp(1.1rem, 2.3vw, 1.5rem);
   line-height: 1.42;
   color: var(--pi);
+}
+
+/* ---- the shareable card ---- */
+/*
+   Rendered off-screen at a fixed 1080 square and never seen in the layout,
+   so nothing here is responsive and nothing here uses a clamp. Everything
+   is absolute, because the only viewport this has is the one html2canvas
+   gives it, and a rem here would inherit whatever the page happened to be
+   set at when the button was pressed.
+*/
+.sharecard {
+  width: 1080px;
+  height: 1080px;
+  box-sizing: border-box;
+  padding: 92px 88px 76px;
+  background: var(--pp);
+  color: var(--pi);
+  display: flex;
+  flex-direction: column;
+}
+.sharecard__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.sharecard__area {
+  font-family: var(--mono);
+  font-size: 22px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--pg);
+  margin: 0;
+}
+.sharecard__top .sky-pol { font-size: 20px; letter-spacing: 4px; }
+.sharecard__top .sky-pol__mark { width: 22px; height: 22px; }
+
+.sharecard__head {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: 92px;
+  line-height: 1.02;
+  letter-spacing: -1.6px;
+  margin: 76px 0 0;
+  text-wrap: balance;
+}
+.sharecard__body {
+  font-size: 34px;
+  line-height: 1.5;
+  color: var(--pi-soft);
+  margin: 44px 0 0;
+  max-width: 24ch;
+}
+
+/* the measurement sits on the floor of the card, which is where a reader
+   looks last and where a screenshot gets cropped least often */
+.sharecard__foot {
+  margin-top: auto;
+  padding-top: 44px;
+  border-top: 1px solid var(--pl);
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.sharecard__proof { min-width: 0; }
+.sharecard__asp {
+  font-family: var(--mono);
+  font-size: 30px;
+  color: var(--pi);
+  margin: 0;
+}
+.sharecard__orb {
+  font-family: var(--mono);
+  font-size: 24px;
+  color: var(--pi-mute);
+  margin: 8px 0 0;
+}
+.sharecard__when {
+  font-family: var(--mono);
+  font-size: 20px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--pi-mute);
+  margin: 14px 0 0;
+}
+.sharecard__mark {
+  font-family: var(--mono);
+  font-size: 20px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--pg);
+  margin: 40px 0 0;
+  text-align: right;
+}
+
+/* ---- save, in the expanded card ---- */
+.sky-modal__acts { display: flex; align-items: center; gap: 10px; flex: none; }
+.sky-modal__share {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--pl);
+  border-radius: 100px;
+  background: none;
+  color: var(--pi-mute);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.sky-modal__share:hover { color: var(--pi); border-color: var(--pi-mute); }
+.sky-modal__share[disabled] { opacity: 0.45; cursor: default; }
+
+/* ---- the daily number ---- */
+/*
+   The figure is set at headline weight and the sentence under it is set
+   small, which is the opposite of every other block on this page. That
+   inversion is the point: here the number is the content and the words
+   are the caption.
+*/
+.sky-num {
+  border-top: 1px solid var(--pl);
+  padding: clamp(30px, 4.5vh, 42px) 0;
+}
+.sky-num__value {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(3rem, 9vw, 5.4rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--pi);
+  margin: 0;
+}
+.sky-num__note {
+  font-size: clamp(0.95rem, 1.7vw, 1.08rem);
+  line-height: 1.6;
+  color: var(--pi-soft);
+  max-width: 48ch;
+  margin: 16px 0 0;
+  text-wrap: pretty;
 }
 
 /* ---- 2. the measurement ---- */
@@ -3050,7 +3294,353 @@ body.on-paper.sky-dark .brand__pill { background: #f4f1e9; }
   margin-top: 2px;
 }
 
-/* ---- 3-5. the modules ---- */
+/* ---- 3. the other areas ---- */
+/*
+   Deliberately quieter than the lead. The hero above is set at 5rem in
+   the display face and these are a third of that: the page has to keep a
+   reading order, and six equal headlines is a contents page, not a
+   morning. They are cards rather than a list because each one is a
+   different area of a life and a list implies a ranking that the orbs
+   already state more precisely.
+*/
+.sky-cards { padding: clamp(34px, 5vh, 52px) 0 0; }
+.sky-cards__count {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  color: var(--pi-mute);
+  white-space: nowrap;
+}
+
+/* the mark on a card the sky is not touching: a dashed ring, so it reads
+   as "no angle here" rather than as a fourth polarity */
+.sky-tab__dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 1px dashed currentColor;
+  flex: none;
+}
+/*
+   Nine areas, so three by three wherever there is room for it. auto-fit
+   would give four across on a wide screen and leave a row of one, which
+   is the layout the ninth area exists to avoid; the count is fixed at
+   nine, so the tracks can be too.
+*/
+.sky-cards__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+}
+@media (max-width: 860px) {
+  .sky-cards__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .sky-cards__grid { grid-template-columns: minmax(0, 1fr); }
+}
+.sky-card {
+  background: var(--pp);
+  box-shadow: 0 0 0 1px var(--pl);
+  padding: clamp(18px, 2.2vw, 24px) clamp(16px, 2vw, 22px);
+  display: flex;
+  flex-direction: column;
+}
+/* `display: flex` outranks the user-agent rule for [hidden], so the filter
+   would set the attribute and change nothing at all without this */
+.sky-cards [hidden] { display: none; }
+.sky-card__area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 10px;
+  /* a card is 280px at its narrowest and "Sex and what is shared" beside
+     "Charged" does not fit that; it wraps rather than truncating, because
+     the mark without its word is decoration and the word is the point */
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--pg);
+  margin: 0 0 14px;
+}
+/* on a card the area name is the heading and the polarity is the aside */
+.sky-card__pol { letter-spacing: 0.16em; }
+/*
+   Both are cut off with an ellipsis rather than shortened in JS: the full
+   sentence stays in the document, so find-in-page and a screen reader
+   still have it, and the popup is reading the same node.
+
+   `line-clamp` is the standard property and `-webkit-line-clamp` the one
+   every shipping browser implements; both are set, and the -webkit-box
+   display they need is what makes the ellipsis appear at all.
+*/
+.sky-card__head,
+.sky-card__body {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sky-card__head {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(1.15rem, 2.2vw, 1.4rem);
+  line-height: 1.16;
+  letter-spacing: -0.012em;
+  color: var(--pi);
+  margin: 0;
+  text-wrap: balance;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.sky-card__body {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--pi-soft);
+  margin: 10px 0 0;
+  text-wrap: pretty;
+  /* three lines is a peek: enough to tell whether the card is worth
+     opening, not enough to stand in for having opened it */
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+/* pushed to the foot of the card so the measurement lines up across a
+   row however unevenly the paragraphs above it fall */
+.sky-card__foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--pl-soft);
+}
+.sky-card__proof {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: var(--pi-mute);
+}
+.sky-card__ico { width: 1.15em; height: 1.15em; color: var(--pi-mute); flex: none; }
+.sky-card__asp { min-width: 0; overflow-wrap: anywhere; }
+.sky-card__orb {
+  margin-left: auto;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--pi);
+  white-space: nowrap;
+}
+
+/* A quiet area is not a broken card, so it is not styled as one: same
+   frame, same type, one step down in ink. Dimming it further would say
+   "nothing here", and the whole argument for printing it is that there
+   is something here and it is the measurement. */
+.sky-card--quiet { background: var(--pp-raised); }
+.sky-card--quiet .sky-card__area { color: var(--pi-mute); }
+.sky-card--quiet .sky-card__head { color: var(--pi-soft); }
+
+/* ---- expand ---- */
+/*
+   An arrow and nothing else. It sits beside the measurement rather than
+   under it, because a card this size cannot spare a row for a word that
+   the arrow already says. The accessible name is on the button, so a
+   screen reader still hears "Expand love" rather than "right arrow".
+*/
+.sky-card__more {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border: 1px solid var(--pl);
+  border-radius: 50%;
+  background: none;
+  color: var(--pi-mute);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease),
+              background 0.25s var(--ease), transform 0.25s var(--ease);
+}
+.sky-card__more:hover {
+  color: var(--pp);
+  background: var(--pi);
+  border-color: var(--pi);
+  transform: translateX(2px);
+}
+.sky-card:focus-within .sky-card__more { border-color: var(--pi-mute); }
+
+/* ---- the expanded card ---- */
+/*
+   A native <dialog>. `showModal()` supplies the focus trap, the Escape
+   key, the inert background and this backdrop; none of that is
+   re-implemented here.
+*/
+.sky-modal {
+  width: min(680px, calc(100vw - 32px));
+  max-height: min(84vh, 900px);
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: var(--pp);
+  color: var(--pi);
+  box-shadow: 0 0 0 1px var(--pl), 0 30px 80px rgba(0, 0, 0, 0.28);
+  overflow: auto;
+}
+.sky-modal::backdrop {
+  background: rgba(16, 15, 14, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+/*
+   The scrollbar, drawn to match the page.
+
+   A three-paragraph card scrolls on most phones, and the platform bar is
+   the one thing in this dialog wearing the operating system's colours
+   rather than the product's. `scrollbar-width` and `scrollbar-color` are
+   the standard properties and Firefox honours them; the ::-webkit rules
+   below do the same job everywhere else. Both are set, and the track is
+   left transparent so the thumb reads as a mark on the paper rather than
+   as a channel cut into it.
+*/
+.sky-modal {
+  scrollbar-width: thin;
+  scrollbar-color: var(--pl) transparent;
+  scroll-behavior: smooth;
+}
+.sky-modal::-webkit-scrollbar { width: 10px; }
+.sky-modal::-webkit-scrollbar-track { background: transparent; }
+.sky-modal::-webkit-scrollbar-thumb {
+  background: var(--pl);
+  border-radius: 100px;
+  /* the border is the same colour as the page, so it reads as padding and
+     leaves a 4px thumb floating inside a 10px gutter */
+  border: 3px solid var(--pp);
+}
+.sky-modal::-webkit-scrollbar-thumb:hover { background: var(--pi-mute); }
+.sky-modal__inner { padding: clamp(26px, 4vw, 40px); }
+.sky-modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.sky-modal__head .sky-label { margin-bottom: 0; flex: 1 1 auto; }
+.sky-modal__x {
+  flex: none;
+  background: none;
+  border: 1px solid var(--pl);
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  line-height: 1;
+  font-size: 1.1rem;
+  color: var(--pi-mute);
+  cursor: pointer;
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.sky-modal__x:hover { color: var(--pi); border-color: var(--pi-mute); }
+
+.sky-modal__title {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(1.8rem, 4.4vw, 2.6rem);
+  line-height: 1.06;
+  letter-spacing: -0.015em;
+  margin: 22px 0 0;
+  text-wrap: balance;
+}
+.sky-modal__body {
+  font-size: clamp(1rem, 1.8vw, 1.12rem);
+  line-height: 1.62;
+  color: var(--pi-soft);
+  margin: 18px 0 0;
+  max-width: 52ch;
+  text-wrap: pretty;
+}
+/* the first paragraph is the one the card showed, so it leads at full
+   ink and the two that follow settle back into the body colour */
+.sky-modal__body:first-of-type { color: var(--pi); }
+.sky-modal__domain {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--pi-mute);
+  margin: 14px 0 0;
+  max-width: 52ch;
+}
+.sky-modal__proof {
+  margin-top: clamp(26px, 3.4vh, 34px);
+  padding-top: clamp(22px, 3vh, 28px);
+  border-top: 1px solid var(--pl);
+}
+/* a two-column row for the quiet block, which has a label and a value and
+   no orb to put in a third track */
+.sky-asp--plain { grid-template-columns: minmax(0, auto) minmax(0, 1fr); }
+.sky-asp--plain .sky-asp__sign { white-space: normal; justify-self: end; text-align: right; }
+
+/* ---- tonight's sky against your sky ---- */
+.sky-against, .sky-rare {
+  border-top: 1px solid var(--pl);
+  padding: clamp(30px, 4.5vh, 44px) 0;
+}
+.sky-backs { list-style: none; margin: 0; padding: 0; }
+.sky-back {
+  display: grid;
+  /* body, bar, per cent, sentence: the bar takes the slack so ten rows
+     line up as one column of bars rather than ten ragged ones */
+  grid-template-columns: 8.5em minmax(60px, 1fr) 3.2em;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 11px 0;
+  border-top: 1px solid var(--pl-soft);
+}
+.sky-back:first-child { border-top: 0; }
+.sky-back__body { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.sky-back__body b { font-weight: 500; font-size: 0.95rem; color: var(--pi); }
+.sky-back__bar {
+  height: 3px;
+  background: var(--pl);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.sky-back__fill { display: block; height: 100%; background: var(--pg); }
+.sky-back__pct {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--pi);
+  text-align: right;
+}
+.sky-back__when {
+  grid-column: 1 / -1;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--pi-mute);
+}
+@media (min-width: 620px) {
+  /* wide enough for the sentence to sit on the same line as the bar */
+  .sky-back { grid-template-columns: 8.5em minmax(60px, 1fr) 3.2em 15em; }
+  .sky-back__when { grid-column: auto; text-align: right; }
+}
+
+/* ---- how unusual that moon was ---- */
+.sky-rare__lead {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(1.4rem, 3.2vw, 2rem);
+  line-height: 1.25;
+  color: var(--pi);
+  margin: 0;
+  max-width: 30ch;
+  text-wrap: balance;
+}
+.sky-rare__lead b { font-weight: 400; color: var(--pg); font-variant-numeric: tabular-nums; }
+
+/* ---- 4-6. the modules ---- */
 /*
    The rules between cards are a 1px outline on each card, overlapping in
    the 1px gap so they read as one hairline and never double at a join.

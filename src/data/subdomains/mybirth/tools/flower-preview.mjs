@@ -4,12 +4,12 @@
 
    Run:  node tools/flower-preview.mjs out.png
 
-   Use this when tuning a FLOWERS recipe in src/models.js — it's a couple of
+   Use this when tuning a FLOWERS recipe in src/scene/models.js — it's a couple of
    seconds per iteration instead of a dev server, a form and a scroll. */
 import * as THREE from "three";
 import { PNG } from "pngjs";
 import fs from "node:fs";
-import { flowerObject } from "../src/models.js";
+import { flowerObject } from "../src/scene/models.js";
 
 const MONTHS = ["Carnation", "Violet", "Daffodil", "Daisy", "Lily of the Valley", "Rose",
   "Larkspur", "Gladiolus", "Aster", "Marigold", "Chrysanthemum", "Narcissus"];

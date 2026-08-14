@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const CONTENTS = join(ROOT, "src", "contents");
+const CONTENTS = join(ROOT, "src", "sky", "contents");
 
 /* ---------- the rules ---------- */
 
@@ -112,6 +112,29 @@ export function checkVoice() {
       const found = text.match(rule.re);
       if (found) {
         problems.push({ path, rule: rule.name, why: rule.why, sample: found.slice(0, 3).join(", "), text });
+      }
+    }
+  }
+
+  /*
+     The line of the day is held to the headline rules and held harder,
+     because it is the one string here that will one day arrive on a lock
+     screen with no label above it and no measurement below it. A card
+     headline that runs long wraps. This one gets cut off mid-sentence by
+     an operating system, and nobody sees the rest of it ever.
+  */
+  const lines = JSON.parse(readFileSync(join(CONTENTS, "lines.json"), "utf8")).lines;
+  for (const [area, tones] of Object.entries(lines)) {
+    for (const [tone, text] of Object.entries(tones)) {
+      const at = `lines.json ${area}.${tone}`;
+      if (text.length > LIMITS.headline.max) {
+        problems.push({ path: at, rule: "line too long", why: "a notification is truncated, not wrapped", sample: `${text.length} chars`, text });
+      }
+      if (/\?\s*$/.test(text)) {
+        problems.push({ path: at, rule: "line is a question", why: "a short declarative or nothing", sample: "", text });
+      }
+      if (!/[.]\s*$/.test(text)) {
+        problems.push({ path: at, rule: "line does not end in a full stop", why: "it is a sentence on its own, not a fragment under a label", sample: "", text });
       }
     }
   }

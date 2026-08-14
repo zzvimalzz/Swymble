@@ -14,7 +14,7 @@
 
 import * as THREE from "three";
 import { loadGLB, normalizeObject } from "./viewer.js";
-import { STAR_FIGURES } from "./starfigures.js";
+import { STAR_FIGURES } from "../sky/starfigures.js";
 import { voxelBuild, mix } from "./voxel.js";
 
 /* Voxel edge length for the birth flowers. 0.048 puts ~44 voxels across a

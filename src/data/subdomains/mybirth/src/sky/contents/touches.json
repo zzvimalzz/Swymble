@@ -1,0 +1,107 @@
+{
+  "_comment": [
+    "Slot 2 of a reading: which part of you took the angle, by tone.",
+    "",
+    "── The one rule these all obey ──",
+    "",
+    "Every entry begins with a back-reference. 'It' is the aspect that slot 1",
+    "has just described, and this sentence says something about that. None of",
+    "these may introduce a subject of its own.",
+    "",
+    "That is not a style preference. Fourteen of these used to open a new",
+    "topic, and the failure was visible on the page: 'Go somewhere you have",
+    "not been. The discipline is available today without costing what it",
+    "usually costs.' Both sentences are fine. Together they are two unrelated",
+    "remarks, because 'the discipline' has no antecedent anywhere on the card.",
+    "",
+    "Full rules in .docs/MyBirth-Plan/10-CORPUS.md section 3a. Before adding",
+    "an entry here, read it after the three least related openings in",
+    "readings.json and check it still parses."
+  ],
+  "touches": {
+    "sun": {
+      "charged": "Your sense of yourself is doing the reacting, which is why it feels personal.",
+      "open": "Your sense of yourself is the part with room in it today.",
+      "friction": "It is your sense of yourself under the pressure, so it will read as criticism even where none is meant.",
+      "easy": "Your sense of yourself is steady underneath it, which is why none of this costs much.",
+      "pull": "Your sense of yourself is on one end of this and something else is on the other."
+    },
+    "moon": {
+      "charged": "It is landing on your mood rather than your judgement, and mood always arrives first.",
+      "open": "What you need is easier to say than usual today, and easier to hear.",
+      "friction": "It is your need for things to be settled that is taking the strain.",
+      "easy": "Your footing is good, so you can afford to feel the whole of it.",
+      "pull": "What you need and what is being asked of you are at opposite ends of this."
+    },
+    "mercury": {
+      "charged": "It is landing on how you put things, so the wording matters more today than the point.",
+      "open": "It is reaching the part of you that finds the words, and today they are there.",
+      "friction": "It is your way of putting things under strain, not what you actually mean by them.",
+      "easy": "It lands on how you say things, and the saying is the easy part today.",
+      "pull": "What you want to say and what wants saying are pulling in different directions."
+    },
+    "venus": {
+      "charged": "It is landing on what you want, which is why it will not stay quiet.",
+      "open": "What you are drawn to is unusually within reach today.",
+      "friction": "It is what you want that is under strain, and wanting has never been a plan.",
+      "easy": "What you want and what is available are close together today.",
+      "pull": "What you want is on one side of this and what you already have is on the other."
+    },
+    "mars": {
+      "charged": "It is landing on your drive, which is why it will present itself as urgency.",
+      "open": "It is reaching the part of you that pushes, and the push does not have to be forced today.",
+      "friction": "It is your drive taking the resistance, which is why it reads as frustration.",
+      "easy": "It lands on your appetite for effort, and the effort goes in cleanly today.",
+      "pull": "Your pace and somebody else's are at opposite ends of this."
+    },
+    "jupiter": {
+      "charged": "It is landing on the part of you that wants more, and that part is not subtle.",
+      "open": "It is reaching the part of you that wants more room, and the room is genuinely there.",
+      "friction": "It is your appetite for more being checked, and the check is a fair one.",
+      "easy": "It lands where you tend to overreach, and today the reach costs less than usual.",
+      "pull": "It has your appetite for more at one end and your need to hold steady at the other."
+    },
+    "saturn": {
+      "charged": "It is landing on the part of you that carries things, and that part is already tired.",
+      "open": "It is reaching the part of you that keeps things standing, and building is unusually easy today.",
+      "friction": "It is the part of you that carries things taking the weight, which is why it feels heavy.",
+      "easy": "It lands on the part of you that counts the cost, and today the cost is low.",
+      "pull": "What is owed and what is wanted are at opposite ends of this."
+    },
+    "uranus": {
+      "charged": "It is landing on the part of you that will not stay put, and that part does not ask first.",
+      "open": "It is reaching the part of you that likes a break in the pattern, and today there is somewhere to put it.",
+      "friction": "It is your dislike of being held in place that is taking the strain.",
+      "easy": "It lands on the part of you that will not stay put, and the change can be made without a fight.",
+      "pull": "What you want to keep and what you want to break are at opposite ends of this."
+    },
+    "neptune": {
+      "charged": "It is landing where your edges are softest, and soft edges take a mark easily.",
+      "open": "What you imagine is unusually close to what you could actually do today.",
+      "friction": "It is the part of you that would rather not look directly at it that is taking the strain.",
+      "easy": "It is reaching the softest part of you, and today the generous read of things is the accurate one.",
+      "pull": "What you hope is true and what you can show is true are pulling apart here."
+    },
+    "pluto": {
+      "charged": "It is landing on the part of you that does not negotiate, and it does not negotiate.",
+      "open": "Something you keep well below the surface has a way out today that costs nothing.",
+      "friction": "It is your grip on this that is taking the strain, not the thing you are gripping.",
+      "easy": "You can go a long way down today without it costing you the climb back.",
+      "pull": "What you will not let go of and what will not stay is the whole of this."
+    },
+    "ascendant": {
+      "charged": "It is landing on the face you meet the day with, so this is visible before it is understood.",
+      "open": "It lands on how you come across, and that is easier to steer today than usual.",
+      "friction": "It is the gap between how you land and how you meant to land that is taking the strain.",
+      "easy": "You are being read accurately today, which is rarer than it sounds.",
+      "pull": "It has how you arrive at one end and what is being asked of you at the other."
+    },
+    "midheaven": {
+      "charged": "It is landing on your standing, so whatever this is, it happens in public.",
+      "open": "It is reaching your standing, and the version of you other people describe has room to move.",
+      "friction": "It is your sense of what you should have built by now that is taking the strain.",
+      "easy": "What you have been doing quietly is legible to other people today.",
+      "pull": "What you are doing and what you are known for are pulling in different directions."
+    }
+  }
+}

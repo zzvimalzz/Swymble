@@ -16,7 +16,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const SRC = join(import.meta.dirname, "subdomains", "mybirth", "src");
+const SRC = join(import.meta.dirname, "..", "src");
 const analyticsSource = readFileSync(join(SRC, "analytics.js"), "utf8");
 const mainSource = readFileSync(join(SRC, "main.js"), "utf8");
 

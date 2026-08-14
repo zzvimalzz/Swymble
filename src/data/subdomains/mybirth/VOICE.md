@@ -74,7 +74,7 @@ only real claim intact, and it is not negotiable.
    There is no "probably fine" path.
 
 5. **No model call on the render path.** Generation happens offline, into
-   `src/contents/`, and a human reads it before it ships.
+   `src/sky/contents/`, and a human reads it before it ships.
 
 The reason for all of this in one sentence: **one fabricated headline
 destroys the premise, and nothing else about the product survives it.**
@@ -84,14 +84,14 @@ Everything on the page is checkable, or the page is worth nothing.
 
 | File | What |
 |---|---|
-| `src/contents/readings.json` | 200 headline and body pairs, indexed by area then tone |
-| `src/contents/touches.json` | The clause naming which part of the chart was struck |
-| `src/contents/motion.json` | The clause about timing |
-| `src/contents/columns.json` | Longer standing pieces |
-| `src/contents/areas.json` | The eight areas of life, and the sectors behind each |
+| `src/sky/contents/readings.json` | 200 headline and body pairs, indexed by area then tone |
+| `src/sky/contents/touches.json` | The clause naming which part of the chart was struck |
+| `src/sky/contents/motion.json` | The clause about timing |
+| `src/sky/contents/columns.json` | Longer standing pieces |
+| `src/sky/contents/areas.json` | The nine areas of life, and the sectors behind each |
 | `index.html` | The landing page and the shell |
 
-The three reading tables multiply: eight areas by five tones by five
+The three reading tables multiply: nine areas by five tones by five
 variants, times thirty-five touches, times fourteen motions. That is where
 the variety comes from, not from generating anything on the fly.
 

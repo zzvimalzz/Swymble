@@ -1,0 +1,78 @@
+{
+  "_comment": [
+    "What the sign on a sector says about that part of a chart.",
+    "",
+    "This is what makes a quiet card worth printing. An area with nothing in",
+    "orb still has a sign on it, and unlike a transit that sign never changes:",
+    "it was fixed at the minute you were born. So an area the sky is not",
+    "touching today is not a blank. It is a standing description that happens",
+    "to have no news attached to it this morning.",
+    "",
+    "── Why no sign is named in here ──",
+    "",
+    "Every line is written to be true of the *measurement*, so it carries no",
+    "proper noun of its own. The card prints the sign name beside it, worked",
+    "out from the chart. Same rule the rest of the bank follows, and the same",
+    "reason: the copy must not be able to be wrong about which sign it is.",
+    "",
+    "Two fields per sign, keyed by index, 0 for the first sign of the zodiac",
+    "through to 11 for the last:",
+    "  clause  one sentence, appended to a quiet card's paragraph",
+    "  depth   the fuller paragraph, shown when the card is expanded",
+    "",
+    "These are the traditional characters of the twelve signs, written fresh.",
+    "Nothing here is a claim about a person; it is a claim about what a sign",
+    "has been taken to mean for about two thousand years, which is a fact",
+    "about the tradition and is labelled as one on the page."
+  ],
+  "signs": {
+    "0": {
+      "clause": "The sign on it starts fast and asks afterwards, so what happens here tends to happen abruptly.",
+      "depth": "This sector runs in a sign that moves first and thinks second. Things here begin quickly, arrive without much warning, and lose momentum about as fast as they found it. When the sky does reach this part of your chart, it usually reads as a sudden appetite rather than as a slow build."
+    },
+    "1": {
+      "clause": "The sign on it is slow to start and hard to shift once it has, so nothing here moves quickly.",
+      "depth": "This sector runs in a sign that takes its time and then refuses to be hurried. What settles here settles for a long while, which makes it steady when it is working and immovable when it is not. Transits through this part of a chart tend to be felt late and remembered long."
+    },
+    "2": {
+      "clause": "The sign on it deals in exchange, so this part of your chart runs on what is being said.",
+      "depth": "This sector runs in a sign that collects, sorts and passes on. It is quick, it is curious, and it scatters about as readily as it gathers. What reaches this part of your chart usually arrives as a conversation, a message or a piece of information rather than as an event."
+    },
+    "3": {
+      "clause": "The sign on it protects what it holds, so this part of your chart keeps things rather than spends them.",
+      "depth": "This sector runs in a sign that remembers and shelters. It draws things in, holds on to them, and withdraws when pressed. What lands here tends to be felt privately first and described later, if it is described at all."
+    },
+    "4": {
+      "clause": "The sign on it wants to be seen, so what happens here rarely happens quietly.",
+      "depth": "This sector runs in a sign that performs and means it. Whatever occupies this part of your chart wants an audience, credit and warmth, and it does badly when it is overlooked. Contacts here read as a matter of pride more often than as a matter of fact."
+    },
+    "5": {
+      "clause": "The sign on it works by correction, so this part of your chart improves things rather than starts them.",
+      "depth": "This sector runs in a sign that notices what is out of place. It repairs, refines and files, and it is harder on its own errors than on anyone else's. What reaches this part of your chart tends to arrive as a small fault worth fixing rather than as a large event."
+    },
+    "6": {
+      "clause": "The sign on it works by comparison, so this part of your chart is always weighing one thing against another.",
+      "depth": "This sector runs in a sign that cannot settle a question without holding it against its opposite. It is fair, it is late to decide, and it does its best work with somebody else in the room. What happens here usually happens through another person."
+    },
+    "7": {
+      "clause": "The sign on it goes deep and stays private, so little of what happens here is visible from outside.",
+      "depth": "This sector runs in a sign that does not do things by halves and does not narrate them either. It holds on, it looks underneath, and it keeps its own counsel. Contacts to this part of your chart are felt strongly and reported rarely."
+    },
+    "8": {
+      "clause": "The sign on it wants distance and a reason, so this part of your chart reaches past what is in front of it.",
+      "depth": "This sector runs in a sign that widens the frame and looks for the principle. It is generous, restless and inclined to overshoot. What lands here tends to raise a question about the larger shape of things rather than about today."
+    },
+    "9": {
+      "clause": "The sign on it builds slowly and keeps score, so this part of your chart pays over time.",
+      "depth": "This sector runs in a sign that plans, waits and does the unglamorous half. It is patient to the point of severity and it does not accept shortcuts. What arrives here arrives as work, and it is usually worth the time it takes."
+    },
+    "10": {
+      "clause": "The sign on it stands back to look, so this part of your chart is cooler than the rest of you.",
+      "depth": "This sector runs in a sign that steps away in order to see clearly, which is both what it is good at and what it costs. It thinks in systems and in groups rather than in single people. What touches this part of your chart tends to be understood before it is felt."
+    },
+    "11": {
+      "clause": "The sign on it dissolves edges, so this part of your chart is the hardest to draw a line around.",
+      "depth": "This sector runs in a sign that blurs what it touches. Boundaries here are soft, endings are gradual, and the difference between being generous and being taken advantage of is not always obvious at the time. What happens in this part of a chart is felt long before it can be named."
+    }
+  }
+}

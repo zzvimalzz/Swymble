@@ -1,0 +1,105 @@
+{
+  "_comment": [
+    "The nine areas of a life, and which of the twelve sectors feed each one.",
+    "",
+    "A 'sector' is a 30-degree slice of the ecliptic counted from the Ascendant.",
+    "Astrology calls them houses; this product does not, because the whole voice",
+    "is astronomy-first and 'sector' is what they geometrically are. The reader",
+    "never sees the number: they see the area it belongs to.",
+    "",
+    "Nine, not eight. Money used to sit inside Work, which followed the older",
+    "grouping of the 2nd, 6th and 10th sectors as one career axis. They are not",
+    "one thing: the 2nd is what you are worth and what you will trade time for,",
+    "the 6th is the daily work and the body doing it, the 10th is the public",
+    "standing that comes of both. Splitting the 2nd out gives money its own card",
+    "and leaves the grid at nine, which lays out three by three.",
+    "",
+    "Sectors need a birth time. The Ascendant moves a degree every four minutes,",
+    "so a chart cast for noon has a sector layout that is wrong for 23 hours out",
+    "of 24. The Daily Sky refuses to guess and asks for the time instead.",
+    "",
+    "Three names per area, and each has one job. 'label' is the full name and",
+    "heads a card. 'tab' is the one-word form for anywhere a full name will not",
+    "fit; keep it to a single word, and to one the copy validator's stop list",
+    "already holds, or the voice suite will read it as an invented proper noun.",
+    "'domain' is the clause that says why a reading landed here, written to",
+    "complete the sentence 'your Mars sits in ...'."
+  ],
+  "areas": {
+    "self": {
+      "label": "Self",
+      "tab": "Self",
+      "sectors": [
+        1
+      ],
+      "domain": "how you arrive in a room"
+    },
+    "money": {
+      "label": "Money and worth",
+      "tab": "Money",
+      "sectors": [
+        2
+      ],
+      "domain": "what you own, and what you will trade your time for"
+    },
+    "talk": {
+      "label": "Talk and people",
+      "tab": "Talk",
+      "sectors": [
+        3,
+        11
+      ],
+      "domain": "how the talking goes and who you run with"
+    },
+    "home": {
+      "label": "Home and roots",
+      "tab": "Home",
+      "sectors": [
+        4
+      ],
+      "domain": "where you are from and where you sleep"
+    },
+    "making": {
+      "label": "Thinking and making",
+      "tab": "Making",
+      "sectors": [
+        5
+      ],
+      "domain": "what you make and how you play"
+    },
+    "work": {
+      "label": "Work and standing",
+      "tab": "Work",
+      "sectors": [
+        6,
+        10
+      ],
+      "domain": "the daily work, and what it is building you a name for"
+    },
+    "love": {
+      "label": "Love and relationships",
+      "tab": "Love",
+      "sectors": [
+        7
+      ],
+      "domain": "the other person"
+    },
+    "sex": {
+      "label": "Sex and pleasure",
+      "tab": "Closeness",
+      "sectors": [
+        8
+      ],
+      "domain": "closeness, pleasure, and what the two of you hold jointly"
+    },
+    "belief": {
+      "label": "Belief and distance",
+      "tab": "Belief",
+      "sectors": [
+        9,
+        12
+      ],
+      "domain": "what you hold true, and the far-off"
+    }
+  }
+}

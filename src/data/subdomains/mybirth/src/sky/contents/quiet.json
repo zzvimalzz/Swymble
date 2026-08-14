@@ -1,0 +1,105 @@
+{
+  "_comment": [
+    "What a card says when the sky is not touching that area of a life.",
+    "",
+    "Every one of the nine areas gets a card every day, so four or five of",
+    "them are usually these. That is the honest shape of a day: on a typical",
+    "morning only three or four parts of a chart have anything within orb, and",
+    "an app that shows nine equally confident cards is either widening its",
+    "orbs until everything counts or writing to fill a grid.",
+    "",
+    "So these say the true thing instead, and the card underneath prints the",
+    "measurement that makes it true: which sign the sector runs in, which of",
+    "your planets live there, which are passing through today, and how far",
+    "outside orb the nearest angle is. A reader can check every one of those.",
+    "",
+    "Four cases, chosen by the chart and not by a seed. The split matters: an",
+    "early version had one line for every area without a reading, which meant",
+    "four identical cards on a typical morning, and four cards saying one",
+    "sentence is the thing this grid exists to avoid.",
+    "",
+    "  near      a planet of yours sits here, and an angle is close but outside orb",
+    "  still     a planet of yours sits here, and nothing is near it",
+    "  visiting  nothing of yours here, but planets are crossing it today",
+    "  empty     nothing of yours here, and nothing passing through",
+    "",
+    "Three variants each, in the same [headline, body] shape readings.json",
+    "uses. Not for variety across days but for variety down the page: three",
+    "empty areas at once is ordinary, and the picker walks the list so no two",
+    "cards of the same kind on the same day can land on the same variant.",
+    "",
+    "Every capitalised word must appear in the stop list in tools/validate-copy.mjs,",
+    "or the voice suite reads it as an invented proper noun.",
+    "",
+    "Keep them declarative and keep them short. They are not consolation for",
+    "a missing reading, they are the reading.",
+    "",
+    "depth is the third paragraph of the expanded card, one per kind. The",
+    "second paragraph comes from signs.json, so a quiet card still expands to",
+    "three paragraphs and two of the three are about this particular chart."
+  ],
+  "quiet": {
+    "near": [
+      [
+        "Close, and not close enough.",
+        "The nearest angle to this part of your chart is outside the orb it would have to be inside to count. The figure is below, and it is worth watching."
+      ],
+      [
+        "Still outside the width that counts.",
+        "Something is approaching an angle to a planet of yours here and has not arrived. The distance is printed below, in degrees."
+      ],
+      [
+        "It has not landed yet.",
+        "There is an angle forming on this part of your chart and it is still short of counting. The number is below, and it moves every day."
+      ]
+    ],
+    "still": [
+      [
+        "Yours, and nobody is asking anything of it.",
+        "Planets of yours sit in this part of the chart and the sky is not at an angle to any of them today, which is what an ordinary day looks like from the inside."
+      ],
+      [
+        "Occupied, and left alone today.",
+        "This part of your chart has your own planets standing in it and no transit is touching them. It is running on itself."
+      ],
+      [
+        "Quiet, and not empty.",
+        "You have planets here and the sky is addressing none of them today. What sits here is listed below, and it is doing its own work."
+      ]
+    ],
+    "visiting": [
+      [
+        "The sign is doing the talking here.",
+        "Planets are crossing this part of your chart today and none of yours is standing here to meet them, so the sign on it is what the area is running on."
+      ],
+      [
+        "Read this one off the sign.",
+        "Something is passing through this sector today and your own chart left the sector unoccupied, so what it is like is a matter of the sign rather than of the traffic."
+      ],
+      [
+        "Traffic, and no planet of yours in it.",
+        "What is crossing is listed below. It is making an angle to none of your own points, because this sector holds none, so the sign is the reading."
+      ]
+    ],
+    "empty": [
+      [
+        "This one runs on its sign alone.",
+        "The sector holds no planet of yours and none is crossing it today, which leaves the sign it was born under as the whole of what it is."
+      ],
+      [
+        "The sign is the standing description here.",
+        "This part of the chart is unoccupied, so it does not change much. What it is like, it is like permanently, and the sign says which."
+      ],
+      [
+        "Quiet by construction, not by accident.",
+        "Twelve sectors and ten planets leaves several of every chart unoccupied for life. This is one of them, and the sign on it is what it has."
+      ]
+    ]
+  },
+  "depth": {
+    "near": "An angle is only an aspect inside its orb, and the orb is not a formality. Outside that width the two bodies are simply two bodies standing at an angle nobody counts. This one is close enough that it is worth looking again tomorrow.",
+    "still": "A part of a chart with planets in it and no transit touching them is having an ordinary day, which most days are. It is neither being pushed nor being helped, and that is worth knowing before you go looking for a reason for how the day is going.",
+    "visiting": "A body passing through a sector is not the same as a body making an angle to something in it. This is traffic through an empty room: real, measurable, and touching nothing of yours, because there is nothing of yours here to touch.",
+    "empty": "Seven bodies cannot occupy twelve sectors, so several parts of every chart stand empty for life. That is not a fault in the chart. It means this area is read from the sign on it and from whatever happens to be crossing, rather than from anything of your own standing here."
+  }
+}

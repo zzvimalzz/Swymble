@@ -8,8 +8,8 @@
    typography scales with the card via container query units.
    ============================================================ */
 
-import { valueOf } from "./provenance.js";
-import { monthName, ordinal } from "./astro.js";
+import { valueOf } from "../facts/provenance.js";
+import { monthName, ordinal } from "../sky/astro.js";
 // a real <img>, not the masked mark: html2canvas rasterises this card for
 // export and does not implement CSS masks (see .sign-img in style.css)
 import { signImage } from "./glyphs.js";

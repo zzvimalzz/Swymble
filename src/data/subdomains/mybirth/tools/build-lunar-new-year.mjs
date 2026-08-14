@@ -21,7 +21,7 @@
 
    ── Why this file carries its own astronomy ──
 
-   It first borrowed moonLongitude and sunLongitude from ../src/astro.js.
+   It first borrowed moonLongitude and sunLongitude from ../src/sky/astro.js.
    Those are deliberately truncated series — the app needs a phase name and
    an illuminated percentage, and six periodic terms give it those. They are
    not good enough to decide which *day* a new moon falls on: for January

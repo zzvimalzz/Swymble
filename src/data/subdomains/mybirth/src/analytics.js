@@ -158,7 +158,7 @@ const ALLOWED = new Set(Object.values(EVENTS));
    cannot be passed by accident because only these strings survive.
 */
 const ALLOWED_PROPS = {
-  kind: new Set(["certificate_png", "certificate_pdf", "ticket", "link"]),
+  kind: new Set(["certificate_png", "certificate_pdf", "ticket", "link", "sky_card"]),
   entry: new Set(["form", "link"]),
   theme: new Set(["paper", "ink"]),
   had_time: new Set(["yes", "no"]),

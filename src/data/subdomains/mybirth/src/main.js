@@ -4,38 +4,57 @@
 
 // style.css is linked from index.html <head>, not imported here: see the
 // comment on that <link> for why a JS-injected stylesheet flashed
+/*
+   The four folders below are the whole map of this app, and the import
+   list is the fastest way to read it:
+
+     sky/    what can be computed exactly from a date and a place
+     facts/  what is looked up — curated tables, live APIs, and the
+             provenance wrapper that makes both say where they came from
+     scene/  three.js: one viewer, and the objects it mounts
+     ui/     the surfaces, each one a function returning HTML
+
+   main.js sits above all four and is the only file allowed to know about
+   more than one of them.
+*/
 import QRCode from "qrcode";
-import { createMoon } from "./moon.js";
-import { createViewer } from "./viewer.js";
+import { createMoon } from "./scene/moon.js";
+import { createViewer } from "./scene/viewer.js";
 import {
   zodiacAnimalObject, gemstoneObject, constellationObject, flowerObject,
   prefetchModelAssets
-} from "./models.js";
-import { buildTicket } from "./ticket.js";
-import { createFete } from "./fete.js";
-import { buildCertificate } from "./certificate.js";
+} from "./scene/models.js";
+import { buildTicket } from "./ui/ticket.js";
+import { createFete } from "./ui/fete.js";
+import { buildCertificate } from "./ui/certificate.js";
 import {
   geocode, historicalWeather, onThisDay, yearEvents, countryFacts, searchPlaces,
   countryIndicators, spaceWeather, albumArt, filmPoster
-} from "./apis.js";
+} from "./facts/apis.js";
 import {
   moonPhase, zodiac, chineseZodiac, birthstone, birthFlower,
   weekday, monthName, prettyDate, ageInfo, lunarMonthsLived,
   generation, lifePath, cosmicOdometer, sunTimes, planetAges,
   planetLongitudes, nextBirthday, milestones, skyReturn, ordinal,
   zonedToUTC, zoneIsUncertain
-} from "./astro.js";
+} from "./sky/astro.js";
 import {
   movieOfYear, songOfYear, leaderAt, COUNTRIES, worldPopulationAt,
   leadersOf, leadersThatYear
-} from "./data.js";
-import { GEM_COLORS, ZODIAC_READINGS } from "./cosmos.js";
-import { buildProfile, dailySkyHTML, wireDailySky, wireClock, spaceModuleHTML } from "./today.js";
-import { signIcon } from "./glyphs.js";
+} from "./facts/data.js";
+import { GEM_COLORS, ZODIAC_READINGS } from "./facts/cosmos.js";
+import {
+  buildProfile, dailySkyHTML, wireDailySky, wireClock, wireClockFields, spaceModuleHTML,
+  shareCardHTML,
+} from "./ui/today.js";
+import { signIcon } from "./ui/glyphs.js";
+// roadmap 1.9 recomputes the card it is about to rasterise rather than
+// scraping it off the DOM: the on-screen card has its text clamped
+import { dailyReading } from "./sky/reading.js";
 // aliased: renderResult already has a local `track` for the leader timeline
 // element, and an import cannot be shadowed quietly without this kind of bug
 import { initAnalytics, track as trackEvent, watchCompletion, EVENTS } from "./analytics.js";
-import { valueOf, mark, scopeNote, wireProvenance } from "./provenance.js";
+import { valueOf, mark, scopeNote, wireProvenance } from "./facts/provenance.js";
 
 // inert unless a provider is configured; see the header of analytics.js
 initAnalytics();
@@ -150,6 +169,37 @@ addEventListener("pointermove", (e) => {
 /* ---------- the month field ---------- */
 /** Set by initMonthField so the deep-link path can fill the month control. */
 let setMonthField = () => {};
+let setTimeField = () => {};
+
+/*
+   The optional birth time, as two number boxes rather than <input type="time">.
+
+   The native control is a different thing in every browser and none of those
+   things match a form that is otherwise four bare underlines. This is the same
+   control the Daily Sky uses at its birth-time gate, wired by the same
+   function, so the two cannot drift apart.
+
+   The visible boxes are the interface; a hidden input named "time" is what the
+   form reads, which keeps every other caller unchanged.
+*/
+(function initTimeField() {
+  const scope = document.querySelector("[data-clock]");
+  const hidden = document.getElementById("f-time");
+  if (!scope || !hidden) return;
+
+  const clock = wireClockFields(scope, {
+    onChange: (v) => { hidden.value = v || ""; },
+  });
+
+  /* used when a shared link carries a time and the form is reflected back */
+  setTimeField = (v) => {
+    const m = /^(\d{1,2}):(\d{2})/.exec(String(v || ""));
+    if (!m) return;
+    scope.querySelector('[data-unit="h"]').value = m[1].padStart(2, "0");
+    scope.querySelector('[data-unit="m"]').value = m[2];
+    clock?.sync();
+  };
+})();
 
 /*
    A combobox rather than a native <select>, so it matches the birthplace
@@ -726,7 +776,7 @@ function initPlaceField() {
   let regionsModule = null;
   const localMatches = async (q) => {
     try {
-      regionsModule ||= await import("./places.js");
+      regionsModule ||= await import("./facts/places.js");
       return regionsModule.searchRegions(q, 4);
     } catch {
       return [];
@@ -2166,6 +2216,54 @@ async function saveTicketImage(ticketEl, name) {
   downloadBlob(blob, `mybirth-ticket-${slugify(name)}.png`);
 }
 
+/*
+   Roadmap 1.9. One card of the Daily Sky, saved as a square image.
+
+   The reason this is worth building is not that sharing is nice. Every
+   card on that screen carries its own arithmetic, so the image carries it
+   too: the two bodies, the angle, the orb in degrees and the date it was
+   true. Somebody who has never heard of this receives the claim and the
+   evidence for it in one picture, which is the one thing the category
+   cannot copy without becoming checkable itself.
+
+   Rendered off-screen at a fixed 1080 square rather than photographed off
+   the grid. The card on screen is a 280px cell with its text clamped to
+   three lines; capturing that would share an ellipsis.
+*/
+async function saveSkyCard(profile, area, btn) {
+  if (!profile) return;
+  const reading = dailyReading(profile, new Date(), { journal: readJournal(profile.key) });
+  const card = reading?.cards?.find((c) => c.area === area);
+  if (!card) return;
+
+  const label = btn?.querySelector("span:last-child");
+  const was = btn?.textContent;
+  if (btn) { btn.disabled = true; btn.textContent = "Saving"; }
+
+  const holder = document.createElement("div");
+  holder.style.cssText = "position:fixed;left:-99999px;top:0;width:1080px;height:1080px;";
+  holder.innerHTML = shareCardHTML(card, {
+    profile,
+    moon: moonPhase(new Date()),
+    date: new Date(),
+  });
+  document.body.appendChild(holder);
+
+  try {
+    const node = holder.firstElementChild;
+    const canvas = await renderNodeToCanvas(node, 1080, 1080, 2);
+    const blob = await new Promise((r) => canvas.toBlob(r, "image/png"));
+    if (!blob) throw new Error("canvas produced no image data");
+    downloadBlob(blob, `mybirth-${slugify(area)}-${slugify(profile.first)}.png`);
+    trackEvent(EVENTS.KEEPSAKE, { kind: "sky_card" });
+  } catch {
+    /* fail soft: an export that cannot run must not break the screen */
+  } finally {
+    holder.remove();
+    if (btn) { btn.disabled = false; btn.textContent = was; if (label) label.textContent = "Save"; }
+  }
+}
+
 async function saveCertificatePDF(flipEl, name) {
   // native (unscaled) layout size — see comment in saveTicketImage above
   const w = flipEl.offsetWidth;
@@ -2567,24 +2665,33 @@ function skyTheme() {
 }
 
 /*
-   A short journal of which reading each person has already been shown.
+   A short journal of which readings each person has already been shown.
 
    It does two jobs. Reading it back means today's reading is stable: a
-   reload finds its own entry and reuses it rather than rerolling. And it
-   lets dailyReading refuse a variant it has used recently, which is what
-   turns "probably different" into "cannot be the same". Thirty entries is
-   about a month, which is roughly how long a sentence stays memorable.
+   reload finds its own entries and reuses them rather than rerolling. And
+   it lets dailyReading refuse a variant it has used recently, which is
+   what turns "probably different" into "cannot be the same".
+
+   One entry per card, lead first, so a day now costs up to six rows
+   rather than one. The cap is sized to hold about a month of them, which
+   is roughly how long a sentence stays memorable — the number that
+   matters is the span in days, not the row count.
 */
 const JOURNAL_KEY = "mybirth:read";
-const JOURNAL_LEN = 30;
+const JOURNAL_DAYS = 30;
+const JOURNAL_LEN = JOURNAL_DAYS * 6;
 
 function readJournal(key) {
   try { return JSON.parse(localStorage.getItem(`${JOURNAL_KEY}:${key}`) || "[]"); } catch { return []; }
 }
 
-function recordReading(key, entry) {
-  const journal = readJournal(key).filter((e) => e.d !== entry.d);
-  journal.unshift(entry);
+function recordReading(key, entries) {
+  const fresh = (Array.isArray(entries) ? entries : [entries]).filter(Boolean);
+  if (!fresh.length) return;
+  /* every card in a day shares its stamp, so one day is replaced whole */
+  const day = fresh[0].d;
+  const journal = readJournal(key).filter((e) => e.d !== day);
+  journal.unshift(...fresh);
   try {
     localStorage.setItem(`${JOURNAL_KEY}:${key}`, JSON.stringify(journal.slice(0, JOURNAL_LEN)));
   } catch {}
@@ -2606,7 +2713,7 @@ function renderToday() {
   mount.innerHTML = dailySkyHTML(active, {
     astro, profiles, theme,
     journal: active ? readJournal(active.key) : [],
-    onReading: (entry) => active && recordReading(active.key, entry),
+    onReading: (entries) => active && recordReading(active.key, entries),
   });
 
   /*
@@ -2665,7 +2772,16 @@ function renderToday() {
   // the screen is rebuilt on every open and on every profile switch, so the
   // previous tick has to be dropped or they stack up writing to dead nodes
   clearInterval(skyCountdown);
-  wireDailySky(mount, { onCountdown: (block) => { skyCountdown = startCountdown(block); } });
+  wireDailySky(mount, {
+    onCountdown: (block) => { skyCountdown = startCountdown(block); },
+    /*
+       Roadmap 1.9. today.js lays the share card out and this rasterises
+       it, because html2canvas is a 200 KB dependency and only main.js is
+       allowed to pull one in on demand. See saveTicketImage, which does
+       the same job for the boarding pass.
+    */
+    onShareCard: (area, btn) => saveSkyCard(active, area, btn),
+  });
 
   mount.querySelector("[data-fete]")?.addEventListener("click", () => {
     createFete({
@@ -2833,6 +2949,7 @@ function renderSaves() {
   set("f-name", inputs.name); set("f-day", inputs.day);
   set("f-year", inputs.year); set("f-place", placeLabel); set("f-time", inputs.time);
   setMonthField(inputs.month);
+  setTimeField(inputs.time);
   if (place) {
     selectedPlace = place;
     document.getElementById("place-field")?.classList.add("is-resolved");

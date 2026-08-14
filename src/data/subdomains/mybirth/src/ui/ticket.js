@@ -6,7 +6,7 @@
            Landing = TBC · QR code stub.
    ============================================================ */
 
-import { monthName } from "./astro.js";
+import { monthName } from "../sky/astro.js";
 
 function hash(str) {
   let h = 2166136261;

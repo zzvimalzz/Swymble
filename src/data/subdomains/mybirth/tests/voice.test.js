@@ -10,10 +10,10 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { checkVoice } from "./subdomains/mybirth/tools/check-voice.mjs";
-import { validateCopy, copyIsSafe } from "./subdomains/mybirth/tools/validate-copy.mjs";
+import { checkVoice } from "../tools/check-voice.mjs";
+import { validateCopy, copyIsSafe } from "../tools/validate-copy.mjs";
 
-const CONTENTS = join(import.meta.dirname, "subdomains", "mybirth", "src", "contents");
+const CONTENTS = join(import.meta.dirname, "..", "src", "sky", "contents");
 
 describe("the content bank obeys VOICE.md", () => {
   it("has no violations", () => {

@@ -253,8 +253,12 @@ export default defineConfig({
   plugins: [react(), createStaticSubdomainPlugin(), createSeoVerificationPlugin()],
   base: '/',
   test: {
-    // Subdomain apps run their own test suites; this suite only covers the root site.
-    exclude: ['**/node_modules/**', '**/dist/**', 'src/data/subdomains/**'],
+    // A subdomain app with its own vitest is excluded here and runs its own suite.
+    // MyBirth does not have one: its tests live beside its code in
+    // src/data/subdomains/mybirth/tests/ and this runner picks them up, so a single
+    // `npm test` still covers everything. Adding a second copy of vitest to that
+    // nested package for five files would buy nothing.
+    exclude: ['**/node_modules/**', '**/dist/**', 'src/data/subdomains/what2watch/**'],
   },
   server: {
     allowedHosts: ['.localhost'],
