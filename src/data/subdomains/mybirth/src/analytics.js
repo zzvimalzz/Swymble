@@ -92,6 +92,31 @@ const ALLOWED_PROPS = {
 
 let ready = false;
 
+/*
+   Dry run.
+
+   With no provider configured, track() returns immediately, which means
+   there is no way to find out whether the events are wired correctly until
+   after somebody has signed up for an analytics service. That is the wrong
+   order: a fortnight of a silently broken call site is a fortnight of data
+   the gate needs and does not have.
+
+   So `?analytics=debug`, or the key below, prints every event that would
+   have been sent, along with the properties that survived the filter.
+   Nothing leaves the page in this mode. It is diagnostics, not collection.
+*/
+const DEBUG = (() => {
+  try {
+    if (new URLSearchParams(location.search).get("analytics") === "debug") {
+      localStorage.setItem("mybirth:analytics-debug", "1");
+      return true;
+    }
+    return localStorage.getItem("mybirth:analytics-debug") === "1";
+  } catch {
+    return false;
+  }
+})();
+
 /** Do Not Track, or Global Privacy Control, or a browser that sends both. */
 function optedOut() {
   try {
@@ -128,14 +153,28 @@ export function initAnalytics() {
  * development and must never be a thing the rest of the code checks for.
  */
 export function track(event, props = {}) {
-  if (!ALLOWED.has(event)) return;                    // unknown event, dropped
-  if (!CONFIG.provider || optedOut()) return;
+  if (!ALLOWED.has(event)) {
+    // an unknown event is a typo at a call site, and silence hides it
+    if (DEBUG) console.warn(`[analytics] dropped unknown event: ${event}`);
+    return;
+  }
 
   // keep only enumerated keys with enumerated values
   const safe = {};
+  const dropped = [];
   for (const [k, v] of Object.entries(props)) {
     if (ALLOWED_PROPS[k]?.has(v)) safe[k] = v;
+    else dropped.push(`${k}=${v}`);
   }
+
+  if (DEBUG) {
+    console.info(
+      `[analytics] ${event}`,
+      Object.keys(safe).length ? safe : "",
+      dropped.length ? `(dropped: ${dropped.join(", ")})` : ""
+    );
+  }
+  if (!CONFIG.provider || optedOut()) return;
 
   try {
     if (CONFIG.provider === "plausible" && typeof window.plausible === "function") {

@@ -2614,7 +2614,16 @@ function renderToday() {
      The ratio between these two is the only way to know whether requiring
      a time is costing more than it buys.
   */
-  trackEvent(EVENTS.TODAY_READ, { had_time: active?.ascendant ? "yes" : "no", theme });
+  /*
+     The theme is stored as light/dark and named paper/ink everywhere a
+     person can see it, including on a dashboard. The two vocabularies had
+     drifted apart here and the property was being dropped by the allow-list
+     without a word, so the dimension was never recorded at all.
+  */
+  trackEvent(EVENTS.TODAY_READ, {
+    had_time: active?.ascendant ? "yes" : "no",
+    theme: theme === "dark" ? "ink" : "paper",
+  });
 
 
   // whose sky
