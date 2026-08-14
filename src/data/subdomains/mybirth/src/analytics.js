@@ -1,60 +1,128 @@
 /* ============================================================
-   analytics.js: the measurement the plan is gated on.
+   analytics.js: enough measurement to decide what to build next.
 
-   MERGE-PLAN §7 sets a hard gate on Phase 3: not a line of subscription
-   code until four weeks of data show more than 2,000 sessions a month
-   *and* archive completion above roughly 40%. Nothing has been measuring
-   either number, which means the gate cannot be opened or closed. This
-   is the smallest thing that fixes that.
+   ── What this is for ──
+
+   Not vanity. Four expensive bets in the roadmap are already predicted by
+   things this file can count:
+
+     · person_saved, more than once per visitor, is demand for the friends
+       and comparison work. If nobody saves a second person, that pillar
+       has no audience.
+     · keepsake exports are the people who would buy a printed poster.
+     · archive_complete over archive_start says whether the archive is
+       worth deepening or whether the Daily Sky is the real product.
+     · today_read with had_time=no says whether requiring a birth time
+       costs more than it buys.
+
+   Those are months of work each. Guessing at them is the expensive option.
 
    ── The rule this module exists to not break ──
 
    The landing page no longer promises that nothing leaves the device,
    because accounts are coming and a promise the product is about to break
    is worse than none. That changes nothing here. Measurement should be
-   able to answer how the product is doing without knowing who anyone is,
-   so this module is still held to a stricter standard than the rest of the
-   code:
+   able to say how the product is doing without knowing who anyone is, so
+   this module is held to a stricter standard than the rest of the code:
 
      · No cookies, no fingerprinting, no cross-site identifier. That rules
-       out Google Analytics outright, as §7 already says.
+       out Google Analytics outright.
      · No personal data ever leaves. Not a name, not a birth date, not a
        place, not a chart. `track()` accepts an event name from a fixed
        list and properties from a fixed list of *values*; anything else is
        dropped rather than sent. Free text cannot reach the wire.
      · Do Not Track and Global Privacy Control are honoured. Most vendors
        ignore DNT; we do not.
-     · Unconfigured, the whole module is inert. It ships disabled, so
-       nothing is collected until somebody deliberately turns it on.
+     · Unconfigured, the whole module is inert.
 
-   ── Choosing a provider ──
+   ── Why there is a registry rather than a provider name ──
 
-   Plausible and Umami both work the same way: one script tag, one global
-   function, EU-hosted or self-hosted, no cookies. Either satisfies the
-   gate on its own because both count sessions and custom events.
+   This started as a single `provider` string, which quietly assumed the
+   answer would only ever be one vendor. It will not be. Cloudflare Web
+   Analytics is free, cookieless, needs no new supplier because the site
+   already runs on Cloudflare, and answers "is anyone coming" today. It
+   cannot do custom events, so it can never answer the four questions
+   above. Plausible and Umami can, and are worth paying for once there is
+   enough traffic for those numbers to mean anything rather than to be
+   twenty people and noise.
 
-   Cloudflare Web Analytics is worth knowing about as well: it is free,
-   cookieless, and this site already runs on Cloudflare, so it needs no new
-   vendor at all. It gives the sessions number with zero code. What it does
-   not give is custom events, so it cannot answer the archive-completion
-   half of the gate by itself.
+   So providers are a list, each declaring what it is capable of. Pageview
+   counting and event counting are separate capabilities. Adding Plausible
+   later is filling in a token, not a rewrite, and the two run side by side
+   without either one knowing about the other.
    ============================================================ */
 
 /*
-   Off until somebody fills this in. Set `provider` to "plausible" or
-   "umami" and supply the matching fields.
+   ── Turning it on ──
 
-     plausible: { provider: "plausible", domain: "mybirth.swymble.com",
-                  src: "https://plausible.io/js/script.js" }
-     umami:     { provider: "umami", websiteId: "…",
-                  src: "https://analytics.example.com/script.js" }
+   Cloudflare: Dashboard, Analytics & Logs, Web Analytics, add
+   mybirth.swymble.com, and copy the token out of the snippet it shows you.
+   Paste it below. The token is public by design and appears in the page
+   source of every site that uses it, so committing it is not a leak.
+
+   Plausible: sign up, then set `src` and clear nothing else. Custom events
+   start flowing the moment the token is present, because every call site
+   is already wired and verified.
+
+   Umami: self-hosted alternative to Plausible, same capabilities.
 */
 const CONFIG = {
-  provider: null,
-  domain: "mybirth.swymble.com",
-  src: "",
-  websiteId: "",
+  cloudflare: {
+    token: "",
+  },
+  plausible: {
+    domain: "mybirth.swymble.com",
+    src: "",                       // "https://plausible.io/js/script.js"
+  },
+  umami: {
+    websiteId: "",
+    src: "",
+  },
 };
+
+/*
+   What each provider is and is not able to do.
+
+   `events: false` is the important field. Cloudflare will accept a script
+   tag and count pageviews and then silently ignore every custom event sent
+   to it, which would look exactly like working. Declaring the limit means
+   the module knows the difference and can say so.
+*/
+const PROVIDERS = {
+  cloudflare: {
+    label: "Cloudflare Web Analytics",
+    events: false,
+    on: (c) => !!c.token,
+    script: (c) => ({
+      src: "https://static.cloudflareinsights.com/beacon.min.js",
+      attrs: { "data-cf-beacon": JSON.stringify({ token: c.token }) },
+    }),
+    send: null,                    // no custom events, by design
+  },
+  plausible: {
+    label: "Plausible",
+    events: true,
+    on: (c) => !!c.src,
+    script: (c) => ({ src: c.src, attrs: { "data-domain": c.domain } }),
+    send: (event, props) => {
+      if (typeof window.plausible !== "function") return;
+      window.plausible(event, Object.keys(props).length ? { props } : undefined);
+    },
+  },
+  umami: {
+    label: "Umami",
+    events: true,
+    on: (c) => !!c.src && !!c.websiteId,
+    script: (c) => ({ src: c.src, attrs: { "data-website-id": c.websiteId } }),
+    send: (event, props) => window.umami?.track?.(event, props),
+  },
+};
+
+/** The providers actually switched on, each paired with its own config. */
+const active = () =>
+  Object.entries(PROVIDERS)
+    .map(([name, provider]) => ({ name, provider, config: CONFIG[name] || {} }))
+    .filter(({ provider, config }) => provider.on(config));
 
 /*
    The events, and nothing outside this list is sent.
@@ -129,20 +197,30 @@ function optedOut() {
   }
 }
 
-/** Load the provider's script once, if there is one and we are allowed to. */
+/** Load every configured provider's script once, if we are allowed to. */
 export function initAnalytics() {
-  if (ready || !CONFIG.provider || !CONFIG.src || optedOut()) return;
+  if (ready || optedOut()) return;
   ready = true;
 
-  const s = document.createElement("script");
-  s.defer = true;
-  s.src = CONFIG.src;
-  if (CONFIG.provider === "plausible") {
-    s.dataset.domain = CONFIG.domain;
-  } else if (CONFIG.provider === "umami") {
-    s.dataset.websiteId = CONFIG.websiteId;
+  const on = active();
+  if (DEBUG) {
+    const withEvents = on.filter(({ provider }) => provider.events).map(({ provider }) => provider.label);
+    console.info(
+      `[analytics] dry run. providers: ${on.map(({ provider }) => provider.label).join(", ") || "none"}`,
+      withEvents.length
+        ? `· custom events go to ${withEvents.join(", ")}`
+        : "· nothing configured records custom events, so only pageviews are counted"
+    );
   }
-  document.head.appendChild(s);
+
+  for (const { provider, config } of on) {
+    const { src, attrs } = provider.script(config);
+    const s = document.createElement("script");
+    s.defer = true;
+    s.src = src;
+    for (const [k, v] of Object.entries(attrs || {})) s.setAttribute(k, v);
+    document.head.appendChild(s);
+  }
 }
 
 /**
@@ -174,15 +252,15 @@ export function track(event, props = {}) {
       dropped.length ? `(dropped: ${dropped.join(", ")})` : ""
     );
   }
-  if (!CONFIG.provider || optedOut()) return;
+  if (optedOut()) return;
 
-  try {
-    if (CONFIG.provider === "plausible" && typeof window.plausible === "function") {
-      window.plausible(event, Object.keys(safe).length ? { props: safe } : undefined);
-    } else if (CONFIG.provider === "umami" && window.umami?.track) {
-      window.umami.track(event, safe);
-    }
-  } catch { /* analytics must never break the page */ }
+  // to every provider that can actually record an event, and no further
+  for (const { provider } of active()) {
+    if (!provider.send) continue;
+    try {
+      provider.send(event, safe);
+    } catch { /* analytics must never break the page */ }
+  }
 }
 
 /**
@@ -210,5 +288,24 @@ export function watchCompletion(root) {
 
 /** Whether anything is being collected at all, for the footer to be honest about. */
 export function analyticsActive() {
-  return !!CONFIG.provider && !optedOut();
+  return active().length > 0 && !optedOut();
+}
+
+/**
+ * What is switched on and what it is capable of.
+ *
+ * `events` being false while `pageviews` is true is the state this whole
+ * registry exists to make visible: Cloudflare on its own counts visits and
+ * silently discards every custom event, which from the outside is
+ * indistinguishable from working. Anything reasoning about the numbers
+ * should be able to ask rather than assume.
+ */
+export function analyticsCapabilities() {
+  const on = active();
+  return {
+    providers: on.map(({ provider }) => provider.label),
+    pageviews: on.length > 0,
+    events: on.some(({ provider }) => provider.events),
+    optedOut: optedOut(),
+  };
 }
