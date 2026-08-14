@@ -17,7 +17,13 @@
    If you add a table here, add its label at the same time. An unqualified
    curated fact is indistinguishable from a fabricated one to the reader,
    and the whole product rests on that difference.
+
+   That rule is no longer left to discipline: the accessors below return
+   facts from provenance.js, which cannot be constructed without a source
+   and carry their own scope to the render site.
    ============================================================ */
+
+import { fact, KIND } from "./provenance.js";
 
 /* ---------- highest-grossing / defining film by release year ---------- */
 export const MOVIES_BY_YEAR = {
@@ -239,7 +245,11 @@ export function leaderAt(countryCode, year) {
     .filter((l) => l.from <= year && (l.to === null || year <= l.to))
     .sort((a, b) => b.from - a.from);
   if (!matches.length) return null;
-  return { ...matches[0], country: entry.country };
+  return fact({ ...matches[0], country: entry.country }, {
+    kind: KIND.CURATED,
+    method: "Hand-compiled terms of office",
+    scope: `${Object.keys(LEADERS).length} countries; most of the world is not yet in this table`,
+  });
 }
 
 /** The full ordered list of a country's leaders (for the timeline). */
@@ -267,8 +277,33 @@ export function leadersThatYear(year, excludeCode) {
   });
 }
 
-export function movieOfYear(year) { return MOVIES_BY_YEAR[year] || null; }
-export function songOfYear(year) { return SONGS_BY_YEAR[year] || null; }
+/*
+   The accessors return facts, not bare values.
+
+   This is the point of provenance.js: the account of where a figure came
+   from travels with the figure instead of alongside it. A render site that
+   forgets to ask about the source now prints [object Object], which is
+   noticed in a second. A render site that forgets a *sentence* prints a
+   page that looks perfect and quietly asserts something we cannot stand
+   behind, which is exactly how a US singles chart came to be shown to the
+   whole world as somebody's defining song.
+*/
+export function movieOfYear(year) {
+  return fact(MOVIES_BY_YEAR[year] || null, {
+    kind: KIND.CURATED,
+    method: "Hand-compiled from each year's box-office leaders and defining releases",
+    scope: "Worldwide, one film a year",
+  });
+}
+
+export function songOfYear(year) {
+  return fact(SONGS_BY_YEAR[year] || null, {
+    kind: KIND.CURATED,
+    method: "Hand-compiled from US year-end singles charts",
+    scope: "United States",
+    url: "https://en.wikipedia.org/wiki/Billboard_Year-End",
+  });
+}
 
 /* ---------- world population (billions), UN estimates, interpolated ---------- */
 const WORLD_POP = {
@@ -277,13 +312,19 @@ const WORLD_POP = {
   2000: 6.14, 2005: 6.54, 2010: 6.96, 2015: 7.43, 2020: 7.84, 2025: 8.09
 };
 export function worldPopulationAt(year) {
+  const source = {
+    kind: KIND.CURATED,
+    method: "Straight-line reading between UN estimates five years apart",
+    scope: "An estimate, good to roughly a tenth of a billion",
+    url: "https://population.un.org/wpp/",
+  };
   const yrs = Object.keys(WORLD_POP).map(Number).sort((a, b) => a - b);
-  if (year <= yrs[0]) return WORLD_POP[yrs[0]] * 1e9;
-  if (year >= yrs[yrs.length - 1]) return WORLD_POP[yrs[yrs.length - 1]] * 1e9;
+  if (year <= yrs[0]) return fact(WORLD_POP[yrs[0]] * 1e9, source);
+  if (year >= yrs[yrs.length - 1]) return fact(WORLD_POP[yrs[yrs.length - 1]] * 1e9, source);
   for (let i = 0; i < yrs.length - 1; i++) {
     if (year >= yrs[i] && year <= yrs[i + 1]) {
       const t = (year - yrs[i]) / (yrs[i + 1] - yrs[i]);
-      return (WORLD_POP[yrs[i]] + t * (WORLD_POP[yrs[i + 1]] - WORLD_POP[yrs[i]])) * 1e9;
+      return fact((WORLD_POP[yrs[i]] + t * (WORLD_POP[yrs[i + 1]] - WORLD_POP[yrs[i]])) * 1e9, source);
     }
   }
   return null;

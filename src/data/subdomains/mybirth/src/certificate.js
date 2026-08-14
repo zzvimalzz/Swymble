@@ -8,6 +8,7 @@
    typography scales with the card via container query units.
    ============================================================ */
 
+import { valueOf } from "./provenance.js";
 import { monthName, ordinal } from "./astro.js";
 // a real <img>, not the masked mark: html2canvas rasterises this card for
 // export and does not implement CSS masks (see .sign-img in style.css)
@@ -132,13 +133,21 @@ function backFacts(d) {
   const out = [];
   out.push(["Day of the week", d.dow]);
   out.push(["Moon", `${d.moon.name} · ${Math.round(d.moon.illumination * 100)}% lit`]);
+  /*
+     Curated tables arrive as facts. On screen their scope is one press
+     behind a marker; on a certificate somebody prints and frames there is
+     nothing to press, so the scope goes into the label itself or not at
+     all. "№1 song" became "№1 song (US)" for exactly that reason.
+  */
+  const song = valueOf(d.song), movie = valueOf(d.movie);
+  const pop = valueOf(d.population), leader = valueOf(d.leader);
   // the dataset stores "Title | Artist"; the certificate shows it as "Title, Artist"
-  if (d.song) out.push(["№1 song", d.song.replace(" | ", ", ")]);
-  if (d.movie) out.push(["Biggest film", d.movie]);
+  if (song) out.push(["№1 song (US)", song.replace(" | ", ", ")]);
+  if (movie) out.push(["Film of the year", movie]);
   if (d.weather && d.weather.mean != null) out.push(["Weather", `${Math.round(d.weather.mean)}°C, ${d.weather.summary.toLowerCase()}`]);
   if (d.sun && !d.sun.polar) out.push(["Sun", `rose ${d.sun.sunrise}, set ${d.sun.sunset}`]);
-  if (d.population) out.push(["People on Earth", `~${(d.population / 1e9).toFixed(2)} billion`]);
-  if (d.leader) out.push([d.leader.title, d.leader.name]);
+  if (pop) out.push(["People on Earth", `~${(pop / 1e9).toFixed(1)} billion`]);
+  if (leader) out.push([leader.title, leader.name]);
   out.push(["Chinese zodiac", d.cz.label]);
   out.push(["Birthstone", d.stone]);
   out.push(["Birth flower", d.flower]);

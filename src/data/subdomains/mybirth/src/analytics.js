@@ -9,10 +9,12 @@
 
    ── The rule this module exists to not break ──
 
-   §4.1 sells "works with no account, nothing leaves the device" as a
-   headline feature. An analytics script is the one thing on the site that
-   sends anything anywhere, so it is held to a stricter standard than the
-   rest of the code:
+   The landing page no longer promises that nothing leaves the device,
+   because accounts are coming and a promise the product is about to break
+   is worse than none. That changes nothing here. Measurement should be
+   able to answer how the product is doing without knowing who anyone is,
+   so this module is still held to a stricter standard than the rest of the
+   code:
 
      · No cookies, no fingerprinting, no cross-site identifier. That rules
        out Google Analytics outright, as §7 already says.

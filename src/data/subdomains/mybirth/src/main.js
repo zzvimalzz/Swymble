@@ -35,9 +35,12 @@ import { signIcon } from "./glyphs.js";
 // aliased: renderResult already has a local `track` for the leader timeline
 // element, and an import cannot be shadowed quietly without this kind of bug
 import { initAnalytics, track as trackEvent, watchCompletion, EVENTS } from "./analytics.js";
+import { valueOf, mark, scopeNote, wireProvenance } from "./provenance.js";
 
 // inert unless a provider is configured; see the header of analytics.js
 initAnalytics();
+// one delegated listener for every provenance marker the page ever renders
+wireProvenance();
 
 /* ---------- starfield ---------- */
 (function starfield() {
@@ -576,6 +579,13 @@ async function enhance(d) {
     }
     hydrate(d, ["weather", "homeland"]);
     refreshKeepsakes(d);
+    /*
+       The save was written when the page painted, which is before a
+       free-typed birthplace has a fix. Without this the coordinates and the
+       zone never reached it, and the Daily Sky — which recomputes from the
+       save rather than from the page — had no Ascendant and so no reading.
+    */
+    if (geo) persistSave(d);
   });
 
   otdP.then((otd) => { d.otd = otd; hydrate(d, ["people"]); });
@@ -784,6 +794,10 @@ function renderResult(d) {
   const placeLabel = placeLabelFor(d);
   d._keepsakeLabel = placeLabel;
   const longDate = prettyDate(d.day, d.month, d.year);
+  // curated tables arrive as facts; the value is unwrapped here and the
+  // source is rendered from the fact itself, next to the figure it explains
+  const song = valueOf(d.song);
+  const movie = valueOf(d.movie);
 
   result.innerHTML = `
     <div class="wrap">
@@ -864,30 +878,29 @@ function renderResult(d) {
           <div class="media__item" style="--glow:rgba(154,127,240,0.18)">
             <div class="media__art" data-art="song" aria-hidden="true"></div>
             <!--
-              The chart is named because the table is a US year-end one, and
-              an unlabelled "defining song" shown to someone born in Manila
-              or Lagos is a claim about their year that we have not earned.
-              Per-country charts are the real answer; naming the chart is the
-              honest stopgap.
+              The chart names itself, and it does so from the fact rather
+              than from a hand-written line here: an unlabelled "defining
+              song" shown to someone born in Manila or Lagos is a claim
+              about their year we have not earned.
             -->
-            <p class="media__type">The US #1 that year</p>
-            ${d.song
-              ? `<h3 class="media__title">${esc(d.song.split(" | ")[0])}</h3>
-                 <p class="media__by">${esc(d.song.split(" | ")[1] || "")}</p>
-                 ${musicLinks(d.song)}`
+            <p class="media__type">The #1 that year ${scopeNote(d.song)} ${d.song ? mark(d.song) : ""}</p>
+            ${song
+              ? `<h3 class="media__title">${esc(song.split(" | ")[0])}</h3>
+                 <p class="media__by">${esc(song.split(" | ")[1] || "")}</p>
+                 ${musicLinks(song)}`
               : `<h3 class="media__title">Off the charts</h3><p class="media__by">Our archive doesn't reach ${d.year} yet.</p>`}
           </div>
           <div class="media__item" style="--glow:rgba(236,217,172,0.16)">
             <div class="media__art media__art--poster" data-art="film" aria-hidden="true"></div>
-            <p class="media__type">The film of the year</p>
+            <p class="media__type">The film of the year ${d.movie ? mark(d.movie) : ""}</p>
             <!--
               "Topped the box office" was a specific factual claim, and the
               table does not support it: it runs highest-grossing most years
               but picks the defining release in others, so 1968 reads 2001: A
               Space Odyssey where the receipts say Funny Girl.
             -->
-            ${d.movie
-              ? `<h3 class="media__title">${esc(d.movie)}</h3><p class="media__by">the year's defining release</p>`
+            ${movie
+              ? `<h3 class="media__title">${esc(movie)}</h3><p class="media__by">the year's defining release</p>`
               : `<h3 class="media__title">The reel's still rolling</h3><p class="media__by">No film logged for ${d.year} yet.</p>`}
           </div>
         </div>
@@ -1049,11 +1062,12 @@ function loadCoverArt(d) {
     img.src = url;
   };
 
-  if (d.song) {
-    albumArt(d.song).then((a) => put("song", a?.image, `Cover of ${a?.title || d.song}`)).catch(() => {});
+  const song = valueOf(d.song), movie = valueOf(d.movie);
+  if (song) {
+    albumArt(song).then((a) => put("song", a?.image, `Cover of ${a?.title || song}`)).catch(() => {});
   }
-  if (d.movie) {
-    filmPoster(d.movie).then((f) => put("film", f?.image, `Poster for ${f?.title || d.movie}`)).catch(() => {});
+  if (movie) {
+    filmPoster(movie).then((f) => put("film", f?.image, `Poster for ${f?.title || movie}`)).catch(() => {});
   }
 }
 
@@ -1391,7 +1405,7 @@ function renderBirthdayPeople(d) {
 
 /* ---- leaders: who-that-year + full timeline + world powers ---- */
 function renderLeader(d) {
-  const l = d.leader;
+  const l = valueOf(d.leader);
   const timeline = leadersOf(d.geo?.countryCode);
   const world = leadersThatYear(d.year, d.geo?.countryCode);
   if (!l && !timeline && !world.length) return "";
@@ -1402,7 +1416,7 @@ function renderLeader(d) {
     <div class="leader mt-l" data-reveal>
       <div class="leader__seal">${esc(initial)}</div>
       <div>
-        <p class="leader__title">${esc(l.title)} of ${esc(l.country)} · ${d.year}</p>
+        <p class="leader__title">${esc(l.title)} of ${esc(l.country)} · ${d.year} ${mark(d.leader)}</p>
         <p class="leader__name">${esc(l.name)}</p>
         <p class="leader__years">In office ${l.from}–${l.to ?? "present"}</p>
       </div>
@@ -1508,7 +1522,8 @@ const ORRERY = [
 function renderCosmosWide(d) {
   // one decimal, not two: this is a straight-line read between UN estimates
   // five years apart, and the second decimal is invented precision
-  const popBillions = d.population ? (d.population / 1e9).toFixed(1) : null;
+  const pop = valueOf(d.population);
+  const popBillions = pop ? (pop / 1e9).toFixed(1) : null;
   const orbits = d.odo.orbits;
   const C = 220;
 
@@ -1541,7 +1556,7 @@ function renderCosmosWide(d) {
       <h2 class="h-section" data-reveal>You against <em>the solar system.</em></h2>
       ${popBillions ? `
         <p class="sub" data-reveal>When you arrived, Earth was already home to about
-          <strong style="color:var(--lunar)">${popBillions} billion</strong> people, and it has been
+          <strong style="color:var(--lunar)">${popBillions} billion</strong> people ${mark(d.population)}, and it has been
           carrying you around the sun ever since.</p>` : ""}
 
       <div class="orrery mt-l" data-orrery data-reveal>
@@ -2466,6 +2481,28 @@ function loadSaves() {
   try { return JSON.parse(localStorage.getItem(SAVES_KEY) || "[]"); } catch { return []; }
 }
 
+/** A name as a reader would compare it: trimmed, single-spaced, caseless. */
+const normalName = (s) => String(s || "").trim().replace(/\s+/g, " ").toLowerCase();
+
+/**
+ * Fold a fresh record over a stored one without ever taking anything away.
+ *
+ * The comment above the old merge claimed a returning visitor gains the
+ * birth time and place; the code did the opposite. A birth time is optional
+ * in the archive form and coordinates can still be unresolved when the
+ * result paints, so a re-run legitimately produces a record with an empty
+ * time and a null fix. Spreading that straight over the stored one deleted
+ * the time somebody had typed into the Daily Sky and nulled the coordinates
+ * its reading depends on. Only real values overwrite now.
+ */
+function upgrade(stored, fresh) {
+  const out = { ...stored };
+  for (const [k, v] of Object.entries(fresh)) {
+    if (v !== "" && v !== null && v !== undefined) out[k] = v;
+  }
+  return out;
+}
+
 function persistSave(d) {
   const saves = loadSaves();
   const key = `${d.name}|${d.day}|${d.month}|${d.year}`;
@@ -2486,10 +2523,21 @@ function persistSave(d) {
     lon: d.geo?.lon ?? null,
     tz: d.geo?.timezone || "",
   };
-  const at = saves.findIndex((s) => s.key === key);
+  /*
+     Match on the name as a person would read it, not as they typed it.
+     The key is built from the raw name, so "Aisha", "aisha" and "Aisha "
+     were three different people in the list. The stored key format is left
+     alone so that saves written before this still match themselves.
+  */
+  const same = (s) =>
+    s.key === key ||
+    (normalName(s.name) === normalName(d.name) &&
+      s.day === d.day && s.month === d.month && s.year === d.year);
+  const at = saves.findIndex(same);
+
   // an older record is upgraded in place, so a returning visitor gains the
   // birth time and place the Daily Sky wants without re-entering anything
-  if (at >= 0) saves[at] = { ...saves[at], ...record };
+  if (at >= 0) saves[at] = upgrade(saves[at], record);
   else saves.unshift(record);
   try { localStorage.setItem(SAVES_KEY, JSON.stringify(saves.slice(0, 50))); } catch {}
   // the day you just recovered is the one the Daily Sky should open on

@@ -1559,6 +1559,92 @@ html[data-boot="sky"] .veil__eyebrow { font-style: normal; font-weight: 400; }
 .r-foot a { color: var(--paper-soft); display: inline-block; padding: 6px 2px; }
 
 /* small print / source tag */
+/* ============================================================
+   PROVENANCE
+
+   A figure that cannot say where it came from should not be on the page,
+   so every curated one carries a marker. It is deliberately quiet: a
+   reader who does not care should never have to read anything, and a
+   reader who does gets the whole account in one press.
+
+   The scope is the exception. When the answer narrows the claim itself —
+   "the US number one", not "the number one" — it goes inline, because
+   somebody who never presses would otherwise leave believing something
+   untrue, and that is the failure this whole system exists to prevent.
+   ============================================================ */
+.prov {
+  display: inline-grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  margin-left: 5px;
+  padding: 0;
+  border: 1px solid var(--line, rgba(236,233,245,0.22));
+  border-radius: 50%;
+  background: none;
+  color: var(--paper-soft);
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  line-height: 1;
+  cursor: pointer;
+  vertical-align: 0.28em;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease), background-color 0.2s var(--ease);
+}
+.prov:hover,
+.prov[aria-expanded="true"] {
+  color: var(--ink, #0a0b14);
+  background: var(--lunar);
+  border-color: var(--lunar);
+}
+.prov:focus-visible { outline: 2px solid var(--lunar); outline-offset: 2px; }
+
+/* the inline half: a scope that changes what the figure means */
+.prov-scope {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  letter-spacing: 0.06em;
+  color: var(--lunar);
+  opacity: 0.8;
+}
+.prov-scope::before { content: "· "; opacity: 0.5; }
+
+.prov-panel {
+  position: fixed;
+  z-index: 120;
+  width: min(280px, calc(100vw - 20px));
+  padding: 13px 15px;
+  border: 1px solid rgba(236,217,172,0.24);
+  border-radius: 12px;
+  background: rgba(12,13,26,0.97);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 44px rgba(0,0,0,0.5);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.18s var(--ease), transform 0.18s var(--ease);
+}
+.prov-panel.is-open { opacity: 1; transform: none; }
+.prov-panel p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--paper-soft);
+}
+.prov-panel a {
+  display: inline-block;
+  margin-top: 9px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lunar);
+}
+
+/* on paper the marker follows the ink, not the night sky */
+body.on-paper .prov { border-color: var(--pl, rgba(20,18,13,0.2)); color: var(--pi-mute, #6b6457); }
+body.on-paper .prov:hover,
+body.on-paper .prov[aria-expanded="true"] { background: var(--pg, #8a6712); border-color: var(--pg, #8a6712); color: #fbf9f4; }
+body.on-paper .prov-scope { color: var(--pg, #8a6712); }
+
 .source { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.04em; color: var(--paper-soft); margin-top: 14px; }
 .source--live { color: var(--teal); }
 .source--curated { color: var(--lunar); }
