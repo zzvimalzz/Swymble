@@ -1,9 +1,22 @@
 /* ============================================================
    data.js | curated, best-effort historical reference data.
-   These are hand-compiled facts (top film, defining song,
-   head of government). They're real but, unlike the live feeds,
-   labelled "from our archive" in the UI so nothing is passed
-   off as a per-day lookup.
+
+   Hand-compiled tables, not lookups: a film and a song per year, heads of
+   government for sixteen countries, and world population read between UN
+   anchors. They are real, and they are also narrower than they look, so
+   every one of them carries its scope in the label that renders it:
+
+     · SONGS_BY_YEAR   is a US chart, and the UI says "The US #1 that year"
+     · MOVIES_BY_YEAR  mixes box-office leaders with defining releases, so
+                       the UI claims the second and not the first
+     · LEADERS         covers sixteen countries and the UI says so outright
+                       when a visitor's country is not among them
+     · WORLD_POP       is interpolated, and prints to one decimal with an
+                       "about" in front of it
+
+   If you add a table here, add its label at the same time. An unqualified
+   curated fact is indistinguishable from a fabricated one to the reader,
+   and the whole product rests on that difference.
    ============================================================ */
 
 /* ---------- highest-grossing / defining film by release year ---------- */

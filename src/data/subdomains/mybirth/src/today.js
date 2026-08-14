@@ -30,7 +30,7 @@
 
 import {
   moonPhase, skyReturn, nextBirthday, milestones, cosmicOdometer,
-  ordinal, prettyDate, monthName, chartAngles, signAt
+  ordinal, prettyDate, monthName, chartAngles, signAt, zonedToUTC
 } from "./astro.js";
 import { dailyReading, aspectLabel } from "./reading.js";
 import { signIcon, planetIcon } from "./glyphs.js";
@@ -76,17 +76,8 @@ export function buildProfile(save) {
   }
   const hasPlace = Number.isFinite(lat) && Number.isFinite(lon);
 
-  /*
-     The birth moment in UTC. A local wall-clock time only becomes an
-     instant once the birthplace's zone is known, and the Ascendant is
-     wrong by fifteen degrees per hour if that step is skipped.
-  */
-  let birthDate;
-  if (hasTime && tz) {
-    birthDate = zonedToUTC(year, month, day, hh, mm, tz);
-  } else {
-    birthDate = new Date(Date.UTC(year, month - 1, day, hh, mm));
-  }
+  // the birth moment as a real instant; no zone means the clock reads as UTC
+  const birthDate = zonedToUTC(year, month, day, hh, mm, tz);
 
   const angles = hasTime && hasPlace ? chartAngles(birthDate, lat, lon) : null;
 
@@ -104,37 +95,6 @@ export function buildProfile(save) {
     placeLabel: save.placeLabel || "",
     shareURL: save.shareURL || "",
   };
-}
-
-/**
- * A wall-clock birth time in a named zone, as a real UTC instant.
- *
- * `Intl` will tell us what a given UTC instant looks like in a zone, but
- * not the reverse, so this guesses UTC, measures the error the formatter
- * reports, and corrects. One pass is enough except within an hour of a
- * daylight-saving change, which the second pass covers.
- */
-function zonedToUTC(year, month, day, hh, mm, timeZone) {
-  const target = Date.UTC(year, month - 1, day, hh, mm);
-  let guess = target;
-  for (let i = 0; i < 2; i++) {
-    const seen = readInZone(new Date(guess), timeZone);
-    if (seen === null) return new Date(target);
-    guess += target - seen;
-  }
-  return new Date(guess);
-}
-
-function readInZone(date, timeZone) {
-  try {
-    const p = new Intl.DateTimeFormat("en-GB", {
-      timeZone, year: "numeric", month: "2-digit", day: "2-digit",
-      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false,
-    }).formatToParts(date).reduce((a, x) => (a[x.type] = x.value, a), {});
-    return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
-  } catch {
-    return null;
-  }
 }
 
 /* ---------- the moon, drawn flat ---------- */

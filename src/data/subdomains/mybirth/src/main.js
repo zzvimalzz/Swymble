@@ -22,7 +22,8 @@ import {
   moonPhase, zodiac, chineseZodiac, birthstone, birthFlower,
   weekday, monthName, prettyDate, ageInfo, lunarMonthsLived,
   generation, lifePath, cosmicOdometer, sunTimes, planetAges,
-  planetLongitudes, nextBirthday, milestones, skyReturn, ordinal
+  planetLongitudes, nextBirthday, milestones, skyReturn, ordinal,
+  zonedToUTC, zoneIsUncertain
 } from "./astro.js";
 import {
   movieOfYear, songOfYear, leaderAt, COUNTRIES, worldPopulationAt,
@@ -322,21 +323,14 @@ function buildShareURL(i) {
 
 async function runGeneration(inputs) {
   const startedAt = performance.now();
-  const { name, day, month, year, time, place, placeLabel } = inputs;
-  const country = place?.country || inputs.country || "";
-  const city = place?.name || "";
-  const state = place?.admin1 || "";
+  const { name, day, month, year, time, placeLabel } = inputs;
   const shareURL = buildShareURL(inputs);
-  try { history.replaceState(null, "", shareURL); } catch {}
+  // keep whichever tab the visitor is on; the share URL itself is built
+  // from scratch in buildShareURL and never carries a hash
+  try { history.replaceState(null, "", shareURL + location.hash); } catch {}
 
   // start pulling the 3D assets while the veil is up
   prefetchModelAssets();
-
-  // build birth Date in UTC (use given time, else noon to centre the day)
-  let hh = 12, mm = 0;
-  if (time && /^\d{1,2}:\d{2}/.test(time)) { [hh, mm] = time.split(":").map(Number); }
-  const birthDate = new Date(Date.UTC(year, month - 1, day, hh, mm));
-  const today = new Date();
 
   // show veil + rotate lines
   veil.hidden = false;
@@ -347,13 +341,55 @@ async function runGeneration(inputs) {
     veilText.textContent = VEIL_LINES[li];
   }, 900);
 
+  /*
+     The birthplace has to be known before the sky can be, because a wall
+     clock is not a moment until you know which clock it was. Picking from
+     the suggestions carries the zone already. Free text typed straight past
+     the list does not, so we spend the veil's own dwell time asking for it,
+     capped: a slow geocoder delays the reveal by at most a fraction of a
+     second, and a dead one falls through to reading the clock as UTC.
+  */
+  let place = inputs.place;
+  if (!place && placeLabel) {
+    place = await Promise.race([
+      geocode(placeLabel).catch(() => null),
+      new Promise((r) => setTimeout(() => r(null), MAX_ZONE_WAIT_MS)),
+    ]);
+  }
+  const country = place?.country || inputs.country || "";
+  const city = place?.name || "";
+  const state = place?.admin1 || "";
+
+  /*
+     Two different things, and conflating them was a real bug.
+
+     `birthDate` is an *instant*: the wall clock the visitor typed, resolved
+     through the birthplace's zone. Everything astronomical wants this, and
+     this file used to skip the resolution and read the clock as UTC, which
+     put the moon out by up to seven degrees and made the archive disagree
+     with the Today tab about the same person.
+
+     `birthNoon` is a *calendar day*, parked at midday UTC. The weekday and
+     the sunrise want this instead: a birth at 08:00 in Auckland is a real
+     instant on the previous UTC date, and asking the instant what day of the
+     week it was would answer Sunday for a Monday baby.
+
+     No time given still means midday, which centres the error rather than
+     leaning it against midnight.
+  */
+  let hh = 12, mm = 0;
+  if (time && /^\d{1,2}:\d{2}/.test(time)) { [hh, mm] = time.split(":").map(Number); }
+  const birthNoon = new Date(Date.UTC(year, month - 1, day, 12));
+  const birthDate = zonedToUTC(year, month, day, hh, mm, place?.timezone || "");
+  const today = new Date();
+
   // ---- compute deterministic ----
   const moonData = moonPhase(birthDate);
   const zod = zodiac(month, day);
-  const cz = chineseZodiac(year);
+  const cz = chineseZodiac(year, month, day);
   const stone = birthstone(month);
   const flower = birthFlower(month);
-  const dow = weekday(birthDate);
+  const dow = weekday(birthNoon);
   const age = ageInfo(day, month, year, today);
   const fullMoons = lunarMonthsLived(birthDate, today);
   const gen = generation(year);
@@ -379,13 +415,13 @@ async function runGeneration(inputs) {
   */
   const payload = {
     name, day, month, year, country, city, state, time,
-    birthDate, today, moon: moonData, zod, cz, stone, flower, dow, age, fullMoons,
+    birthDate, birthNoon, today, moon: moonData, zod, cz, stone, flower, dow, age, fullMoons,
     gen, lp, odo, planets, population, movie, song, shareURL,
     skyThen, nextReturn, nextMilestones, returning,
     placeLabel,
     // a picked suggestion already carries a fix, so the sun is exact from frame one
     geo: place || null,
-    sun: place ? sunTimes(place.lat, place.lon, birthDate, place.timezone) : null,
+    sun: place ? sunTimes(place.lat, place.lon, birthNoon, place.timezone) : null,
     weather: null, yearNews: null, otd: null,
     leader: place ? leaderAt(place.countryCode, year) : null,
     homeland: null, pending: true
@@ -407,6 +443,8 @@ async function runGeneration(inputs) {
 
 /** How long the loading veil is held, at minimum, before the reveal. */
 const MIN_VEIL_MS = 420;
+/** How long we will wait on a geocoder for a birthplace's time zone. */
+const MAX_ZONE_WAIT_MS = 1200;
 
 /**
  * The progressive half: fetch what needs the network, then fill the waiting
@@ -435,7 +473,7 @@ async function enhance(d) {
   geoP.then(async (geo) => {
     d.geo = geo;
     if (geo) {
-      d.sun = sunTimes(geo.lat, geo.lon, d.birthDate, geo.timezone);
+      d.sun = sunTimes(geo.lat, geo.lon, d.birthNoon, geo.timezone);
       d.leader = leaderAt(geo.countryCode, d.year);
     }
     hydrate(d, ["weather", "leader", "homeland"], { weatherPending: !!geo });
@@ -452,7 +490,7 @@ async function enhance(d) {
     // read off the longitude; the archive just told us the real one
     if (geo && !geo.timezone && weather?.timezone) {
       geo.timezone = weather.timezone;
-      d.sun = sunTimes(geo.lat, geo.lon, d.birthDate, weather.timezone);
+      d.sun = sunTimes(geo.lat, geo.lon, d.birthNoon, weather.timezone);
     }
     hydrate(d, ["weather", "homeland"]);
     refreshKeepsakes(d);
@@ -743,7 +781,14 @@ function renderResult(d) {
         <div class="media mt-l" data-reveal>
           <div class="media__item" style="--glow:rgba(154,127,240,0.18)">
             <div class="media__art" data-art="song" aria-hidden="true"></div>
-            <p class="media__type">Defining song</p>
+            <!--
+              The chart is named because the table is a US year-end one, and
+              an unlabelled "defining song" shown to someone born in Manila
+              or Lagos is a claim about their year that we have not earned.
+              Per-country charts are the real answer; naming the chart is the
+              honest stopgap.
+            -->
+            <p class="media__type">The US #1 that year</p>
             ${d.song
               ? `<h3 class="media__title">${esc(d.song.split(" | ")[0])}</h3>
                  <p class="media__by">${esc(d.song.split(" | ")[1] || "")}</p>
@@ -752,9 +797,15 @@ function renderResult(d) {
           </div>
           <div class="media__item" style="--glow:rgba(236,217,172,0.16)">
             <div class="media__art media__art--poster" data-art="film" aria-hidden="true"></div>
-            <p class="media__type">Biggest film</p>
+            <p class="media__type">The film of the year</p>
+            <!--
+              "Topped the box office" was a specific factual claim, and the
+              table does not support it: it runs highest-grossing most years
+              but picks the defining release in others, so 1968 reads 2001: A
+              Space Odyssey where the receipts say Funny Girl.
+            -->
             ${d.movie
-              ? `<h3 class="media__title">${esc(d.movie)}</h3><p class="media__by">topped the box office</p>`
+              ? `<h3 class="media__title">${esc(d.movie)}</h3><p class="media__by">the year's defining release</p>`
               : `<h3 class="media__title">The reel's still rolling</h3><p class="media__by">No film logged for ${d.year} yet.</p>`}
           </div>
         </div>
@@ -949,7 +1000,7 @@ function renderWeather(d, placeLabel) {
         <p class="kicker" data-reveal>The weather overhead</p>
         <h2 class="h-section" data-reveal>The skies kept <em>no record.</em></h2>
         <p class="sub" data-reveal>Reliable daily weather only reaches back to 1940, and not every coordinate is covered. For ${esc(placeLabel)} on your day, the archive came back empty, but the sky still ran on schedule.</p>
-        ${d.sun ? `<dl class="facts mt-l" data-reveal>${sunFactsHTML(d.sun)}</dl>` : ""}
+        ${d.sun ? `<dl class="facts mt-l" data-reveal>${sunFactsHTML(d.sun, d.year)}</dl>` : ""}
       </section>`;
   }
   const w = d.weather;
@@ -991,7 +1042,7 @@ function renderWeather(d, placeLabel) {
           <div class="fact"><dt>Low</dt><dd>${Math.round(w.min)}°C</dd></div>
           <div class="fact"><dt>Rain</dt><dd>${w.precip != null ? w.precip.toFixed(1) : "0"}<small>mm of precipitation</small></dd></div>
           <div class="fact"><dt>Wind</dt><dd>${w.wind != null ? Math.round(w.wind) : "·"}<small>km/h peak gust</small></dd></div>
-          ${sunFactsHTML(d.sun)}
+          ${sunFactsHTML(d.sun, d.year)}
           <div class="fact"><dt>Conditions</dt><dd>${esc(w.summary)}</dd></div>
           
         </dl>
@@ -999,14 +1050,26 @@ function renderWeather(d, placeLabel) {
     </section>`;
 }
 
-function sunFactsHTML(sun) {
+function sunFactsHTML(sun, year) {
   if (!sun) return "";
   if (sun.polar) {
     return `<div class="fact"><dt>Daylight</dt><dd>${sun.polar === "day" ? "Midnight sun" : "Polar night"}<small>the sun ${sun.polar === "day" ? "never set" : "never rose"} that day</small></dd></div>`;
   }
-  // an exact place carries its IANA zone; a country or region centroid does
-  // not, and saying so is better than printing a clock that looks certain
-  const zoneNote = sun.approxZone ? "solar time at that longitude" : "local time";
+  /*
+     Two different reasons a clock here might not be exact, and the reader
+     deserves to know which one applies.
+
+     An exact place carries its IANA zone; a country or region centroid does
+     not, so the time is read off the longitude instead.
+
+     And even with a real zone, offsets before 1970 come from the part of the
+     zone database its own maintainers describe as not authoritative and in
+     places deliberately simplified. A good share of this product's visitors
+     were born back there, and an hour is worth admitting to.
+  */
+  const zoneNote = sun.approxZone
+    ? "solar time at that longitude"
+    : zoneIsUncertain(year) ? "local time, approximate before 1970" : "local time";
   return `
     <div class="fact"><dt>Sunrise</dt><dd>${esc(sun.sunrise)}<small>${zoneNote}</small></dd></div>
     <div class="fact"><dt>Sunset</dt><dd>${esc(sun.sunset)}<small>${zoneNote}</small></dd></div>
@@ -1361,7 +1424,9 @@ const ORRERY = [
 ];
 
 function renderCosmosWide(d) {
-  const popBillions = d.population ? (d.population / 1e9).toFixed(2) : null;
+  // one decimal, not two: this is a straight-line read between UN estimates
+  // five years apart, and the second decimal is invented precision
+  const popBillions = d.population ? (d.population / 1e9).toFixed(1) : null;
   const orbits = d.odo.orbits;
   const C = 220;
 
@@ -2192,6 +2257,25 @@ function applyTab(name, focus) {
   const rail = document.getElementById("chapter-rail");
   if (rail) rail.hidden = name !== "archive";
   scrollTo({ top: 0, behavior: "auto" });
+  rememberTab(name);
+}
+
+/*
+   Which tab you are on belongs in the URL.
+
+   A shared link carries the birth details in its query string, and that
+   query string stays put while you move between tabs. So a reload from
+   People or Today re-read the query, found a day to recover, and dropped
+   you back on the Archive: the tab you were looking at was never written
+   down anywhere. The hash is, it survives a reload, and it costs nothing
+   to a shared link because share URLs are built from scratch elsewhere.
+*/
+function rememberTab(name) {
+  try {
+    const want = `#${name}`;
+    if (location.hash === want) return;
+    history.replaceState(null, "", location.pathname + location.search + want);
+  } catch { /* a hostile history stack is not worth failing over */ }
 }
 
 /** Paper or ink, set on <body> so the fixed backdrop and the nav follow it. */
@@ -2267,9 +2351,18 @@ document.getElementById("brand-home").addEventListener("click", () => {
 });
 
 /** Where the wordmark goes, and where a plain visit lands. */
-function rootTab() {
+function rootTab({ fromLink = false } = {}) {
   // "#new" means the visitor asked for the form, so it beats the saved-day rule
   if (location.hash === "#new") return "archive";
+  // a tab written into the hash by rememberTab: honour it across a reload
+  const named = location.hash.replace("#", "");
+  if (Object.prototype.hasOwnProperty.call(PANELS, named)) return named;
+  /*
+     Arriving on somebody's shared link with no tab named: show them the
+     archive, which is the thing the link is *of*. Only a plain visit falls
+     through to whichever tab a returning visitor would want.
+  */
+  if (fromLink) return "archive";
   return loadSaves().length ? "today" : "archive";
 }
 
@@ -2574,6 +2667,13 @@ function renderSaves() {
   };
   if (validate(inputs)) return; // malformed link, just show the landing
   trackEvent(EVENTS.ARCHIVE_START, { entry: "link" });
+  /*
+     The link is recovered either way, but the tab the visitor was last on
+     wins. Without this a reload from People or Today landed back on the
+     Archive, because the query string is still in the URL and this branch
+     never asked which tab was wanted.
+  */
+  activateTab(rootTab({ fromLink: true }));
 
   // reflect into the form so "recover another" and re-edits stay consistent
   const set = (id, v) => { const el = document.getElementById(id); if (el != null && v) el.value = v; };
