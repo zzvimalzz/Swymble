@@ -16,7 +16,7 @@ import { createFete } from "./fete.js";
 import { buildCertificate } from "./certificate.js";
 import {
   geocode, historicalWeather, onThisDay, yearEvents, countryFacts, searchPlaces,
-  countryIndicators, spaceWeather
+  countryIndicators, spaceWeather, albumArt, filmPoster
 } from "./apis.js";
 import {
   moonPhase, zodiac, chineseZodiac, birthstone, birthFlower,
@@ -702,7 +702,6 @@ function renderResult(d) {
               <div class="fact"><dt>Direction</dt><dd>${d.moon.waxing ? "Waxing" : "Waning"}</dd></div>
               <div class="fact"><dt>Moons since</dt><dd data-count="${d.fullMoons}">0<small>full cycles lived</small></dd></div>
             </dl>
-            <p class="source source--live">Drag to turn the moon. The phase holds true at every angle.</p>
           </div>
         </div>
       </section>
@@ -743,22 +742,20 @@ function renderResult(d) {
         <h2 class="h-section" data-reveal>The soundtrack &amp; spectacle<br/>of <em>${d.year}.</em></h2>
         <div class="media mt-l" data-reveal>
           <div class="media__item" style="--glow:rgba(154,127,240,0.18)">
-            <div class="media__icon">Sound</div>
+            <div class="media__art" data-art="song" aria-hidden="true"></div>
             <p class="media__type">Defining song</p>
             ${d.song
               ? `<h3 class="media__title">${esc(d.song.split(" | ")[0])}</h3>
                  <p class="media__by">${esc(d.song.split(" | ")[1] || "")}</p>
                  ${musicLinks(d.song)}`
               : `<h3 class="media__title">Off the charts</h3><p class="media__by">Our archive doesn't reach ${d.year} yet.</p>`}
-            <p class="media__note source--curated">From our archive of the year</p>
           </div>
           <div class="media__item" style="--glow:rgba(236,217,172,0.16)">
-            <div class="media__icon">Screen</div>
+            <div class="media__art media__art--poster" data-art="film" aria-hidden="true"></div>
             <p class="media__type">Biggest film</p>
             ${d.movie
               ? `<h3 class="media__title">${esc(d.movie)}</h3><p class="media__by">topped the box office</p>`
               : `<h3 class="media__title">The reel's still rolling</h3><p class="media__by">No film logged for ${d.year} yet.</p>`}
-            <p class="media__note source--curated">From our archive of the year</p>
           </div>
         </div>
       </section>
@@ -888,9 +885,43 @@ function renderResult(d) {
   */
   trackEvent(EVENTS.ARCHIVE_READY);
   watchCompletion(result);
+  loadCoverArt(d);
 
   // persist this result to saves
   persistSave(d);
+}
+
+/*
+   The sleeve and the poster, fetched after the chapter has painted.
+
+   Neither is needed for the page to make sense, so neither is waited on:
+   the titles are already there and the art drops into its own square when
+   it arrives. A miss leaves an empty frame rather than a broken image,
+   which is why the <img> is only created once a URL is in hand.
+*/
+function loadCoverArt(d) {
+  const put = (key, url, alt) => {
+    const slot = result.querySelector(`[data-art="${key}"]`);
+    if (!slot || !url) return;
+    const img = new Image();
+    img.alt = alt;
+    img.decoding = "async";
+    /*
+       Deliberately NOT loading="lazy". A lazy image that is not in the
+       document has no viewport to enter, so the browser never starts the
+       fetch and onload never fires: the frame stayed empty forever while
+       the URL sat right there. This one is being fetched on purpose.
+    */
+    img.onload = () => { slot.appendChild(img); slot.classList.add("is-loaded"); };
+    img.src = url;
+  };
+
+  if (d.song) {
+    albumArt(d.song).then((a) => put("song", a?.image, `Cover of ${a?.title || d.song}`)).catch(() => {});
+  }
+  if (d.movie) {
+    filmPoster(d.movie).then((f) => put("film", f?.image, `Poster for ${f?.title || d.movie}`)).catch(() => {});
+  }
 }
 
 /*
@@ -962,7 +993,7 @@ function renderWeather(d, placeLabel) {
           <div class="fact"><dt>Wind</dt><dd>${w.wind != null ? Math.round(w.wind) : "·"}<small>km/h peak gust</small></dd></div>
           ${sunFactsHTML(d.sun)}
           <div class="fact"><dt>Conditions</dt><dd>${esc(w.summary)}</dd></div>
-          <div class="fact"><dt>Source</dt><dd style="font-size:1rem" class="source--live">ERA5 reanalysis<small>the archive for ${esc(prettyDate(d.day, d.month, d.year))} at ${d.geo ? `${d.geo.lat.toFixed(2)}, ${d.geo.lon.toFixed(2)}` : "that place"} · measured on the day, not today's forecast</small></dd></div>
+          
         </dl>
       </div>
     </section>`;
@@ -1156,7 +1187,7 @@ function renderYearNews(d) {
     <section class="block">
       <p class="kicker" data-reveal>The year the world turned</p>
       <h2 class="h-section" data-reveal>What <em>${d.year}</em> was made of.</h2>
-      <p class="sub" data-reveal>Pulled live from Wikipedia's chronicle of the year. Each headline links to its source article.</p>
+      <p class="sub" data-reveal>Each headline links to its article.</p>
 
       ${yn.world && yn.world.length ? `
         <div class="news-scope" data-reveal>
@@ -1171,7 +1202,6 @@ function renderYearNews(d) {
         </div>` : `
         <p class="source" data-reveal style="margin-top:30px">No dedicated “${d.year} in Malaysia” chronicle was found on Wikipedia.</p>`}
 
-      <p class="source source--live mt-l">Compiled live from Wikipedia.</p>
     </section>`;
 }
 
@@ -1189,6 +1219,8 @@ function renderBirthdayPeople(d) {
   const deaths = d.otd?.deaths || [];
   if (!births.length && !deaths.length) return "";
 
+  /* the full birth date, since the day and month are the reader's own */
+  const born = `${String(d.day).padStart(2, "0")}/${String(d.month).padStart(2, "0")}/`;
   const card = (p) => `
     <a class="person" ${p.url ? `href="${p.url}" target="_blank" rel="noopener"` : ""}>
       <span class="person__face">${p.thumb
@@ -1197,7 +1229,7 @@ function renderBirthdayPeople(d) {
       <span class="person__info">
         <b>${esc(p.name)}</b>
         <span class="person__desc">${esc(p.desc || "")}</span>
-        <em>b. ${p.year}</em>
+        <em>${born}${p.year}${p.died ? ` &ndash; ${p.died}` : ""}</em>
       </span>
     </a>`;
 
@@ -1209,7 +1241,6 @@ function renderBirthdayPeople(d) {
       ${deaths.length ? `
         <h3 class="source" style="margin-top:46px;font-size:0.7rem;letter-spacing:0.24em">THE WORLD ALSO REMEMBERS, ON THIS DATE</h3>
         <div class="shares" data-reveal>${deaths.map((p) => `<span class="share-chip"><b>${esc(p.name)}</b> · d. ${p.year}</span>`).join("")}</div>` : ""}
-      <p class="source source--live mt-l">Pulled live from Wikipedia's “on this day”.</p>
     </section>`;
 }
 
@@ -1268,7 +1299,6 @@ function renderLeader(d) {
       ${hero}
       ${track}
       ${worldGrid}
-      <p class="source source--curated mt-l">From our archive of heads of government &amp; state.</p>
     </section>`;
 }
 
@@ -1539,8 +1569,8 @@ function renderSkyThen(d) {
         <p class="kicker" data-reveal>The sky, exactly as it stood</p>
         <h2 class="h-section" data-reveal>Where the wanderers <em>stood.</em></h2>
         <p class="ch-sub" data-reveal>
-          Not a reading, a position. This is the ecliptic on your date, with each
-          naked-eye planet at the longitude it actually held.
+          The ecliptic on your date, with each naked-eye planet at the
+          longitude it actually held.
         </p>
       </div>
       <div class="ps-strip mt-l" data-reveal style="--rows:${rows}">
@@ -1550,7 +1580,6 @@ function renderSkyThen(d) {
           ${pins}
         </div>
       </div>
-      <p class="source center mt-l">Geocentric longitudes from JPL Keplerian elements, accurate to a few arcminutes.</p>
     </section>`;
 }
 
@@ -1869,7 +1898,6 @@ function renderHomeland(d) {
           ${geoFacts.length ? `<dl class="facts homeland__facts">${geoFacts.map(([k, v]) => `<div class="fact"><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>` : ""}
         </div>
       </div>
-      <p class="source source--live mt-l">Population and life expectancy from World Bank open data · summary from Wikipedia · position from Open-Meteo.</p>
     </section>`;
 }
 
@@ -2071,19 +2099,30 @@ function movePill() {
 function radialSwap(origin, swap) {
   if (!document.startViewTransition || REDUCED_MOTION) { swap(); return; }
 
+  const root = document.documentElement;
   const x = origin?.x ?? innerWidth / 2;
   const y = origin?.y ?? 0;
   // the circle has to reach the furthest corner, or a wedge of the old
   // page is still showing when the animation ends
   const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
 
-  const t = document.startViewTransition(swap);
-  t.ready.then(() => {
-    document.documentElement.animate(
-      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
-      { duration: 620, easing: "cubic-bezier(0.65, 0, 0.35, 1)", pseudoElement: "::view-transition-new(root)" },
-    );
-  }).catch(() => {});
+  /*
+     Set before the transition starts, not after. The animation itself is
+     declared in CSS (see ::view-transition-new(root) there) so it is live
+     from the pseudo-element's first frame; these only tell it where the
+     circle grows from. `is-wiping` silences every other colour transition
+     for the duration, because two animations over one repaint is what
+     produced the torn frames.
+  */
+  root.style.setProperty("--wipe-x", `${x}px`);
+  root.style.setProperty("--wipe-y", `${y}px`);
+  root.style.setProperty("--wipe-r", `${Math.ceil(r)}px`);
+  root.classList.add("is-wiping");
+
+  const done = () => root.classList.remove("is-wiping");
+  let t;
+  try { t = document.startViewTransition(swap); } catch { swap(); done(); return; }
+  t.finished.then(done, done);
 }
 
 /** Where a pointer event happened, for the wipe to grow from. */

@@ -1874,7 +1874,11 @@ main { position: relative; z-index: 2; padding-top: 56px; }
 .cert-dossier dt { font-family: var(--mono); font-size: clamp(0.4rem, 1cqw, 0.5rem); letter-spacing: 0.16em; text-transform: uppercase; color: rgba(221, 216, 240, 0.55); margin-bottom: 2px; }
 .cert-dossier dd { margin: 0; font-size: clamp(0.7rem, 1.7cqw, 1rem); font-weight: 500; line-height: 1.25; }
 .cert-qr { text-align: center; flex: none; }
-.cert-qr img { width: clamp(96px, 22cqw, 168px); aspect-ratio: 1; display: block; margin: 0 auto; padding: 2.4cqw; max-width: 168px; background: #e8e4f4; border: 1px solid var(--cert-gold); border-radius: 6px; }
+/* `height: auto` is load-bearing: the <img> carries width/height attributes
+   so the certificate does not reflow while the code renders, and that
+   height attribute is a real used value that beats `aspect-ratio`. Left in,
+   the QR came out 104x150 and visibly stretched. */
+.cert-qr img { width: clamp(96px, 22cqw, 168px); height: auto; aspect-ratio: 1; display: block; margin: 0 auto; padding: 2.4cqw; max-width: 168px; background: #e8e4f4; border: 1px solid var(--cert-gold); border-radius: 6px; }
 .cert-qr__cap { font-family: var(--mono); font-size: clamp(0.46rem, 1.2cqw, 0.58rem); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(221, 216, 240, 0.6); margin: 10px 0 4px; line-height: 1.5; }
 .cert-qr__url { font-family: var(--mono); font-size: clamp(0.46rem, 1.2cqw, 0.58rem); color: var(--cert-gold); margin: 0; word-break: break-all; }
 .cert-twins { font-style: italic; font-size: clamp(0.78rem, 1.7cqw, 1.05rem); color: rgba(221, 216, 240, 0.7); margin: clamp(12px, 2cqw, 22px) 0 0; text-align: center; }
@@ -3353,3 +3357,85 @@ body.on-paper.sky-dark .daynight:hover { color: #e0bc63; }
   .brand__nav { gap: 0; padding: 4px; }
   .brand__tab { padding: 10px 12px; font-size: 0.66rem; letter-spacing: 0.1em; }
 }
+
+/* ============================================================
+   THE RADIAL WIPE
+
+   `startViewTransition` snapshots the old page and paints the new one over
+   it, cross-fading the two by default. That default is exactly the muddy
+   middle we are avoiding, so it is replaced: the old page holds still
+   underneath while the new one is revealed through a circle grown from
+   wherever the press happened.
+
+   Declared here rather than started from script. It used to be a WAAPI
+   animation applied inside `transition.ready.then()`, and for the frame or
+   two before that promise resolved the new page was already composited at
+   full size with no animation on it. On some builds you saw it snap in and
+   then jump back to a circle: the tear and the white flash. In CSS the
+   animation exists the instant the pseudo-element does, and the origin
+   reaches it through custom properties set beforehand.
+   ============================================================ */
+::view-transition-old(root) { animation: none; mix-blend-mode: normal; z-index: 0; }
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  z-index: 1;
+  animation: wipe-in 0.62s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+@keyframes wipe-in {
+  from { clip-path: circle(0px at var(--wipe-x, 50%) var(--wipe-y, 0px)); }
+  to   { clip-path: circle(var(--wipe-r, 150vmax) at var(--wipe-x, 50%) var(--wipe-y, 0px)); }
+}
+
+/*
+   While the wipe runs, nothing else may animate the same colours.
+
+   The body background, the fixed backdrop layers and the nav each carry
+   their own half-second transition. Under a view transition those keep
+   running inside the captured frame, so the two crossed and left a
+   hard-edged band of half-painted page. The wipe alone carries the change.
+*/
+html.is-wiping body,
+html.is-wiping #starfield,
+html.is-wiping .aurora,
+html.is-wiping .grain,
+html.is-wiping .brand__name,
+html.is-wiping .brand__name b,
+html.is-wiping .brand__tab,
+html.is-wiping .brand__pill,
+html.is-wiping .brand__nav,
+html.is-wiping .meridian,
+html.is-wiping .daynight,
+html.is-wiping #panel-today,
+html.is-wiping .sky-mod,
+html.is-wiping .sky-btn,
+html.is-wiping .sky-who__btn { transition: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
+}
+
+/* ---- cover art on the media cards ----
+   An empty square until the artwork lands, then a crossfade. The frame is
+   drawn either way so the card does not jump when it arrives. */
+.media__art {
+  position: relative;
+  width: clamp(84px, 22%, 130px);
+  aspect-ratio: 1;
+  margin-bottom: 18px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px var(--line) inset;
+}
+/* a poster is not square: 2:3 is the standard sheet */
+.media__art--poster { aspect-ratio: 2 / 3; width: clamp(72px, 18%, 104px); border-radius: 6px; }
+.media__art img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  opacity: 0; transition: opacity 0.5s var(--ease);
+}
+.media__art.is-loaded img { opacity: 1; }
+.media__art.is-loaded { box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.7); }
+
+/* the people who share the date: the description wraps rather than truncating,
+   now that there are six well-known names rather than nine obscure ones */
+.person__desc { white-space: normal; overflow: visible; text-overflow: clip; }

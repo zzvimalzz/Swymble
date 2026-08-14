@@ -210,52 +210,181 @@ function describeWeather(code) {
 }
 
 /* ---------- Wikipedia: people who share the date ---------- */
+/**
+ * The people who share your birthday, ranked by how well known they are.
+ *
+ * The feed returns every human Wikipedia lists for a date: on 9 July that
+ * is 208 of them, ordered newest first, and taking any fixed slice gave a
+ * page of footballers born in 2003 or of thirteenth-century bishops. Both
+ * are true and neither is what anyone means by "born on your day".
+ *
+ * So the list is ranked. There is no fame field in the payload, but there
+ * is a free, key-free, CORS-open one next door: the Wikimedia pageviews
+ * API. Three months of traffic to an article separates a household name
+ * from a club swimmer by three orders of magnitude, which is exactly the
+ * signal wanted. Only a shortlist is measured, in one parallel round, so
+ * it costs about half a second and no key.
+ *
+ * One name from before 1900 is kept deliberately. A page of living
+ * celebrities loses the fact that this date has been somebody's birthday
+ * for a thousand years.
+ */
 export async function onThisDay(month, day) {
   const mm = String(month).padStart(2, "0");
   const dd = String(day).padStart(2, "0");
+
+  /*
+     Cached for a month, per date.
+
+     Ranking costs one traffic lookup per candidate, and a busy date has
+     around 170 of them. That is a lot to ask of a free endpoint every time
+     somebody opens their own birthday, and repeated loads earned a 429.
+     Who was born on 9 July does not change between Tuesday and Wednesday,
+     so the finished list is kept and the whole burst happens once a month
+     per date rather than once a page view.
+  */
+  const cached = readCache(`otd:${mm}-${dd}`);
+  if (cached) return cached;
+
   try {
-    const url = `https://en.wikipedia.org/api/rest_v1/feed/onthisday/all/${mm}/${dd}`;
-    const data = await getJSON(url);
-    return {
-      births: shapePeople(data?.births, 9),
-      deaths: shapePeople(data?.deaths, 5)
-    };
+    const data = await getJSON(`https://en.wikipedia.org/api/rest_v1/feed/onthisday/all/${mm}/${dd}`);
+    const [births, deaths] = await Promise.all([
+      rankPeople(data?.births, 6, true),
+      rankPeople(data?.deaths, 5, false),
+    ]);
+    const out = { births, deaths };
+    if (births.length) writeCache(`otd:${mm}-${dd}`, out);
+    return out;
   } catch {
     return null;
   }
 }
 
-function shapePeople(list, n) {
-  const people = (list || [])
-    .filter((p) => p.text && p.year)
-    .map((p) => {
-      const page = p.pages?.[0];
-      return {
-        year: p.year,
-        // Wikipedia's own copy uses en and em dashes, so the splitter has to
-      // know about them even though we never write one ourselves
-      name: (p.text.split(/,| – | — /)[0] || p.text).trim(),
-        desc: page?.description || cleanDesc(p.text),
-        thumb: page?.thumbnail?.source || null,
-        url: page?.content_urls?.desktop?.page || null
-      };
-    });
-  // prefer entries that have a portrait, then sample across time for variety
-  const withImg = people.filter((p) => p.thumb);
-  const pool = withImg.length >= n ? withImg : people;
-  return sample(pool.sort((a, b) => a.year - b.year), n);
+const CACHE_TTL = 30 * 86400000;   // a month
+
+function readCache(key) {
+  try {
+    const raw = localStorage.getItem(`mybirth:cache:${key}`);
+    if (!raw) return null;
+    const { at, value } = JSON.parse(raw);
+    if (!at || Date.now() - at > CACHE_TTL) return null;
+    return value;
+  } catch {
+    return null;
+  }
 }
 
-function cleanDesc(text) {
-  const parts = text.split(/,(.+)/);
-  return (parts[1] || "").replace(/\s+/g, " ").trim().slice(0, 80);
+function writeCache(key, value) {
+  // a full quota, or private mode, simply means no cache; never a failure
+  try { localStorage.setItem(`mybirth:cache:${key}`, JSON.stringify({ at: Date.now(), value })); } catch {}
 }
 
-function sample(arr, n) {
-  if (arr.length <= n) return arr;
-  const step = arr.length / n, out = [];
-  for (let i = 0; i < n; i++) out.push(arr[Math.floor(i * step)]);
-  return out;
+/** A portrait is required by the design, so anyone without one is out first. */
+function shape(p) {
+  const page = p.pages?.[0];
+  if (!page?.thumbnail?.source) return null;
+  return {
+    year: p.year,
+    title: page.normalizedtitle || page.title,
+    name: (page.normalizedtitle || p.text.split(/,| – | — /)[0] || "").trim(),
+    desc: trimRole(page.description || ""),
+    thumb: page.thumbnail.source,
+    url: page.content_urls?.desktop?.page || null,
+    died: deathYear(page.extract, page.description),
+    fame: 0,
+  };
+}
+
+/*
+   The death year, taken from text we already have rather than from another
+   request. A summary opens with a bracketed pair of dates for somebody who
+   has died and with "born" for somebody who has not; the short description
+   carries the same convention. Neither is guaranteed, and an unknown death
+   year is simply not shown.
+*/
+function deathYear(extract, description) {
+  const RANGE = /\((?:[^()]*?\b)?(\d{3,4})\s*[–—-]\s*(?:[^()]*?\b)?(\d{3,4})\s*\)/;
+  for (const text of [extract || "", description || ""]) {
+    if (/\(\s*born\b/i.test(text)) return null;
+    const m = text.match(RANGE);
+    if (m) return Number(m[2]);
+  }
+  return null;
+}
+
+/** "American actor and singer (born 1991)" becomes "American actor and singer" */
+function trimRole(d) {
+  return d.replace(/\s*\([^)]*\)\s*$/, "").trim();
+}
+
+async function rankPeople(list, n, keepHistoric) {
+  const all = (list || []).map(shape).filter(Boolean);
+  if (!all.length) return [];
+
+  /*
+     Every candidate is measured, not a shortlist.
+
+     The first version sampled the twenty newest and the eight oldest,
+     which sounds thrifty and is wrong: the household names sit in the
+     *middle* of a list ordered by birth year, so a 1956 actor was never
+     measured and the page filled up with recent footballers. Measuring all
+     168 who have a portrait takes about 1.3 seconds against a CDN, in one
+     parallel round, after the page has already painted.
+  */
+  await addFame(all);
+
+  const ranked = [...all].sort((a, b) => b.fame - a.fame);
+  const picked = [];
+  if (keepHistoric) {
+    const old = ranked.find((p) => p.year < 1900);
+    if (old) picked.push(old);
+  }
+  for (const p of ranked) {
+    if (picked.length >= n) break;
+    if (!picked.includes(p)) picked.push(p);
+  }
+  // oldest first, so the row runs forward through time
+  return picked.sort((a, b) => a.year - b.year);
+}
+
+/*
+   Three months of article traffic as a proxy for how well known somebody
+   is. A failure leaves that person at zero rather than breaking anything.
+
+   Throttled to eight at a time. Firing all 168 at once did work and did
+   return the right answer, and it also earned a 429: that is a public
+   endpoint with no key and no charge, and hammering it is both rude and
+   unreliable. Eight in flight finishes in a couple of seconds, well after
+   the chapter has already painted.
+
+   No custom headers. Wikimedia asks anonymous clients for an
+   `Api-User-Agent`, but sending one makes this a non-simple cross-origin
+   request, and the preflight it triggers is refused: every lookup then
+   failed silently and the ranking quietly collapsed back to whoever
+   happened to be first.
+*/
+async function addFame(people) {
+  const firstOf = (d) => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}0100`;
+  const from = new Date(); from.setDate(1); from.setMonth(from.getMonth() - 4);
+  const to = new Date(); to.setDate(1); to.setMonth(to.getMonth() - 1);
+  const range = `${firstOf(from)}/${firstOf(to)}`;
+
+  const measure = async (p) => {
+    try {
+      const t = encodeURIComponent(p.title.replace(/ /g, "_"));
+      const r = await getJSON(
+        `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/user/${t}/monthly/${range}`
+      );
+      p.fame = (r?.items || []).reduce((sum, i) => sum + (i.views || 0), 0);
+    } catch {
+      p.fame = 0;
+    }
+  };
+
+  const queue = [...people];
+  await Promise.all(Array.from({ length: 8 }, async () => {
+    while (queue.length) await measure(queue.shift());
+  }));
 }
 
 /* ---------- Wikipedia: what happened that YEAR (world + Malaysia) ---------- */
@@ -367,6 +496,71 @@ export async function spaceWeather() {
     if (!Number.isFinite(kp)) return null;
     const band = KP_BANDS.find(([max]) => kp < max) || KP_BANDS[KP_BANDS.length - 1];
     return { kp, state: band[1], line: band[2], at: Array.isArray(last) ? last[0] : last?.time_tag };
+  } catch {
+    return null;
+  }
+}
+
+/* ---------- cover art for the year's song and film ---------- */
+/*
+   Two different sources, because no single free one covers both.
+
+   iTunes Search is key-free, CORS-open and has essentially every record
+   ever released, so it answers the song. It does *not* answer films: the
+   movie storefront returns nothing for even the most obvious titles, so
+   the film's poster comes from its Wikipedia page instead, where the lead
+   image is the poster by convention.
+
+   Both fail silently. A chapter with no artwork still has its title.
+*/
+export async function albumArt(song) {
+  if (!song) return null;
+  // the table stores "Title | Artist", and both halves matter
+  const [title, artist] = song.split(" | ").map((x) => (x || "").trim());
+  const norm = (x) => x.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const wanted = norm(artist);
+
+  try {
+    /*
+       Searched as a *track*, not an album, and then checked.
+
+       An album search for "How You Remind Me Nickelback" confidently
+       returned a DJ Khaled single called "You Remind Me": iTunes ranks by
+       its own relevance and will happily hand back a different record by a
+       different artist rather than nothing. So the artist is verified
+       against the result before the artwork is used, and a mismatch is
+       treated as no answer at all.
+    */
+    const data = await getJSON(
+      `https://itunes.apple.com/search?media=music&entity=song&limit=8&term=${encodeURIComponent(`${title} ${artist}`)}`
+    );
+    const hits = data?.results || [];
+    const hit = hits.find((r) => {
+      const got = norm(r.artistName || "");
+      return wanted && got && (got.includes(wanted) || wanted.includes(got));
+    });
+    if (!hit?.artworkUrl100) return null;
+    return {
+      // the 100px url is a resize of a much larger original; asking for 600
+      // costs nothing extra and stops it looking soft on a retina card
+      image: hit.artworkUrl100.replace(/\/\d+x\d+bb\./, "/600x600bb."),
+      title: hit.collectionName || hit.trackName || title,
+      artist: hit.artistName || artist,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function filmPoster(title) {
+  if (!title) return null;
+  try {
+    const data = await getJSON(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`
+    );
+    const src = data?.originalimage?.source || data?.thumbnail?.source;
+    if (!src) return null;
+    return { image: src, title: data.title || title };
   } catch {
     return null;
   }
