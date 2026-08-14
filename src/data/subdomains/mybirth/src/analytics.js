@@ -68,7 +68,10 @@
 */
 const CONFIG = {
   cloudflare: {
-    token: "",
+    // public by design: this token appears in the page source of every site
+    // that uses Web Analytics, so it is not a secret and committing it is not
+    // a leak. It identifies the site to Cloudflare, nothing else.
+    token: "6bc590301c194483be88830a39761f2c",
   },
   plausible: {
     domain: "mybirth.swymble.com",
@@ -93,8 +96,11 @@ const PROVIDERS = {
     label: "Cloudflare Web Analytics",
     events: false,
     on: (c) => !!c.token,
+    // type="module" rather than defer, matching the snippet Cloudflare
+    // issues and tests against; a module script defers on its own
     script: (c) => ({
       src: "https://static.cloudflareinsights.com/beacon.min.js",
+      type: "module",
       attrs: { "data-cf-beacon": JSON.stringify({ token: c.token }) },
     }),
     send: null,                    // no custom events, by design
@@ -214,9 +220,9 @@ export function initAnalytics() {
   }
 
   for (const { provider, config } of on) {
-    const { src, attrs } = provider.script(config);
+    const { src, type, attrs } = provider.script(config);
     const s = document.createElement("script");
-    s.defer = true;
+    if (type) s.type = type; else s.defer = true;
     s.src = src;
     for (const [k, v] of Object.entries(attrs || {})) s.setAttribute(k, v);
     document.head.appendChild(s);

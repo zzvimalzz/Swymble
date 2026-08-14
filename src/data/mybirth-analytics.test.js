@@ -70,9 +70,21 @@ describe("what can reach a vendor", () => {
     expect(analyticsSource).toContain("doNotTrack");
   });
 
-  it("ships with no vendor switched on until somebody fills one in", () => {
-    // a token committed by accident would start collection silently
-    expect(analyticsSource).toMatch(/token: ""/);
+  it("has exactly one vendor switched on, and it is the free one", () => {
+    /*
+       Cloudflare is deliberately live: free, cookieless, no new supplier,
+       and it answers whether anybody is arriving. Plausible and Umami stay
+       empty until traffic makes their custom events worth paying for, so
+       this asserts nobody has quietly switched on a billed vendor.
+    */
+    const cloudflareToken = analyticsSource.match(/token: "([a-f0-9]*)"/)?.[1] || "";
+    expect(cloudflareToken).toMatch(/^[a-f0-9]{32}$/);
+
+    // the paid pair ship inert; each is turned on by its own src
+    const plausible = analyticsSource.match(/plausible: \{[\s\S]*?\n  \},/)[0];
+    const umami = analyticsSource.match(/umami: \{[\s\S]*?\n  \},/)[0];
+    expect(plausible).toMatch(/src: ""/);
+    expect(umami).toMatch(/src: ""/);
   });
 });
 
