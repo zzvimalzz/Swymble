@@ -3398,10 +3398,17 @@ body.on-paper.sky-dark .brand__pill { background: #f4f1e9; }
   color: var(--pi-soft);
   margin: 10px 0 0;
   text-wrap: pretty;
-  /* three lines is a peek: enough to tell whether the card is worth
-     opening, not enough to stand in for having opened it */
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  /* A peek: enough to tell whether the card is worth opening, not enough
+     to stand in for having opened it.
+
+     Four rather than three since the corpus rewrite, and not because the
+     body got longer: it is forty-two words against the old forty-one. What
+     moved is where the payload sits. The old body spent its last two
+     clauses on the chart, so clipping them lost nothing; the new one ends
+     on the instruction, and at three lines the clip was landing just
+     before it. */
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
 }
 /* pushed to the foot of the card so the measurement lines up across a
    row however unevenly the paragraphs above it fall */

@@ -398,23 +398,38 @@ function motionClause(a, ctx) {
 /*
    One aspect, written up.
 
-   The paragraph is assembled from three tables, each keyed off a
-   different part of the same measurement:
+   The body used to be three tables glued end to end: an opening keyed by
+   area and tone, a clause keyed by the natal body, a clause keyed by the
+   transit. 120 x 35 x 14 addresses out of 169 fragments, which is a lot of
+   variety and was the wrong thing to optimise for. Three failures came out
+   of it, and all three were visible on the page:
 
-     readings.json  area x tone x variant   where in a life it lands
-     touches.json   natal body x tone       which part of you took it
-     motion.json    transit body x applying when it peaks
+     Two thirds of every paragraph was the machine describing itself. The
+     reading proper averaged thirteen words and the two clauses about the
+     chart averaged twenty-seven between them.
 
-   120 x 35 x 14 addresses from 169 written fragments. That is the whole
-   trick, and it is the same trick every horoscope engine uses; the only
-   difference here is that the address is printed underneath.
+     The middle clause restated the opening rather than adding to it, and
+     not by accident. An aspect's area is derived from where the natal
+     point sits, so the two keys are correlated, and for the two angles
+     they are locked: every Midheaven card is a Work card by construction.
+
+     The pronouns collided. Both appended clauses were written to open on
+     a back-reference, and the opening had usually spent its own "it" on
+     something else. "Pay the boring bill first. It is the one that turns
+     into a larger problem if it waits. It is your sense of yourself under
+     the pressure."
+
+   So the body is one written paragraph now, per area, tone and variant,
+   plus a timing tail in plain English. The other two tables did not go
+   away; they moved into the expansion, where each has a paragraph of its
+   own and does not have to survive being read mid-sentence.
 */
 function buildCard(a, ctx) {
   const tone = a.aspect.tone;
   const { cell, variant } = chooseVariant(a, ctx);
-  const [headline, opening] = READINGS[a.area][tone][variant];
-  const touch = TOUCHES[a.natal.key]?.[tone] || "";
+  const [headline, reading] = READINGS[a.area][tone][variant];
   const motion = motionClause(a, ctx);
+  const body = [reading, motion].filter(Boolean).join(" ");
 
   return {
     quiet: false,
@@ -422,27 +437,27 @@ function buildCard(a, ctx) {
     areaLabel: areaLabel(a.area),
     areaDomain: areaDomain(a.area),
     headline,
-    body: [opening, touch, motion].filter(Boolean).join(" "),
+    body,
     /*
        The expanded card, three paragraphs, in the order specific,
        specific, mechanical:
 
-         1  the reading             what today is
-         2  area x tone             what that means for this part of a life
+         1  area x tone x variant   the reading, and what to do about it
+         2  natal body x tone       which part of you took it
          3  natal + tone + transit  which two points, what angle, how long
 
-       The area dimension in the second is the whole point. Without it,
-       paragraph two was natal plus tone alone, which meant the Love card
-       and the Work card expanded to the *same* two paragraphs whenever
-       their two aspects shared a body. Nine cards whose insides converged
-       read as a template, because that is what it was.
+       Paragraph two is keyed off the natal point alone, which is a
+       different address from the body's. That is what stops it being a
+       paraphrase: the old paragraph two was keyed by area and tone, the
+       same address the opening came from, so expanding a card printed the
+       card again in longer words.
 
        Paragraph three is allowed to sound like an explanation. It is one,
        and it is marked as one by sitting last, underneath two that are not.
     */
     paragraphs: [
-      [opening, touch, motion].filter(Boolean).join(" "),
-      DEPTH.area[a.area]?.[tone],
+      body,
+      TOUCHES[a.natal.key]?.[tone],
       [DEPTH.natal[a.natal.key], DEPTH.tone[tone], DEPTH.transit[a.transit.key]]
         .filter(Boolean).join(" "),
     ].filter(Boolean),

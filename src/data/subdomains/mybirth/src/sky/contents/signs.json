@@ -1,12 +1,20 @@
 {
   "_comment": [
-    "What the sign on a sector says about that part of a chart.",
+    "What the sign on a sector says about that part of a life.",
     "",
     "This is what makes a quiet card worth printing. An area with nothing in",
     "orb still has a sign on it, and unlike a transit that sign never changes:",
     "it was fixed at the minute you were born. So an area the sky is not",
     "touching today is not a blank. It is a standing description that happens",
     "to have no news attached to it this morning.",
+    "",
+    "── Written to the reader, not to the chart ──",
+    "",
+    "These used to open 'The sign on it starts fast and asks afterwards, so",
+    "this part of your chart tends to...'. Accurate, and the subject of the",
+    "sentence was a sector rather than a person, which is how a card ends up",
+    "reading like a system status. They are addressed to the reader now. The",
+    "claim is unchanged; only who the sentence is about has moved.",
     "",
     "── Why no sign is named in here ──",
     "",
@@ -17,7 +25,7 @@
     "",
     "Two fields per sign, keyed by index, 0 for the first sign of the zodiac",
     "through to 11 for the last:",
-    "  clause  one sentence, appended to a quiet card's paragraph",
+    "  clause  one sentence, joined to a quiet card's paragraph",
     "  depth   the fuller paragraph, shown when the card is expanded",
     "",
     "These are the traditional characters of the twelve signs, written fresh.",
@@ -27,52 +35,52 @@
   ],
   "signs": {
     "0": {
-      "clause": "The sign on it starts fast and asks afterwards, so what happens here tends to happen abruptly.",
-      "depth": "This sector runs in a sign that moves first and thinks second. Things here begin quickly, arrive without much warning, and lose momentum about as fast as they found it. When the sky does reach this part of your chart, it usually reads as a sudden appetite rather than as a slow build."
+      "clause": "You start fast here and ask afterwards, so things in this part of your life tend to happen abruptly.",
+      "depth": "You move first and think second here. Things in this part of your life begin quickly, arrive without much warning, and lose momentum about as fast as they found it. When the sky does reach this area, it usually reads as a sudden appetite rather than as a slow build."
     },
     "1": {
-      "clause": "The sign on it is slow to start and hard to shift once it has, so nothing here moves quickly.",
-      "depth": "This sector runs in a sign that takes its time and then refuses to be hurried. What settles here settles for a long while, which makes it steady when it is working and immovable when it is not. Transits through this part of a chart tend to be felt late and remembered long."
+      "clause": "You are slow to start here and hard to shift once you have, so nothing in this part of your life moves quickly.",
+      "depth": "You take your time here and then refuse to be hurried. What settles in this part of your life settles for a long while, which makes it steady when it is working and immovable when it is not. Things that reach this area are usually felt late and remembered long."
     },
     "2": {
-      "clause": "The sign on it deals in exchange, so this part of your chart runs on what is being said.",
-      "depth": "This sector runs in a sign that collects, sorts and passes on. It is quick, it is curious, and it scatters about as readily as it gathers. What reaches this part of your chart usually arrives as a conversation, a message or a piece of information rather than as an event."
+      "clause": "This part of your life runs on what is being said, so it moves when the talking does.",
+      "depth": "You collect, sort and pass things on here. This part of your life is quick and curious, and it scatters about as readily as it gathers. What reaches it usually arrives as a conversation, a message or a piece of information rather than as an event."
     },
     "3": {
-      "clause": "The sign on it protects what it holds, so this part of your chart keeps things rather than spends them.",
-      "depth": "This sector runs in a sign that remembers and shelters. It draws things in, holds on to them, and withdraws when pressed. What lands here tends to be felt privately first and described later, if it is described at all."
+      "clause": "You keep what you hold here rather than spend it, so this part of your life changes sideways rather than head on.",
+      "depth": "You remember and you shelter here. This part of your life draws things in, holds on to them, and withdraws when pressed. What lands here tends to be felt privately first and described later, if it is described at all."
     },
     "4": {
-      "clause": "The sign on it wants to be seen, so what happens here rarely happens quietly.",
-      "depth": "This sector runs in a sign that performs and means it. Whatever occupies this part of your chart wants an audience, credit and warmth, and it does badly when it is overlooked. Contacts here read as a matter of pride more often than as a matter of fact."
+      "clause": "You are visible here whether you meant to be or not, so little of this part of your life happens quietly.",
+      "depth": "You want an audience here. This part of your life does badly on being ignored and is unusually generous when it is given credit. Nothing in this area stays a private matter for long, which is a cost on the bad days and the whole point on the good ones."
     },
     "5": {
-      "clause": "The sign on it works by correction, so this part of your chart improves things rather than starts them.",
-      "depth": "This sector runs in a sign that notices what is out of place. It repairs, refines and files, and it is harder on its own errors than on anyone else's. What reaches this part of your chart tends to arrive as a small fault worth fixing rather than as a large event."
+      "clause": "You improve things here rather than start them, so this part of your life gets better by correction.",
+      "depth": "You work by noticing what is slightly wrong and fixing it. That is useful and exhausting in roughly equal measure, and the risk in this part of your life is not laziness, it is never calling anything finished. Things here arrive as adjustments rather than as beginnings."
     },
     "6": {
-      "clause": "The sign on it works by comparison, so this part of your chart is always weighing one thing against another.",
-      "depth": "This sector runs in a sign that cannot settle a question without holding it against its opposite. It is fair, it is late to decide, and it does its best work with somebody else in the room. What happens here usually happens through another person."
+      "clause": "You weigh one thing against another here, so this part of your life is always a comparison.",
+      "depth": "You compare here, constantly, which makes you fair and slow. Decisions in this part of your life go better with somebody else in the room, because left alone with it you will keep the scales moving. What arrives here usually arrives as a choice between two reasonable options."
     },
     "7": {
-      "clause": "The sign on it goes deep and stays private, so little of what happens here is visible from outside.",
-      "depth": "This sector runs in a sign that does not do things by halves and does not narrate them either. It holds on, it looks underneath, and it keeps its own counsel. Contacts to this part of your chart are felt strongly and reported rarely."
+      "clause": "You go deep here and keep it private, so little of this part of your life is visible from outside.",
+      "depth": "You do not do halves here. What this part of your life touches it either commits to entirely or cuts off, and very little of that process is visible to anybody watching. Nothing in this area is casual, which is why it is the part other people most often misread."
     },
     "8": {
-      "clause": "The sign on it wants distance and a reason, so this part of your chart reaches past what is in front of it.",
-      "depth": "This sector runs in a sign that widens the frame and looks for the principle. It is generous, restless and inclined to overshoot. What lands here tends to raise a question about the larger shape of things rather than about today."
+      "clause": "You reach past what is in front of you here, so this part of your life wants distance and a reason.",
+      "depth": "You want a bigger frame here, and you are impatient with detail. This part of your life is at its best when it is aimed at something far off and at its worst when the specifics matter. What goes wrong here usually goes wrong because you took the general answer and skipped the exact one."
     },
     "9": {
-      "clause": "The sign on it builds slowly and keeps score, so this part of your chart pays over time.",
-      "depth": "This sector runs in a sign that plans, waits and does the unglamorous half. It is patient to the point of severity and it does not accept shortcuts. What arrives here arrives as work, and it is usually worth the time it takes."
+      "clause": "You build slowly here and keep score, so this part of your life pays over time rather than at once.",
+      "depth": "You construct things here that outlast what you construct elsewhere. This part of your life rewards showing up, is unimpressed by enthusiasm, and gives nothing back early. The cost is that it is slow to admit when something is working."
     },
     "10": {
-      "clause": "The sign on it stands back to look, so this part of your chart is cooler than the rest of you.",
-      "depth": "This sector runs in a sign that steps away in order to see clearly, which is both what it is good at and what it costs. It thinks in systems and in groups rather than in single people. What touches this part of your chart tends to be understood before it is felt."
+      "clause": "You stand back to look here, so this part of your life runs cooler than the rest of you.",
+      "depth": "You judge from a few steps outside here, and this part of your life works better on principle than on feeling. That makes you unusually clear-eyed about it and unusually late to warmth. What reaches this area is understood before it is felt."
     },
     "11": {
-      "clause": "The sign on it dissolves edges, so this part of your chart is the hardest to draw a line around.",
-      "depth": "This sector runs in a sign that blurs what it touches. Boundaries here are soft, endings are gradual, and the difference between being generous and being taken advantage of is not always obvious at the time. What happens in this part of a chart is felt long before it can be named."
+      "clause": "The edges are soft here, so this is the hardest part of your life to draw a line around.",
+      "depth": "You take on the shape of whatever is around you here, which makes this part of your life unusually receptive and unusually hard to pin down. Boundaries in this area have to be drawn on purpose, because they will not form by themselves."
     }
   }
 }

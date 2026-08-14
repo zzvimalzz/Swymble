@@ -1,165 +1,189 @@
 {
   "_comment": [
-    "Slot 3 of a reading: when the angle peaks, by transiting body.",
-    "",
-    "Keyed body, then direction: [0] is applying, still coming to exact,",
-    "[1] is separating, already past it. Three variants of each.",
-    "",
-    "── Why three and not one ──",
-    "",
-    "A day's nine cards are mostly driven by whichever body is moving",
-    "fastest, so several of them share a transit body and a direction. With",
-    "one clause per state, four cards a morning ended on the same sentence,",
-    "which is the single most visible way an assembled page gives itself",
-    "away. reading.js walks this list rather than seeding it, so two cards",
-    "on one day cannot land on the same clause.",
+    "The timing tail, by transiting body. Keyed body, then direction:",
+    "[0] is applying, still coming to exact, [1] is separating, already past.",
+    "Five variants of each.",
     "",
     "── The rule these obey ──",
     "",
-    "Every entry begins with a back-reference or a time word. 'It' is the",
-    "aspect slot 1 described; none of these may introduce a subject. And",
-    "none of them names a body, because the card prints that from the chart.",
-    "Full rules in .docs/MyBirth-Plan/10-CORPUS.md section 3a."
+    "Plain English, no astrology. A reader does not know what 'past exact' or",
+    "'still applying' means, and the sentence that ends a card is the one they",
+    "are most likely to finish reading. So: 'this peaked this morning and is",
+    "easing off', not 'past exact now, and thinning out through the afternoon'.",
+    "",
+    "None of these names a body, because the card prints that from the chart",
+    "underneath. None of these introduces a new subject: 'this' is the reading",
+    "the body has just given. And each one has to survive being read directly",
+    "after an instruction, since that is what every body now ends on.",
+    "",
+    "── Why five and not one ──",
+    "",
+    "A day's nine cards are mostly driven by whichever body is moving fastest,",
+    "so several of them share a transit body and a direction. With one clause",
+    "per state, four cards a morning ended on the same sentence, which is the",
+    "single most visible way an assembled page gives itself away. reading.js",
+    "walks this list rather than seeding it, so two cards in one render cannot",
+    "land on the same clause."
   ],
   "motion": {
     "moon": [
       [
-        "It is still tightening, and it peaks later today.",
-        "It is closing now, and the hours around evening are the sharp ones.",
-        "Still coming to exact, so the strongest part of it is ahead of you.",
-        "It is closing through the morning and sharpest around dusk.",
-        "Still gathering, and it will be at its clearest before the day ends."
+        "This builds through the day and is strongest tonight.",
+        "The pull of it sharpens towards the evening.",
+        "It gets stronger as the day goes on, so there is no rush this morning.",
+        "The strongest hours of this are still ahead of you.",
+        "This is still gathering, and it peaks before you sleep."
       ],
       [
-        "It passed exact earlier today and is already letting go.",
-        "Past exact now, and thinning out through the afternoon.",
-        "It broke a few hours ago, and what is left of it goes quickly.",
-        "It went exact overnight and is on its way out.",
-        "It is past its peak, and by tomorrow it will not be here at all."
+        "The sharp part of this was the morning, and it is easing off.",
+        "This peaked earlier and the rest of the day is gentler.",
+        "It is already fading, so use it today or not at all.",
+        "The heat went out of this a few hours ago.",
+        "This passed overnight, and by tomorrow it will be gone."
       ]
     ],
     "sun": [
       [
-        "It is still closing, and it comes to exact within a day or two.",
-        "Still tightening, so this is nearer its beginning than its end.",
-        "It has not peaked yet, and the peak is inside the week.",
-        "Still closing, and the days on either side of exact are the ones that count.",
-        "It is coming to exact, and it will not repeat this year."
+        "This builds over the next couple of days.",
+        "It is not at full strength yet, and it will be by the weekend.",
+        "The next few days sharpen this rather than soften it.",
+        "This is still gathering, and the strongest day is not today.",
+        "There is more of this coming before it eases."
       ],
       [
-        "It passed exact and is widening now, over a few days.",
-        "Past exact, and it will be gone by the end of the week.",
-        "It broke earlier this week, and it is thinning rather than ending.",
-        "It is widening now, having held for a day or so.",
-        "Past its peak, and the week takes it the rest of the way out."
+        "The strongest day of this has passed and it is thinning out.",
+        "This peaked a day or two ago and it is on its way out.",
+        "What is left of it runs out inside the week.",
+        "The pressure came off yesterday, so this is the easy end of it.",
+        "This is already going, and it does not come back for a year."
       ]
     ],
     "mercury": [
       [
-        "It is still closing, and this one can come back before it is finished.",
-        "Still tightening, and it may repeat before the season is out.",
-        "It is coming to exact, quickly, the way this one always does.",
-        "Still closing, and it is quick enough to arrive before you have prepared.",
-        "It is coming to exact, and it rarely waits to be ready for."
+        "This gets more insistent over the next day or two.",
+        "The clearest version of it is still ahead.",
+        "It is building, so what does not land today lands tomorrow.",
+        "This sharpens for another day before it turns.",
+        "There is more of this coming before it clears."
       ],
       [
-        "It passed exact and is letting go, though it can return.",
-        "Past exact now, and this is the kind that comes round again.",
-        "It broke recently, and it is not necessarily finished with the subject.",
-        "It is widening, and this one has a habit of returning.",
-        "Past exact, and whether it is finished depends on the station."
+        "This has already turned, and it fades over the next day.",
+        "The sharpest of it was yesterday.",
+        "It is on the way out, so say it today rather than next week.",
+        "This is thinning, and the window closes soon.",
+        "What is left of it goes quickly from here."
       ]
     ],
     "venus": [
       [
-        "It is still closing, over a day or two rather than an hour.",
-        "Still tightening, so it will be more itself tomorrow than today.",
-        "It is coming to exact, slowly enough to be a mood.",
-        "Still closing, and it arrives without any sharpness to it.",
-        "It is coming to exact over a couple of days, gently."
+        "This warms up over the next couple of days.",
+        "It is still building, and it is at its best towards the weekend.",
+        "There is more of this coming, so nothing has to happen today.",
+        "The easy part of it has not arrived yet.",
+        "This gathers slowly and then holds for a few days."
       ],
       [
-        "Past exact now, and fading over the next few days.",
-        "It passed exact and is easing off, without any hurry about it.",
-        "It broke a day or so ago, and it is thinning rather than gone.",
-        "It is widening, and the warmth of it lasts longer than the angle.",
-        "Past exact, and it is leaving more slowly than it came."
+        "This has already peaked, and it fades gently.",
+        "The best of it was yesterday, and there is still some left.",
+        "It is easing off over the next few days.",
+        "This is on its way out, so spend it now.",
+        "The warmth is going out of this slowly."
       ]
     ],
     "mars": [
       [
-        "It is still closing, and it holds for the better part of a week.",
-        "Still tightening, so there is no rush to decide anything under it.",
-        "It is coming to exact, and it will sit there for some days.",
-        "Still closing, and it will not be hurried out of the week.",
-        "It is coming to exact, and it holds once it gets there."
+        "The pressure of this rises for another day or two.",
+        "It is building, and it will be harder to sit with tomorrow.",
+        "This has not peaked yet, so pace yourself.",
+        "There is more push in this before it lets go.",
+        "The sharpest of it is still ahead of you."
       ],
       [
-        "It passed exact and is widening, though it has not let go yet.",
-        "Past exact now, and easing over the rest of the week.",
-        "It broke a few days ago and the pressure is coming off slowly.",
-        "It is widening, though the heat comes off later than the angle does.",
-        "Past exact, and the week has to finish letting it go."
+        "The worst of this is behind you and it is draining away.",
+        "This peaked yesterday, and the heat is going out of it.",
+        "It is letting go, so do not restart the argument.",
+        "The push fades over the next few days.",
+        "This has broken, and what is left is tiredness rather than force."
       ]
     ],
     "jupiter": [
       [
-        "It is still closing, and it will be weeks about it.",
-        "Still tightening, on the scale of a season rather than a day.",
-        "It is coming to exact slowly, and it will stay once it does."
+        "This has been building for weeks and it is not finished.",
+        "It widens further before it settles, so there is time.",
+        "The most open part of this is still ahead.",
+        "This grows for a few more weeks.",
+        "There is more room coming, not less."
       ],
       [
-        "It passed exact and is widening over the coming weeks.",
-        "Past exact now, and what it opened is still open.",
-        "It broke some weeks ago and is letting go at its own speed."
+        "This peaked a few weeks ago and it is closing slowly.",
+        "The open part of it is shutting, so use it this month.",
+        "It is receding, and it does not come round again for years.",
+        "This has passed its widest point.",
+        "What is left of the opening lasts a few more weeks."
       ]
     ],
     "saturn": [
       [
-        "It is still closing, and it has been closing for weeks.",
-        "Still tightening, and nothing about it is going to be quick.",
-        "It is coming to exact, and it will take its time arriving."
+        "This has been forming for months and it tightens further.",
+        "It is not finished with the subject, so plan for it.",
+        "The heaviest part of this is still ahead.",
+        "This builds slowly, and it takes months to arrive.",
+        "There is more weight coming before it lifts."
       ],
       [
-        "It passed exact and will take weeks to let go.",
-        "Past exact now, and the weight comes off slowly.",
-        "It broke weeks ago and is still on its way out."
+        "The heaviest part of this is behind you now.",
+        "It is lifting, slowly, over the next few months.",
+        "This has passed its worst, and the release is gradual.",
+        "The weight is coming off, though not quickly.",
+        "This is on its way out and it will not repeat soon."
       ]
     ],
     "uranus": [
       [
-        "It is still closing, and it will be months about it.",
-        "Still tightening, on a scale where the day is not the unit.",
-        "It is coming to exact over months rather than weeks."
+        "This has been loosening for months and it is not done.",
+        "The unsettled part of it is still building.",
+        "It arrives without much warning, and it has not arrived yet.",
+        "There is more disruption in this before it settles.",
+        "This is still tightening, over months rather than days."
       ],
       [
-        "It passed exact and the ground is settling again.",
-        "Past exact now, and what it dislodged has already moved.",
-        "It broke months ago, and it is still unwinding."
+        "The disruptive part of this has passed.",
+        "It is settling now, over the next few months.",
+        "This broke a while ago and the pieces are still landing.",
+        "The unsettling is over, and the rearranging is not.",
+        "This is releasing slowly, and it does not return for years."
       ]
     ],
     "neptune": [
       [
-        "It is still gathering, slowly enough that the day is not the unit.",
-        "Still closing, over months, and it will not announce its arrival.",
-        "It is coming to exact by degrees, without a sharp edge anywhere."
+        "This has been gathering for months, quietly.",
+        "It builds without announcing itself, and it is not finished.",
+        "The blurred part of this is still increasing.",
+        "There is more of this coming, slowly and without edges.",
+        "This tightens over months, so do not expect a clear day soon."
       ],
       [
-        "It passed exact and the outline is coming back.",
-        "Past exact now, and the fog is lifting at its own rate.",
-        "It broke some time ago, and it has been clearing since."
+        "This is clearing, slowly, over the next few months.",
+        "The fog of it peaked a while ago.",
+        "It is thinning out, and the edges come back gradually.",
+        "This has passed, and what is left is dispersing.",
+        "The blur is lifting, though not on any particular day."
       ]
     ],
     "pluto": [
       [
-        "It is still closing, and it has been closing for a season.",
-        "Still tightening, on a scale of years rather than of weeks.",
-        "It is coming to exact, and it may arrive more than once."
+        "This has been building for a season and it is still coming.",
+        "It works slowly, and it is nowhere near finished.",
+        "The heaviest part of this is months away.",
+        "There is more of this ahead, over seasons rather than weeks.",
+        "This tightens for months yet, and it does not let go easily."
       ],
       [
-        "It passed exact, and what it moved has already moved.",
-        "Past exact now, though nothing about it is finished.",
-        "It broke a season ago and is not done with the subject."
+        "The worst of this passed a season ago.",
+        "It is releasing very slowly, over months.",
+        "This has already turned, though it may come back once more.",
+        "The grip of it is loosening, and it takes a season to finish.",
+        "This is on its way out, and it changes what it leaves behind."
       ]
     ]
   }

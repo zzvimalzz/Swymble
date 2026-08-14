@@ -37,45 +37,74 @@ const LINES = linesFile.lines;
 
 const TONES = ["charged", "open", "friction", "easy", "pull"];
 
-describe("slot 2 refers back, and never opens a subject", () => {
+describe("the body is one paragraph, not three tables in a trench coat", () => {
   /*
-     The rule that fixes the first fault above. Slot 1 introduces the
-     subject; every slot after it says something about that subject. A
-     piece starting "The discipline..." or "Growth..." is starting a new
-     topic, and it will do that under all 225 openings it can follow.
+     The rewrite this suite was rewritten for.
+
+     The body used to be an opening, plus a clause keyed by the natal body,
+     plus a clause keyed by the transit. Every piece after the first had to
+     open on a back-reference so it would parse under any of the 225
+     openings it could follow, and that constraint is what produced the
+     card the complaint came in about:
+
+       "One of them pays and one of them matters; today they want opposite
+        hours. What you are doing and what you are known for are pulling in
+        different directions. Past exact now, and thinning out through the
+        afternoon."
+
+     Three sentences, three subjects, two registers, and a timing clause in
+     a vocabulary no reader has. The body is one written paragraph now plus
+     a timing tail in English, and these are the rules that keep it one.
   */
-  it("starts every touch with a back-reference", () => {
+  it("writes every body to the reader rather than about the measurement", () => {
     const bad = [];
-    for (const [body, tones] of Object.entries(TOUCHES)) {
-      for (const [tone, text] of Object.entries(tones)) {
-        if (!/^(It|What|You|Your|Something)\b/.test(text)) bad.push(`${body}.${tone}: ${text}`);
+    for (const [area, tones] of Object.entries(READINGS)) {
+      for (const [tone, variants] of Object.entries(tones)) {
+        variants.forEach(([, body], i) => {
+          /* second person, by pronoun or by imperative mood */
+          const second = /\byou(r|rs|rself)?\b/i.test(body)
+            || /(^|\. )(Say|Do|Ask|Give|Take|Make|Go|Let|Send|Start|Stop|Pick|Pay|Put|Set|Skip|Sit|Read|Name|Cut|Close|Finish|Write|Work|Point|Settle|Reply|Clear|Change|Build|Spend|Argue|Move|Call|Check|Choose|Find|Keep|Learn|Leave|Listen|Notice|Show|Teach|Tell|Trust|Turn|Use|Wait|Watch)\b/.test(body);
+          if (!second) bad.push(`${area}.${tone}[${i}]: ${body.slice(0, 60)}`);
+        });
       }
     }
     expect(bad).toEqual([]);
   });
 
-  it("starts every motion clause with a back-reference or a time word", () => {
+  it("keeps astrology out of the copy a reader is meant to read at a glance", () => {
+    /*
+       "Past exact now" is accurate and it is not English. The measurement
+       is printed underneath every card, in full, with the aspect named and
+       the orb in degrees, which is where the vocabulary belongs.
+    */
+    const jargon = /\b(orb|applying|separating|exact|conjunct|sextile|quincunx|trine)\b/i;
     const bad = [];
-    for (const [body, states] of Object.entries(MOTION)) {
-      states.forEach((variants, i) => {
-        variants.forEach((text, v) => {
-          if (!/^(It|Past|Still|The exact|This)\b/.test(text)) bad.push(`${body}[${i}][${v}]: ${text}`);
+    for (const [area, tones] of Object.entries(READINGS)) {
+      for (const [tone, variants] of Object.entries(tones)) {
+        variants.forEach(([, body], i) => {
+          if (jargon.test(body)) bad.push(`readings ${area}.${tone}[${i}]`);
         });
-      });
+      }
+    }
+    for (const [body, states] of Object.entries(MOTION)) {
+      states.forEach((variants, i) => variants.forEach((text, v) => {
+        if (jargon.test(text)) bad.push(`motion ${body}[${i}][${v}]: ${text}`);
+      }));
     }
     expect(bad).toEqual([]);
   });
 
-  it("gives each transiting body three timing clauses per direction", () => {
+  it("gives each transiting body five timing tails per direction", () => {
     /*
        One clause per direction meant four cards a morning ended on the
        identical sentence, because a day's cards are mostly driven by
-       whichever body is moving fastest. Three is enough that the walk in
-       reading.js can never hand out a repeat within one render.
+       whichever body is moving fastest. reading.js walks the list rather
+       than seeding it, so a repeat inside one render is impossible while a
+       direction has more variants than the day has cards using it.
     */
     for (const [body, states] of Object.entries(MOTION)) {
       expect(states, body).toHaveLength(2);
-      for (const variants of states) expect(variants.length, body).toBeGreaterThanOrEqual(3);
+      for (const variants of states) expect(variants.length, body).toBeGreaterThanOrEqual(5);
     }
   });
 
@@ -86,6 +115,77 @@ describe("slot 2 refers back, and never opens a subject", () => {
       ...Object.values(MOTION).flat(2),
     ];
     for (const text of all) expect(text.trim(), text.slice(0, 40)).toMatch(/[.]$/);
+  });
+});
+
+describe("no paragraph of a card restates the one above it", () => {
+  /*
+     The fault that produced the complaint, and the reason it was not a
+     one-off. An aspect's *area* is derived from where the natal point
+     sits, so keying two tables by area and by natal point does not give
+     two independent dimensions; it gives two correlated ones. For the two
+     angles the correlation is total, because the Ascendant defines the
+     first sector and the Midheaven the tenth. Every Midheaven card was a
+     Work card, so every Midheaven card paired the midheaven clause with a
+     work opening and a work paragraph: one address, three paraphrases.
+
+     Worst case shared every content word it had:
+
+       body      "One of them pays and one of them matters; today they want
+                  opposite hours."
+       expanded  "One of them pays and one of them matters, and today they
+                  want opposite hours."
+
+     The area paragraph is gone and paragraph two is keyed by the natal
+     point alone. This checks that the two never converge again, at every
+     address the renderer can actually produce.
+  */
+  const STOP = new Set(("the a an and or but of to in on it is are was were be been being that this these those "
+    + "you your yours i we they them there here for with as at by from not no so than then today tomorrow what "
+    + "which who whom whose how when where why do does did done has have had will would can could should its "
+    + "on off up down out one two both").split(" "));
+  const words = (s) => new Set(
+    (s.toLowerCase().match(/[a-z']+/g) || []).filter((w) => w.length > 2 && !STOP.has(w)),
+  );
+  /** How much of the shorter piece is already in the longer one. */
+  const overlap = (a, b) => {
+    const [x, y] = [words(a), words(b)];
+    if (!x.size) return 0;
+    return [...x].filter((w) => y.has(w)).length / x.size;
+  };
+
+  it("keys paragraph two off the natal point, not off the area again", () => {
+    const bad = [];
+    for (const [area, tones] of Object.entries(READINGS)) {
+      for (const [tone, variants] of Object.entries(tones)) {
+        for (const [point, byTone] of Object.entries(TOUCHES)) {
+          variants.forEach(([, body], i) => {
+            const r = overlap(byTone[tone], body);
+            if (r >= 0.5) {
+              bad.push(`${area}.${tone}[${i}] vs touches.${point}.${tone}: ${(r * 100) | 0}%`);
+            }
+          });
+        }
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it("holds for the two angles, where the area is locked by construction", () => {
+    /*
+       Narrower and stricter, because these are the addresses that cannot
+       vary: an Ascendant aspect is always a Self card and a Midheaven
+       aspect is always a Work card, so these pairings render every time
+       they come up rather than occasionally.
+    */
+    for (const [point, area] of [["ascendant", "self"], ["midheaven", "work"]]) {
+      for (const tone of TONES) {
+        for (const [i, [, body]] of READINGS[area][tone].entries()) {
+          const r = overlap(TOUCHES[point][tone], body);
+          expect(r, `${point}.${tone} vs ${area}.${tone}[${i}]`).toBeLessThan(0.4);
+        }
+      }
+    }
   });
 });
 
@@ -136,14 +236,22 @@ describe("every table is complete for every key it is addressed by", () => {
      A missing cell does not throw. It renders as a shorter card, or a
      paragraph that quietly disappears, and nothing on the page says so.
   */
-  it("has a reading and a line and an area paragraph for all nine areas", () => {
+  it("has a reading and a line for all nine areas", () => {
     for (const area of Object.keys(AREAS)) {
       for (const tone of TONES) {
         expect(READINGS[area]?.[tone]?.length, `readings.${area}.${tone}`).toBeGreaterThan(0);
         expect(LINES[area]?.[tone], `lines.${area}.${tone}`).toBeTruthy();
-        expect(DEPTH.area[area]?.[tone], `depth.area.${area}.${tone}`).toBeTruthy();
       }
     }
+  });
+
+  it("has no area table left in depth.json, which is what made it a restatement", () => {
+    /*
+       Guarding a deletion. depth.area was keyed by area and tone, the same
+       address the body's opening came from, so paragraph two paraphrased
+       paragraph one by construction. If it comes back, so does the bug.
+    */
+    expect(DEPTH.area).toBeUndefined();
   });
 
   it("has a touch and a depth paragraph for every point an aspect can land on", () => {
