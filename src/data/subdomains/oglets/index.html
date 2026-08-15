@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#000000">
-<title>Swyms · Swymble Labs</title>
-<meta name="description" content="Swyms are little one-eyed creatures with a genome. Drag them, poke them, watch them make friends and fall asleep — then read the alleles that made them.">
+<title>Oglets · Swymble Labs</title>
+<meta name="description" content="An Oglet is a small creature made mostly of eyes, drawn from a weighted genome. You get one, it is yours, it watches you, and it remembers you — then read the alleles that made it.">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://swyms.swymble.com/">
+<link rel="canonical" href="https://oglets.swymble.com/">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://swyms.swymble.com/">
-<meta property="og:title" content="Swyms · Swymble Labs">
-<meta property="og:description" content="Little one-eyed creatures with a genome. Drag them, poke them, watch them make friends and fall asleep.">
+<meta property="og:url" content="https://oglets.swymble.com/">
+<meta property="og:title" content="Oglets · Swymble Labs">
+<meta property="og:description" content="A small creature made mostly of eyes, drawn from a weighted genome. You get one, it is yours, and it watches you.">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><ellipse cx='11' cy='16' rx='7.4' ry='8' fill='%238ad8f0'/><ellipse cx='23' cy='16' rx='5.6' ry='7' fill='%238ad8f0'/><ellipse cx='12.4' cy='16' rx='2.6' ry='2.6' fill='%2326647f'/><ellipse cx='23.6' cy='16' rx='2.2' ry='2.2' fill='%2326647f'/></svg>">
 <style>
@@ -81,12 +81,12 @@
 <div class="tabs">
   <button id="tabWorld" class="on">World</button>
   <button id="tabGenome">Genome</button>
-  <span class="brand">Swyms · Swymble Labs</span>
+  <span class="brand">Oglets · Swymble Labs</span>
 </div>
 
 <div class="view" id="viewWorld">
   <canvas id="world"></canvas>
-  <div id="hint">drag them</div>
+  <div id="hint">drag it</div>
 </div>
 
 <div class="view" id="viewGenome" hidden>
@@ -96,7 +96,7 @@
 <script type="module">
 import {
   GENES, CATS, tierOf, geneOf, randomGenome, odds,
-  encode, nameOf, packSwym, unpackSwym, STORAGE_KEY,
+  encode, nameOf, packOglet, unpackOglet, STORAGE_KEY,
 } from './genome.js';
 
 (() => {
@@ -333,12 +333,12 @@ class Body{
 /* ═══════════════════════════════════════════════════════════
    WORLD
    ═══════════════════════════════════════════════════════════ */
-class Swym{
+class Oglet{
   constructor(g,scale,seat){
     this.body=new Body(g); this.g=g; this.scale=scale; this.seat=seat;
     this.b={x:seat.x,y:seat.y,vx:0,vy:0,tx:seat.x,ty:seat.y,nextDrift:0,
             z:1,vz:0,shake:0};
-    /* drives — every expression this Swym ever wears is traced back to one of these, so nothing
+    /* drives — every expression this Oglet ever wears is traced back to one of these, so nothing
        it feels is arbitrary. annoy: being mashed. held: a hand resting on it. bond: how attached
        it is to you. cheer: good things banked, spent on a smile. ignored: seconds you have been
        on the page without coming near. lonely: only ever built from being ignored. */
@@ -476,7 +476,7 @@ class Swym{
     } else d.held=Math.max(0,d.held-dt*2);
 
     /* ── how it feels about you, updated once per frame ──
-       Being on its own is not sad: a Swym alone in an empty room entertains itself quite happily.
+       Being on its own is not sad: an Oglet alone in an empty room entertains itself quite happily.
        What actually stings is you being *here* and not coming near — so loneliness is built from
        `ignored`, never from a plain absence of company. */
     const alone=world.length<2;
@@ -517,7 +517,7 @@ class Swym{
     this.updateSocial(dt,now);
 
     /* ── the face ──
-       Every branch here names the thing that caused it. Nothing is picked at random: a Swym that
+       Every branch here names the thing that caused it. Nothing is picked at random: an Oglet that
        looks sad is sad *about* something, which is the whole difference between a character and
        a screensaver. */
     if(now>B.exprUntil){
@@ -707,14 +707,14 @@ resize();
 
 /* ═══════════════════════════════════════════════════════════
    YOURS
-   One Swym, rolled the first time you ever open the page and kept in this browser afterwards.
+   One Oglet, rolled the first time you ever open the page and kept in this browser afterwards.
    What is stored is the nine-character code, not the genome: it is the same string the Genome
    tab shows you, so the format on screen and the format on disk can never drift apart. If the
    store is empty, unreadable, or holds a code that no longer decodes, a new one hatches.
    ═══════════════════════════════════════════════════════════ */
 const store={
-  read(){ try{ return unpackSwym(localStorage.getItem(STORAGE_KEY)); }catch{ return null; } },
-  write(s){ try{ localStorage.setItem(STORAGE_KEY,packSwym(s)); }catch{} },
+  read(){ try{ return unpackOglet(localStorage.getItem(STORAGE_KEY)); }catch{ return null; } },
+  write(s){ try{ localStorage.setItem(STORAGE_KEY,packOglet(s)); }catch{} },
 };
 function hatch(){
   const genome=randomGenome(), code=encode(genome), at=Date.now();
@@ -728,7 +728,7 @@ const firstMeeting=!saved;
 const awayFor=firstMeeting?0:Math.max(0,Date.now()-mine.seen);
 if(firstMeeting) store.write(mine);
 
-const world=[ new Swym(mine.genome,0.070,{x:0,y:0}) ];
+const world=[ new Oglet(mine.genome,0.070,{x:0,y:0}) ];
 world[0].drive.bond=mine.bond;
 if(awayFor>6*3600e3){                       // it waited, then dozed off
   const c=world[0];
@@ -745,7 +745,7 @@ addEventListener("pagehide",persist);
 setInterval(persist,10000);
 
 /* A greeting is the one expression that is allowed to arrive unprompted — because the prompt is
-   you coming back, which is the single best thing that happens to a Swym all day. */
+   you coming back, which is the single best thing that happens to an Oglet all day. */
 function greetUser(now,warm){
   for(const c of world){
     if(c.phase!=="awake") c.wake(now,false);
@@ -842,7 +842,7 @@ function buildGenome(){
   const host=document.getElementById("genome");
   host.innerHTML="";
 
-  /* yours — not a roller. There is one Swym and it is the one you have; being able to reroll it
+  /* yours — not a roller. There is one Oglet and it is the one you have; being able to reroll it
      on a whim is exactly what would stop it mattering. */
   const roll=document.createElement("div"); roll.className="roll";
   roll.appendChild(makeThumb(mine.genome,96).canvas);
@@ -917,7 +917,7 @@ function frame(t){
           const a=rand(0,TAU),rr=Math.pow(Math.random(),.5);
           B.S.tx=Math.cos(a)*rr*0.8; B.S.ty=Math.sin(a)*rr*0.5;
           B.glance(B.S.tx,B.S.ty);
-          // a catalogue Swym has nothing to be sad about, so it never is
+          // a catalogue Oglet has nothing to be sad about, so it never is
           if(Math.random()<0.3) B.setExpr(pick(["happy","neutral","neutral"]),rand(1.2,2.4),tt);
           if(tt>B.exprUntil) B.expr="neutral";
         }

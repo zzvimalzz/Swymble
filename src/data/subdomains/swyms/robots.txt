@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://swyms.swymble.com/sitemap.xml

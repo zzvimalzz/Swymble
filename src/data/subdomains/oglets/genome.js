@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   SWYMS — the genome layer.
+   OGLETS — the genome layer.
 
    Everything in here is deterministic and free of the DOM, so the repo's vitest
    suite covers it (this project has no DOM test environment — the rule is that
@@ -106,7 +106,7 @@ export function odds(g) {
 
 const C36 = '0123456789abcdefghijklmnopqrstuvwxyz'
 
-/* FNV-1a. Used for everything that must look arbitrary but stay identical forever: a Swym's name,
+/* FNV-1a. Used for everything that must look arbitrary but stay identical forever: an Oglet's name,
    and the two asymmetry genes, which are too small to be worth spending code characters on. */
 function hash(str) {
   let h = 0x811c9dc5
@@ -132,7 +132,7 @@ export function encode(g) {
  *
  * asymW/asymH are not encoded — nine characters is the budget — so they are derived from a hash
  * of the code instead. That keeps a code round-trippable *and* means the same code always draws
- * the same Swym, which is the property share links and storage actually depend on.
+ * the same Oglet, which is the property share links and storage actually depend on.
  */
 export function decode(code) {
   if (typeof code !== 'string') return null
@@ -159,7 +159,7 @@ export function decode(code) {
 }
 
 /* ── names ──────────────────────────────────────────────────
-   Derived from the code, never stored: the same Swym is called the same thing on every device it
+   Derived from the code, never stored: the same Oglet is called the same thing on every device it
    is ever opened on, with no backend and nothing to keep in sync. 320 possibilities is plenty —
    you only ever meet one. */
 const HEADS = ['Pob', 'Nix', 'Tur', 'Mol', 'Bim', 'Kes', 'Lun', 'Fip', 'Wob', 'Rue',
@@ -174,12 +174,12 @@ export function nameOf(genomeOrCode) {
 }
 
 /* ── storage ────────────────────────────────────────────────
-   One Swym, one key. The code is stored rather than the genome: it is nine characters, it is
+   One Oglet, one key. The code is stored rather than the genome: it is nine characters, it is
    already the thing shown to the reader, and reading it back through decode() means the format
    the site displays and the format it persists can never disagree. */
-export const STORAGE_KEY = 'swyms:v1'
+export const STORAGE_KEY = 'oglets:v1'
 
-export function packSwym(state) {
+export function packOglet(state) {
   return JSON.stringify({
     v: 1,
     code: state.code,
@@ -190,11 +190,11 @@ export function packSwym(state) {
 }
 
 /**
- * Reads a stored Swym back. Returns null on anything unusable — missing, wrong version, junk
+ * Reads a stored Oglet back. Returns null on anything unusable — missing, wrong version, junk
  * JSON, a code that no longer decodes (an allele could be removed in a future release). The
  * caller's job on null is to hatch a new one, never to throw at somebody opening the page.
  */
-export function unpackSwym(raw) {
+export function unpackOglet(raw) {
   if (typeof raw !== 'string' || !raw) return null
 
   let data

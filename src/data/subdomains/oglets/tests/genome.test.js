@@ -8,11 +8,11 @@ import {
   geneOf,
   nameOf,
   odds,
-  packSwym,
+  packOglet,
   randomGenome,
   rollFrom,
   tierOf,
-  unpackSwym,
+  unpackOglet,
 } from '../genome.js'
 
 /** A deterministic generator, so a failure here is always reproducible. */
@@ -80,7 +80,7 @@ describe('the code', () => {
     }
   })
 
-  it('draws the same Swym from the same code every time, asymmetry included', () => {
+  it('draws the same Oglet from the same code every time, asymmetry included', () => {
     const code = encode(randomGenome(seeded(3)))
     expect(decode(code)).toEqual(decode(code.toLowerCase()))
     expect(decode(code).asymW).toBe(decode(code).asymW)
@@ -141,31 +141,31 @@ describe('names', () => {
 })
 
 describe('storage', () => {
-  const swym = { code: encode(randomGenome(seeded(29))), bond: 0.42, born: 1_700_000_000_000, seen: 1_700_000_900_000 }
+  const oglet = { code: encode(randomGenome(seeded(29))), bond: 0.42, born: 1_700_000_000_000, seen: 1_700_000_900_000 }
 
   it('uses a versioned key', () => {
-    expect(STORAGE_KEY).toBe('swyms:v1')
+    expect(STORAGE_KEY).toBe('oglets:v1')
   })
 
-  it('round-trips a saved Swym', () => {
-    const back = unpackSwym(packSwym(swym))
-    expect(back.code).toBe(swym.code)
-    expect(back.bond).toBeCloseTo(swym.bond, 3)
-    expect(back.born).toBe(swym.born)
-    expect(back.seen).toBe(swym.seen)
-    expect(back.name).toBe(nameOf(swym.code))
-    expect(back.genome).toEqual(decode(swym.code))
+  it('round-trips a saved Oglet', () => {
+    const back = unpackOglet(packOglet(oglet))
+    expect(back.code).toBe(oglet.code)
+    expect(back.bond).toBeCloseTo(oglet.bond, 3)
+    expect(back.born).toBe(oglet.born)
+    expect(back.seen).toBe(oglet.seen)
+    expect(back.name).toBe(nameOf(oglet.code))
+    expect(back.genome).toEqual(decode(oglet.code))
   })
 
   it('clamps a bond that has been tampered with', () => {
-    expect(unpackSwym(packSwym({ ...swym, bond: 9 })).bond).toBe(1)
-    expect(unpackSwym(packSwym({ ...swym, bond: -3 })).bond).toBe(0)
-    expect(unpackSwym(JSON.stringify({ v: 1, code: swym.code, bond: 'lots' })).bond).toBe(0)
+    expect(unpackOglet(packOglet({ ...oglet, bond: 9 })).bond).toBe(1)
+    expect(unpackOglet(packOglet({ ...oglet, bond: -3 })).bond).toBe(0)
+    expect(unpackOglet(JSON.stringify({ v: 1, code: oglet.code, bond: 'lots' })).bond).toBe(0)
   })
 
   it('returns null for anything unusable, so the page hatches a new one instead of throwing', () => {
-    for (const bad of ['', 'not json', '{}', '[]', null, undefined, JSON.stringify({ v: 2, code: swym.code }), JSON.stringify({ v: 1, code: 'nope' })]) {
-      expect(unpackSwym(bad), String(bad)).toBeNull()
+    for (const bad of ['', 'not json', '{}', '[]', null, undefined, JSON.stringify({ v: 2, code: oglet.code }), JSON.stringify({ v: 1, code: 'nope' })]) {
+      expect(unpackOglet(bad), String(bad)).toBeNull()
     }
   })
 })

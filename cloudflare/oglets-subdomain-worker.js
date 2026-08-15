@@ -1,17 +1,17 @@
-// Routes swyms.swymble.com to the Swyms build served from the main swymble.com origin
-// (dist/subdomains/swyms/) — same pattern as mybirth-subdomain-worker.js and
+// Routes oglets.swymble.com to the Oglets build served from the main swymble.com origin
+// (dist/subdomains/oglets/) — same pattern as mybirth-subdomain-worker.js and
 // what2watch-subdomain-worker.js.
 //
 // Deploy either way:
-//   npx wrangler deploy --config cloudflare/swyms-subdomain-worker.wrangler.toml
+//   npx wrangler deploy --config cloudflare/oglets-subdomain-worker.wrangler.toml
 //   ...or paste this file into the dashboard's Workers "Quick edit" editor and attach
-//      swyms.swymble.com by hand (how the other two subdomain workers were deployed).
+//      oglets.swymble.com by hand (how the other two subdomain workers were deployed).
 //
-// The toml attaches swyms.swymble.com as a Custom Domain, so wrangler creates the proxied DNS
+// The toml attaches oglets.swymble.com as a Custom Domain, so wrangler creates the proxied DNS
 // record itself — unlike mybirth/what2watch/watchpaintdry, which sit on zone routes because
 // their hostnames already had records. See that file's header if the deploy hits error 100117.
 const ORIGIN_HOST = 'swymble.com';
-const SWYMS_PREFIX = '/subdomains/swyms';
+const OGLETS_PREFIX = '/subdomains/oglets';
 
 export default {
   async fetch(request) {
@@ -30,14 +30,14 @@ export default {
     }
 
     // Extensionless miss — the site is a single page, so serve it rather than a 404.
-    originUrl.pathname = `${SWYMS_PREFIX}/index.html`;
+    originUrl.pathname = `${OGLETS_PREFIX}/index.html`;
     return fetch(new Request(originUrl, request));
   },
 };
 
 function toOriginPath(pathname) {
   const normalizedPath = pathname === '/' ? '/index.html' : pathname;
-  return `${SWYMS_PREFIX}${normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`}`;
+  return `${OGLETS_PREFIX}${normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}`}`;
 }
 
 function hasFileExtension(pathname) {

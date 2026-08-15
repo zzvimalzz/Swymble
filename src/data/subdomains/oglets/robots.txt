@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://oglets.swymble.com/sitemap.xml

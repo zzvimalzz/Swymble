@@ -1,0 +1,38 @@
+# Oglets
+
+> Oglets (oglets.swymble.com) is a single-screen web toy. An Oglet is a small
+> creature made mostly of eyes, drawn from a weighted genome. You are given one
+> the first time you open the page, it is kept in your browser, and it is yours.
+
+The site has two tabs.
+
+**World** is the live canvas. Your Oglet watches your cursor, follows it, leans
+toward you when it is fond of you and backs off if you have been jabbing it.
+Drag it, or tap it once to say hello. Left alone it entertains itself — it
+tracks a speck only it can see, daydreams, or goes to check the last place your
+cursor was — and then naps. Come back and it greets you.
+
+Its expressions are driven, never random: it is happy when you hold it, when you
+greet it or when it is playing; cross when it is mashed; sad only when you are
+on the page and not coming near. An Oglet alone is perfectly content on its own.
+
+**Genome** is the catalogue. It shows your Oglet's name, its nine-character
+code, its alleles, its odds and the day you met, then every allele for eye
+shape, pupil, palette and finish with its real drawn thumbnail, rarity tier and
+weight. Rarity is not a lookup table — a trait is rare because its allele is
+rare, which is what makes the same weights usable for inheritance later.
+
+Names are derived from the code rather than stored, so the same Oglet is called
+the same thing anywhere it is ever opened.
+
+Everything runs client-side on one canvas. No accounts, no network calls, no
+tracking; the only thing stored is your Oglet's code in this browser.
+
+Oglets is part of SWYMBLE Labs, the experiments arm of the SWYMBLE software
+studio.
+
+## Contact
+
+Studio: https://swymble.com
+Labs: https://swymble.com/labs
+Email: hello@swymble.com
