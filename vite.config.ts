@@ -146,6 +146,22 @@ function shouldPublishSubdomainFile(source: string) {
   return name !== 'tests' && !/\.(test|spec)\.[cm]?[jt]sx?$/.test(name)
 }
 
+/** Every subdomain folder this server serves directly — i.e. the ones with no build of their own. */
+function listPlainSubdomains() {
+  if (!fs.existsSync(SUBDOMAINS_SOURCE_ROOT)) {
+    return []
+  }
+
+  return fs
+    .readdirSync(SUBDOMAINS_SOURCE_ROOT, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter((name) => {
+      const root = path.join(SUBDOMAINS_SOURCE_ROOT, name)
+      return !isSubdomainAppSource(root) && fs.existsSync(path.join(root, 'index.html'))
+    })
+}
+
 function copySubdomainSitesToDist() {
   if (!fs.existsSync(SUBDOMAINS_SOURCE_ROOT)) {
     return
@@ -244,6 +260,19 @@ function createStaticSubdomainPlugin(): Plugin {
 
         next()
       })
+
+      // Plain subdomains have no dev process of their own — this server *is* their dev server,
+      // reached by hostname rather than by port. `npm run dev` names only main/mybirth/what2watch,
+      // so without this they look like they are simply not running. Print their URLs alongside
+      // Vite's own so every subdomain in the repo is visible from one place.
+      const printUrls = server.printUrls.bind(server)
+      server.printUrls = () => {
+        printUrls()
+        const port = server.config.server.port ?? 5173
+        for (const name of listPlainSubdomains()) {
+          server.config.logger.info(`  \x1b[32m➜\x1b[0m  \x1b[1m${name}\x1b[0m:  \x1b[36mhttp://${name}.localhost:${port}/\x1b[0m`)
+        }
+      }
     },
     configurePreviewServer(server) {
       server.middlewares.use((request, _response, next) => {
