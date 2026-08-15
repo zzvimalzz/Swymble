@@ -135,6 +135,17 @@ function isSubdomainAppSource(subdomainRoot: string) {
   return fs.existsSync(path.join(subdomainRoot, 'package.json'))
 }
 
+/**
+ * A plain subdomain is copied to dist wholesale, which would otherwise publish its test files
+ * alongside the site — they import vitest, they are meaningless to a browser, and they would be
+ * crawlable. Source folders named `tests` and any `*.test.js` are left behind; everything else,
+ * including the site's own JS modules, ships.
+ */
+function shouldPublishSubdomainFile(source: string) {
+  const name = path.basename(source)
+  return name !== 'tests' && !/\.(test|spec)\.[cm]?[jt]sx?$/.test(name)
+}
+
 function copySubdomainSitesToDist() {
   if (!fs.existsSync(SUBDOMAINS_SOURCE_ROOT)) {
     return
@@ -158,7 +169,7 @@ function copySubdomainSitesToDist() {
     fs.cpSync(
       subdomainRoot,
       path.join(distSubdomainsRoot, entry.name),
-      { recursive: true },
+      { recursive: true, filter: shouldPublishSubdomainFile },
     )
   }
 }

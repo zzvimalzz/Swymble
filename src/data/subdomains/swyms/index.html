@@ -93,7 +93,12 @@
   <div id="genome"></div>
 </div>
 
-<script>
+<script type="module">
+import {
+  GENES, CATS, tierOf, geneOf, randomGenome, odds,
+  encode, nameOf, packSwym, unpackSwym, STORAGE_KEY,
+} from './genome.js';
+
 (() => {
 "use strict";
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t;
@@ -121,88 +126,8 @@ function hex2hsl(h){
 function hsl(h,s,l){ return `hsl(${((h%360)+360)%360} ${(s*100).toFixed(1)}% ${(l*100).toFixed(1)}%)`; }
 function shiftHue(hex,deg){ const [h,s,l]=hex2hsl(hex); return hsl(h+deg,s,l); }
 
-/* ═══════════════════════════════════════════════════════════
-   THE GENOME
-   Every Swym is derived from this — nothing is rolled at
-   render time. Weights are the ONLY source of rarity: a trait
-   is rare because its allele is rare, not because a table says
-   so. That also means breeding can inherit alleles directly.
-   ═══════════════════════════════════════════════════════════ */
-const GENES={
-  shape:[
-    {id:"round", name:"Round", w:0.38, rx:1.00,ry:1.03,kT:.58,kO:.56,kB:.56,kI:.58},
-    {id:"egg",   name:"Egg",   w:0.29, rx:0.86,ry:1.16,kT:.62,kO:.54,kB:.54,kI:.62},
-    {id:"cat",   name:"Cat",   w:0.21, rx:1.02,ry:1.00,kT:.32,kO:.62,kB:.58,kI:.50},
-    {id:"bean",  name:"Bean",  w:0.12, rx:1.14,ry:0.90,kT:.80,kO:.84,kB:.84,kI:.80},
-  ],
-  pupil:[
-    {id:"dot",  name:"Dot",   w:0.46, travel:0.46, lift:1.00},
-    {id:"oval", name:"Oval",  w:0.27, travel:0.34, lift:0.45},
-    {id:"slit", name:"Slit",  w:0.17, travel:0.44, lift:0.85},
-    {id:"ring", name:"Ring",  w:0.10, travel:0.42, lift:0.95},
-  ],
-  palette:[
-    {id:"moss",   name:"Moss",     w:0.14, e:"#86e6a8", p:"#2c8c5c"},
-    {id:"lagoon", name:"Lagoon",   w:0.13, e:"#8ad8f0", p:"#26647f"},
-    {id:"peony",  name:"Peony",    w:0.12, e:"#ffb2c8", p:"#9e3a5e"},
-    {id:"amber",  name:"Amber",    w:0.11, e:"#ffcf6b", p:"#a06418"},
-    {id:"bone",   name:"Bone",     w:0.10, e:"#f0e8d6", p:"#5a5045"},
-    {id:"coral",  name:"Coral",    w:0.09, e:"#ff8f70", p:"#9e3623"},
-    {id:"iris",   name:"Iris",     w:0.08, e:"#c2acff", p:"#553aa2"},
-    {id:"lime",   name:"Lime",     w:0.07, e:"#d8f07a", p:"#5b7418"},
-    {id:"jukebox",name:"Jukebox",  w:0.06, e:"#1a55e8", p:"#ff44b0"},
-    {id:"siren",  name:"Siren",    w:0.05, e:"#d4807e", p:"#8adcea"},
-    {id:"ember",  name:"Ember",    w:0.030,e:"#2b0d0d", p:"#ff5c3a"},
-    {id:"void",   name:"Void",     w:0.020,e:"#2a2a34", p:"#e8e8f2"},
-  ],
-  finish:[
-    {id:"matte", name:"Matte", w:0.90},
-    {id:"glow",  name:"Glow",  w:0.08},
-    {id:"prism", name:"Prism", w:0.02},
-  ],
-};
-
-const TIERS=[
-  {min:0.30,name:"Common",   c:"t0"},
-  {min:0.16,name:"Uncommon", c:"t1"},
-  {min:0.08,name:"Rare",     c:"t2"},
-  {min:0.03,name:"Epic",     c:"t3"},
-  {min:0,   name:"Legendary",c:"t4"},
-];
-const tierOf=w=>TIERS.find(t=>w>=t.min);
-
-function rollFrom(list){
-  let r=Math.random()*list.reduce((s,x)=>s+x.w,0);
-  for(const x of list){ if((r-=x.w)<=0) return x; }
-  return list[list.length-1];
-}
-function geneOf(cat,id){ return GENES[cat].find(x=>x.id===id)||GENES[cat][0]; }
-
-function randomGenome(){
-  return {
-    shape:rollFrom(GENES.shape).id,
-    pupil:rollFrom(GENES.pupil).id,
-    palette:rollFrom(GENES.palette).id,
-    finish:rollFrom(GENES.finish).id,
-    // continuous genes — these carry personality and small look drift
-    gap:rand(0.98,1.12), pupilSize:rand(0.25,0.33),
-    asymW:rand(0.95,1.06), asymH:rand(0.96,1.04),
-    pace:rand(0.8,1.3), temper:rand(0.7,1.4), sociable:rand(0.6,1.4),
-  };
-}
-/* The odds of drawing this exact combination of categorical alleles.
-   Continuous genes are excluded — they always vary. */
-const CATS=["shape","pupil","palette","finish"];
-function odds(g){ return CATS.reduce((p,c)=>p*geneOf(c,g[c]).w,1); }
-
-const C36="0123456789abcdefghijklmnopqrstuvwxyz";
-function encode(g){
-  const i=(c,id)=>C36[GENES[c].findIndex(x=>x.id===id)];
-  const q=(v,a,b)=>C36[clamp(Math.round((v-a)/(b-a)*35),0,35)];
-  return (i("shape",g.shape)+i("pupil",g.pupil)+i("palette",g.palette)+
-          i("finish",g.finish)+q(g.gap,.98,1.12)+q(g.pupilSize,.25,.33)+
-          q(g.pace,.8,1.3)+q(g.temper,.7,1.4)+q(g.sociable,.6,1.4)).toUpperCase();
-}
+/* The genome, the rarity tiers, the code and the name bank all live in ./genome.js —
+   pure, deterministic and covered by the repo test suite. Everything below draws or moves. */
 
 /* ═══════════════════════════════════════════════════════════
    EXPRESSIONS — the upper lid's inner and outer heights move
@@ -413,9 +338,15 @@ class Swym{
     this.body=new Body(g); this.g=g; this.scale=scale; this.seat=seat;
     this.b={x:seat.x,y:seat.y,vx:0,vy:0,tx:seat.x,ty:seat.y,nextDrift:0,
             z:1,vz:0,shake:0};
-    this.drive={annoy:0,idle:rand(0,6),held:0};
+    /* drives — every expression this Swym ever wears is traced back to one of these, so nothing
+       it feels is arbitrary. annoy: being mashed. held: a hand resting on it. bond: how attached
+       it is to you. cheer: good things banked, spent on a smile. ignored: seconds you have been
+       on the page without coming near. lonely: only ever built from being ignored. */
+    this.drive={annoy:0,idle:rand(0,6),held:0,bond:0,cheer:0,ignored:0,lonely:0};
     this.phase="awake"; this.phaseAt=0; this.wakeAt=0; this.yawned=false;
     this.sleepAfter=rand(18,32); this.napFor=rand(16,34);
+    /* what it does when it is on its own: track something imaginary, daydream, or look for you */
+    this.solo={mote:null};
     this.nextWander=0; this.attn="wander"; this.attnUntil=0; this.peer=null;
     this.dragging=false; this.gdx=0; this.gdy=0; this.taps=[];
     this.soc={state:"none",partner:null,until:0,role:null,
@@ -472,9 +403,13 @@ class Swym{
     this.body.poke();
     this.taps.push(now); this.taps=this.taps.filter(t=>now-t<3);
     this.drive.annoy=clamp(this.drive.annoy+(0.17+this.taps.length*0.06)*this.g.temper,0,1.3);
+    this.drive.ignored=0;
     if(this.drive.annoy>0.5){ this.setExpr("angry",2.2,now); this.b.shake=1;
       const p=this.soc.partner; if(p) p.receive("angry",this,now); }
     else if(this.drive.annoy>0.28) this.setExpr("sad",1.2,now);
+    // one poke, on its own, is a hello rather than a jab — mashing is what earns the scowl above
+    else if(this.taps.length===1){ this.drive.cheer=clamp(this.drive.cheer+0.85,0,2);
+      this.drive.lonely=Math.max(0,this.drive.lonely-0.4); }
     for(const o of world) if(o!==this&&Math.random()<0.7) o.startle(this,now);
   }
   updateSocial(dt,now){
@@ -532,12 +467,30 @@ class Swym{
     if(this.pending&&now>=this.pending.at){
       this.setExpr(this.pending.expr,this.pending.dur,now); this.pending=null; }
 
-    const near=Math.hypot(ptr.x-this.cx,ptr.y-this.cy)<this._rad*1.25;
+    const reach=Math.hypot(ptr.x-this.cx,ptr.y-this.cy);
+    const near=reach<this._rad*1.25, close=reach<this._rad*2.8;
     const att=ptr.in&&(now-ptr.last)<3.2;
     if(att) d.idle=0;
     if(ptr.down&&near&&ptr.moved<this.R*0.5){
       d.held+=dt; if(d.held>0.5&&d.annoy<0.45) d.annoy=Math.max(0,d.annoy-dt*0.35);
     } else d.held=Math.max(0,d.held-dt*2);
+
+    /* ── how it feels about you, updated once per frame ──
+       Being on its own is not sad: a Swym alone in an empty room entertains itself quite happily.
+       What actually stings is you being *here* and not coming near — so loneliness is built from
+       `ignored`, never from a plain absence of company. */
+    const alone=world.length<2;
+    if(this.phase==="awake"&&!this.dragging){
+      if(d.held>0.35){ d.bond=clamp(d.bond+dt*0.05,0,1); d.cheer=clamp(d.cheer+dt*0.5,0,2); d.ignored=0; }
+      else if(att&&close){ d.bond=clamp(d.bond+dt*0.012,0,1); d.cheer=clamp(d.cheer+dt*0.16,0,2); d.ignored=0; }
+      else if(att&&alone){ d.ignored+=dt; }
+      else d.ignored=Math.max(0,d.ignored-dt*0.5);
+
+      if(d.annoy>0.6) d.bond=Math.max(0,d.bond-dt*0.04);
+      if(this.attn==="user"&&d.ignored>18) d.lonely=clamp(d.lonely+dt*0.06,0,1);
+      else if(d.ignored<1) d.lonely=Math.max(0,d.lonely-dt*0.35);
+      d.cheer=Math.max(0,d.cheer-dt*0.05);   // an unspent good mood fades rather than banking up
+    }
 
     if(this.phase==="awake"){
       if(d.idle>this.sleepAfter&&this.soc.state==="none"){
@@ -563,23 +516,60 @@ class Swym{
 
     this.updateSocial(dt,now);
 
+    /* ── the face ──
+       Every branch here names the thing that caused it. Nothing is picked at random: a Swym that
+       looks sad is sad *about* something, which is the whole difference between a character and
+       a screensaver. */
     if(now>B.exprUntil){
-      if(this.phase==="asleep")      B.expr="asleep";
-      else if(this.phase==="sleepy") B.expr="sleepy";
-      else if(d.annoy>0.5)           B.expr="angry";
-      else if(d.held>0.6)            B.expr="happy";
-      else{ B.expr="neutral";
-        if(this.soc.state==="none"&&Math.random()<dt*0.06*this.g.pace)
-          this.setExpr(pick(["happy","happy","sad"]),rand(1.3,2.6),now); }
+      if(this.phase==="asleep")        B.expr="asleep";
+      else if(this.phase==="sleepy")   B.expr="sleepy";
+      else if(d.annoy>0.5)             B.expr="angry";   // you kept jabbing it
+      else if(d.held>0.6)              B.expr="happy";   // your hand is resting on it
+      else if(this.soc.state==="play") B.expr="happy";   // mid-game with a friend
+      else{
+        B.expr="neutral";
+        if(d.cheer>=1){                                   // something good just happened — spend it
+          d.cheer=0; this.setExpr("happy",rand(1.4,2.4),now);
+          if(Math.random()<0.28) B.wink();
+        } else if(d.lonely>0.55&&!this.dragging){         // you are right there, and not looking
+          d.lonely=Math.max(0,d.lonely-0.3);
+          this.setExpr("sad",rand(1.6,2.6),now); B.blinkNow(0.2);
+        }
+      }
     }
 
+    /* ── what it is paying attention to ──
+       With company, the old peer/user/wander mix. On its own, it does not just stare into space:
+       it tracks something imaginary, daydreams, or goes looking for you. */
     const social=this.soc.state!=="none";
     if(!social&&now>this.attnUntil&&this.phase==="awake"){
-      this.attnUntil=now+rand(2,5.5);
+      const peers=world.filter(x=>x!==this);
       const r=Math.random();
-      this.attn=att?(r<0.55?"user":(r<0.85?"peer":"wander")):(r<0.5?"peer":"wander");
-      if(this.attn==="peer"){ const o=world.filter(x=>x!==this);
-        this.peer=o.length?pick(o):null; if(!this.peer) this.attn="wander"; }
+      if(att){
+        const watch=clamp(0.55+d.bond*0.3,0,0.92);        // the fonder it is, the more it watches
+        this.attn=r<watch?"user":(peers.length&&r<watch+0.22?"peer":"wander");
+        this.attnUntil=now+rand(2.2,5.5);
+      } else if(peers.length){
+        this.attn=r<0.5?"peer":"wander";
+        this.attnUntil=now+rand(2,5.5);
+      } else if(ptr.seen&&(d.lonely>0.35||d.ignored>6)){
+        this.attn="seek";                                  // checks the last place you were
+        this.attnUntil=now+rand(3,6);
+        const t=this.aimAt({x:ptr.x,y:ptr.y}); B.glance(t.x,t.y);
+      } else if(r<0.42){
+        this.attn="mote";                                  // follows a speck only it can see
+        this.attnUntil=now+rand(4.5,9);
+        this.solo.mote={a:rand(0,TAU),r:rand(0.35,0.85),ph:rand(0,TAU),
+                        sp:rand(0.3,0.62)*(Math.random()<0.5?-1:1)};
+      } else if(r<0.72){
+        this.attn="muse";                                  // looks up, thinking about nothing
+        this.attnUntil=now+rand(3.5,7);
+        B.glance(rand(-0.3,0.3),rand(-0.78,-0.42));
+      } else {
+        this.attn="wander";
+        this.attnUntil=now+rand(2,5);
+      }
+      if(this.attn==="peer"){ this.peer=peers.length?pick(peers):null; if(!this.peer) this.attn="wander"; }
     }
     if(social){ this.attn="peer"; this.peer=this.soc.partner; }
 
@@ -588,6 +578,12 @@ class Swym{
     else if(this.dragging){ S.tx=clamp(b.vx*0.0016,-.9,.9); S.ty=clamp(b.vy*0.0014,-.7,.7); }
     else if(this.attn==="user"&&att){ const t=this.aimAt({x:ptr.x,y:ptr.y}); S.tx=t.x; S.ty=t.y; }
     else if(this.attn==="peer"&&this.peer){ const t=this.aimAt({x:this.peer.cx,y:this.peer.cy}); S.tx=t.x; S.ty=t.y; }
+    else if(this.attn==="mote"&&this.solo.mote){
+      const mo=this.solo.mote; mo.a+=dt*mo.sp;             // a slow, smooth arc — a fly, basically
+      S.tx=Math.cos(mo.a)*mo.r; S.ty=Math.sin(mo.a*0.7+mo.ph)*mo.r*0.55;
+    }
+    else if(this.attn==="seek"&&ptr.seen){ const t=this.aimAt({x:ptr.x,y:ptr.y}); S.tx=t.x; S.ty=t.y; }
+    else if(this.attn==="muse"){ /* holds the glance set when it started daydreaming */ }
     else if(now>this.nextWander){
       this.nextWander=now+(Math.random()<0.34?rand(3,6.5):rand(1.3,2.8))/this.g.pace;
       if(Math.random()<0.24){ S.tx=0; S.ty=0; }
@@ -621,8 +617,11 @@ class Swym{
         }
         tx=b.tx; ty=b.ty;
         if(att&&this.phase==="awake"&&this.attn==="user"){
-          const pull=d.annoy>0.5?-0.10:0.09;
+          // leans in when it likes you, backs off when it has had enough of you
+          const pull=d.annoy>0.5?-0.10:0.09+d.bond*0.07;
           tx+=(ptr.x-W/2-b.x)*pull; ty+=(ptr.y-H/2-b.y)*pull;
+        } else if(this.phase==="awake"&&this.attn==="seek"&&ptr.seen){
+          tx+=(ptr.x-W/2-b.x)*0.05; ty+=(ptr.y-H/2-b.y)*0.05;   // wanders over to where you were
         }
       }
       const chase=this.soc.state==="play"&&this.soc.role==="chase";
@@ -706,25 +705,77 @@ function resize(){
 addEventListener("resize",()=>{ resize(); });
 resize();
 
-const m=Math.min(W,H);
-const world=[
-  new Swym(randomGenome(),0.070,{x:0,       y:-m*0.24}),
-  new Swym(randomGenome(),0.060,{x:-m*0.24, y: m*0.00}),
-  new Swym(randomGenome(),0.058,{x: m*0.24, y: m*0.06}),
-  new Swym(randomGenome(),0.055,{x: m*0.00, y: m*0.28}),
-];
+/* ═══════════════════════════════════════════════════════════
+   YOURS
+   One Swym, rolled the first time you ever open the page and kept in this browser afterwards.
+   What is stored is the nine-character code, not the genome: it is the same string the Genome
+   tab shows you, so the format on screen and the format on disk can never drift apart. If the
+   store is empty, unreadable, or holds a code that no longer decodes, a new one hatches.
+   ═══════════════════════════════════════════════════════════ */
+const store={
+  read(){ try{ return unpackSwym(localStorage.getItem(STORAGE_KEY)); }catch{ return null; } },
+  write(s){ try{ localStorage.setItem(STORAGE_KEY,packSwym(s)); }catch{} },
+};
+function hatch(){
+  const genome=randomGenome(), code=encode(genome), at=Date.now();
+  return {code,genome,name:nameOf(code),bond:0,born:at,seen:at};
+}
+const saved=store.read();
+const mine=saved??hatch();
+const firstMeeting=!saved;
+/* How long you have been gone decides how it greets you: a few minutes and it is simply pleased,
+   half a day and it had given up and gone to sleep. */
+const awayFor=firstMeeting?0:Math.max(0,Date.now()-mine.seen);
+if(firstMeeting) store.write(mine);
 
-const ptr={x:-1e5,y:-1e5,px:0,py:0,in:false,last:-1e9,down:false,t0:0,moved:0};
+const world=[ new Swym(mine.genome,0.070,{x:0,y:0}) ];
+world[0].drive.bond=mine.bond;
+if(awayFor>6*3600e3){                       // it waited, then dozed off
+  const c=world[0];
+  c.phase="asleep"; c.body.asleep=true; c.wakeAt=1e9; c.drive.idle=c.sleepAfter+9;
+}
+let greetPending=firstMeeting?false:awayFor>60e3;
+
+function persist(){
+  mine.bond=world[0]?world[0].drive.bond:mine.bond;
+  mine.seen=Date.now();
+  store.write(mine);
+}
+addEventListener("pagehide",persist);
+setInterval(persist,10000);
+
+/* A greeting is the one expression that is allowed to arrive unprompted — because the prompt is
+   you coming back, which is the single best thing that happens to a Swym all day. */
+function greetUser(now,warm){
+  for(const c of world){
+    if(c.phase!=="awake") c.wake(now,false);
+    c.setExpr("happy",warm?2.6:1.9,now);
+    c.body.blinkNow(0.05); c.b.vz-=warm?3.4:2.2;
+    c.drive.ignored=0; c.drive.lonely=Math.max(0,c.drive.lonely-0.6);
+    c.drive.bond=clamp(c.drive.bond+0.01,0,1);
+    c.attn="user"; c.attnUntil=now+rand(2.5,4.2);
+  }
+}
+let hiddenAt=Date.now();
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){ hiddenAt=Date.now(); persist(); return; }
+  if(Date.now()-hiddenAt>45e3) greetPending=true;
+});
+
+const ptr={x:-1e5,y:-1e5,px:0,py:0,in:false,last:-1e9,down:false,t0:0,moved:0,seen:false};
 let held=null,touched=false;
 const hint=document.getElementById("hint");
+hint.textContent=`${firstMeeting?"meet":"drag"} ${mine.name}`;
 const seen=()=>{ if(!touched){ touched=true; hint.style.opacity=0; } };
 const local=e=>{ const r=cv.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; };
+/* the first move or touch after you have been away is what triggers the welcome */
+const noticed=(now)=>{ ptr.seen=true; if(greetPending){ greetPending=false; greetUser(now,awayFor>6*3600e3); } };
 
 cv.addEventListener("pointerdown",e=>{
   const p=local(e);
   ptr.x=ptr.px=p.x; ptr.y=ptr.py=p.y;
   ptr.in=true; ptr.down=true; ptr.moved=0;
-  ptr.t0=performance.now()/1000; ptr.last=ptr.t0; seen();
+  ptr.t0=performance.now()/1000; ptr.last=ptr.t0; seen(); noticed(ptr.t0);
   for(const c of world) if(c.phase!=="awake") c.wake(ptr.t0,true);
   for(let i=world.length-1;i>=0;i--){
     if(world[i].hit(p.x,p.y)){
@@ -738,7 +789,7 @@ cv.addEventListener("pointerdown",e=>{
 cv.addEventListener("pointermove",e=>{
   const p=local(e);
   ptr.px=ptr.x; ptr.py=ptr.y; ptr.x=p.x; ptr.y=p.y;
-  ptr.in=true; ptr.last=performance.now()/1000; seen();
+  ptr.in=true; ptr.last=performance.now()/1000; seen(); noticed(ptr.last);
   if(ptr.down) ptr.moved+=Math.hypot(ptr.x-ptr.px,ptr.y-ptr.py);
 },{passive:true});
 function release(){
@@ -791,22 +842,18 @@ function buildGenome(){
   const host=document.getElementById("genome");
   host.innerHTML="";
 
-  /* roller */
+  /* yours — not a roller. There is one Swym and it is the one you have; being able to reroll it
+     on a whim is exactly what would stop it mattering. */
   const roll=document.createElement("div"); roll.className="roll";
-  const rt=makeThumb(randomGenome(),96);
-  roll.appendChild(rt.canvas);
+  roll.appendChild(makeThumb(mine.genome,96).canvas);
   const meta=document.createElement("div"); meta.className="meta";
+  const o=odds(mine.genome);
+  const since=new Date(mine.born).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+  meta.innerHTML=`<div class="code">${mine.name}</div>
+    <div class="odds">${mine.code} · ${CATS.map(c=>geneOf(c,mine.genome[c]).name).join(" · ")}<br>
+    1 in ${Math.round(1/o).toLocaleString()} · overall ${tierOf(o*6).name}<br>
+    yours since ${since}</div>`;
   roll.appendChild(meta);
-  const btn=document.createElement("button"); btn.textContent="Roll again";
-  function refresh(){
-    const g=rt.body.g, o=odds(g);
-    meta.innerHTML=`<div class="code">${encode(g)}</div>
-      <div class="odds">${CATS.map(c=>geneOf(c,g[c]).name).join(" · ")}<br>
-      1 in ${Math.round(1/o).toLocaleString()} · overall ${tierOf(o*6).name}</div>`;
-    meta.appendChild(btn);
-  }
-  btn.onclick=()=>{ rt.body=new Body(randomGenome()); refresh(); };
-  refresh();
   host.appendChild(roll);
 
   section(host,"Eye shape","4 alleles",
@@ -821,7 +868,8 @@ function buildGenome(){
   const combos=GENES.shape.length*GENES.pupil.length*GENES.palette.length*GENES.finish.length;
   host.insertAdjacentHTML("beforeend",
     `<div class="note">
-      Every Swym is one draw from this genome.<br>
+      ${mine.name} is one draw from this genome, made the first time you opened this page
+      and kept in this browser since.<br>
       ${combos.toLocaleString()} categorical combinations, before continuous genes.<br>
       Rarity is not a table — a trait is rare because its allele is rare.<br>
       The same weights drive inheritance once breeding exists, and recessive
@@ -869,7 +917,8 @@ function frame(t){
           const a=rand(0,TAU),rr=Math.pow(Math.random(),.5);
           B.S.tx=Math.cos(a)*rr*0.8; B.S.ty=Math.sin(a)*rr*0.5;
           B.glance(B.S.tx,B.S.ty);
-          if(Math.random()<0.3) B.setExpr(pick(["happy","happy","sad","neutral"]),rand(1.2,2.4),tt);
+          // a catalogue Swym has nothing to be sad about, so it never is
+          if(Math.random()<0.3) B.setExpr(pick(["happy","neutral","neutral"]),rand(1.2,2.4),tt);
           if(tt>B.exprUntil) B.expr="neutral";
         }
         B.update(d,tt);
