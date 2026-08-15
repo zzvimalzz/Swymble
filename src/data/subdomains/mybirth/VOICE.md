@@ -9,10 +9,10 @@ person to touch the copy.
 
 ## 1. The register
 
-Short sentences. Second person.
-Present tense. Say the thing, say what follows from it, say what to do
-about it, and stop. A reading is finished when a person can act on it after
-one read, on a phone, without going back to the top.
+Short sentences. Second person. Present tense. Say the thing, say what
+follows from it, say what to do about it, and stop. A reading is finished
+when a person can act on it after one read, on a phone, without going back
+to the top.
 
 *"The wall at work is real today. Stop testing it and go around."*
 
