@@ -1,0 +1,29 @@
+# Wrangler config for the Swyms subdomain-routing Worker.
+#
+# Deploy from the repo root:
+#   npx wrangler deploy --config cloudflare/swyms-subdomain-worker.wrangler.toml
+#
+# Only prerequisite: ship the site itself first — `npm run build` + push to main, so
+# https://swymble.com/subdomains/swyms/index.html is live. The Worker fetches that origin.
+#
+# `custom_domain = true` means wrangler creates the proxied DNS record for swyms.swymble.com
+# itself — no manual DNS step. That works here only because the hostname is brand new: Cloudflare
+# rejects a Custom Domain when a proxied record for it already exists (API error 100117), which
+# is exactly why watchpaintdry (and the two older subdomain workers) use plain zone routes on top
+# of their pre-existing records instead. Deleting this Worker also deletes the record, so the
+# hostname stops resolving rather than falling back to anything.
+#
+# If the deploy fails with 100117, something already claims swyms.swymble.com (a per-subdomain
+# record, or a *.swymble.com wildcard). Fall back to a route, and add the proxied record by hand:
+#
+#   [[routes]]
+#   pattern = "swyms.swymble.com/*"
+#   zone_name = "swymble.com"
+name = "swyms-site"
+main = "swyms-subdomain-worker.js"
+compatibility_date = "2026-07-01"
+workers_dev = true
+
+[[routes]]
+pattern = "swyms.swymble.com"
+custom_domain = true

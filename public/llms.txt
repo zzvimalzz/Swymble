@@ -43,6 +43,7 @@ products anyone can use today.
 ## Other domains operated by Swymble
 
 - https://mybirth.swymble.com
+- https://swyms.swymble.com
 - https://www.watchpaintdry.net
 - https://what2watch.swymble.com
 
