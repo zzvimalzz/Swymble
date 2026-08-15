@@ -98,6 +98,11 @@ Everything on the page is checkable, or the page is worth nothing.
 
 ## 5. Where the copy lives
 
+**`src/sky/contents/CORPUS-RULES.md` is the working manual for these
+tables**: the shape of a body, the brief for each of the nine areas, what
+each of the five tones actually means, and the checklist to run before
+committing. This file is the register; that one is the method.
+
 | File | What |
 |---|---|
 | `src/sky/contents/readings.json` | 225 headline and body pairs, indexed by area then tone. The body is the whole reading |

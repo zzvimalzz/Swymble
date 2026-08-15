@@ -110,8 +110,8 @@ const JARGON = /\b(orb|applying|separating|exact|ephemeris|ecliptic|longitude|co
 const IMPERATIVES = new Set([
   "accept", "add", "answer", "argue", "ask", "assume", "bank", "be", "book",
   "build", "buy", "call", "cancel", "change", "check", "choose", "clear", "close",
-  "come", "compare", "cook", "correct", "cut", "deal", "decide", "defend",
-  "delete", "do", "draw", "enjoy", "explain", "feed", "fill", "find",
+  "come", "compare", "cook", "correct", "cut", "deal", "decide", "decline",
+  "defend", "delete", "do", "draw", "enjoy", "explain", "feed", "fill", "find",
   "finish", "fix", "follow", "get", "give", "go", "have", "hold",
   "introduce", "invite", "judge", "keep", "know", "lead", "learn", "leave",
   "let", "list", "listen", "look", "lower", "make", "move", "name",
@@ -119,13 +119,14 @@ const IMPERATIVES = new Set([
   "protect", "push", "put", "reach", "read", "reply", "rest", "return",
   "ring", "run", "save", "say", "see", "sell", "send", "set", "settle",
   "share", "ship", "show", "sit", "skip", "solve", "sort", "spend",
-  "start", "stay", "stop", "store", "switch", "take", "teach", "tell",
+  "split", "start", "stay", "stop", "store", "switch", "take", "teach", "tell",
   "test", "throw", "tidy", "trust", "try", "turn", "update", "use",
   "visit", "wait", "watch", "work", "write", "zoom",
 ]);
 
-/** Second person, either by pronoun or by mood. */
-function addressesTheReader(text) {
+/** Second person, either by pronoun or by mood. Exported: the seams suite
+    checks the same property and two lists of verbs is one too many. */
+export function addressesTheReader(text) {
   if (/\byou(r|rs|rself)?\b/i.test(text)) return true;
   return text
     .split(/(?<=[.])\s+/)
