@@ -124,6 +124,23 @@ const HARMLESS = new Set([
   "Own", "Plan", "Present", "Protect", "Renegotiating", "Reread",
   "Rewrite", "Rewriting", "Save", "Separate", "Sign", "Space", "State",
   "Suggest", "Uncomfortable", "Unowned", "Update", "Updating", "Volunteer",
+  /*
+     And from rekeying the two lower paragraphs by area, which turned them
+     from encyclopaedia entries into prose about a part of a life. Same
+     test as every block above, one word at a time.
+  */
+  "About", "Appetite", "Charge", "Clarity", "Days", "Friction",
+  "Friendships", "Knowing", "Less", "Most", "Openings", "Recognition",
+  "Slow", "Talking", "Thirteen", "Trouble", "Whichever",
+  /*
+     And from friends.json, where the subject is somebody else and the
+     reader is you. Note that "{name}", "{planet}" and "{sign}" are holes
+     rather than words: the renderer fills them from a chart, which is how
+     that table can name a placement without this check having anything to
+     object to. A line that spelled one out could be printed against the
+     wrong one, which is the whole reason this file exists.
+  */
+  "As", "Cancel", "Coming", "Help", "On", "Research", "Stopping", "With",
 ]);
 
 /** Every number in a string, normalised so 6.30 and 6.3 compare equal. */

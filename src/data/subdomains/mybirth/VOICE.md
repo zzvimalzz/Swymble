@@ -9,10 +9,10 @@ person to touch the copy.
 
 ## 1. The register
 
-Short sentences. Second person.
-Present tense. Say the thing, say what follows from it, say what to do
-about it, and stop. A reading is finished when a person can act on it after
-one read, on a phone, without going back to the top.
+Short sentences. Second person. Present tense. Say the thing, say what
+follows from it, say what to do about it, and stop. A reading is finished
+when a person can act on it after one read, on a phone, without going back
+to the top.
 
 *"The wall at work is real today. Stop testing it and go around."*
 
@@ -105,10 +105,11 @@ committing. This file is the register; that one is the method.
 
 | File | What |
 |---|---|
-| `src/sky/contents/readings.json` | 225 headline and body pairs, indexed by area then tone. The body is the whole reading |
+| `src/sky/contents/readings.json` | 450 headline and body pairs, area by tone by variant. The body is the whole reading |
 | `src/sky/contents/motion.json` | The timing tail, in English |
-| `src/sky/contents/touches.json` | Paragraph two: which part of you took the angle |
-| `src/sky/contents/depth.json` | Paragraph three: the mechanism |
+| `src/sky/contents/placements.json` | Paragraph two: the permanent placement, area by natal point |
+| `src/sky/contents/depth.json` | Paragraph three: the recurring pattern, area by tone. Plus the one-line mechanism note |
+| `src/sky/contents/friends.json` | The friend card. Written, not yet wired up |
 | `src/sky/contents/quiet.json` | The cards for areas the sky is not touching |
 | `src/sky/contents/signs.json` | What the sign on a sector says about that part of a life |
 | `src/sky/contents/lines.json` | The line of the day, written to a lock screen |
@@ -151,6 +152,13 @@ made, and it is the whole reason the bank read as generic.
 Two tables may still be joined in one paragraph only if they are keyed by
 genuinely independent dimensions, and `tests/seams.test.js` checks the
 overlap rather than trusting that they are.
+
+**And a paragraph must know which part of a life it is about.** The second
+version of this card failed the same way in a quieter place: paragraphs two
+and three were keyed by the natal point and the aspect, with no area in the
+address at all, so neither could name the house it was printed under. Which
+house a given planet occupies differs per reader, so one sentence had to
+serve all nine. Both are keyed by area now.
 
 ## 7. Things the product does not say
 

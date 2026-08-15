@@ -1,0 +1,289 @@
+{
+  "_comment": [
+    "The friend card: somebody else's day, written to you.",
+    "",
+    "── Status ──",
+    "",
+    "The bank is written. Nothing renders it yet. It is here rather than in a",
+    "branch because the copy is the slow part and the wiring is not, and",
+    "because writing it alongside the rest of the corpus is the only way it",
+    "ends up in the same voice. What still has to be built is listed at the",
+    "bottom of this note.",
+    "",
+    "── The shape ──",
+    "",
+    "A friend card is the same engine pointed at a second chart. Their birth",
+    "data gives their leading aspect, which gives an area and a tone, exactly",
+    "as it does for the reader. So this table is keyed the same way the",
+    "reading is: area then tone, forty-five pairs.",
+    "",
+    "The difference is who the sentences are about and who they are for. The",
+    "subject is your friend. The reader is you. Every body therefore ends on",
+    "something you can do for them rather than on something they should do,",
+    "because they are not the one holding the phone.",
+    "",
+    "  headline  what is true for them today, in their name",
+    "  body      what that means, and the one useful thing you can do",
+    "  bridge    the part of your chart that makes you the right person to",
+    "",
+    "── Tokens ──",
+    "",
+    "  {name}    their display name, inserted by the renderer",
+    "  {planet}  a point in your chart, named from your chart",
+    "  {sign}    the sign that point stands in, named from your chart",
+    "",
+    "Tokens are how this table can name a planet and a sign without breaking",
+    "the rule in CORPUS-RULES section 3. The copy never asserts a placement;",
+    "it leaves a hole and the renderer fills it from the arithmetic. A line",
+    "that spelled out a sign could be printed against the wrong one. A hole",
+    "cannot.",
+    "",
+    "── The bridge, and why it is a separate line ──",
+    "",
+    "The obvious way to write this is as one paragraph, with the clause about",
+    "your chart sitting in the middle of the sentences about theirs. It reads",
+    "well in isolation, and it is precisely the assembly that made this",
+    "product's own cards read as machine output for a year: a fragment keyed",
+    "off one thing wedged into a paragraph keyed off another. See the note at",
+    "the top of depth.json.",
+    "",
+    "So the body is complete without it, and the bridge renders as its own",
+    "short line underneath, labelled as what it is: the reason this landed in",
+    "your feed rather than somebody else's. Twelve of them, one per point,",
+    "and the renderer picks the point of yours sitting in the same area of",
+    "your chart as the card's area. That is a real fact about the two charts",
+    "and it is checkable, which is the whole standard here.",
+    "",
+    "── Still to build ──",
+    "",
+    "  1  a second profile in dailyReading, which already takes any chart",
+    "  2  the token renderer, and escaping for {name} since it is user input",
+    "  3  the picker for which of your points supplies the bridge, plus the",
+    "     fallback for a friend or a reader with no birth time and so no",
+    "     sectors, where the honest card is no card",
+    "  4  consent. A friend card is somebody else's chart on your screen, so",
+    "     it needs their birth data given by them rather than guessed by you",
+    "",
+    "── Rules ──",
+    "",
+    "Everything in CORPUS-RULES applies, with one change: second person means",
+    "you, the reader, and the friend is third person. Never tell the reader",
+    "what their friend should do, because the reader cannot do it. Tell them",
+    "what they can do. And never diagnose somebody who is not in the room:",
+    "the card says what the sky is doing to a chart, not what a person is."
+  ],
+  "readings": {
+    "self": {
+      "charged": [
+        "{name} is being looked at more closely than usual.",
+        "Today {name} is aware of how they are coming across and getting it slightly wrong in both directions. They do not need advice about it. Tell them one specific thing they did well this week and let that be the correction."
+      ],
+      "open": [
+        "{name} could ask for something today.",
+        "There is a room {name} wants into, and nobody is keeping them out. They are simply not being thought about. If you can put their name in front of the right person today, do it without telling them first."
+      ],
+      "friction": [
+        "{name} thinks they have been misread.",
+        "Today {name} is bracing against a criticism that may never have been made. Do not help them build the defence. Ask what was actually said, out loud, and the sentence usually turns out smaller than the version they have carried around."
+      ],
+      "easy": [
+        "{name} is unusually easy to be around today.",
+        "Whatever has been heavy for {name} is lighter this week, and they will spend that on people who already like them. You are probably one of those. Point them at the person they have been avoiding instead."
+      ],
+      "pull": [
+        "{name} is being asked to be two people.",
+        "Two parts of {name}'s life want different versions of them today and both requests are reasonable. They will try to do both. Say out loud that they are allowed to pick one, because they are waiting for somebody to say it."
+      ]
+    },
+    "money": {
+      "charged": [
+        "{name} is thinking about a number today.",
+        "There is a figure {name} has been circling for a week and has not said out loud. They will not raise it first. Ask what it is, plainly, and they will almost certainly tell you and feel better for having said it."
+      ],
+      "open": [
+        "{name} is about to ask for too little.",
+        "The figure {name} has in mind is lower than the one they would tell a friend to ask for. If they run it past you today, say the higher number back to them without softening it or explaining why."
+      ],
+      "friction": [
+        "{name} is avoiding some arithmetic.",
+        "Something about money is worrying {name} and they have not actually looked at it. The dread is nearly always bigger than the total. Offer to sit with them while they open it, which is the whole of the help needed here."
+      ],
+      "easy": [
+        "{name} is worth more this week than they think.",
+        "Whatever {name} charges or earns, the room is unusually willing right now and they are the last to notice. Tell them. Coming from somebody else it lands as information rather than as encouragement."
+      ],
+      "pull": [
+        "{name} cannot afford both of the things they want.",
+        "{name} is trying to have the safe option and the interesting one at once, and the month will not stretch that far. Do not choose for them. Ask which one they would regret losing and let them hear their own answer."
+      ]
+    },
+    "talk": {
+      "charged": [
+        "{name} has something they have not said.",
+        "Today {name} is carrying a sentence they have rehearsed and not sent. Ask one direct question and then leave a longer pause than is comfortable. They will fill it, and they have been waiting to."
+      ],
+      "open": [
+        "{name} would answer if you messaged first.",
+        "The gap between you and {name} is not a fallout. It is two people each waiting for the other to go first. Today it costs one line. Send it now rather than composing something worthy of how long it has been."
+      ],
+      "friction": [
+        "{name} is arguing about a definition.",
+        "The disagreement {name} is in has two people using one word to mean different things, and neither has noticed. If you are anywhere near it, ask them both what they mean by it. The temperature drops immediately."
+      ],
+      "easy": [
+        "{name} can hear the difficult thing today.",
+        "The conversation you have been putting off with {name} goes better this week than it will next. Open with what you want rather than with what went wrong, and it stays a conversation rather than becoming a case."
+      ],
+      "pull": [
+        "{name} is talking to two audiences at once.",
+        "{name} is trying to keep two sets of people happy with one message, and it will satisfy neither. Tell them to write it for the ones who actually matter and to brief the others separately."
+      ]
+    },
+    "home": {
+      "charged": [
+        "Something at home is loud for {name}.",
+        "{name} is spending more attention on the house or the family than they are letting on, and the thing being discussed is not the subject. Ask about the practical part and let them arrive at the rest on their own."
+      ],
+      "open": [
+        "{name} would say yes if you invited them.",
+        "{name} has been keeping their place private because it is not presentable, and waiting to be asked somewhere instead. Ask them over this week, as your house actually is, and they will come."
+      ],
+      "friction": [
+        "{name} is inside the old family script.",
+        "Everybody in {name}'s family is playing the part they were cast in decades ago, and it is exhausting from the inside. Do not offer solutions. Say that you can see it, which is the thing nobody in there ever says."
+      ],
+      "easy": [
+        "{name} needs to stay in.",
+        "{name} is running on empty and will accept a plan out of politeness. Cancel it yourself first so they do not have to, and offer the same evening in a fortnight instead."
+      ],
+      "pull": [
+        "{name} is being pulled home and away at once.",
+        "Where {name} is from and where they are going want different things from them this month, and neither claim is wrong. What they are looking for is permission to disappoint one of the two. Give it to them."
+      ]
+    },
+    "making": {
+      "charged": [
+        "{name} has an idea they have not started.",
+        "The thing {name} keeps describing has been described often enough now to be a decision rather than a plan. Ask what the first hour of it would actually look like. That question does more than encouragement does."
+      ],
+      "open": [
+        "{name} should show somebody the unfinished thing.",
+        "{name} has work sitting private and getting precious. Ask to see it today with no promise of feedback attached. Being looked at once is what unsticks it, and they will not ask you."
+      ],
+      "friction": [
+        "{name} is calling it a block.",
+        "What {name} is stuck on is an unfinished section rather than a block, and they have been polishing the part that already works. If they ask, point at the bit they have been going around all week."
+      ],
+      "easy": [
+        "{name} should aim higher this week.",
+        "The work is coming easily to {name} right now and they will spend that on the parts that were never hard. Suggest the difficult section. They have the appetite for it today and will not next week."
+      ],
+      "pull": [
+        "{name} is choosing between two projects.",
+        "{name} has one thing they owe and one they want to make, and splitting the hours gets them two things at half strength. Ask which one they would still be doing if nobody was waiting for it."
+      ]
+    },
+    "work": {
+      "charged": [
+        "{name} is being assessed this week.",
+        "Somebody is forming a view of {name} out of small visible things rather than out of what they actually did. If you are anywhere near that room, say the specific useful thing they did. It counts more than they think."
+      ],
+      "open": [
+        "{name} should ask for the thing today.",
+        "The budget, the title, the room. {name} has earned it and is waiting to be offered it, and it has never worked that way. Tell them to ask this week, while the answer is unusually likely to be yes."
+      ],
+      "friction": [
+        "{name} is pushing at a wall.",
+        "{name} has tried the same approach three times and got the same answer each time. It is a process problem wearing somebody's face. Suggest going around it, or going at whoever actually owns the decision."
+      ],
+      "easy": [
+        "What {name} pushes at this week gives more back.",
+        "The return on effort is better than usual for {name} right now, and they will spend it on the things that were already moving. Ask what has not moved in a month, and let them answer that one themselves."
+      ],
+      "pull": [
+        "{name} is doing two jobs and being paid for one.",
+        "The second grew because {name} was good at it and nobody has ever named it out loud. They will not raise it unprompted. Say it to them, because hearing it from outside is what makes it real enough to act on."
+      ]
+    },
+    "love": {
+      "charged": [
+        "{name} has not said the obvious thing.",
+        "{name} is being careful around somebody, and it has been subtle to nobody except the person involved. Ask the direct question. They want to be asked, which is why it keeps coming up sideways."
+      ],
+      "open": [
+        "{name} should make the plan.",
+        "There is a person {name} keeps meaning to see, and neither of them has named a date. On both sides that reads as reluctance. Tell them to put a specific day on it today."
+      ],
+      "friction": [
+        "{name} is arguing with somebody who is not there.",
+        "The caution {name} is applying was earned by an earlier person. They know that already and knowing has not helped. Ask what this one has actually done, and let the list turn out to be short."
+      ],
+      "easy": [
+        "{name} can have the difficult conversation today.",
+        "The one {name} has been saving for a better moment. This is the better moment and it does not hold. If it comes up, tell them to start it before the evening rather than after it."
+      ],
+      "pull": [
+        "{name} wants two things that do not fit together.",
+        "{name} wants to be chosen and wants to stay free, at the same volume, today. Neither one is the wrong answer. Do not help them resolve it. Help them say it to the person it concerns."
+      ]
+    },
+    "sex": {
+      "charged": [
+        "{name} is not saying what they want.",
+        "Something unsaid is shaping everything between {name} and somebody else, and working around it costs more than the sentence would. You are not the person who can fix that. You are the person who can say that hinting has never worked."
+      ],
+      "open": [
+        "{name} can be honest today without it costing them.",
+        "There is unusual room this week for {name} to say the thing they normally soften, and it closes quickly. If they are working up to it, tell them today rather than next week."
+      ],
+      "friction": [
+        "{name} is arguing about who decides.",
+        "Whatever {name} says the row is about, it is about control, and money or time is the usual costume. Naming that is not your job. Stopping them from winning the surface argument and calling it settled is."
+      ],
+      "easy": [
+        "{name} should move first.",
+        "The distance {name} has been keeping is cheaper to cross this week than usual, and they are waiting to be approached instead. Somebody has to go first. Say so if it comes up."
+      ],
+      "pull": [
+        "{name} needs a boundary said out loud.",
+        "Money, time or space is tangled between {name} and somebody else, and nobody has named the line. It is a short conversation now and an accusation in three months. Tell them to have it while it is small."
+      ]
+    },
+    "belief": {
+      "charged": [
+        "Something {name} believed is being tested.",
+        "A position {name} has held for years has met a fact that does not fit it. They will want to defend it today. The useful thing you can do is not agree too quickly, which is the opposite of what they will ask for."
+      ],
+      "open": [
+        "{name} should book the thing.",
+        "The trip, the course, the plan {name} has been researching for months. Research is how a plan quietly turns into a hobby. Ask what date they are putting on it and make them say a month out loud."
+      ],
+      "friction": [
+        "{name} is arguing with somebody who cannot be moved.",
+        "The position {name} is up against was not reasoned into place and will not be reasoned out of it. They are spending something real on it. Say that walking away is not losing, because that is the part they cannot see."
+      ],
+      "easy": [
+        "{name} can see the long view this week.",
+        "Decisions that have been impossible up close are making themselves from a distance for {name} right now. Ask where they want to be in a year rather than what they are doing this week."
+      ],
+      "pull": [
+        "{name} is between growing and staying put.",
+        "The thing that made {name} safe is now the thing keeping them still, and both of those are true at once. They do not need it resolved. They need somebody to agree that it is genuinely a trade."
+      ]
+    }
+  },
+  "bridges": {
+    "sun": "As a {sign} {planet}, you know what it costs to be seen wrongly.",
+    "moon": "As a {sign} {planet}, you know how far ahead of the reasoning a mood arrives.",
+    "mercury": "As a {sign} {planet}, you know how much of this is wording rather than meaning.",
+    "venus": "As a {sign} {planet}, you know the difference between wanting a thing and it being good for you.",
+    "mars": "As a {sign} {planet}, you know how early the frustration turns up and how rarely it aims well.",
+    "jupiter": "As a {sign} {planet}, you understand the instinct to want more room than the plan allows.",
+    "saturn": "As a {sign} {planet}, you know the weight of doing it properly when nobody is checking.",
+    "uranus": "As a {sign} {planet}, you know the pull to change something suddenly, and what it costs to aim it wrong.",
+    "neptune": "As a {sign} {planet}, you know how persuasive a story gets when the facts are out of reach.",
+    "pluto": "As a {sign} {planet}, you know what it is to hold on well past the point of comfort.",
+    "ascendant": "With your {planet} in {sign}, you know how much of this gets decided before anybody has spoken.",
+    "midheaven": "With your {planet} in {sign}, you know how little of a reputation is ever under your control."
+  }
+}

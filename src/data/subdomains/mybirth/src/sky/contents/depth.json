@@ -1,78 +1,136 @@
 {
   "_comment": [
-    "The third paragraph of an expanded card: the explanation.",
+    "Paragraph three: the pattern behind today, in this part of your life.",
+    "And the one-line mechanism note that sits in the measurement row.",
     "",
-    "  natal    what that part of you is        12, angles included",
-    "  tone     what that kind of angle does     5",
-    "  transit  how long it lasts, and why      10",
+    "  pattern    area x tone   45   the recurring shape, and the trap",
+    "  mechanism  tone  5             what this kind of angle is",
+    "  mechanism  transit 10          how long it lasts",
     "",
-    "── The `area` table is gone, and why ──",
+    "── What this file used to be, and why it changed ──",
     "",
-    "There used to be a fourth table here, keyed area by tone, and it supplied",
-    "paragraph two. It was written when the card body was a single 130",
-    "character sentence and the expansion had to carry the actual reading.",
+    "It held three encyclopaedia entries, keyed by natal point, tone and",
+    "transit, concatenated into one paragraph. Twenty-seven sentences total,",
+    "a hundred and six words, sixty-three per cent of every expanded card,",
+    "and the same text for every reader forever. Its middle fragment had five",
+    "entries, so one of them printed six hundred times a year for one person,",
+    "and on thirty-six per cent of cards it repeated a sentence already shown",
+    "on another card the same morning. Three cards into a morning you had",
+    "read what a hard angle is three times.",
     "",
-    "That made it a restatement by construction. An area's paragraph and an",
-    "area's opening were the same address, so the expansion paraphrased the",
-    "card it was expanding. Worst case, work by pull, shared every content",
-    "word with the opening printed directly above it: 'One of them pays and",
-    "one of them matters; today they want opposite hours' expanded to 'One of",
-    "them pays and one of them matters, and today they want opposite hours.'",
+    "None of that was rescuable by rewriting, because the address had no area",
+    "in it. A paragraph that must be true whether the card says Money or Home",
+    "can only describe the machinery.",
     "",
-    "And it was not bad luck. An aspect's area is derived from where the natal",
-    "point sits, so the two keys are correlated, and for the two angles they",
-    "are locked: the Ascendant is always the first sector and the Midheaven",
-    "always the tenth. Every Midheaven card ever rendered paired the midheaven",
-    "clause with a work opening and a work paragraph. Three tables, one",
-    "address, three paraphrases of one sentence.",
+    "The mechanical content did not need a paragraph anyway. The measurement",
+    "row directly underneath already prints the two bodies, the aspect, both",
+    "signs, the degrees off and the orb allowed. So the encyclopaedia is now",
+    "one short line inside that row, where the vocabulary belongs, and this",
+    "paragraph became reader-facing prose about the area.",
     "",
-    "The body is now the whole reading, written per area, tone and variant, so",
-    "there is nothing left for an area paragraph to add. The expansion goes:",
+    "── The three paragraphs, and their three time horizons ──",
     "",
-    "  1  the reading   what today is, and what to do about it  (readings.json)",
-    "  2  the point     which part of you took it               (touches.json)",
-    "  3  the mechanism which points, what angle, how long      (this file)",
+    "  1  today          readings.json    what is happening, and what to do",
+    "  2  always         placements.json  the permanent thing that makes it land here",
+    "  3  every time     this file        the recurring pattern, and the usual mistake",
     "",
-    "Paragraph three is allowed to sound like an explanation, because it is",
-    "one, and it is marked as one by sitting last under two that are not.",
+    "That is what keeps three area-keyed paragraphs from collapsing into one",
+    "another. They are the same subject at three distances. If a pattern entry",
+    "reads like an instruction for today, it has drifted into paragraph one's",
+    "job and the seams suite will fail it on overlap.",
     "",
-    "No proper nouns. Not one of these names a planet, because the card prints",
-    "the planet from the chart and a line that named it could be wrong. The",
-    "same rule governs readings.json, touches.json and signs.json."
+    "── Rules ──",
+    "",
+    "Plain language, second person, no astrology, no planet names. Say what",
+    "this kind of day does in this area over time and name the mistake people",
+    "make in it. Full rules in CORPUS-RULES.md section 8."
   ],
   "depth": {
-    "natal": {
-      "sun": "This is the part of you that wants to be recognised as itself. When something lands on it, the day turns on being seen accurately, and being seen wrongly costs more than it usually would.",
-      "moon": "This is the part that reacts before you have decided anything. It sets the weather of a day a few minutes ahead of your reasoning, which is why the mood arrives first and the explanation second.",
-      "mercury": "This is the part that turns a thought into a sentence. Angles to it show up in the wording of things rather than in what you meant, which is why a good point can land badly on one of these days.",
-      "venus": "This is the part that decides what you are drawn to and what is worth having. Angles to it show up in what you want, which is not always the same as what you then do about it.",
-      "mars": "This is where the push comes from. Angles to it show up as speed, appetite and irritation, usually in that order and usually before you have chosen a target for any of them.",
-      "jupiter": "This is the part that wants more room. Angles to it widen whatever they touch, and they are not selective about it: the opportunity and the overreach arrive together.",
-      "saturn": "This is what asks for patience and keeps the promises. Angles to it feel heavy even when nothing has actually gone wrong, and they reward doing the dull thing on time.",
-      "uranus": "This is the part that will not stay put. Angles to it arrive abruptly and rarely at a convenient hour, and the urge they produce is usually right about the need and wrong about the target.",
-      "neptune": "This is where the edges go soft. Angles to it make the story you are telling yourself more persuasive and the facts harder to get at, in both directions at once.",
-      "pluto": "This is what will not be negotiated. Angles to it do not adjust things, they change them, which is why they are uncomfortable long before they are useful.",
-      "ascendant": "This is not a planet. It is the degree that was climbing over the horizon at the minute you were born, which is why it fixes the whole sector layout, and why an angle to it shows up in how you land on a room before it shows up in anything you do.",
-      "midheaven": "This is not a planet either. It is the degree that was directly overhead when you were born, the highest point the sky reached, and it stands for the part of a life other people can see from a distance: the standing, the reputation, the answer to what it is you do."
+    "pattern": {
+      "self": {
+        "charged": "Days like this are about visibility rather than about achievement. You have not changed, the light has. The mistake is treating the extra attention as a verdict and adjusting yourself to keep it.",
+        "open": "The openings in this part of your life are never announced. Nothing here arrives unasked, which is why these days pass unnoticed more than any other kind. What you do not ask for stays exactly where it was.",
+        "friction": "Friction here almost always arrives as a misreading rather than as a conflict. Somebody has the wrong picture of you. The trap is arguing with the picture, which makes it look accurate and makes you look worried about it.",
+        "easy": "Ease in this part of your life is social rather than practical. Being around you costs people less. It is the easiest thing in the world to spend that on people who already like you, which is also the only way to waste it.",
+        "pull": "This part of your life splits when who you are and who you are expected to be stop matching. Both are real. The failure is running both at once, which produces a third version nobody recognises, including you."
+      },
+      "money": {
+        "charged": "Days like this in this part of your life turn on a figure becoming visible. The number was always there. What changes is that you have to look at it or say it, and the discomfort is about the saying rather than about the amount.",
+        "open": "Openings in this part of your life are small and short: a rate, a request, a piece of admin that is briefly painless. None of it feels significant at the time. The ones you take are worth more in a year than anything you agonised over.",
+        "friction": "Money trouble here is almost never about the total. It is about arithmetic you have not done, or a decision you have been making by feel. The trap is solving a spreadsheet problem with a mood, or the reverse.",
+        "easy": "When earning is easy here, the temptation is to enjoy it rather than build on it. The rate you can get today is not the rate you get all year. What you set up now is what carries the flat months.",
+        "pull": "This part of your life splits over which currency you are paying in: money, time, or goodwill. You have more of one than you think and less of another, and pretending you can spend all three is how a month goes wrong."
+      },
+      "talk": {
+        "charged": "Days like this amplify whatever was already being said. Nothing new arrives. What was subtle becomes obvious, which is useful if you meant it and expensive if you were relying on it staying subtle.",
+        "open": "The opening in this part of your life is always a message somebody is waiting for, and it stays open for about a day. These pass unnoticed because sending it feels too small to count as having done anything.",
+        "friction": "Trouble in this part of your life is a misunderstanding rather than a disagreement, nine times in ten: you and somebody else using one word to mean two things. The trap is explaining harder, which entrenches both definitions instead of finding the gap.",
+        "easy": "When talking comes easily to you, the words are there for the difficult conversation rather than for the pleasant one, which was going to go fine anyway. Days like this are how your backlog of them gets cleared.",
+        "pull": "This part of your life splits between being liked and being clear. The message that keeps everybody comfortable does not say the thing. You will spend one of the two, and choosing is better than finding out afterwards."
+      },
+      "home": {
+        "charged": "Days like this bring something domestic to the front of your attention, out of all proportion to its size. The object is rarely the subject. What is loud is something that went unresolved long enough to become furniture.",
+        "open": "The openings here are small and physical: a room, an errand, an invitation. None of them look like progress. They are the ones that quietly change how the rest of your month feels to live in.",
+        "friction": "Friction here runs on an old script, with everybody playing the part they were cast in years ago, including you. The trap is trying to rewrite a decades-old arrangement in one evening, which is how the same argument gets had again.",
+        "easy": "When this part of your life is easy, rest actually restores rather than merely passing time, and that does not happen most weeks. The failure is spending the day productively and wondering why the tiredness is still there tomorrow.",
+        "pull": "This part of your life splits between where you are from and where you are going. Both have a claim and neither is wrong. Being half present in both places is worse for everybody than being honestly absent from one."
+      },
+      "making": {
+        "charged": "Days like this bring an idea to the front whether or not the timing suits you, and it will not wait politely. The trap is treating the arrival as a plan, when the arrival is all it is.",
+        "open": "Openings here look like play rather than like work: an hour of messing about, a technique tried sideways, a tangent followed. That is how a stuck thing comes loose in this part of your life, and it never feels like progress at the time.",
+        "friction": "What stops you here is almost never a block. It is an unfinished section wearing a block's clothes. The trap is polishing the part that already works, which feels like effort and moves nothing at all.",
+        "easy": "When this comes easily, the temptation is to coast through the parts that were never hard. Ease here is for spending on the difficult section. A day like this used on the easy half is a day you will want back.",
+        "pull": "This part of your life splits between the thing you want to make and the thing you owe. Both are real work and only one is on a list. The failure is giving the wanted one whatever time is left, because there is never time left."
+      },
+      "work": {
+        "charged": "Days like this bring your visibility and your output into the same frame. Somebody is forming a view, and it is being built out of small visible things rather than out of the quality of what you actually did.",
+        "open": "Openings here are almost always somebody's willingness to say yes, and it does not last the week. The ask is smaller than the case you were preparing. Most of these close because nobody asked in time.",
+        "friction": "What blocks you here is structural rather than personal, nearly always: a bad process wearing somebody's face. The trap is working harder at a thing that is actually waiting on a decision nobody has made.",
+        "easy": "The good stretches here are shorter than they feel and they never announce themselves. Whatever is already in front of you will happily absorb one, and a month later the difficult piece is exactly where it was. That is the whole failure mode.",
+        "pull": "This part of your life splits between doing the work and being seen doing it. Both are real and they want different hours. Whichever one you have been starving this month is the one to feed."
+      },
+      "love": {
+        "charged": "Days like this put something unspoken at the centre of everything between you, and nobody has to mention it for it to be the subject. The trap is managing around it for another week rather than saying it in one sentence.",
+        "open": "The openings here are small: an invitation, a plain question, a specific plan. They look too minor to matter. Every large thing in this part of your life started as one of them, and they close within a day or two.",
+        "friction": "Trouble here is usually with somebody who is not in the room, an old pattern applied to a current person. The trap is testing them for it, because you will not believe the result whichever way it comes out.",
+        "easy": "When this part of your life is easy, the difficult conversation goes well and the pleasant one would have gone fine anyway. That is the whole opportunity and it does not hold. The waste is spending it on the person who was never the problem.",
+        "pull": "This part of your life splits between comfort and wanting, or between two people who need different amounts of you. Averaging satisfies nobody. Say what you can actually offer and let them decide from that."
+      },
+      "sex": {
+        "charged": "Days like this bring appetite and closeness into the same room and make them hard to tell apart. Charge is not intimacy. Notice which of the two you are actually getting before you decide anything on the strength of it.",
+        "open": "The opening here is somebody's willingness to hear your honest version without it turning into a whole conversation. It is rare and it is short. What does not get said now gets considerably harder to say next week.",
+        "friction": "What goes wrong for you here is about who decides rather than about whatever is being discussed, and that stays true even when the subject is money or time. The trap is winning the surface argument and leaving the real one untouched.",
+        "easy": "When this part of your life is easy, the distance between you costs less to cross than usual and moving first is cheap. The waste is waiting for the other person to do it, which is what cost you the last few weeks.",
+        "pull": "This part of your life splits over what is yours and what is shared: money, time, secrets, or the right to decide. The failure is leaving the boundary unspoken until it can only come out as an accusation."
+      },
+      "belief": {
+        "charged": "Days like this put a position of yours in front of a fact that does not fit it, and the mismatch is the useful part. The trap is defending the position on the day, before you have seen which of the two survives.",
+        "open": "Openings here are the ones that look optional: a book, a booking, a question asked of somebody older. Nothing forces you into them. That is exactly why they get left, and why a year of yours can pass looking much like the last one.",
+        "friction": "Trouble here is usually you arguing with something that was never reasoned into place, so it will not be reasoned out. The trap is spending real effort on an audience of one who is not listening.",
+        "easy": "When this part of your life is easy, the long view is unusually clear and the week stops being the unit. Decisions that are impossible up close make themselves from a distance. Clarity like this does not sit still for long.",
+        "pull": "This part of your life splits between what you believe and what the evidence says, or between growing and staying put. Both sides are real. The failure is settling it by looking away rather than by setting a date where one of them wins."
+      }
     },
-    "tone": {
-      "charged": "This is a conjunction: two bodies in the same degree. It does not pull in a direction, it amplifies whatever was already running, which is why it is the easiest angle to notice and the hardest to give advice about.",
-      "open": "This is a soft angle, and an opening rather than a push. Nothing here forces itself on the day. It is available, and it stays available only while the angle holds.",
-      "friction": "This is a hard angle between two parts of a chart that both want the day. It does not resolve by picking a winner. It resolves by doing the smaller, duller thing that neither part objects to.",
-      "easy": "This is the easiest angle there is, and it costs nothing, which is exactly its risk. What runs clean tends to run unattended, and a day like this can pass without the ease having been spent on anything.",
-      "pull": "This puts two parts of your chart at opposite ends of one line. Both are real and both are yours. The work is not picking one, it is admitting the trade rather than pretending there is not one."
-    },
-    "transit": {
-      "moon": "The body making this angle covers thirteen degrees a day, so the contact forms and breaks inside a few hours. Whatever it is doing, it is not doing it tomorrow.",
-      "sun": "The body making this angle moves about a degree a day, so this is a matter of two or three days rather than an afternoon, and it comes round once a year.",
-      "mercury": "The body making this angle moves roughly a degree a day and turns back on itself more often than anything else, so contacts from it are short and can repeat within a season.",
-      "venus": "The body making this angle takes a few days over it. Long enough to be a mood rather than a moment, short enough that waiting it out is a real option.",
-      "mars": "The body making this angle takes the better part of a week, which is long enough for a mood to turn into a decision if nobody interrupts it.",
-      "jupiter": "The body making this angle takes about a month to cross, so this is a season of something rather than a day of it, and there is no need to act on the first morning.",
-      "saturn": "The body making this angle moves a couple of degrees a year, so this has been forming for months and will take months to clear. Nothing about it is sudden and nothing about it is precise.",
-      "uranus": "The body making this angle moves slowly and arrives abruptly, so the contact spans months while the things that happen inside it do not.",
-      "neptune": "The body making this angle covers less than a degree in a season, so this is a long, undramatic weather system rather than a day, and it clears the same way it arrived.",
-      "pluto": "The body making this angle covers about two arcseconds a day, so this contact spans seasons and can return two or three times before it is finished. It is the slowest thing on this page by a wide margin."
+    "mechanism": {
+      "tone": {
+        "charged": "Two bodies in the same degree, which amplifies rather than pushing in any direction.",
+        "open": "A soft angle: available rather than forced, and only for as long as it holds.",
+        "friction": "A hard angle between two parts of a chart that both want the same day.",
+        "easy": "The easiest angle there is, which is why it can pass without being spent.",
+        "pull": "Two parts of your chart at opposite ends of one line, both of them yours."
+      },
+      "transit": {
+        "moon": "Thirteen degrees a day, so this forms and breaks inside a few hours.",
+        "sun": "About a degree a day, so it runs two or three days and comes back once a year.",
+        "mercury": "About a degree a day, and it doubles back, so this is short and can repeat within a season.",
+        "venus": "A few days. Long enough to be a mood, short enough to wait out.",
+        "mars": "The better part of a week, long enough for a mood to turn into a decision.",
+        "jupiter": "About a month to cross, so this is a season of something rather than a day of it.",
+        "saturn": "A couple of degrees a year, so it has been forming for months and clears over months.",
+        "uranus": "Slow to arrive and abrupt when it does, so the contact spans months and the events do not.",
+        "neptune": "Less than a degree in a season, so this is weather rather than a day.",
+        "pluto": "About two arcseconds a day, so this spans seasons and can return two or three times."
+      }
     }
   }
 }

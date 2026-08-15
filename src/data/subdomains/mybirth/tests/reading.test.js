@@ -48,10 +48,10 @@ describe("polarity", () => {
 
   it("names the axis after the angle, never after a promise about the day", () => {
     /*
-       The one rule this whole feature exists to keep. Co-Star's own
-       reviewers read its circle as a luck score, and the moment a label
-       says Lucky or Good the product is making a claim the arithmetic
-       underneath it cannot support.
+       The one rule this whole feature exists to keep. Readers of the
+       apps in this category routinely take the mark beside a card as a
+       luck score, and the moment a label says Lucky or Good the product
+       is making a claim the arithmetic underneath it cannot support.
     */
     const banned = /\b(luck|lucky|unlucky|good|bad|positive|negative|fortune|blessed|score)\b/i;
     for (const p of Object.values(POLARITIES)) {

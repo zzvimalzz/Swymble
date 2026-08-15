@@ -3241,6 +3241,18 @@ body.on-paper.sky-dark .brand__pill { background: #f4f1e9; }
   margin: 0;
   text-wrap: pretty;
 }
+
+/* The mechanism, one line, inside the measurement row rather than above it.
+   It used to be a hundred and six words of prose sitting between the reading
+   and the arithmetic, in a third register and repeating across cards. It is
+   an annotation on the numbers, so it lives with the numbers. */
+.sky-proof__how {
+  margin: 6px 0 0;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--pi-soft);
+}
 .sky-proof__note {
   font-size: 0.9rem;
   line-height: 1.6;

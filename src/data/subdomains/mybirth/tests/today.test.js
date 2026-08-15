@@ -13,10 +13,10 @@ import { describe, it, expect } from "vitest";
 import { buildProfile, dailySkyHTML, clickIsOnBackdrop, shareCardHTML } from "../src/ui/today.js";
 import { dailyReading, AREA_KEYS, areaLabel } from "../src/sky/reading.js";
 import depthFile from "../src/sky/contents/depth.json";
-import touchesFile from "../src/sky/contents/touches.json";
+import placementsFile from "../src/sky/contents/placements.json";
 
 const DEPTH = depthFile.depth;
-const TOUCHES = touchesFile.touches;
+const PLACEMENTS = placementsFile.placements;
 
 const SAVE = {
   key: "test-person",
@@ -76,7 +76,7 @@ describe("the Daily Sky renders what the engine computed", () => {
     expect(html).not.toMatch(/\d+ of \d+ touched/);
   });
 
-  it("wears none of Co-Star's section names", () => {
+  it("wears none of the category's section names", () => {
     /*
        Not a legal guard: short labels are not copyrightable. It is a
        positioning one. The product's only claim is that it shows its
@@ -264,12 +264,17 @@ describe("expanding a card", () => {
     }
   });
 
-  it("makes the second paragraph about the point that took the aspect", () => {
+  it("makes the second paragraph the permanent placement in this area", () => {
     /*
-       Paragraph two used to be keyed by area and tone, which is the same
-       address the body came from, so expanding a card printed the card
-       again in longer words. It is keyed by the natal point now, which is
-       a genuinely different dimension.
+       Paragraph two used to be keyed by the natal point and tone alone,
+       which meant it had no idea which part of a life the card was about:
+       one reader's Venus lives in their money sector and another's in
+       their talk sector, so a single sentence had to be true of both and
+       could only talk about wanting in the abstract.
+
+       Keyed by area and point, it can name the area, and it says the one
+       thing the reading above it cannot: this is permanent, it was true
+       before today and it is why today landed here.
 
        They still all differ, and for a stronger reason than before: one
        card per area, and an area is derived from where its natal point
@@ -282,15 +287,32 @@ describe("expanding a card", () => {
     expect(new Set(second).size, "second paragraphs must all differ").toBe(second.length);
 
     for (const c of reads) {
-      expect(c.paragraphs[1]).toBe(TOUCHES[c.aspect.natal.key][c.tone]);
+      expect(c.paragraphs[1]).toBe(PLACEMENTS[c.area][c.aspect.natal.key]);
     }
   });
 
-  it("keeps the mechanical explanation last, where it is marked as one", () => {
+  it("makes the third paragraph the recurring pattern in this area", () => {
     for (const c of reading.cards.filter((x) => !x.quiet)) {
-      const last = c.paragraphs[c.paragraphs.length - 1];
-      expect(last).toContain(DEPTH.natal[c.aspect.natal.key]);
-      expect(last).toContain(DEPTH.transit[c.aspect.transit.key]);
+      expect(c.paragraphs[2]).toBe(DEPTH.pattern[c.area][c.tone]);
+    }
+  });
+
+  it("puts the mechanism in the measurement row rather than in a paragraph", () => {
+    /*
+       It was a hundred and six words of encyclopaedia sitting directly
+       above a row that already prints both bodies, the aspect, both signs,
+       the degrees off and the orb allowed. One line, in the row, is the
+       whole of what the prose was adding.
+    */
+    for (const c of reading.cards.filter((x) => !x.quiet)) {
+      expect(c.mechanism).toBeTruthy();
+      expect(c.mechanism.length).toBeLessThan(200);
+      for (const p of c.paragraphs) expect(p).not.toContain(c.mechanism);
+
+      const m = modalBlocks.find((b) => b.includes(`data-modal-for="${c.area}"`));
+      expect(m).toContain(c.mechanism);
+      // and it sits inside the measurement block, under the proof line
+      expect(m.indexOf(c.mechanism)).toBeGreaterThan(m.indexOf(c.proof));
     }
   });
 
