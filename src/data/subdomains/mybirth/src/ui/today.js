@@ -353,10 +353,10 @@ function readingHTML(r, p) {
         Partly because the entries are noun phrases and always were — the
         bank holds "Happy hour" and "Hedging", so "More of: Happy hour"
         parses and "Do: Happy hour" does not. And partly because Do/Don't
-        is the name Co-Star's daily screen uses, and a product whose only
-        real claim is that it shows its working cannot afford to arrive
-        wearing a competitor's labels. Nothing here was ever copied from
-        them; the headings just made it look as though it had been.
+        is the pair of headings the best known app in this category uses,
+        and a product whose only real claim is that it shows its working
+        cannot afford to arrive wearing a competitor's labels. Nothing here
+        was ever copied; the headings just made it look as though it had been.
       -->
       <div class="sky-dd">
         <div class="sky-dd__col">

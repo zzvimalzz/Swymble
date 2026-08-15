@@ -76,7 +76,7 @@ describe("the Daily Sky renders what the engine computed", () => {
     expect(html).not.toMatch(/\d+ of \d+ touched/);
   });
 
-  it("wears none of Co-Star's section names", () => {
+  it("wears none of the category's section names", () => {
     /*
        Not a legal guard: short labels are not copyrightable. It is a
        positioning one. The product's only claim is that it shows its

@@ -271,12 +271,12 @@ const ORDINAL_TONE = {
 /*
    Polarity: whether the angle is helping or pushing.
 
-   Co–Star prints an open circle or a hatched one beside each of its
-   cards, and the axis it is really showing — an easy aspect against a
-   hard one — is a thing astrologers have drawn for centuries. It is worth
-   showing. What is not worth doing is what every app in the category does
-   with it, which is to call it Luck, or a score, or a percentage, and
-   turn a fact about an angle into a promise about a day.
+   The apps in this category print an open circle or a hatched one beside
+   each card, and the axis they are really showing, an easy aspect against
+   a hard one, is a thing astrologers have drawn for centuries. It is worth
+   showing. What is not worth doing is what the category does with it next,
+   which is to call it Luck, or a score, or a percentage, and turn a fact
+   about an angle into a promise about a day.
 
    So the mark is here and the name is honest. Support and strain are
    descriptions of the geometry: a trine or a sextile is a soft angle, a
@@ -593,9 +593,9 @@ function dailyNumber({ lead, natal, sky, now, moon, s }) {
    A card for an area the sky is not touching.
 
    This is the half of the day nothing else in the category will show you.
-   Co-Star prints a confident card for every area every morning; a real chart has
-   three or four things in orb on a typical day, and the other four or
-   five areas are quiet. An app can handle that by widening its orbs until
+   The other apps print a confident card for every area every morning; a
+   real chart has three or four things in orb on a typical day, and the
+   other four or five areas are quiet. An app can handle that by widening its orbs until
    everything counts, by writing to fill the grid, or by saying so.
 
    Saying so is only worth anything if it comes with the arithmetic, so a

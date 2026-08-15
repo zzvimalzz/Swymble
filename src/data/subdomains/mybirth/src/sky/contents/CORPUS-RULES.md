@@ -367,11 +367,11 @@ checks that no other table contains a brace at all.
 
 ### The bridge is a separate line
 
-Co-Star runs the whole thing as one paragraph: *"As a Cancer Jupiter, you
-understand their instinct to dream big."* Good sentence, and gluing a
-clause keyed off your chart into the middle of a paragraph keyed off theirs
-is the exact assembly this whole document exists because of. The body is
-complete without it and the bridge renders underneath, labelled.
+The obvious way to write this is as one paragraph, with the clause about
+your chart sitting inside the sentences about theirs. It reads well on its
+own, and it is the exact assembly this whole document exists because of: a
+fragment keyed off one thing wedged into a paragraph keyed off another. The
+body is complete without it, and the bridge renders underneath, labelled.
 
 ## 10. The quiet cards
 
