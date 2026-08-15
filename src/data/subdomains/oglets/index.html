@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0b0b0d">
 <title>Oglets · Swymble Labs</title>
 <meta name="description" content="An Oglet is a small creature made mostly of eyes, drawn from a weighted genome. You get one, it is yours, it watches you, and it remembers you — then read the alleles that made it.">
 <meta name="robots" content="index, follow">
@@ -14,24 +14,38 @@
 <meta property="og:title" content="Oglets · Swymble Labs">
 <meta property="og:description" content="A small creature made mostly of eyes, drawn from a weighted genome. You get one, it is yours, and it watches you.">
 <meta name="twitter:card" content="summary">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23000'/><ellipse cx='11' cy='16' rx='7.4' ry='8' fill='%238ad8f0'/><ellipse cx='23' cy='16' rx='5.6' ry='7' fill='%238ad8f0'/><ellipse cx='12.4' cy='16' rx='2.6' ry='2.6' fill='%2326647f'/><ellipse cx='23.6' cy='16' rx='2.2' ry='2.2' fill='%2326647f'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%230b0b0d'/><ellipse cx='11' cy='16' rx='7.4' ry='8' fill='%23f6f3ec'/><ellipse cx='23' cy='16' rx='5.6' ry='7' fill='%23f6f3ec'/><ellipse cx='12.4' cy='16' rx='2.6' ry='2.6' fill='%230b0b0d'/><ellipse cx='23.6' cy='16' rx='2.2' ry='2.2' fill='%230b0b0d'/></svg>">
 <style>
-  :root{ --bg:#000; --panel:#0a0a0d; --hair:#1b1b23; --dim:#5a5a68;
-         --txt:#dcdce6; --accent:#7ad9ff;
-         --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace; }
+  /* Two colours: ink and pearl. Every piece of chrome is one of them at some opacity, and the
+     only real colour anywhere is the Oglet itself — which is the point of the whole page.
+     Nothing sits below 62% pearl, because unreadable text is not "subtle", it is just missing. */
+  :root{
+    --ink:#0b0b0d;                       /* the page */
+    --well:#070708;                      /* the canvas, and anything sunk into the page */
+    --pearl:246 243 236;                 /* held as parts so opacity can vary per use */
+    --txt:rgb(var(--pearl));
+    --txt-2:rgb(var(--pearl) / .78);
+    --txt-3:rgb(var(--pearl) / .64);
+    --hair:rgb(var(--pearl) / .13);
+    --hair-2:rgb(var(--pearl) / .3);
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;margin:0}
-  body{background:var(--bg);color:var(--txt);font-family:var(--mono);font-size:12px;
+  body{background:var(--ink);color:var(--txt);font-family:var(--mono);font-size:13px;
        display:flex;flex-direction:column;overflow:hidden;
        -webkit-user-select:none;user-select:none;overscroll-behavior:none}
+  ::selection{background:rgb(var(--pearl) / .22);color:var(--txt)}
 
   .tabs{flex:0 0 auto;display:flex;align-items:center;gap:2px;
         padding:10px 12px 0;border-bottom:1px solid var(--hair)}
-  .tabs button{font:inherit;font-size:10px;letter-spacing:.22em;text-transform:uppercase;
-        color:var(--dim);background:none;border:0;border-bottom:1px solid transparent;
+  .tabs button{font:inherit;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+        color:var(--txt-3);background:none;border:0;border-bottom:1px solid transparent;
         padding:8px 12px 9px;cursor:pointer;transition:color .2s,border-color .2s}
-  .tabs button.on{color:var(--txt);border-bottom-color:var(--accent)}
-  .tabs .brand{margin-left:auto;color:#33333d;letter-spacing:.28em;font-size:9px;
+  .tabs button:hover{color:var(--txt-2)}
+  .tabs button.on{color:var(--txt);border-bottom-color:var(--txt)}
+  .tabs button:focus-visible{outline:1px solid var(--hair-2);outline-offset:2px;color:var(--txt)}
+  .tabs .brand{margin-left:auto;color:var(--txt-3);letter-spacing:.24em;font-size:10px;
         text-transform:uppercase;padding-right:4px}
 
   .view{flex:1 1 auto;min-height:0;position:relative}
@@ -41,39 +55,49 @@
   #world{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
   body.grabbing #world{cursor:grabbing}
   #hint{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);
-        font-size:10px;letter-spacing:.34em;color:#2b2b32;text-transform:uppercase;
+        font-size:11px;letter-spacing:.3em;color:var(--txt-2);text-transform:uppercase;
         pointer-events:none;opacity:0;transition:opacity 1.2s}
 
   /* genome */
   #genome{height:100%;overflow-y:auto;overscroll-behavior:contain;
-          padding:16px 14px calc(40px + env(safe-area-inset-bottom))}
+          padding:16px 14px calc(40px + env(safe-area-inset-bottom));
+          scrollbar-width:thin;scrollbar-color:rgb(var(--pearl) / .22) transparent}
   .roll{border:1px solid var(--hair);border-radius:4px;padding:14px;margin-bottom:22px;
-        display:flex;gap:14px;align-items:center}
-  .roll canvas{flex:0 0 auto;border-radius:3px;background:#000}
+        display:flex;gap:14px;align-items:center;background:var(--well)}
+  .roll canvas{flex:0 0 auto;border-radius:3px;background:var(--well)}
   .roll .meta{flex:1 1 auto;min-width:0}
-  .roll .code{font-size:15px;letter-spacing:.14em;color:var(--accent);margin-bottom:5px}
-  .roll .odds{color:var(--dim);font-size:10px;line-height:1.7;letter-spacing:.04em}
-  .roll button{font:inherit;font-size:9px;letter-spacing:.18em;text-transform:uppercase;
-        color:var(--dim);background:none;border:1px solid var(--hair);border-radius:2px;
-        padding:6px 10px;margin-top:9px;cursor:pointer}
-  .roll button:hover{color:var(--txt);border-color:#33333f}
+  .roll .code{font-size:17px;letter-spacing:.12em;color:var(--txt);margin-bottom:6px}
+  .roll .odds{color:var(--txt-2);font-size:11px;line-height:1.75;letter-spacing:.03em}
 
-  h2{font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:var(--dim);
-     font-weight:400;margin:24px 0 4px;display:flex;align-items:baseline;gap:8px}
-  h2 span{color:#2e2e38;letter-spacing:.06em;text-transform:none}
+  h2{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--txt-2);
+     font-weight:400;margin:26px 0 5px;display:flex;align-items:baseline;gap:8px}
+  h2 span{color:var(--txt-3);letter-spacing:.05em;text-transform:none}
   h2:first-of-type{margin-top:0}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
-  .card{border:1px solid var(--hair);border-radius:3px;padding:8px 6px 7px;text-align:center;
-        background:#050507}
+  /* 92px + 6px gap is what keeps four alleles on one row at 390px of usable width — bigger
+     type made the old 88/8 spill a lone card onto a second line. */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
+  .card{border:1px solid var(--hair);border-radius:3px;padding:9px 6px 8px;text-align:center;
+        background:var(--well)}
   .card canvas{display:block;margin:0 auto 6px;border-radius:2px}
-  .card .nm{font-size:10px;letter-spacing:.06em;color:var(--txt);
+  .card .nm{font-size:11px;letter-spacing:.05em;color:var(--txt);
             white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .card .rr{font-size:8px;letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
-  .card .pc{font-size:8px;color:#33333d;margin-top:2px;letter-spacing:.06em}
-  .t0{color:#5f5f6d}.t1{color:#63c98a}.t2{color:#5aa8f0}.t3{color:#b07af0}.t4{color:#f0c04a}
-  .note{color:#2e2e38;font-size:9px;line-height:1.9;letter-spacing:.05em;
-        margin-top:26px;border-top:1px solid var(--hair);padding-top:14px}
+  .card .rr{font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-top:4px;
+            white-space:nowrap}   /* colour comes from the tier class below */
+  .card .rr i{font-style:normal;letter-spacing:.08em;padding-left:.35em}
+  .card .pc{font-size:10px;color:var(--txt-3);margin-top:3px;letter-spacing:.05em}
+  /* Rarity is the one place colour is allowed back into the chrome — five steps of pearl
+     brightness were not tellable apart at a glance. Every value below clears 8.8:1 on ink, and
+     the pip count carries the same information for anyone who cannot separate the hues.
+     The classes are doubled on purpose: `.card .rr` and `.roll .odds` are two-class selectors,
+     so a single `.t2` would lose the specificity fight and every tier would render pearl. */
+  .t0.t0{color:rgb(var(--pearl) / .72)}   /* Common — the absence of colour is itself the signal */
+  .t1.t1{color:#6fdd9b}                   /* Uncommon */
+  .t2.t2{color:#6fb6ff}                   /* Rare */
+  .t3.t3{color:#c79bff}                   /* Epic */
+  .t4.t4{color:#ffc95c}                   /* Legendary */
+  .note{color:var(--txt-3);font-size:11px;line-height:1.85;letter-spacing:.04em;
+        margin-top:28px;border-top:1px solid var(--hair);padding-top:16px}
 </style>
 </head>
 <body>
@@ -95,9 +119,12 @@
 
 <script type="module">
 import {
-  GENES, CATS, tierOf, geneOf, randomGenome, odds,
+  GENES, TIERS, CATS, tierOf, geneOf, randomGenome, odds,
   encode, nameOf, packOglet, unpackOglet, STORAGE_KEY,
 } from './genome.js';
+
+/* The one colour value the canvas needs; everything else is CSS. Keep it equal to --well. */
+const WELL="#070708";
 
 (() => {
 "use strict";
@@ -820,9 +847,11 @@ function card(g,label,weight,size=72){
   const el=document.createElement("div"); el.className="card";
   el.appendChild(t.canvas);
   const tier=tierOf(weight);
+  // rarity used to be a colour; on a two-colour page it is brightness plus a count of pips
+  const pips="·".repeat(TIERS.indexOf(tier)+1);
   el.insertAdjacentHTML("beforeend",
     `<div class="nm">${label}</div>
-     <div class="rr ${tier.c}">${tier.name}</div>
+     <div class="rr ${tier.c}">${tier.name}<i>${pips}</i></div>
      <div class="pc">${(weight*100).toFixed(weight<0.05?1:0)}%</div>`);
   return el;
 }
@@ -847,11 +876,13 @@ function buildGenome(){
   const roll=document.createElement("div"); roll.className="roll";
   roll.appendChild(makeThumb(mine.genome,96).canvas);
   const meta=document.createElement("div"); meta.className="meta";
-  const o=odds(mine.genome);
+  const o=odds(mine.genome), t=tierOf(o*6);
   const since=new Date(mine.born).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+  // one fact per line: the code and the alleles used to share a line and wrap mid-phrase
   meta.innerHTML=`<div class="code">${mine.name}</div>
-    <div class="odds">${mine.code} · ${CATS.map(c=>geneOf(c,mine.genome[c]).name).join(" · ")}<br>
-    1 in ${Math.round(1/o).toLocaleString()} · overall ${tierOf(o*6).name}<br>
+    <div class="odds">${mine.code}<br>
+    ${CATS.map(c=>geneOf(c,mine.genome[c]).name).join(" · ")}<br>
+    1 in ${Math.round(1/o).toLocaleString()} · overall <span class="${t.c}">${t.name}</span><br>
     yours since ${since}</div>`;
   roll.appendChild(meta);
   host.appendChild(roll);
@@ -897,7 +928,7 @@ function frame(t){
   t/=1000; const dt=clamp(t-last,0,1/24); last=t;
 
   if(tab==="world"){
-    ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle=WELL; ctx.fillRect(0,0,W,H);
     for(const c of world) c.update(dt,t);
     separate();
     for(const c of world) c.draw(ctx,t);
@@ -924,7 +955,7 @@ function frame(t){
         B.update(d,tt);
         const x=th.ctx, s=th.size;
         x.clearRect(0,0,s,s);
-        x.fillStyle="#000"; x.fillRect(0,0,s,s);
+        x.fillStyle=WELL; x.fillRect(0,0,s,s);
         x.save(); x.translate(s/2,s/2);
         B.draw(x, s*0.19, tt);
         x.restore();
@@ -933,7 +964,7 @@ function frame(t){
   }
   requestAnimationFrame(frame);
 }
-setTimeout(()=>{ if(!touched) hint.style.opacity=.55; },2000);
+setTimeout(()=>{ if(!touched) hint.style.opacity=.9; },2000);
 setTimeout(()=>{ hint.style.opacity=0; },12000);
 requestAnimationFrame(frame);
 })();
