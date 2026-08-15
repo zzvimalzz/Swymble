@@ -19,22 +19,24 @@
 
 import { describe, it, expect } from "vitest";
 import readingsFile from "../src/sky/contents/readings.json";
-import touchesFile from "../src/sky/contents/touches.json";
+import placementsFile from "../src/sky/contents/placements.json";
 import motionFile from "../src/sky/contents/motion.json";
 import areasFile from "../src/sky/contents/areas.json";
 import depthFile from "../src/sky/contents/depth.json";
 import linesFile from "../src/sky/contents/lines.json";
+import friendsFile from "../src/sky/contents/friends.json";
 import { dailyReading } from "../src/sky/reading.js";
 import { addressesTheReader } from "../tools/check-voice.mjs";
 
 const BIRTH = new Date(Date.UTC(1991, 4, 17, 3, 25));
 
 const READINGS = readingsFile.readings;
-const TOUCHES = touchesFile.touches;
+const PLACEMENTS = placementsFile.placements;
 const MOTION = motionFile.motion;
 const AREAS = areasFile.areas;
 const DEPTH = depthFile.depth;
 const LINES = linesFile.lines;
+const FRIENDS = friendsFile;
 
 const TONES = ["charged", "open", "friction", "easy", "pull"];
 
@@ -134,7 +136,8 @@ describe("the body is one paragraph, not three tables in a trench coat", () => {
   it("ends every assembled piece in a full stop, since the joiner adds nothing", () => {
     const all = [
       ...Object.values(READINGS).flatMap((t) => Object.values(t).flat().map((p) => p[1])),
-      ...Object.values(TOUCHES).flatMap((t) => Object.values(t)),
+      ...Object.values(PLACEMENTS).flatMap((a) => Object.values(a)),
+      ...Object.values(DEPTH.pattern).flatMap((a) => Object.values(a)),
       ...Object.values(MOTION).flat(2),
     ];
     for (const text of all) expect(text.trim(), text.slice(0, 40)).toMatch(/[.]$/);
@@ -143,37 +146,51 @@ describe("the body is one paragraph, not three tables in a trench coat", () => {
 
 describe("no paragraph of a card restates the one above it", () => {
   /*
-     The fault that produced the complaint, and the reason it was not a
-     one-off. An aspect's *area* is derived from where the natal point
-     sits, so keying two tables by area and by natal point does not give
-     two independent dimensions; it gives two correlated ones. For the two
-     angles the correlation is total, because the Ascendant defines the
-     first sector and the Midheaven the tenth. Every Midheaven card was a
-     Work card, so every Midheaven card paired the midheaven clause with a
-     work opening and a work paragraph: one address, three paraphrases.
+     The fault that started all of this, and the reason it was structural
+     rather than a run of bad sentences.
 
-     Worst case shared every content word it had:
+     All three paragraphs are keyed by area now, which is what makes them
+     specific and is also exactly how they could collapse into each other.
+     What keeps them apart is that they are the same subject at three
+     different distances:
 
-       body      "One of them pays and one of them matters; today they want
-                  opposite hours."
-       expanded  "One of them pays and one of them matters, and today they
-                  want opposite hours."
+       1  today       what is happening, and what to do about it
+       2  always      the permanent placement that makes it land here
+       3  every time  the recurring pattern, and the usual mistake
 
-     The area paragraph is gone and paragraph two is keyed by the natal
-     point alone. This checks that the two never converge again, at every
-     address the renderer can actually produce.
+     Written to those, they do not overlap. Written carelessly, paragraph
+     three drifts into being another instruction for today and paragraph
+     two into being a second version of the reading. So the overlap is
+     measured rather than trusted, at every address the renderer can
+     actually produce.
   */
-  it("keys paragraph two off the natal point, not off the area again", () => {
+  it("keeps paragraph two off the reading it sits under", () => {
     const bad = [];
     for (const [area, tones] of Object.entries(READINGS)) {
       for (const [tone, variants] of Object.entries(tones)) {
-        for (const [point, byTone] of Object.entries(TOUCHES)) {
+        for (const [point, text] of Object.entries(PLACEMENTS[area])) {
           variants.forEach(([, body], i) => {
-            const r = overlap(byTone[tone], body);
-            if (r >= 0.5) {
-              bad.push(`${area}.${tone}[${i}] vs touches.${point}.${tone}: ${(r * 100) | 0}%`);
-            }
+            const r = overlap(text, body);
+            if (r >= 0.5) bad.push(`${area}.${tone}[${i}] vs placements.${area}.${point}: ${(r * 100) | 0}%`);
           });
+        }
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it("keeps paragraph three off both of the paragraphs above it", () => {
+    const bad = [];
+    for (const [area, tones] of Object.entries(READINGS)) {
+      for (const [tone, variants] of Object.entries(tones)) {
+        const pattern = DEPTH.pattern[area][tone];
+        variants.forEach(([, body], i) => {
+          const r = overlap(pattern, body);
+          if (r >= 0.5) bad.push(`pattern.${area}.${tone} vs body[${i}]: ${(r * 100) | 0}%`);
+        });
+        for (const [point, text] of Object.entries(PLACEMENTS[area])) {
+          const r = overlap(pattern, text);
+          if (r >= 0.5) bad.push(`pattern.${area}.${tone} vs placements.${area}.${point}: ${(r * 100) | 0}%`);
         }
       }
     }
@@ -185,13 +202,15 @@ describe("no paragraph of a card restates the one above it", () => {
        Narrower and stricter, because these are the addresses that cannot
        vary: an Ascendant aspect is always a Self card and a Midheaven
        aspect is always a Work card, so these pairings render every time
-       they come up rather than occasionally.
+       they come up rather than occasionally. They are also the two points
+       whose placement paragraph is allowed to be about the area itself,
+       which is precisely why they need the tighter bound.
     */
     for (const [point, area] of [["ascendant", "self"], ["midheaven", "work"]]) {
       for (const tone of TONES) {
         for (const [i, [, body]] of READINGS[area][tone].entries()) {
-          const r = overlap(TOUCHES[point][tone], body);
-          expect(r, `${point}.${tone} vs ${area}.${tone}[${i}]`).toBeLessThan(0.4);
+          const r = overlap(PLACEMENTS[area][point], body);
+          expect(r, `${point} vs ${area}.${tone}[${i}]`).toBeLessThan(0.4);
         }
       }
     }
@@ -324,28 +343,58 @@ describe("every table is complete for every key it is addressed by", () => {
     expect(bad).toEqual([]);
   });
 
-  it("has no area table left in depth.json, which is what made it a restatement", () => {
+  it("has a placement for every area and point an aspect can reach", () => {
     /*
-       Guarding a deletion. depth.area was keyed by area and tone, the same
-       address the body's opening came from, so paragraph two paraphrased
-       paragraph one by construction. If it comes back, so does the bug.
+       Ninety-two, not a hundred and eight. Ten planets can fall in any of
+       the nine areas, but the Ascendant only ever defines the first sector
+       and the Midheaven only ever the tenth, so those two have exactly one
+       reachable area each. Writing the other sixteen would be writing copy
+       no reader can ever be shown.
     */
-    expect(DEPTH.area).toBeUndefined();
+    const PLANETS = ["sun", "moon", "mercury", "venus", "mars", "jupiter",
+      "saturn", "uranus", "neptune", "pluto"];
+    let n = 0;
+    for (const area of Object.keys(AREAS)) {
+      for (const p of PLANETS) {
+        expect(PLACEMENTS[area]?.[p], `placements.${area}.${p}`).toBeTruthy();
+        n++;
+      }
+    }
+    expect(PLACEMENTS.self.ascendant, "placements.self.ascendant").toBeTruthy();
+    expect(PLACEMENTS.work.midheaven, "placements.work.midheaven").toBeTruthy();
+    n += 2;
+    const written = Object.values(PLACEMENTS).reduce((t, a) => t + Object.keys(a).length, 0);
+    expect(written, "no unreachable placements written").toBe(n);
   });
 
-  it("has a touch and a depth paragraph for every point an aspect can land on", () => {
-    const points = Object.keys(DEPTH.natal);
-    expect(points.length).toBe(12);
-    for (const p of points) {
-      for (const tone of TONES) expect(TOUCHES[p]?.[tone], `touches.${p}.${tone}`).toBeTruthy();
+  it("has a pattern paragraph for every area and tone", () => {
+    for (const area of Object.keys(AREAS)) {
+      for (const tone of TONES) {
+        expect(DEPTH.pattern[area]?.[tone], `depth.pattern.${area}.${tone}`).toBeTruthy();
+      }
     }
   });
 
-  it("has a motion clause and a depth paragraph for every transiting body", () => {
+  it("has a one-line mechanism note for every tone and every transiting body", () => {
+    for (const tone of TONES) expect(DEPTH.mechanism.tone[tone], tone).toBeTruthy();
     for (const body of Object.keys(MOTION)) {
-      expect(DEPTH.transit[body], `depth.transit.${body}`).toBeTruthy();
+      expect(DEPTH.mechanism.transit[body], `mechanism.transit.${body}`).toBeTruthy();
     }
     expect(Object.keys(MOTION)).toHaveLength(10);
+  });
+
+  it("keeps the encyclopaedia out of the paragraphs entirely", () => {
+    /*
+       depth.natal and depth.transit used to be prose, concatenated into a
+       hundred-and-six-word third paragraph above a measurement row that
+       already said the same things in numbers. If either comes back as a
+       paragraph, so does the card that was two thirds machine.
+    */
+    expect(DEPTH.natal).toBeUndefined();
+    expect(DEPTH.area).toBeUndefined();
+    for (const line of Object.values(DEPTH.mechanism.transit)) {
+      expect(line.length, line).toBeLessThan(110);
+    }
   });
 
   it("never prints one timing clause twice in a day", () => {
@@ -366,5 +415,88 @@ describe("every table is complete for every key it is addressed by", () => {
         expect(new Set(tails).size, `asc ${asc} day ${d}`).toBe(tails.length);
       }
     }
+  });
+});
+
+describe("the friend bank is complete and its tokens are the ones the renderer fills", () => {
+  /*
+     Nothing renders this yet. It is checked anyway, because the failure it
+     is most likely to ship with is a typo in a token: {nane} does not
+     throw, it prints. A hole that never gets filled is the one way this
+     table can put a literal brace in front of a reader, and the only thing
+     standing between it and that is this test.
+
+     The tokens are also what let this one table name a planet and a sign
+     at all. Every other file in here is forbidden from doing so, because a
+     line that spelled out a placement could be printed against a different
+     one. A hole cannot be wrong, so the rule holds and the card still gets
+     to say "as a {sign} {planet}".
+  */
+  const TOKENS = new Set(["name", "planet", "sign"]);
+  const tokensIn = (text) => (text.match(/\{([a-z]+)\}/g) || []).map((t) => t.slice(1, -1));
+
+  it("has a reading for all nine areas and all five tones", () => {
+    for (const area of Object.keys(AREAS)) {
+      for (const tone of TONES) {
+        const pair = FRIENDS.readings[area]?.[tone];
+        expect(pair, `friends.readings.${area}.${tone}`).toHaveLength(2);
+        for (const text of pair) expect(text.trim(), text.slice(0, 40)).toMatch(/[.]$/);
+      }
+    }
+  });
+
+  it("names the friend in every headline and every body", () => {
+    for (const [area, tones] of Object.entries(FRIENDS.readings)) {
+      for (const [tone, [headline, body]] of Object.entries(tones)) {
+        expect(headline, `friends.${area}.${tone} headline`).toContain("{name}");
+        expect(body, `friends.${area}.${tone} body`).toContain("{name}");
+      }
+    }
+  });
+
+  it("has a bridge for every point an aspect can land on, with both holes in it", () => {
+    const points = Object.keys(PLACEMENTS.self).concat("midheaven");
+    for (const p of new Set(points)) {
+      const b = FRIENDS.bridges[p];
+      expect(b, `friends.bridges.${p}`).toBeTruthy();
+      expect(b, p).toContain("{planet}");
+      expect(b, p).toContain("{sign}");
+    }
+    expect(Object.keys(FRIENDS.bridges)).toHaveLength(12);
+  });
+
+  it("uses no token the renderer does not know how to fill", () => {
+    const bad = [];
+    const walk = (v, path) => {
+      if (typeof v === "string") {
+        for (const t of tokensIn(v)) if (!TOKENS.has(t)) bad.push(`${path}: {${t}}`);
+        // an unpaired brace is a token somebody half deleted
+        const open = (v.match(/\{/g) || []).length;
+        const close = (v.match(/\}/g) || []).length;
+        if (open !== close) bad.push(`${path}: unbalanced braces`);
+      } else if (Array.isArray(v)) v.forEach((x, i) => walk(x, `${path}[${i}]`));
+      else if (v && typeof v === "object") {
+        for (const [k, x] of Object.entries(v)) if (k !== "_comment") walk(x, `${path}.${k}`);
+      }
+    };
+    walk(FRIENDS, "friends");
+    expect(bad).toEqual([]);
+  });
+
+  it("leaves the token holes out of every other table", () => {
+    /*
+       The reverse guard. A brace anywhere else is a fragment that escaped
+       from this file, and nothing else in the bank has a renderer that
+       would fill it.
+    */
+    const others = [READINGS, PLACEMENTS, DEPTH, MOTION, LINES];
+    const found = [];
+    const walk = (v) => {
+      if (typeof v === "string") { if (/[{}]/.test(v)) found.push(v.slice(0, 50)); }
+      else if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === "object") for (const x of Object.values(v)) walk(x);
+    };
+    others.forEach(walk);
+    expect(found).toEqual([]);
   });
 });

@@ -21,16 +21,34 @@ A reading card is four pieces from four tables, and each piece has exactly
 one job. Nothing may do another piece's job.
 
 ```
-headline    readings.json[area][tone][n][0]   the screenshot
-body        readings.json[area][tone][n][1]   the whole reading
-  + tail    motion.json[transit][applying][n] when it peaks, in English
-¶2          touches.json[point][tone]         which part of you took it
-¶3          depth.json                        the mechanism, marked as one
-measurement computed                          the arithmetic, printed
+headline    readings.json[area][tone][n][0]     the screenshot
+body        readings.json[area][tone][n][1]     the whole reading
+  + tail    motion.json[transit][applying][n]   when it peaks, in English
+¶2          placements.json[area][point]        the permanent thing about you
+¶3          depth.json.pattern[area][tone]      the recurring pattern, and the trap
+mechanism   depth.json.mechanism                one line, inside the measurement
+measurement computed                            the arithmetic, printed
 ```
+
+**All three paragraphs are keyed by area.** That is what makes them
+specific, and it is also how they could collapse into each other, so they
+are written at three different distances from today:
+
+| | | |
+|---|---|---|
+| ¶1 | **today** | what is happening, and what to do about it |
+| ¶2 | **always** | the permanent placement that makes it land here |
+| ¶3 | **every time** | the recurring shape, and the mistake people make |
 
 The compact card shows the headline and the body. Tapping it adds ¶2 and
 ¶3 and the measurement. That is the whole product.
+
+The mechanism is not a paragraph. It used to be: three encyclopaedia
+entries keyed by point, tone and transit, concatenated into a hundred and
+six words sitting directly above a measurement row that already stated the
+same facts in numbers. It is one line inside that row now. If you find
+yourself explaining what a conjunction is in a paragraph, you are writing
+the version that made two thirds of every card machine.
 
 ## 2. The shape of a body
 
@@ -239,34 +257,123 @@ than the day has cards using it. Five is comfortably above that on a normal
 day; if a morning ever runs more than five cards off one body moving in one
 direction, this table is the one to grow.
 
-## 7. Writing paragraph two
+## 7. Writing paragraph two: the placement
 
-`touches.json`, keyed by natal point then tone. Sixty entries.
+`placements.json`, keyed area then natal point. Ninety-two entries.
 
-It answers one question: which part of you took this, and what that means
-for the next few hours. It is a paragraph now, not a clause, so:
+It answers one question: **what is permanently true about you that made
+today land in this part of your life?** Unlike the reading above it, this
+was true last year and will be true next year. That is what makes it the
+most personal paragraph on the card.
 
+> **money / venus**
+> What you are drawn to sits in the part of your chart about what you own.
+> You buy for pleasure rather than for use. That is not a fault, and it
+> does mean your budget works better when the pleasure is built into it on
+> purpose.
+
+- **Plain language, second person.** No astrology, no planet names.
 - **Self-contained.** No opening back-reference. Never start with *It is*,
-  *This one* or *They*, because there is nothing above it to reach.
-- **Addressed to the reader.**
-- **It must advance the body, never restate it.**
+  *This one* or *They*, because there is nothing above it to reach back to.
+- **Say something a reader recognises about themselves**, in the furniture
+  of that area of life.
+- **It must not restate the reading above it.** That one is about today.
+  This one is about always.
 
-That last one is the failure this whole file exists because of. An
-aspect's *area* is derived from where its natal point sits, so keying the
-body by area and this by natal point gives two **correlated** dimensions.
-For the two angles it is total: the Ascendant is always sector 1 and the
-Midheaven always sector 10, so every Midheaven card is a Work card. Before
-the rewrite, that meant every Midheaven card printed the work opening, the
-midheaven clause and the work paragraph: one address, three paraphrases of
-one sentence.
+### Why it is keyed this way, and why the old key could not work
 
-`tests/seams.test.js` measures the content-word overlap between the body
-and paragraph two at **every address the renderer can produce**, and holds
-the two locked pairings to a tighter bound. If you write a midheaven entry
-about the gap between the job and the reputation, it will fail, because
-that is what the Work bodies are about.
+This table used to be `touches.json`, keyed by natal point and tone alone,
+and it was the paragraph readers called generic. The reason was structural.
 
-## 8. The quiet cards
+An aspect's area comes from where the natal point sits, and **which area
+that is differs per person**: one reader's Venus lives in their money
+sector, another's in their self sector, another's in their talk sector. A
+table keyed by the point alone is therefore one sentence that has to be
+true whether the card above it says Money, Self or Talk. It could only ever
+talk about wanting in the abstract.
+
+The exception proved it. The Ascendant is always the first sector and the
+Midheaven always the tenth, **for everybody**, and those two were the only
+entries in the old table that read specific. Same writer, same tone, same
+day: the difference was entirely whether the address knew the house.
+
+### Ninety-two, not a hundred and eight
+
+Ten planets across nine areas, plus the Ascendant in `self` and the
+Midheaven in `work`, which are the only areas those two can ever fall in.
+The other sixteen are unreachable and writing them would be writing copy
+no reader can be shown. `tests/seams.test.js` asserts the count exactly, in
+both directions.
+
+## 8. Writing paragraph three: the pattern
+
+`depth.json` under `pattern`, keyed area then tone. Forty-five entries.
+
+It answers: **what does this kind of day do in this part of your life, over
+time, and what is the mistake people make in it?** Not what to do today,
+which is paragraph one's job.
+
+> **work / friction**
+> What blocks you here is structural rather than personal, nearly always:
+> a bad process wearing somebody's face. The trap is working harder at a
+> thing that is actually waiting on a decision nobody has made.
+
+Name the trap. Every one of these is more useful when it ends on the
+failure mode than when it ends on reassurance.
+
+**The overlap test is real and it will catch you.** Paragraphs one and
+three are both keyed by area and tone, which is exactly the correlation
+that produced the original bug. `tests/seams.test.js` measures content-word
+overlap between paragraph three and both paragraphs above it, at every
+address the renderer can produce, and fails at fifty per cent. During this
+rewrite it caught `pattern.work.easy` at sixty-four per cent, because the
+entry had drifted into being another instruction for today.
+
+### The mechanism line
+
+Also in `depth.json`, under `mechanism`. Five tone notes and ten transit
+notes, one short sentence each, rendered inside the measurement row rather
+than as prose.
+
+This is the only place astrology vocabulary belongs, because it is an
+annotation on numbers that are printed right beside it. Keep each under a
+hundred and ten characters. If it needs a paragraph, it is being written at
+the wrong altitude.
+
+## 9. The friend bank
+
+`friends.json`. Written, not yet wired to anything; the file's own note
+lists what still has to be built.
+
+Same keying as the reading, area then tone, because a friend card is the
+same engine pointed at a second chart. What changes is the grammar:
+
+- **The friend is third person. You are second person.**
+- **Every body ends on something the reader can do**, never on what the
+  friend should do. The friend is not holding the phone.
+- **Never diagnose somebody who is not in the room.** The card says what
+  the sky is doing to a chart, not what a person is.
+
+### Tokens
+
+`{name}`, `{planet}` and `{sign}` are holes the renderer fills from a
+chart. They are how this one table gets to name a placement at all: the
+copy never asserts one, so it cannot be wrong about one. A line that spelled
+out a sign could be printed against a different sign. A hole cannot.
+
+Use no other token. `{nane}` does not throw, it prints, so the seams suite
+checks every brace in this file against the three the renderer knows and
+checks that no other table contains a brace at all.
+
+### The bridge is a separate line
+
+Co-Star runs the whole thing as one paragraph: *"As a Cancer Jupiter, you
+understand their instinct to dream big."* Good sentence, and gluing a
+clause keyed off your chart into the middle of a paragraph keyed off theirs
+is the exact assembly this whole document exists because of. The body is
+complete without it and the bridge renders underneath, labelled.
+
+## 10. The quiet cards
 
 `quiet.json` and `signs.json` are the cards for the four or five areas the
 sky is not touching on a normal morning. They are not an apology and they
@@ -286,7 +393,7 @@ written to the reader: *"You keep what you hold here rather than spend
 it"*, not *"the sign on it protects what it holds"*. Same claim, and only
 one of the two is a sentence about a person.
 
-## 9. Before you commit
+## 11. Before you commit
 
 - [ ] `node tools/check-voice.mjs` says clean
 - [ ] `npx vitest run tests/` passes
@@ -297,3 +404,5 @@ one of the two is a sentence about a person.
 - [ ] The tone is the one the aspect actually means, per section 5
 - [ ] You read the new cell top to bottom, all ten, looking for two that
       are the same reading in different words
+- [ ] A new placement or pattern is at its own distance from today, per
+      section 1: always, or every time, never today

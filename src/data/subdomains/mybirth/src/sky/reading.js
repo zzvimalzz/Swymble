@@ -32,7 +32,7 @@ import {
 */
 import areasFile from "./contents/areas.json";
 import readingsFile from "./contents/readings.json";
-import touchesFile from "./contents/touches.json";
+import placementsFile from "./contents/placements.json";
 import motionFile from "./contents/motion.json";
 import columnsFile from "./contents/columns.json";
 import quietFile from "./contents/quiet.json";
@@ -42,7 +42,7 @@ import linesFile from "./contents/lines.json";
 
 const AREAS = areasFile.areas;
 const READINGS = readingsFile.readings;
-const TOUCHES = touchesFile.touches;
+const PLACEMENTS = placementsFile.placements;
 const MOTION = motionFile.motion;
 const COLUMNS = columnsFile.columns;
 const QUIET = quietFile.quiet;
@@ -457,10 +457,20 @@ function buildCard(a, ctx) {
     */
     paragraphs: [
       body,
-      TOUCHES[a.natal.key]?.[tone],
-      [DEPTH.natal[a.natal.key], DEPTH.tone[tone], DEPTH.transit[a.transit.key]]
-        .filter(Boolean).join(" "),
+      PLACEMENTS[a.area]?.[a.natal.key],
+      DEPTH.pattern[a.area]?.[tone],
     ].filter(Boolean),
+    /*
+       The mechanical note, which is no longer a paragraph.
+
+       It used to be three encyclopaedia entries concatenated into a third
+       paragraph of a hundred and six words, printed directly above a
+       measurement row that already states the two bodies, the aspect, both
+       signs, the degrees off and the orb allowed. The row was doing the job
+       better, so the prose version is gone and this one line joins the row.
+    */
+    mechanism: [DEPTH.mechanism.tone[tone], DEPTH.mechanism.transit[a.transit.key]]
+      .filter(Boolean).join(" "),
     tone,
     toneWord: ORDINAL_TONE[tone],
     polarity: polarityOf(tone),

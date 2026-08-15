@@ -266,22 +266,37 @@ export function checkVoice() {
   }
 
   /*
-     Paragraph two. It used to be a clause wedged into the body and it is
-     a paragraph of its own now, so it has to stand up alone: address the
-     reader, and never open on a pronoun with nothing to refer back to.
+     Paragraph two, the permanent placement. It is keyed by area and natal
+     point now, so unlike its predecessor it can name the part of a life it
+     is about, and it has to: an entry that could be printed under any of
+     the nine areas is the failure this rekeying exists to fix.
   */
-  const touches = JSON.parse(readFileSync(join(CONTENTS, "touches.json"), "utf8")).touches;
-  for (const [point, tones] of Object.entries(touches)) {
-    for (const [tone, text] of Object.entries(tones)) {
-      const at = `touches.json ${point}.${tone}`;
+  const placements = JSON.parse(readFileSync(join(CONTENTS, "placements.json"), "utf8")).placements;
+  for (const [area, points] of Object.entries(placements)) {
+    for (const [point, text] of Object.entries(points)) {
+      const at = `placements.json ${area}.${point}`;
       if (!addressesTheReader(text)) {
         problems.push({ path: at, rule: "paragraph never addresses the reader", why: "second person, or it is a description of a measurement", sample: "", text });
       }
       if (/^(It|This one|They)\b/.test(text)) {
-        problems.push({ path: at, rule: "opens on a loose pronoun", why: "it is a paragraph now, and there is nothing above it for the pronoun to reach", sample: text.slice(0, 12), text });
+        problems.push({ path: at, rule: "opens on a loose pronoun", why: "it is a paragraph, and there is nothing above it for the pronoun to reach", sample: text.slice(0, 12), text });
       }
     }
   }
+
+  /*
+     Paragraph three, the pattern. Same rule, same reason.
+  */
+  const pattern = JSON.parse(readFileSync(join(CONTENTS, "depth.json"), "utf8")).depth.pattern;
+  for (const [area, tones] of Object.entries(pattern)) {
+    for (const [tone, text] of Object.entries(tones)) {
+      const at = `depth.json pattern.${area}.${tone}`;
+      if (!addressesTheReader(text)) {
+        problems.push({ path: at, rule: "paragraph never addresses the reader", why: "second person, or it is a description of a measurement", sample: "", text });
+      }
+    }
+  }
+
   return problems;
 }
 

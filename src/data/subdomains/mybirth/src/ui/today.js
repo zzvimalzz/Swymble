@@ -803,6 +803,7 @@ function readingDetailHTML(c) {
     <div class="sky-modal__proof">
       <p class="sky-label">The measurement</p>
       <p class="sky-proof__lead">${esc(c.proof)}</p>
+      ${c.mechanism ? `<p class="sky-proof__how">${esc(c.mechanism)}</p>` : ""}
       <ul class="sky-asps">
         <li class="sky-asp">
           <span class="sky-asp__bodies">
