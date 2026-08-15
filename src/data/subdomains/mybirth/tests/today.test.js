@@ -13,8 +13,10 @@ import { describe, it, expect } from "vitest";
 import { buildProfile, dailySkyHTML, clickIsOnBackdrop, shareCardHTML } from "../src/ui/today.js";
 import { dailyReading, AREA_KEYS, areaLabel } from "../src/sky/reading.js";
 import depthFile from "../src/sky/contents/depth.json";
+import touchesFile from "../src/sky/contents/touches.json";
 
 const DEPTH = depthFile.depth;
+const TOUCHES = touchesFile.touches;
 
 const SAVE = {
   key: "test-person",
@@ -262,14 +264,16 @@ describe("expanding a card", () => {
     }
   });
 
-  it("makes the second paragraph specific to the area, not just to the bodies", () => {
+  it("makes the second paragraph about the point that took the aspect", () => {
     /*
-       The bug this dimension exists to fix. Without an area key, paragraph
-       two was natal plus tone alone, so the Love card and the Work card
-       expanded to identical text whenever their aspects shared a body.
-       Nine cards whose insides converge read as a template, and they read
-       as vague because a sentence that has to be true of nine different
-       parts of a life cannot say much about any of them.
+       Paragraph two used to be keyed by area and tone, which is the same
+       address the body came from, so expanding a card printed the card
+       again in longer words. It is keyed by the natal point now, which is
+       a genuinely different dimension.
+
+       They still all differ, and for a stronger reason than before: one
+       card per area, and an area is derived from where its natal point
+       sits, so no two cards in a render can share a natal point.
     */
     const reads = reading.cards.filter((c) => !c.quiet);
     expect(reads.length).toBeGreaterThan(2);
@@ -277,9 +281,8 @@ describe("expanding a card", () => {
     const second = reads.map((c) => c.paragraphs[1]);
     expect(new Set(second).size, "second paragraphs must all differ").toBe(second.length);
 
-    // and each one has to be about its own area, not a generic remark
     for (const c of reads) {
-      expect(c.paragraphs[1]).toBe(DEPTH.area[c.area][c.tone]);
+      expect(c.paragraphs[1]).toBe(TOUCHES[c.aspect.natal.key][c.tone]);
     }
   });
 

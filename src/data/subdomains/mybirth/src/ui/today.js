@@ -617,7 +617,7 @@ function cardHTML(c, i) {
         ${c.polarity
           ? polarityHTML(c.polarity, { cls: "sky-card__pol" })
           : `<span class="sky-pol sky-card__pol" data-polarity="quiet"
-                   title="Nothing is within orb of this part of your chart today.">
+                   title="Nothing in the sky is at an angle to this part of your chart today.">
                <span class="sky-tab__dot" aria-hidden="true"></span><span>Quiet</span>
              </span>`}
       </p>

@@ -62,10 +62,76 @@ const BANNED = [
   },
 ];
 
+/*
+   The body used to be capped at 130 characters and two sentences, on the
+   grounds that two further clauses were appended to it. That cap is the
+   reason every reading was a flat assertion: there was no room for a
+   consequence or an instruction after the statement, so the bank was two
+   hundred and twenty-five statements and nothing else.
+
+   The body is the whole reading now. The shape it has to have is state,
+   then consequence, then what to do, which does not fit in one sentence
+   and does not need five hundred characters either.
+*/
 const LIMITS = {
   headline: { max: 72, why: "the headline is the screenshot" },
-  body: { max: 130, sentences: 2, why: "two further clauses are appended to it" },
+  body: {
+    min: 120,
+    max: 300,
+    minSentences: 2,
+    maxSentences: 6,
+    why: "the body is the whole reading: state it, then say what to do about it",
+  },
+  /* the timing tail, which is appended to every body */
+  motion: { max: 90, why: "it is a tail on a finished paragraph, not a sentence of its own" },
 };
+
+/*
+   Rules that only apply to the reader-facing tables.
+   These are the ones that caught the assembled-page failures.
+*/
+const JARGON = /\b(orb|applying|separating|exact|ephemeris|ecliptic|longitude|conjunct|sextile|quincunx|trine|square|opposition)\b/i;
+
+/*
+   Whether a piece is addressed to the reader at all.
+
+   The first version of this test looked for "you" and nothing else, and it
+   failed on a third of the bank for the wrong reason: an imperative is
+   second person without ever using the pronoun. "Skip the apology. Say one
+   true sentence about why they came to mind." There is no "you" in that
+   and there is no doubt who it is talking to.
+
+   So an imperative counts, detected by the verb a sentence opens on. The
+   list is the one the bank actually uses, extracted the same way the stop
+   list in validate-copy.mjs was. A verb missing from it fails closed,
+   which costs somebody one line of maintenance and catches the real
+   failure: a paragraph written in the third person about a measurement.
+*/
+const IMPERATIVES = new Set([
+  "accept", "add", "answer", "argue", "ask", "assume", "bank", "be", "book",
+  "build", "buy", "call", "cancel", "change", "check", "choose", "clear", "close",
+  "come", "compare", "cook", "correct", "cut", "deal", "decide", "decline",
+  "defend", "delete", "do", "draw", "enjoy", "explain", "feed", "fill", "find",
+  "finish", "fix", "follow", "get", "give", "go", "have", "hold",
+  "introduce", "invite", "judge", "keep", "know", "lead", "learn", "leave",
+  "let", "list", "listen", "look", "lower", "make", "move", "name",
+  "notice", "occupy", "pace", "pay", "pick", "play", "point", "prepare",
+  "protect", "push", "put", "reach", "read", "reply", "rest", "return",
+  "ring", "run", "save", "say", "see", "sell", "send", "set", "settle",
+  "share", "ship", "show", "sit", "skip", "solve", "sort", "spend",
+  "split", "start", "stay", "stop", "store", "switch", "take", "teach", "tell",
+  "test", "throw", "tidy", "trust", "try", "turn", "update", "use",
+  "visit", "wait", "watch", "work", "write", "zoom",
+]);
+
+/** Second person, either by pronoun or by mood. Exported: the seams suite
+    checks the same property and two lists of verbs is one too many. */
+export function addressesTheReader(text) {
+  if (/\byou(r|rs|rself)?\b/i.test(text)) return true;
+  return text
+    .split(/(?<=[.])\s+/)
+    .some((s) => IMPERATIVES.has((s.match(/^[A-Za-z]+/) || [""])[0].toLowerCase()));
+}
 
 /* ---------- walking the bank ---------- */
 
@@ -154,10 +220,66 @@ export function checkVoice() {
         if (body.length > LIMITS.body.max) {
           problems.push({ path: at, rule: "body too long", why: LIMITS.body.why, sample: `${body.length} chars`, text: body });
         }
-        if (countSentences(body) > LIMITS.body.sentences) {
-          problems.push({ path: at, rule: "body runs on", why: LIMITS.body.why, sample: `${countSentences(body)} sentences`, text: body });
+        if (body.length < LIMITS.body.min) {
+          problems.push({ path: at, rule: "body too short", why: LIMITS.body.why, sample: `${body.length} chars`, text: body });
+        }
+        const n = countSentences(body);
+        if (n > LIMITS.body.maxSentences || n < LIMITS.body.minSentences) {
+          problems.push({ path: at, rule: "body is the wrong shape", why: LIMITS.body.why, sample: `${n} sentences`, text: body });
+        }
+        /*
+           The rule that fixes the complaint the rewrite came from. A
+           reading that never says "you" is a reading about the aspect,
+           and a reading about the aspect is one the reader has to
+           translate before it means anything.
+        */
+        if (!addressesTheReader(body)) {
+          problems.push({ path: at, rule: "body never addresses the reader", why: "second person, or it is a description of a measurement", sample: "", text: body });
+        }
+        if (JARGON.test(body)) {
+          problems.push({ path: at, rule: "astrology in the body", why: "the measurement is printed underneath; the reading is in English", sample: body.match(JARGON)[0], text: body });
         }
       });
+    }
+  }
+
+  /*
+     The timing tail. It is the last thing on every card, which is the
+     position a reader is most likely to actually finish, and it used to be
+     where the register broke: "Past exact now, and thinning out through
+     the afternoon." Plain English, short, and no back-reference opening,
+     because it now follows an instruction rather than a description.
+  */
+  const motion = JSON.parse(readFileSync(join(CONTENTS, "motion.json"), "utf8")).motion;
+  for (const [body, states] of Object.entries(motion)) {
+    states.forEach((variants, i) => {
+      variants.forEach((text, v) => {
+        const at = `motion.json ${body}[${i}][${v}]`;
+        if (text.length > LIMITS.motion.max) {
+          problems.push({ path: at, rule: "timing tail too long", why: LIMITS.motion.why, sample: `${text.length} chars`, text });
+        }
+        if (JARGON.test(text)) {
+          problems.push({ path: at, rule: "astrology in the timing", why: "a reader does not know what past exact means", sample: text.match(JARGON)[0], text });
+        }
+      });
+    });
+  }
+
+  /*
+     Paragraph two. It used to be a clause wedged into the body and it is
+     a paragraph of its own now, so it has to stand up alone: address the
+     reader, and never open on a pronoun with nothing to refer back to.
+  */
+  const touches = JSON.parse(readFileSync(join(CONTENTS, "touches.json"), "utf8")).touches;
+  for (const [point, tones] of Object.entries(touches)) {
+    for (const [tone, text] of Object.entries(tones)) {
+      const at = `touches.json ${point}.${tone}`;
+      if (!addressesTheReader(text)) {
+        problems.push({ path: at, rule: "paragraph never addresses the reader", why: "second person, or it is a description of a measurement", sample: "", text });
+      }
+      if (/^(It|This one|They)\b/.test(text)) {
+        problems.push({ path: at, rule: "opens on a loose pronoun", why: "it is a paragraph now, and there is nothing above it for the pronoun to reach", sample: text.slice(0, 12), text });
+      }
     }
   }
   return problems;

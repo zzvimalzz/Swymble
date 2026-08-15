@@ -32,7 +32,10 @@
     "or the voice suite reads it as an invented proper noun.",
     "",
     "Keep them declarative and keep them short. They are not consolation for",
-    "a missing reading, they are the reading.",
+    "a missing reading, they are the reading. What they must never sound like",
+    "is an error message: the sentence says what is true of this area today,",
+    "in the same voice the reading cards use, and the sign clause from",
+    "signs.json supplies what the area is like the rest of the time.",
     "",
     "depth is the third paragraph of the expanded card, one per kind. The",
     "second paragraph comes from signs.json, so a quiet card still expands to",
@@ -42,64 +45,64 @@
     "near": [
       [
         "Close, and not close enough.",
-        "The nearest angle to this part of your chart is outside the orb it would have to be inside to count. The figure is below, and it is worth watching."
+        "Something is lining up on this part of your chart and it has not arrived. The distance is printed below, in degrees. Nothing is being asked of you here today, which is worth knowing rather than filling in."
       ],
       [
-        "Still outside the width that counts.",
-        "Something is approaching an angle to a planet of yours here and has not arrived. The distance is printed below, in degrees."
+        "Nearly, but not today.",
+        "An angle is forming here and it is still short of the width that counts. Watch it rather than acting on it. The number below moves a little every day, so this is one to check tomorrow."
       ],
       [
         "It has not landed yet.",
-        "There is an angle forming on this part of your chart and it is still short of counting. The number is below, and it moves every day."
+        "Something is approaching a planet of yours here and has not got there. Whatever you are feeling about this part of your life today is arriving from somewhere else on this page."
       ]
     ],
     "still": [
       [
         "Yours, and nobody is asking anything of it.",
-        "Planets of yours sit in this part of the chart and the sky is not at an angle to any of them today, which is what an ordinary day looks like from the inside."
+        "Planets of yours sit here and nothing in the sky is at an angle to them today. This is what an ordinary day looks like from the inside, and most of your days are this one."
       ],
       [
         "Occupied, and left alone today.",
-        "This part of your chart has your own planets standing in it and no transit is touching them. It is running on itself."
+        "This part of your chart has your own planets standing in it and nothing is touching them. It is running on itself, which is usually when things here go well."
       ],
       [
         "Quiet, and not empty.",
-        "You have planets here and the sky is addressing none of them today. What sits here is listed below, and it is doing its own work."
+        "You have planets here and the sky is addressing none of them today. What sits here is listed below, and it is doing its own work without supervision."
       ]
     ],
     "visiting": [
       [
         "The sign is doing the talking here.",
-        "Planets are crossing this part of your chart today and none of yours is standing here to meet them, so the sign on it is what the area is running on."
+        "Planets are crossing this part of your chart today and none of yours is standing here to meet them, so the sign is what this area is running on."
+      ],
+      [
+        "Traffic, and none of it is yours.",
+        "Something is passing through this sector today and your chart left it unoccupied, so what happens here is a matter of the sign rather than of the traffic."
       ],
       [
         "Read this one off the sign.",
-        "Something is passing through this sector today and your own chart left the sector unoccupied, so what it is like is a matter of the sign rather than of the traffic."
-      ],
-      [
-        "Traffic, and no planet of yours in it.",
-        "What is crossing is listed below. It is making an angle to none of your own points, because this sector holds none, so the sign is the reading."
+        "What is crossing is listed below. It is making an angle to none of your own points, because none of them live here, so the sign is the whole of the reading."
       ]
     ],
     "empty": [
       [
         "This one runs on its sign alone.",
-        "The sector holds no planet of yours and none is crossing it today, which leaves the sign it was born under as the whole of what it is."
-      ],
-      [
-        "The sign is the standing description here.",
-        "This part of the chart is unoccupied, so it does not change much. What it is like, it is like permanently, and the sign says which."
+        "No planet of yours sits here and none is crossing today, which leaves the sign it was born under as the whole of what this area is."
       ],
       [
         "Quiet by construction, not by accident.",
-        "Twelve sectors and ten planets leaves several of every chart unoccupied for life. This is one of them, and the sign on it is what it has."
+        "Twelve sectors and ten planets leaves several parts of every chart unoccupied for life. This is one of them, and the sign on it is what it has."
+      ],
+      [
+        "The standing description, not today's.",
+        "This part of the chart is unoccupied, so it does not change much. What it is like, it is like permanently, and the sign below says which."
       ]
     ]
   },
   "depth": {
-    "near": "An angle is only an aspect inside its orb, and the orb is not a formality. Outside that width the two bodies are simply two bodies standing at an angle nobody counts. This one is close enough that it is worth looking again tomorrow.",
-    "still": "A part of a chart with planets in it and no transit touching them is having an ordinary day, which most days are. It is neither being pushed nor being helped, and that is worth knowing before you go looking for a reason for how the day is going.",
+    "near": "An angle only counts inside its orb, and the orb is not a formality. Outside that width, two bodies are simply two bodies standing at an angle nobody reads. This one is close enough to be worth looking at again tomorrow.",
+    "still": "A part of a chart with planets in it and nothing touching them is having an ordinary day, which most days are. Nothing here is being pushed or helped, and that is worth knowing before you go looking for a reason for how the day is going.",
     "visiting": "A body passing through a sector is not the same as a body making an angle to something in it. This is traffic through an empty room: real, measurable, and touching nothing of yours, because there is nothing of yours here to touch.",
-    "empty": "Seven bodies cannot occupy twelve sectors, so several parts of every chart stand empty for life. That is not a fault in the chart. It means this area is read from the sign on it and from whatever happens to be crossing, rather than from anything of your own standing here."
+    "empty": "Ten bodies cannot occupy twelve sectors, so several parts of every chart stand empty for life. That is not a fault in the chart. It means this area is read from the sign on it and from whatever happens to be crossing, rather than from anything of your own standing here."
   }
 }

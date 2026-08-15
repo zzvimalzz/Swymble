@@ -1,107 +1,109 @@
 {
   "_comment": [
-    "Slot 2 of a reading: which part of you took the angle, by tone.",
+    "Which part of you took the angle, by natal point then tone.",
     "",
-    "── The one rule these all obey ──",
+    "── What changed, and why ──",
     "",
-    "Every entry begins with a back-reference. 'It' is the aspect that slot 1",
-    "has just described, and this sentence says something about that. None of",
-    "these may introduce a subject of its own.",
+    "These used to be slot 2 of the card body: a clause wedged between the",
+    "reading and the timing, written to open with a back-reference so it would",
+    "parse after any of the 225 openings it could follow. Two failures came",
+    "out of that. The pronoun collided, because the opening had usually spent",
+    "its own 'it' on something else: 'Pay the boring bill first. It is the one",
+    "that turns into a larger problem if it waits. It is your sense of",
+    "yourself under the pressure.' And the clause was written about the chart",
+    "rather than about the reader, so a third of every paragraph was the",
+    "machine describing itself.",
     "",
-    "That is not a style preference. Fourteen of these used to open a new",
-    "topic, and the failure was visible on the page: 'Go somewhere you have",
-    "not been. The discipline is available today without costing what it",
-    "usually costs.' Both sentences are fine. Together they are two unrelated",
-    "remarks, because 'the discipline' has no antecedent anywhere on the card.",
-    "",
-    "Full rules in .docs/MyBirth-Plan/10-CORPUS.md section 3a. Before adding",
-    "an entry here, read it after the three least related openings in",
-    "readings.json and check it still parses."
+    "So these are now the second paragraph of the expanded card, where there",
+    "is room for them. Each one is self-contained, addressed to the reader,",
+    "and has to advance the reading rather than restate it. No back-reference",
+    "opening, no 'It is'. They answer one question: which part of you this",
+    "landed on, and what that means for the next few hours."
   ],
   "touches": {
     "sun": {
-      "charged": "Your sense of yourself is doing the reacting, which is why it feels personal.",
-      "open": "Your sense of yourself is the part with room in it today.",
-      "friction": "It is your sense of yourself under the pressure, so it will read as criticism even where none is meant.",
-      "easy": "Your sense of yourself is steady underneath it, which is why none of this costs much.",
-      "pull": "Your sense of yourself is on one end of this and something else is on the other."
+      "charged": "This landed on your sense of yourself, which is why it feels personal rather than practical. Being seen accurately matters more than usual today, and being read wrongly costs more than it should.",
+      "open": "This reached the part of you that wants to be recognised, and today that part has room in it. Say what you want to be known for while it is easy to say.",
+      "friction": "The pressure is on your sense of yourself, so almost anything said today will read as criticism where none is meant. Assume it is not about you, and check tomorrow when it has cooled.",
+      "easy": "Your sense of yourself is steady underneath all this, which is why none of it costs much. You can afford to hear the whole of what somebody says today without flinching at it.",
+      "pull": "Your sense of yourself is on one end of this and something else is on the other. You cannot satisfy both. Decide which one you would defend, and let the other one wait."
     },
     "moon": {
-      "charged": "It is landing on your mood rather than your judgement, and mood always arrives first.",
-      "open": "What you need is easier to say than usual today, and easier to hear.",
-      "friction": "It is your need for things to be settled that is taking the strain.",
-      "easy": "Your footing is good, so you can afford to feel the whole of it.",
-      "pull": "What you need and what is being asked of you are at opposite ends of this."
+      "charged": "This landed on your mood rather than your judgement, and the mood arrives several minutes before the reasoning does. Give yourself that gap today before you answer anything that matters.",
+      "open": "What you need is easier to say than usual today, and easier for somebody to hear. Say it plainly, once, and do not build a case around it first.",
+      "friction": "The strain is on your need for things to be settled. The unsettledness is temporary and your reaction to it is out of proportion. Do something physical and dull for an hour.",
+      "easy": "Your footing is good today, so you can afford to feel the whole of something rather than managing it. Let the feeling run its full length instead of cutting it short.",
+      "pull": "What you need and what is being asked of you are at opposite ends of this. Say the need out loud, rather than performing it and hoping somebody notices."
     },
     "mercury": {
-      "charged": "It is landing on how you put things, so the wording matters more today than the point.",
-      "open": "It is reaching the part of you that finds the words, and today they are there.",
-      "friction": "It is your way of putting things under strain, not what you actually mean by them.",
-      "easy": "It lands on how you say things, and the saying is the easy part today.",
-      "pull": "What you want to say and what wants saying are pulling in different directions."
+      "charged": "This landed on how you put things, so the wording matters more today than the point does. Choose the sentence carefully, and then say it exactly once.",
+      "open": "The words are unusually available today. Use them on the thing that has been hard to explain, not on the conversation that was going to be easy anyway.",
+      "friction": "The strain is on how you say things rather than on what you mean. The gap between those two is wider today, so check before you assume you were understood.",
+      "easy": "The saying is the easy part today. Whatever you have not been able to phrase will come out cleanly, so have the conversation while that is still true.",
+      "pull": "Two things you want to say are pulling in different directions, and a sentence containing both will please nobody. Say the more important one and drop the other."
     },
     "venus": {
-      "charged": "It is landing on what you want, which is why it will not stay quiet.",
-      "open": "What you are drawn to is unusually within reach today.",
-      "friction": "It is what you want that is under strain, and wanting has never been a plan.",
-      "easy": "What you want and what is available are close together today.",
-      "pull": "What you want is on one side of this and what you already have is on the other."
+      "charged": "This landed on what you want, which is why it feels less like a decision than usual. Notice that wanting something and it being good for you are separate questions.",
+      "open": "What you are drawn to is unusually accessible today. Move towards it in a small way rather than waiting for a version that arrives fully formed.",
+      "friction": "The strain is on what you want, and today wanting is uncomfortable rather than pleasant. Do not resolve that by buying something or by making a promise you will reread later.",
+      "easy": "What you are drawn to and what is actually available line up today, which does not happen often. Take the pleasant thing without needing to have earned it first.",
+      "pull": "What you want and what you are supposed to want are at opposite ends of this. Say the true one to yourself before you say the acceptable one to anybody else."
     },
     "mars": {
-      "charged": "It is landing on your drive, which is why it will present itself as urgency.",
-      "open": "It is reaching the part of you that pushes, and the push does not have to be forced today.",
-      "friction": "It is your drive taking the resistance, which is why it reads as frustration.",
-      "easy": "It lands on your appetite for effort, and the effort goes in cleanly today.",
-      "pull": "Your pace and somebody else's are at opposite ends of this."
+      "charged": "This landed on your drive, which is why the reaction is arriving ahead of the thought. The push is real and the first thing it aims at is usually the wrong target.",
+      "open": "The push is available today without having to be forced. Point it at the thing that needs starting rather than at the thing that needs winning.",
+      "friction": "The strain is on your drive, so frustration is arriving early and out of proportion. Move your body before you make any decision that involves another person.",
+      "easy": "The push is there and it is not costing you anything today. Use it on the task you have been putting off, rather than on the one that was already moving.",
+      "pull": "Your drive and something else are pulling opposite ways, which is why you feel busy and stationary at the same time. Stop one of the two rather than working harder at both."
     },
     "jupiter": {
-      "charged": "It is landing on the part of you that wants more, and that part is not subtle.",
-      "open": "It is reaching the part of you that wants more room, and the room is genuinely there.",
-      "friction": "It is your appetite for more being checked, and the check is a fair one.",
-      "easy": "It lands where you tend to overreach, and today the reach costs less than usual.",
-      "pull": "It has your appetite for more at one end and your need to hold steady at the other."
+      "charged": "This landed on your appetite for more, and today that appetite is louder than your judgement. The instinct to expand is worth listening to and not worth acting on before evening.",
+      "open": "The part of you that wants more room has some today. Ask for the larger version of what you were going to ask for, since the difference in cost is small.",
+      "friction": "The strain is on your optimism, which has been promising things the schedule cannot cover. Cut the plan by a third today and it turns into something that actually happens.",
+      "easy": "Room opens easily today and the temptation is to fill it immediately. Take the opportunity, and leave some of the space unspent.",
+      "pull": "Growth and what you already have are at opposite ends of this. Expanding costs you something real, and today is a good day to say out loud what it costs."
     },
     "saturn": {
-      "charged": "It is landing on the part of you that carries things, and that part is already tired.",
-      "open": "It is reaching the part of you that keeps things standing, and building is unusually easy today.",
-      "friction": "It is the part of you that carries things taking the weight, which is why it feels heavy.",
-      "easy": "It lands on the part of you that counts the cost, and today the cost is low.",
-      "pull": "What is owed and what is wanted are at opposite ends of this."
+      "charged": "This landed on the part of you that keeps promises, so today feels heavier than the tasks warrant. The weight is the point rather than a problem to be solved.",
+      "open": "The discipline is available today without the usual argument about it. Start the thing that needs consistency, since starting is the expensive part of it.",
+      "friction": "The strain is on your patience, and the limit is real rather than a failure of will. Do less today, properly, and stop treating your capacity as a moral question.",
+      "easy": "Structure comes easily today. Build the boring system now, while it costs almost nothing, and it will hold on the days when it would cost a lot.",
+      "pull": "What you owe and what you want are at opposite ends of this. The obligation is real. So is the resentment, and today is the day to say which one you are choosing."
     },
     "uranus": {
-      "charged": "It is landing on the part of you that will not stay put, and that part does not ask first.",
-      "open": "It is reaching the part of you that likes a break in the pattern, and today there is somewhere to put it.",
-      "friction": "It is your dislike of being held in place that is taking the strain.",
-      "easy": "It lands on the part of you that will not stay put, and the change can be made without a fight.",
-      "pull": "What you want to keep and what you want to break are at opposite ends of this."
+      "charged": "This landed on the part of you that will not settle. The urge to change something suddenly is strong today, and it is rarely aimed at the right thing.",
+      "open": "There is room to do it differently today, with less resistance than usual. Change one small thing rather than announcing a new way of working.",
+      "friction": "The strain is on your need for room to move, which is why ordinary constraints feel intolerable today. Do not resign from anything before the weekend.",
+      "easy": "A change that would normally be disruptive is cheap today. Make the alteration you have been circling, and make it small enough to be reversible.",
+      "pull": "Freedom and commitment are at opposite ends of this, and both of them are yours. Naming the trade today prevents the version where you break something to avoid saying it."
     },
     "neptune": {
-      "charged": "It is landing where your edges are softest, and soft edges take a mark easily.",
-      "open": "What you imagine is unusually close to what you could actually do today.",
-      "friction": "It is the part of you that would rather not look directly at it that is taking the strain.",
-      "easy": "It is reaching the softest part of you, and today the generous read of things is the accurate one.",
-      "pull": "What you hope is true and what you can show is true are pulling apart here."
+      "charged": "This landed on the part of you that softens the edges, so the story you tell yourself is more persuasive than usual today. Check the facts before acting on the feeling.",
+      "open": "Your imagination is unusually available today, and unusually accurate. Use it on something that benefits from it, and keep it well away from the arithmetic.",
+      "friction": "The strain is on your sense of what is actually happening. Things are less clear than they feel today, in both directions. Postpone anything that needs a firm number.",
+      "easy": "The soft focus is working for you today rather than against you. Let the ambiguity sit rather than forcing it into a decision this afternoon.",
+      "pull": "What you hope is true and what you can see are at opposite ends of this. Both are informing you. Only one of them should be signing anything."
     },
     "pluto": {
-      "charged": "It is landing on the part of you that does not negotiate, and it does not negotiate.",
-      "open": "Something you keep well below the surface has a way out today that costs nothing.",
-      "friction": "It is your grip on this that is taking the strain, not the thing you are gripping.",
-      "easy": "You can go a long way down today without it costing you the climb back.",
-      "pull": "What you will not let go of and what will not stay is the whole of this."
+      "charged": "This landed on the part of you that does not do things by halves. What it touches gets changed rather than adjusted, which is worth knowing before you start.",
+      "open": "There is a way through something entrenched today, and it is available rather than easy. Take the smaller version of the confrontation while the door is open.",
+      "friction": "The strain is on the part of you that holds on hardest. The grip will not be argued away today. Notice what you are protecting before you defend it again.",
+      "easy": "Something normally immovable will move today if you push steadily at it. Pick the entrenched thing rather than the convenient one.",
+      "pull": "Control and letting go are at opposite ends of this, and both of them feel like survival. You will not settle it today. Say what you are actually afraid of losing."
     },
     "ascendant": {
-      "charged": "It is landing on the face you meet the day with, so this is visible before it is understood.",
-      "open": "It lands on how you come across, and that is easier to steer today than usual.",
-      "friction": "It is the gap between how you land and how you meant to land that is taking the strain.",
-      "easy": "You are being read accurately today, which is rarer than it sounds.",
-      "pull": "It has how you arrive at one end and what is being asked of you at the other."
+      "charged": "This landed on how you come across, which is the first thing anybody gets from you and the hardest to correct afterwards. Whatever you lead with today is what people take away.",
+      "open": "How you come across is easy to steer today. Turn up as you are rather than as the arranged version, and it will be received better than usual.",
+      "friction": "The strain is in the gap between how you meant to land and how you did. That gap is wider today, so ask rather than assuming you were read correctly.",
+      "easy": "You land well today with very little effort. Spend that on a room you have been avoiding, rather than on the one where you are already comfortable.",
+      "pull": "How you appear and how you actually are have come apart today. Do not fix that by performing harder. Say the plainer thing and let the appearance catch up."
     },
     "midheaven": {
-      "charged": "It is landing on your standing, so whatever this is, it happens in public.",
-      "open": "It is reaching your standing, and the version of you other people describe has room to move.",
-      "friction": "It is your sense of what you should have built by now that is taking the strain.",
-      "easy": "What you have been doing quietly is legible to other people today.",
-      "pull": "What you are doing and what you are known for are pulling in different directions."
+      "charged": "This landed on your standing, which means it plays out in public rather than privately. What becomes visible today is what gets remembered, so choose what you make visible.",
+      "open": "Your standing has room in it today. Ask for the thing that changes what people think you do, because that ask is unusually cheap this morning.",
+      "friction": "The strain is on your reputation rather than on your work. Those are different problems and only one of them is fixed by working harder. Go and talk to somebody.",
+      "easy": "What you are seen doing and what you are actually doing line up today. Take the credit while that is true, plainly and without a speech attached.",
+      "pull": "What you do and what you are known for have come apart. Both are real. Decide which one you want to be true a year from now, and give that one the better hours."
     }
   }
 }
