@@ -1,0 +1,73 @@
+/* ═══════════════════════════════════════════════════════════
+   BASE — tokens, reset, and the two or three things every page shares.
+
+   Two colours: ink and pearl. Every piece of chrome is one of them at some opacity, and the
+   only real colour anywhere is the Oglet itself — plus the seven rarity tiers, which are the
+   one place colour is allowed back into the chrome.
+
+   **Nothing on this site is smaller than 12px.** Not a label, not a caption, not a percentage.
+   Type that has to be leaned into is not "quiet", it is just hard to read.
+   ═══════════════════════════════════════════════════════════ */
+
+:root{
+  --ink:#0b0b0d;                       /* the page */
+  --well:#070708;                      /* the canvas, and anything sunk into the page */
+  --pearl:246 243 236;                 /* held as parts so opacity can vary per use */
+  --txt:rgb(var(--pearl));
+  --txt-2:rgb(var(--pearl) / .8);
+  --txt-3:rgb(var(--pearl) / .66);
+  --hair:rgb(var(--pearl) / .13);
+  --hair-2:rgb(var(--pearl) / .3);
+  --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  --bar:54px;
+  --ease:cubic-bezier(.22,.9,.24,1);
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--ink);color:var(--txt);font-family:var(--mono);font-size:13px;
+     display:flex;flex-direction:column;overflow:hidden;
+     -webkit-user-select:none;user-select:none;overscroll-behavior:none}
+body.sheet-open{overflow:hidden}
+::selection{background:rgb(var(--pearl) / .22);color:var(--txt)}
+
+main{flex:1 1 auto;min-height:0;position:relative}
+.view{position:absolute;inset:0}
+.view[hidden]{display:none}
+
+/* Any view that scrolls does it inside itself — the page body never moves. */
+.scroller{height:100%;overflow-y:auto;overscroll-behavior:contain;
+          scrollbar-width:thin;scrollbar-color:rgb(var(--pearl) / .22) transparent}
+
+h1,h2,h3{font-weight:400;margin:0}
+a{color:inherit}
+
+/* the small uppercase label above a block — 12px is the floor, so this is the floor */
+.kicker{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-3);margin:0}
+
+.btn{display:inline-block;font:inherit;font-size:13px;letter-spacing:.16em;text-transform:uppercase;
+     color:var(--txt-2);text-decoration:none;background:none;cursor:pointer;
+     border:1px solid var(--hair);border-radius:3px;padding:12px 20px;
+     transition:color .18s,border-color .18s,background-color .18s,transform .18s var(--ease)}
+.btn:hover{color:var(--txt);border-color:var(--hair-2)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:1px solid var(--hair-2);outline-offset:2px;color:var(--txt)}
+.btn-primary{background:var(--txt);color:var(--ink);border-color:var(--txt)}
+.btn-primary:hover{background:rgb(var(--pearl) / .88);border-color:rgb(var(--pearl) / .88);color:var(--ink)}
+.btn-quiet{font-size:12px;letter-spacing:.14em;padding:8px 12px}
+
+/* ── rarity ──────────────────────────────────────────────
+   Seven tiers, and five steps of pearl brightness were never tellable apart at a glance. Every
+   colour below clears 8:1 on ink, and the star count carries the same information for anyone
+   who cannot separate the hues. The classes are doubled on purpose: `.card .rr` is a two-class
+   selector, so a single `.t2` would lose the specificity fight and every tier would be pearl. */
+.t0.t0{color:rgb(var(--pearl) / .74)}   /* Common — the absence of colour is itself the signal */
+.t1.t1{color:#6fdd9b}                   /* Uncommon */
+.t2.t2{color:#6fb6ff}                   /* Rare */
+.t3.t3{color:#c79bff}                   /* Epic */
+.t4.t4{color:#ffc95c}                   /* Legendary */
+.t5.t5{color:#ff7ae0}                   /* Void */
+.t6.t6{color:#ff5c4d;text-shadow:0 0 14px rgb(255 92 77 / .55)}   /* God */
+
+.stars{font-style:normal;font-size:12px;letter-spacing:.14em;white-space:nowrap}
+.stars.dim{color:rgb(var(--pearl) / .34)}

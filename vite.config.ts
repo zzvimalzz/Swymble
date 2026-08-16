@@ -136,6 +136,30 @@ function isSubdomainAppSource(subdomainRoot: string) {
 }
 
 /**
+ * Does this subdomain actually own the requested path?
+ *
+ * INTERNAL_PATH_PREFIXES exists to keep Vite's own machinery (`/@vite`, `/@fs/`, the main
+ * site's `/src/`) from being rewritten onto a subdomain. But a plain subdomain is a whole site
+ * of its own, and `src/` is the obvious name for its modules — oglets serves
+ * `/src/main.js` from its own folder. So an internal-looking path is only refused when the
+ * subdomain has no such file; `/@vite/client` never does, and `/src/main.js` under
+ * oglets.localhost always does.
+ */
+function subdomainOwnsPath(subdomain: string, requestUrl: string, allowBuiltSubdomain?: boolean) {
+  const pathname = new URL(requestUrl, 'http://swymble.local').pathname
+  const roots = [path.join(SUBDOMAINS_SOURCE_ROOT, subdomain)]
+
+  if (allowBuiltSubdomain) {
+    roots.push(path.resolve(__dirname, 'dist', 'subdomains', subdomain))
+  }
+
+  return roots.some((root) => {
+    const resolved = path.resolve(root, `.${pathname}`)
+    return resolved.startsWith(root) && fs.existsSync(resolved) && fs.statSync(resolved).isFile()
+  })
+}
+
+/**
  * A plain subdomain is copied to dist wholesale, which would otherwise publish its test files
  * alongside the site — they import vitest, they are meaningless to a browser, and they would be
  * crawlable. Source folders named `tests` and any `*.test.js` are left behind; everything else,
@@ -200,7 +224,14 @@ function createStaticSubdomainPlugin(): Plugin {
     const subdomain = resolveSubdomainFromHost(request.headers.host)
     const requestUrl = request.url ?? '/'
 
-    if (!subdomain || INTERNAL_PATH_PREFIXES.some((prefix) => requestUrl.startsWith(prefix))) {
+    if (!subdomain) {
+      return
+    }
+
+    if (
+      INTERNAL_PATH_PREFIXES.some((prefix) => requestUrl.startsWith(prefix)) &&
+      !subdomainOwnsPath(subdomain, requestUrl, options.allowBuiltSubdomain)
+    ) {
       return
     }
 

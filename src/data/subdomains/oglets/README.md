@@ -15,14 +15,30 @@ build copies this folder verbatim to `dist/subdomains/oglets/`
 `package.json`, and leaves `tests/` behind). Zero dependencies, zero network
 calls.
 
-Two files:
+Everything is native ES modules — no bundler, no transpile. That means the page
+must be served over HTTP, never opened over `file://`, and that an import needs
+its real `.js` extension.
 
-- `genome.js` — the pure layer. Gene tables, `encode`/`decode`, the name bank,
-  the storage shape. No DOM, so the repo's vitest suite covers it
-  (`tests/genome.test.js`, run by `npm test` at the root). It is loaded as a
-  plain ES module, which needs no build — but it does mean the page must be
-  served over HTTP, not opened over `file://`.
-- `index.html` — markup, CSS, and everything that draws or moves.
+```
+index.html            the shell: nav bar, three views, nothing else
+src/
+  main.js             the entry — wires pages to the one animation loop
+  core/               math, Spring, colour, the two canvas colours
+  genome/             genes · tiers · roll · codec · names · hash  (pure, tested)
+  state/              storage (pure, tested) · session (this browser's Oglet)
+  emotions/           expressions · drives · face
+  render/             eye geometry · Body
+  behaviour/          oglet · attention · social · sleep · separate
+  world/              stage · canvas · input · loop · world
+  ui/                 router · home · genome-page · sheet · thumbs
+  styles/             base · nav · home · world · genome
+tests/                run by `npm test` at the repo root
+```
+
+The dividing line: **`genome/` and `state/storage.js` are pure and covered by
+vitest; everything else draws, moves or touches the DOM.** This project has no
+DOM test environment, so anything worth testing has to be extracted into a pure
+function first.
 
 ## Run it
 
@@ -38,17 +54,31 @@ npm run build             # writes dist/subdomains/oglets/
 npm run preview           # then http://localhost:4173/subdomains/oglets/
 ```
 
+## The four pages
+
+Routing is by hash — `#/`, `#/world`, `#/genome` — on real `<a>`
+links, so a page can be shared and read by a crawler.
+
+| Page | What it is |
+| --- | --- |
+| **Home** | The landing, and the only page with no bar on it — a door does not need a menu. The name, and one button. The O of the wordmark is an eye that follows your cursor and blinks (`ui/home.js`, CSS transitions, no ticker); Enter opens the world out of the button itself (`ui/transition.js`). A first-time visitor starts here; a returning one goes straight to the world. |
+| **World** | The live canvas. One Oglet, drag and poke, its own attention and moods. |
+| **Genome** | Your Oglet at size — id, traits, rarity — then every mutation it could have drawn. Built the first time it is opened. Each card is a real render, in a circle, with one mutation changed; tap one to open it and read its lore. |
+
 ## Inside it
 
 | Piece | What it does |
 | --- | --- |
-| `GENES` | The four categorical genes — shape, pupil, palette, finish — and their weights. Weights are the *only* source of rarity. |
-| `encode` / `decode` | Nine characters, both ways. The code is what gets stored and what the Genome tab prints, so the two can never disagree. |
-| `Body` | Genome + expression + gaze + blink. Draws an Oglet and knows nothing about the world, so the catalogue thumbnails reuse it. |
-| `Oglet` | One inhabitant: drives, sleep phases, solo behaviour, social states (`approach` → `engage` → `play`), drag and poke. |
-| Genome tab | Built lazily on first open; thumbnails idle at 30fps and skip anything off-screen. |
+| `genome/genes.js` | The four categorical genes — shape, pupil, eye colour, pupil colour — their bands and lore. A mutation declares its tier; its weight is derived from the band. A gene carries at least two mutations of every tier. The interface calls these **mutations**; the data model keeps `allele`, because inheritance will need the word. |
+| `genome/derive.js` | **An Oglet is a hash.** 128 CSPRNG bits, stored as its id, and `genomeOf(id)` redraws the exact creature forever. Every gene reads its own stream (`streamFor(id, gene)`), which is what lets a gene be added later without redrawing anybody — and what lets an Oglet age from the same id via an epoch. |
+| `genome/tiers.js` / `rarity.js` | Seven tiers cut by occurrence, and an Oglet's own rarity scored one trait at a time rather than by multiplying odds. `.docs/Oglets-Plan/03-GENOME.md` has the tables. |
+| `genome/codec.js` | The first release's nine-character code, both ways. Still read, because an Oglet from before ids existed keeps the face it has always had. |
+| `render/body.js` | Genome + expression + gaze + blink. Draws an Oglet and knows nothing about the world, so the thumbnails and the landing portrait reuse it. |
+| `behaviour/oglet.js` | One inhabitant: drives, sleep phases, solo behaviour, social states (`approach` → `engage` → `play`), drag and poke. |
+| `world/stage.js` | The three shared mutables: `view`, `ptr`, `population`. Mutate in place, never reassign. |
+| `world/loop.js` | One `requestAnimationFrame` for the whole site. Each view registers a ticker and decides whether the frame concerns it. |
 
-Two rules worth keeping:
+Three rules worth keeping:
 
 1. **The expression system is lid geometry.** The upper lid's inner and outer
    heights move independently, and the gap between those two numbers *is* the
@@ -57,13 +87,17 @@ Two rules worth keeping:
    `bond`, `cheer`, `ignored`, `annoy`, `lonely` — and sadness in particular only
    comes from being ignored while you are on the page. An Oglet by itself is
    content by itself.
+3. **Rarity is never declared.** A tier is a *reading* of an allele's weight.
+   Nothing in the roller consults `tiers.js`.
+4. **Nothing on the site is smaller than 12px.** Type that has to be leaned into
+   is not quiet, it is missing.
 
 ## Yours
 
-One Oglet, rolled on first visit, stored under `oglets:v1` as its code alone.
-An unreadable or outdated code hatches a new one rather than throwing. There is
-deliberately no reroll button: being able to replace it on a whim is what would
-stop it mattering.
+One Oglet, hatched on first visit and stored under `oglets:v2` as its id alone —
+no appearance is saved, because the id redraws it. An unreadable or outdated
+record hatches a new one rather than throwing. There is deliberately no reroll
+button: being able to replace it on a whim is what would stop it mattering.
 
 ## Deploying
 

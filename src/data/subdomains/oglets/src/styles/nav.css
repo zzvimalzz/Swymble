@@ -1,0 +1,42 @@
+/* ═══════════════════════════════════════════════════════════
+   THE BAR — title left, pages right, one hairline under it.
+
+   The landing has no bar at all: it is a door, and a door does not need a menu. The title is
+   the way back to it from anywhere else.
+   ═══════════════════════════════════════════════════════════ */
+
+.topbar{flex:0 0 auto;height:var(--bar);display:flex;align-items:center;justify-content:space-between;
+        gap:12px;padding:0 16px;border-bottom:1px solid var(--hair);
+        background:var(--ink);position:relative;z-index:2}
+body[data-route="home"] .topbar{display:none}
+
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--txt);
+       padding:6px 2px;border-radius:3px}
+.brand:focus-visible{outline:1px solid var(--hair-2);outline-offset:2px}
+.brand svg{display:block;width:24px;height:17px;flex:0 0 auto}
+.brand-name{font-size:17px;letter-spacing:.14em;text-transform:lowercase}
+.brand:hover .brand-eye-pupil{transform:translateX(1.1px)}
+.brand-eye-pupil{transition:transform .25s ease}
+
+/* The underline is one element that slides between the links rather than a border that blinks
+   on and off. `--ink-x` / `--ink-w` are written by ui/router.js from the active link's box. */
+.routes{position:relative;display:flex;align-items:center;gap:2px}
+.routes::after{content:"";position:absolute;left:0;bottom:0;height:1px;background:var(--txt);
+               width:var(--ink-w,0);transform:translateX(var(--ink-x,0));
+               opacity:var(--ink-o,0);
+               transition:transform .42s var(--ease),width .42s var(--ease),opacity .25s ease}
+.routes a{font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-3);
+          text-decoration:none;padding:10px 12px;transition:color .28s var(--ease)}
+.routes a:hover{color:var(--txt-2)}
+.routes a.on{color:var(--txt)}
+.routes a:focus-visible{outline:1px solid var(--hair-2);outline-offset:2px;color:var(--txt)}
+
+@media (prefers-reduced-motion:reduce){
+  .routes::after{transition:opacity .2s ease}
+}
+
+@media (max-width:400px){
+  .topbar{padding:0 12px}
+  .routes a{padding:10px 9px;letter-spacing:.12em}
+  .brand-name{font-size:15px}
+}

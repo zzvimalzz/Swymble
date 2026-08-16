@@ -1,0 +1,47 @@
+/* ═══════════════════════════════════════════════════════════
+   THE LANDING — the name, and the way in. Nothing else.
+
+   Every word that is not the name or the button was removed on purpose: the site explains
+   itself by being opened, and a creature is a poor thing to describe in a paragraph.
+   ═══════════════════════════════════════════════════════════ */
+
+.home{padding:0 20px}
+.home-inner{min-height:100%;display:flex;flex-direction:column;align-items:center;
+            justify-content:center;gap:clamp(52px,12vh,96px);padding:48px 0}
+
+/* The O is an eye. The SVG sits in the ordinary text flow on the baseline and is exactly the
+   letters' x-height, so it reads as an `o` first and as an eye a beat later — which is the
+   joke. Do not turn this into a flex row; baseline alignment is what makes it work.
+
+   4.8em of line at 17vw is the widest the word can be and still clear a 390px phone. */
+.wordmark{font-size:clamp(54px,17vw,116px);line-height:1;text-transform:lowercase;
+          letter-spacing:.2em;text-indent:.2em;text-align:center}
+/* .6em wide is one mono advance, so the eye occupies an `o`'s slot exactly and the letter
+   spacing on either side of it matches every other pair. */
+.eye{display:inline-block;width:.6em;height:.58em;vertical-align:baseline;color:var(--txt)}
+/* the lid is a scaleY on the whole eye — cheapest blink there is, and it reads as one */
+.eye-lid{transform-box:fill-box;transform-origin:center;transition:transform .085s ease}
+.wordmark.blink .eye-lid{transform:scaleY(.06)}
+.eye-pupil{transition:transform .34s cubic-bezier(.22,.9,.3,1)}
+
+.enter{min-width:230px;text-align:center;padding:18px 26px;font-size:17px;letter-spacing:.26em}
+
+/* top left — a way back out that never competes with the way in */
+.back{position:absolute;top:18px;left:18px;
+      font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-3);
+      text-decoration:none;padding:6px 4px;transition:color .18s}
+.back:hover{color:var(--txt-2)}
+.back:focus-visible{outline:1px solid var(--hair-2);outline-offset:2px;color:var(--txt)}
+
+.no-js{color:var(--txt-3);font-size:12px;letter-spacing:.05em;margin:0;text-align:center}
+
+/* the cover the world opens out of, and the hairline riding its edge — see ui/transition.js */
+.wipe{position:fixed;inset:0;z-index:30;pointer-events:none}
+.wipe-ring{position:fixed;z-index:31;pointer-events:none;border-radius:50%;
+           border:1px solid rgb(var(--pearl) / .3);
+           transform:translate(-50%,-50%) scale(0)}
+
+@media (max-width:420px){
+  .home{padding:0 16px}
+  .back{top:12px;left:12px}
+}
