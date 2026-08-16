@@ -66,6 +66,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://swymble.com/labs/oglets</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://swymble.com/labs/territory</loc>
     <lastmod>2026-05-01</lastmod>
     <changefreq>monthly</changefreq>

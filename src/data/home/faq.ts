@@ -33,7 +33,7 @@ export const SWYMBLE_FAQ: SwymbleFaqEntry[] = [
   {
     question: 'What is Swymble Labs?',
     answer:
-      'Swymble Labs is the research and development side of Swymble: independent products built outside client work. It currently includes Cortex, an AI platform with persistent long-context memory; MyDompet, an offline-first money tracker for Android and iOS; Territory, a fitness app that turns movement into map territory; MyBirth, an archive of the day you were born; what2watch, an interactive wall of films and shows; and Watch Paint Dry, a deliberately pointless relaxation toy. Each has its own page at swymble.com/labs.',
+      'Swymble Labs is the research and development side of Swymble: independent products built outside client work. It currently includes Cortex, an AI platform with persistent long-context memory; MyDompet, an offline-first money tracker for Android and iOS; Territory, a fitness app that turns movement into map territory; MyBirth, an archive of the day you were born; what2watch, an interactive wall of films and shows; Watch Paint Dry, a deliberately pointless relaxation toy; and Oglets, a small creature made of eyes that lives in your browser. Each has its own page at swymble.com/labs.',
   },
   {
     question: 'Who runs Swymble?',
