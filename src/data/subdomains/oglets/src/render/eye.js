@@ -15,7 +15,16 @@
 
 import { TAU } from '../core/math.js'
 
-/** Half the angle between the two eyes on the imaginary head sphere. */
+/**
+ * Half the angle between the two eyes on the imaginary head sphere.
+ *
+ * **It is the travel dial, and it is not the separation dial** — which is the opposite of what it
+ * looks like. Resting separation is `sin(φ) · Rh` and `Rh` is `half / sin(φ)`, so the sine cancels
+ * and where the eyes sit at rest depends only on the gap gene. What φ actually decides is how big
+ * the sphere is under them: a *smaller* φ is a *bigger* head, so the same turn of gaze carries the
+ * eyes further across the creature and foreshortens the far one harder. A Soulless lowers it for
+ * exactly that reason — see `render/soulless.js`.
+ */
 export const PHI = 0.42
 /** How far a gaze of ±1 turns the head, in radians. */
 export const YAW = 0.5
@@ -25,11 +34,11 @@ export const PITCH = 0.34
  * Places one eye on a sphere and returns its projected normal. `m` is -1 or +1 — the side.
  * This is what makes an Oglet turn rather than slide: the far eye genuinely foreshortens.
  */
-export function eyeXform(m, yaw, pitch) {
+export function eyeXform(m, yaw, pitch, phi = PHI) {
   const ca = Math.cos(yaw)
   const sa = Math.sin(yaw)
-  const n0x = m * Math.sin(PHI)
-  const n0z = Math.cos(PHI)
+  const n0x = m * Math.sin(phi)
+  const n0z = Math.cos(phi)
   const nx = n0x * ca + n0z * sa
   let nz = -n0x * sa + n0z * ca
   const cb = Math.cos(pitch)
@@ -118,7 +127,7 @@ export function roundedPoly(ctx, pts, radii) {
    across a flame took the tongue off and left a stump. Flames is gone and it was the only user,
    so the hook went with it — every shape here now wears the standard lid. Bring it back the
    moment a radial shape lands (a star wants `'shrink'`: close by scaling from the centre); the
-   design is in `03-GENOME.md` §7. */
+   design is in `.docs/OGLETS.md` §6. */
 
 /**
  * A lid, as a clipping region. `a` and `bv` are its inner and outer heights — the gap between
@@ -152,7 +161,7 @@ export function lidPath(ctx, rx, ry, m, a, bv, upper, bell = 0) {
      rise is a height and a wide short eye (Slab is 1.24 × 0.76) would otherwise spread a small
      rise over a long span and flatten it back into the bar this exists to replace. This is a
      patch on the real problem — lid depths are still read against the eye's nominal size rather
-     than the shape's, which is item 1 in `04-EMOTION.md` §4.
+     than the shape's, which is item 1 in `.docs/OGLETS.md` §11.
 
      **Wider than the eye, on purpose.** At 0.7 the gaussian had decayed to 13% by the eye's edge,
      so the lid ran flat along the corners and then spiked in the middle — two hard changes of
@@ -453,6 +462,60 @@ export function drawSphereShading(ctx, rx, ry) {
   ctx.beginPath()
   ctx.ellipse(0, 0, rx * 0.955, ry * 0.955, 0, Math.PI * 0.06, Math.PI * 0.92)
   ctx.stroke()
+  ctx.restore()
+}
+
+/**
+ * A CAPSULE — a stadium: a rectangle whose two short ends are exact semicircles. The shape bloub's
+ * eyes are, and the one a **Soulless** wears, where the outline itself carries the expression
+ * rather than a lid drawn across it.
+ *
+ * `hw`/`hh` are half-dimensions, `tilt` is in radians and applied in the eye's own plane, and
+ * `squash` is a vertical squeeze **in screen space** — applied outside the rotation, because a
+ * blink flattens what you see rather than shortening the capsule along its own axis. That ordering
+ * is bloub's and it is why a tilted eye closes into a horizontal dash instead of a diagonal one.
+ */
+export function capsulePath(ctx, hw, hh, tilt = 0, squash = 1, bow = 0) {
+  ctx.save()
+  if (squash !== 1) ctx.scale(1, squash)
+  if (tilt) ctx.rotate(tilt)
+  const w = Math.max(hw, 0.01)
+  const h = Math.max(hh, 0.01)
+  const r = Math.min(w, h)
+
+  if (bow <= 0.001) {
+    ctx.beginPath()
+    roundedPoly(ctx, [[-w, -h], [w, -h], [w, h], [-w, h]], [r, r, r, r])
+    ctx.restore()
+    return
+  }
+
+  /* THE ARCH — a capsule bent upward in the middle, and the only way a Soulless can smile.
+     A lidded Oglet smiles by raising its lower lid into a dome (`lidPath`'s bell). There is no lid
+     here, so the eye itself has to be the curve: at 30° of tilt a narrowed capsule is a scowl and
+     at 14° it is very nearly the same scowl, which is exactly the complaint — happy and angry were
+     the same shape at different angles. Bent, it is a different shape.
+
+     Built as one closed outline rather than a stroked arc so it fills like every other eye and
+     morphs out of a plain capsule as `bow` springs from zero. The stadium is a Minkowski sum of a
+     segment and a disc — for each angle, the end of the spine in that direction plus `r` — and the
+     bow is a parabola in x subtracted from y, which lifts the middle and leaves the ends alone. */
+  const sx = w - r
+  const sy = h - r
+  const lift = bow * (h + r) * 1.35
+  const N = 56
+  ctx.beginPath()
+  for (let i = 0; i <= N; i++) {
+    const a = (i / N) * Math.PI * 2
+    const ca = Math.cos(a)
+    const sa = Math.sin(a)
+    const x = Math.sign(ca) * sx + ca * r
+    const u = x / w
+    const y = Math.sign(sa) * sy + sa * r - lift * (1 - u * u)
+    if (i === 0) ctx.moveTo(x, y)
+    else ctx.lineTo(x, y)
+  }
+  ctx.closePath()
   ctx.restore()
 }
 

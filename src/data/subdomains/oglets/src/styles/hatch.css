@@ -51,6 +51,10 @@ body[data-route="hatch"] .topbar{display:none}
 .eggrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px;margin-bottom:6px}
 .eggcard{border:1px solid var(--hair);border-radius:4px;padding:12px 8px;
          display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+/* Soulless — silver, and the only shell above God. Every other border names a hue; this one names
+   the absence of one, which is the whole joke the creature inside it is. */
+.eggcard[data-tier="t7"]{border-color:rgb(236 240 248 / .78);
+                         box-shadow:0 0 18px rgb(236 240 248 / .2)}
 .eggcard[data-tier="t6"]{border-color:rgb(255 92 77 / .5)}
 .eggcard[data-tier="t5"]{border-color:rgb(255 122 224 / .38)}
 .eggcard[data-tier="t4"]{border-color:rgb(255 201 92 / .34)}

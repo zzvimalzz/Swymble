@@ -2,7 +2,7 @@
 
    Two ways to meet one, and neither of them is a slot machine:
 
-   1. **Your own Oglet's four traits** are known the moment it hatches. You live with them.
+   1. **Your own Oglet's five traits** are known the moment it hatches. You live with them.
    2. **Opening a card** on the Genome page meets that allele. Looking is the verb, because
       there is no reroll button in this game to spam — one deliberate pass through the
       catalogue is exploration, not a grind, and it leaves you with a page you have *been*

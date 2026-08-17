@@ -13,7 +13,7 @@
 
    **Changing a list changes what existing ids draw for that gene**, because a weighted draw
    walks the whole table. That is fine while this is new; once there is an audience, a table
-   change needs a generation stamp beside the id and the old table kept. See `03-GENOME.md`.
+   change needs a generation stamp beside the id and the old table kept. See `.docs/OGLETS.md` §2.
 
    ── eye shape geometry ──
    A shape picks one of four path modes — see `render/eye.js`. The default is four beziers
@@ -217,6 +217,50 @@ export const GENES = {
     { id: 'spectrum', name: 'Spectrum', tier: 'god', god: 'prism', prism: 180,
       lore: 'The centre runs the whole wheel, half a turn behind whatever the eye around it is doing.' },
   ],
+
+  /* ═══════════════════════════════════════════════════════
+     BODY — **a sparse gene**, and the only one.
+
+     `.docs/OGLETS.md` §1 opens with the rule this appears to break: an Oglet is a pair of eyes with a
+     soul bolted on, and there is no body. That rule stands. Ninety-eight and a half percent of
+     Oglets draw `bare` and are exactly what they have always been; a body is a **Legendary-and-
+     below event**, the rarest thing on the creature, and the shape it wears is negative space
+     around the eyes rather than a face with eyes stuck on it. The eyes are still the whole face —
+     `render/body.js` clips them to the silhouette, so an eye that swings wide is cut by the body
+     it lives in, the way bloub's are cut by its mask.
+
+     **How "sparse" works.** Every other gene fills all seven bands. This one populates the last
+     three and nothing else, and `assignWeights()` lets the four empty bands fall to the default
+     allele — so `bare` holds 0.6 + 0.25 + 0.1 + 0.035 = **0.985** of every roll without anybody
+     writing 0.985 down. `TIER_QUOTA.sparse` names the exemption.
+
+     **One body per rare tier**, which is why there are three and not ten: the band a body sits in
+     is the whole statement about it. Circle is the Legendary you might actually meet, Cloud is the
+     Void you will not, and Wisp is a God-line rendering. A second body in any band would blur the
+     only axis this gene has, and that is why the sparse rule does not ask for two.
+
+     **`bare` must stay at index 0.** `geneOf()` degrades to it, and `codec.js` gives it to every
+     nine-character code that predates this gene. That is what keeps every Oglet hatched before
+     today looking precisely as it does.
+
+     `form` names a silhouette in `render/silhouette.js#FORMS`; the geometry is there and not here,
+     so this file stays pure and free of ray casting.
+     ═══════════════════════════════════════════════════════ */
+  body: [
+    { id: 'bare', name: 'Bare', tier: 'common',
+      lore: 'No body at all, which is what an Oglet is. Everything below is a rumour that turned out to be true.' },
+
+    { id: 'circle', name: 'Circle', tier: 'legendary', form: 'circle',
+      lore: 'A body, and nothing said about it. The plainest thing an Oglet can be that is not nothing.' },
+    { id: 'cloud', name: 'Cloud', tier: 'void', form: 'cloud',
+      lore: 'Weather, and it does not disperse. A Cloud Oglet is always fractionally warmer than the room it is in.' },
+    /* God-line, and a rendering rather than a shape like every other God mutation: `live` sends
+       the outline through `silhouette.js#breatheProfile` every frame. It is the mutation that
+       could not exist without profiles — a body that is a different shape every frame is only
+       cheap because every shape is 64 numbers. */
+    { id: 'wisp', name: 'Wisp', tier: 'god', god: 'wisp', form: 'wisp', live: 'wisp',
+      lore: 'It has no shape, only shapes. Nothing has ever seen the same Wisp twice, including the Wisp.' },
+  ],
 }
 
 /* No mechanics table any more. A card used to print `width ×1.08 · height ×0.94` under the
@@ -226,7 +270,7 @@ export const GENES = {
    the odds because they always vary — nobody is lucky for having a slightly wider eye gap. */
 /* Append new genes to the END: a first-release nine-character code has no character for one,
    and `decode()` reads the characters it has and defaults the rest. */
-export const CATS = ['shape', 'pupil', 'iris', 'core']
+export const CATS = ['shape', 'pupil', 'iris', 'core', 'body']
 
 /* Human labels for the Genome page, so the copy is not derived from the key name. */
 export const CAT_LABELS = {
@@ -234,6 +278,7 @@ export const CAT_LABELS = {
   pupil: { title: 'Pupil', note: 'the look' },
   iris: { title: 'Eye colour', note: 'the body of the eye' },
   core: { title: 'Pupil colour', note: 'the centre' },
+  body: { title: 'Body', note: 'almost never' },
 }
 
 /* Continuous genes and their ranges. One table, used by the roller, the encoder and the
@@ -257,10 +302,20 @@ export const CODED = ['gap', 'pupilSize', 'pace', 'temper', 'sociable']
  */
 function assignWeights() {
   for (const alleles of Object.values(GENES)) {
+    let unclaimed = 0
     for (const tier of TIERS) {
       const inBand = alleles.filter((a) => a.tier === tier.id)
+      /* An EMPTY band's share is not lost — it falls to the gene's default allele. That is the
+         whole mechanism behind a sparse gene (`body`): populate Legendary and below, leave the
+         four common bands empty, and `bare` ends up holding 98.5% of the roll without anybody
+         writing 0.985 anywhere. Weights still sum to exactly 1, which is a test. */
+      if (!inBand.length) {
+        unclaimed += tier.spawn
+        continue
+      }
       for (const allele of inBand) allele.w = tier.spawn / inBand.length
     }
+    if (unclaimed > 0) alleles[0].w += unclaimed
   }
 }
 assignWeights()

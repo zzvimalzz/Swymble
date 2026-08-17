@@ -17,7 +17,16 @@
 .mine{display:flex;gap:22px;align-items:center;flex-wrap:wrap;margin-bottom:30px}
 .mine-stage{width:176px;height:176px}
 .mine-body{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
-.mine-name{font-size:30px;letter-spacing:.1em;line-height:1}
+/* The name is editable, and looks like the heading it replaced until you put a caret in it. A
+   field that announces itself with a border and a button would make renaming the loudest thing on
+   a page that is about the creature. */
+.mine-rename{display:block;width:100%}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.mine-name{font:inherit;font-size:30px;letter-spacing:.1em;line-height:1.15;color:var(--txt);
+           width:100%;max-width:100%;background:none;border:0;border-bottom:1px solid transparent;
+           padding:0 0 2px;transition:border-color .18s}
+.mine-name:hover{border-bottom-color:var(--hair)}
+.mine-name:focus{outline:none;border-bottom-color:var(--hair-2)}
 
 .verdict-head{margin:0;font-size:17px;letter-spacing:.12em;text-transform:uppercase;
               display:flex;align-items:center;gap:10px;flex-wrap:wrap}

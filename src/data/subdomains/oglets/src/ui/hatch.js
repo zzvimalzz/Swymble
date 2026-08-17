@@ -9,18 +9,19 @@
    tier, so the wait is not a loading bar — it is a five-minute tell, and a red shell glowing
    through its cracks means something before it opens.
 
-   Three ways out, and all three matter (see `05-HATCHING.md` §5): tapping brings it forward and
+   Three ways out, and all three matter (see `.docs/OGLETS.md` §9): tapping brings it forward and
    the credit is banked so a reload keeps it, leaving and coming back finds it further along
    because progress is derived from a timestamp, and `Skip` still *breaks* the shell rather than
    dissolving to the world.
    ═══════════════════════════════════════════════════════════ */
 
-import { clamp, rand } from '../core/math.js'
+import { approach, clamp, rand } from '../core/math.js'
 import { WELL } from '../core/theme.js'
-import { rarityOf } from '../genome/index.js'
+import { SOULLESS_TIER, rarityOf } from '../genome/index.js'
 import { hash } from '../genome/index.js'
 import { drawEgg, drawShards, shellFor } from '../render/egg.js'
 import { Body } from '../render/body.js'
+import { soulOf } from '../render/soulless.js'
 import { mine, persist } from '../state/session.js'
 import { createStageCanvas } from '../world/canvas.js'
 import { addTicker } from '../world/loop.js'
@@ -36,7 +37,7 @@ import {
   progressOf,
   remainingOf,
 } from './hatch-beats.js'
-import { PORTRAIT_SCALE } from './thumbs.js'
+import { fitScale } from './thumbs.js'
 
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -56,7 +57,10 @@ const minutes = (s) => {
  * is what restarts the clock display for somebody coming back to a half-grown egg.
  */
 export function mountHatch(host, { onHatched } = {}) {
-  const tier = rarityOf(mine.genome).tier
+  /* A Soulless gets its own shell — the Void's with the colour taken out — and it is the one egg
+     on the site that tells you exactly what is in it rather than merely how rare it is. */
+  const soul = soulOf(mine.id)
+  const tier = soul ? SOULLESS_TIER : rarityOf(mine.genome).tier
   const seed = hash(`egg:${mine.id}`)
   const shell = shellFor(tier.id)
 
@@ -84,7 +88,7 @@ export function mountHatch(host, { onHatched } = {}) {
 
   /* The creature, built once and kept: at the reveal it is drawn by the same `Body` the world
      uses, so the thing that comes out of the shell is the thing you are about to be given. */
-  const body = new Body(mine.genome)
+  const body = new Body(mine.genome, { theme: soul })
   body.expr = 'startled'
   body.exprUntil = 1e9
 
@@ -180,7 +184,7 @@ export function mountHatch(host, { onHatched } = {}) {
       thump(0.5 + beat.rock * 0.7)
     }
     state.kick = Math.max(0, state.kick - dt * 2.6)
-    state.lurch *= 1 - Math.min(1, dt * 4)
+    state.lurch = approach(state.lurch, 0, 4, dt)
 
     /* ── paint ─────────────────────────────────────────── */
     ctx.clearRect(0, 0, SIZE, SIZE)
@@ -198,7 +202,7 @@ export function mountHatch(host, { onHatched } = {}) {
       // the pop is timed off the swap, so it is nearly over by the time you can see again
       const pop = 1 + Math.max(0, 1 - (lit - FLASH.up) * 1.5) * 0.14
       ctx.scale(pop, pop)
-      body.draw(ctx, SIZE * PORTRAIT_SCALE, t)
+      body.draw(ctx, SIZE * fitScale(body), t)
     } else {
       const rock = calm ? 0 : beat.rock
       const tilt = Math.sin(t * (1.1 + rock * 1.6)) * 0.05 * rock + state.lurch * 0.09

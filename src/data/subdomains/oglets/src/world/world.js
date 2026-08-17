@@ -11,6 +11,7 @@ import { separate } from '../behaviour/separate.js'
 import { clamp, rand } from '../core/math.js'
 import { WELL } from '../core/theme.js'
 import { SLEPT_AWAY, awayFor, firstMeeting, mine, trackBond } from '../state/session.js'
+import { soulOf } from '../render/soulless.js'
 import { createWorldCanvas } from './canvas.js'
 import { bindPointer } from './input.js'
 import { addTicker } from './loop.js'
@@ -23,7 +24,9 @@ const GREETABLE_ABSENCE = 60e3
 export function createWorld(canvas, { isActive, onFirstTouch } = {}) {
   const { ctx, resize } = createWorldCanvas(canvas)
 
-  const me = new Oglet(mine.genome, 0.07, { x: 0, y: 0 })
+  /* One in ten million is Soulless — a rendering rather than a trait, drawn from its own stream
+     on the id. See `render/soulless.js`. */
+  const me = new Oglet(mine.genome, 0.07, { x: 0, y: 0 }, { theme: soulOf(mine.id) })
   me.drive.bond = mine.bond
   population.push(me)
 

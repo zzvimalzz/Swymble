@@ -83,15 +83,22 @@ describe('the order', () => {
     expect(new Set(order).size).toBe(COMBO_COUNT)
   })
 
+  /* One assertion for half a million comparisons, on purpose: `expect()` costs microseconds and
+     the space grew elevenfold when the `body` gene landed, so calling it per item turned a
+     millisecond loop into a nine-second one and timed the suite out. The failure message carries
+     the offending index, which is the only thing the per-item version gave that this does not. */
   it('runs commonest first, and never goes backwards', () => {
+    let bad = null
     let prev = comboScore(order[0])
-    for (let i = 1; i < order.length; i++) {
+    for (let i = 1; i < order.length && bad === null; i++) {
       const cur = comboScore(order[i])
-      expect(cur.points).toBeGreaterThanOrEqual(prev.points)
       // within a score, the likelier one leads
-      if (cur.points === prev.points) expect(cur.chance).toBeLessThanOrEqual(prev.chance + 1e-15)
+      if (cur.points < prev.points || (cur.points === prev.points && cur.chance > prev.chance + 1e-15)) {
+        bad = `at ${i}: ${prev.points}pts/${prev.chance} then ${cur.points}pts/${cur.chance}`
+      }
       prev = cur
     }
+    expect(bad).toBeNull()
   })
 
   it('is stable across calls — the same array, not a fresh sort', () => {

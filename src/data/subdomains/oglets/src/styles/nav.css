@@ -36,7 +36,19 @@ body[data-route="home"] .topbar{display:none}
 }
 
 @media (max-width:400px){
-  .topbar{padding:0 12px}
-  .routes a{padding:10px 9px;letter-spacing:.12em}
+  .topbar{padding:0 12px;gap:8px}
+  .routes a{padding:10px 8px;letter-spacing:.1em;font-size:13px}
   .brand-name{font-size:15px}
+}
+
+/* ── 360px and under ────────────────────────────────────────
+   **The wordmark goes and the eye stays.** At 320 the title plus three page names came to 350px
+   against a 320px screen, so the bar pushed the whole document sideways — every page scrolled
+   horizontally by 30px, which on a touchscreen reads as the layout being broken rather than as a
+   long bar. The eye is the mark, it still links home, and three page names that fit beat a title
+   that shoves one of them off the edge. Type stops at 12px, which is this project's floor. */
+@media (max-width:360px){
+  .brand-name{display:none}
+  .brand{gap:0}
+  .routes a{font-size:12px;padding:10px 6px;letter-spacing:.08em}
 }

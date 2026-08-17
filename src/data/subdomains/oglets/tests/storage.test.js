@@ -1,4 +1,37 @@
 import { describe, expect, it } from 'vitest'
+import { cleanName } from '../src/state/storage.js'
+
+/* A chosen name is the first thing about an Oglet that is **not** derived from its id, so it is
+   also the first thing that has to be cleaned: it is stored, and later rendered into the page. */
+describe('a name somebody typed', () => {
+  it('keeps letters, digits and the marks a name actually uses', () => {
+    expect(cleanName('Pobble')).toBe('Pobble')
+    expect(cleanName("O'Nix")).toBe("O'Nix")
+    expect(cleanName('Jean-Luc 2')).toBe('Jean-Luc 2')
+    expect(cleanName('Ünter Ω 김')).toBe('Ünter Ω 김')
+  })
+
+  it('drops anything that could be markup, because this ends up in the page', () => {
+    expect(cleanName('</h2><script>')).toBe('h2script')
+    expect(cleanName('a&b"c`d')).toBe('abcd')
+    // asserted as a property rather than a string: the 18-character cap truncates this one, and
+    // what matters is that nothing left in it can open a tag or close an attribute
+    for (const nasty of ['<img src=x onerror=alert(1)>', '" onmouseover="x', '${alert(1)}', 'a<b>c']) {
+      expect(cleanName(nasty), nasty).not.toMatch(/[<>&"`${}()=/\\]/)
+    }
+  })
+
+  it('tidies whitespace and caps the length', () => {
+    expect(cleanName('   spaced   out   ')).toBe('spaced out')
+    expect(cleanName('x'.repeat(60))).toHaveLength(18)
+  })
+
+  it('returns nothing usable as empty, so the caller falls back to the derived name', () => {
+    for (const bad of ['', '   ', '<<<>>>', null, undefined, 42, {}]) {
+      expect(cleanName(bad), String(bad)).toBe('')
+    }
+  })
+})
 import { encode, genomeOf, nameOf, newId, randomGenome } from '../src/genome/index.js'
 import { LEGACY_KEY, STORAGE_KEY, packOglet, unpackOglet } from '../src/state/storage.js'
 

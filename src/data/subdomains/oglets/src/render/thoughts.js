@@ -18,10 +18,13 @@ const RISE = 3.4 // seconds for one mark to travel its whole arc
  * @param {number} R the body radius in pixels
  * @param {number} t seconds
  * @param {number} seed the Oglet's own seed, so its thoughts are its own
+ * @param {number} edge how far out the creature actually reaches, in pixels. Marks are placed
+ *   against THIS and sized against `R`: on a bodied Oglet the silhouette is three times the eye
+ *   radius, and a thought placed in eye radii is a thought drawn inside the body.
  * @param {number} amount 0…1 ramp
  * @param {string} colour taken from the eye, so the thought belongs to the creature
  */
-export function drawThoughts(ctx, R, t, seed, amount, colour) {
+export function drawThoughts(ctx, R, t, seed, amount, colour, edge = R) {
   if (amount <= 0.01) return
 
   ctx.save()
@@ -40,9 +43,9 @@ export function drawThoughts(ctx, R, t, seed, amount, colour) {
     if (fade <= 0.02) continue
 
     const size = R * (0.5 + i * 0.1) * (0.74 + phase * 0.44)
-    const sway = Math.sin(phase * 5.2 + i * 2.1) * R * 0.16
-    const x = R * (0.46 + i * 0.24) + sway
-    const y = -R * (0.95 + phase * 1.05)
+    const sway = Math.sin(phase * 5.2 + i * 2.1) * edge * 0.16
+    const x = edge * (0.42 + i * 0.22) + sway
+    const y = -edge * (1.04 + phase * 0.66)
 
     ctx.globalAlpha = amount * fade * 0.85
     ctx.font = `700 ${size.toFixed(2)}px ui-rounded, "Nunito", system-ui, sans-serif`

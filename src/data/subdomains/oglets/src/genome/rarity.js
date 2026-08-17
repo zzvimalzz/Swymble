@@ -17,7 +17,7 @@ import { CATS, GENES, geneOf } from './genes.js'
 import { tierById, tierIndex, tierOfAllele } from './tiers.js'
 
 /**
- * Score → tier. Cut against the real tables, not by feel: four genes, each carrying at least two
+ * Score → tier. Cut against the real tables, not by feel: five genes, four of them carrying at least two
  * mutations of every tier, gives a score whose distribution is known exactly, and the steps are
  * placed so the verdicts come out in roughly the same proportions as the spawn bands themselves —
  * Common 57%, Uncommon 29%, Rare 11%, Epic 2.7%, Legendary 0.6%, Void 0.1%.

@@ -58,6 +58,22 @@ export const SHELLS = {
     name: 'God', lite: '#ffe2c0', mid: '#ff8a4c', dark: '#93240f', accent: '#ffc46a',
     glow: '#ff6a3c', heat: 1, pattern: 'drips', relief: 'scales',
   },
+  /**
+   * SOULLESS — the Void's shell with the colour taken out of it, and the only egg that tells you
+   * exactly what is in it rather than merely how rare it is.
+   *
+   * Black and white on purpose, and it is the same joke the creature is: everything the other seven
+   * shells say with a hue, this one has to say with nothing. It keeps Void's swirl and facets so it
+   * still reads as belonging to the top of the ladder, and it burns nearly as hot as God's — an egg
+   * this rare should not look calm.
+   *
+   * **Only ever seen around a Soulless**, because `SOULLESS_TIER` is not something a genome can
+   * score: you get this shell if and only if you drew the one-in-ten-million.
+   */
+  soulless: {
+    name: 'Soulless', lite: '#ffffff', mid: '#c9c9cd', dark: '#0a0a0c', accent: '#f4f4f6',
+    glow: '#ffffff', heat: 0.9, pattern: 'swirl', relief: 'facets',
+  },
 }
 
 export const shellFor = (tierId) => SHELLS[tierId] ?? SHELLS.common

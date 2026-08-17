@@ -14,8 +14,9 @@ import {
   CAT_LABELS,
   GENES,
   chanceText,
+  SOULLESS_CHANCE,
+  SOULLESS_TIER,
   TIERS,
-  combinations,
   geneOf,
   groupId,
   hash,
@@ -24,8 +25,9 @@ import {
   tierOfAllele,
 } from '../genome/index.js'
 import { SHELLS } from '../render/egg.js'
+import { SOULLESS, soulOf, soullessGenome } from '../render/soulless.js'
 import { discover, isFound, progressOf, totalProgress } from '../state/dex.js'
-import { mine } from '../state/session.js'
+import { mine, rename, shareCode } from '../state/session.js'
 import { createSheet } from './sheet.js'
 import { paletteFor, specimen } from './specimen.js'
 import { EggThumb, PORTRAIT_SCALE, PupilThumb, Thumb } from './thumbs.js'
@@ -46,11 +48,16 @@ const dateOf = (ms) =>
 /* ── your Oglet ─────────────────────────────────────────── */
 
 function hero(host, thumbs) {
-  const thumb = new Thumb(mine.genome, 176, { scale: PORTRAIT_SCALE, expressive: true })
+  const mySoul = soulOf(mine.id)
+  const thumb = new Thumb(mine.genome, 176, { scale: PORTRAIT_SCALE, expressive: true, theme: mySoul })
   thumbs.push(thumb)
 
   const chance = odds(mine.genome)
-  const { traits, tier } = rarityOf(mine.genome)
+  /* A Soulless has no verdict of its own: rarity is scored from traits and it has replaced all of
+     them with a rendering. So the verdict is simply what it is, and the trait tags below still
+     list the genes underneath — they are still true, they are just not what you are looking at. */
+  const { traits } = rarityOf(mine.genome)
+  const tier = mySoul ? SOULLESS_TIER : rarityOf(mine.genome).tier
 
   const section = document.createElement('section')
   section.className = 'mine'
@@ -61,8 +68,15 @@ function hero(host, thumbs) {
 
   const body = document.createElement('div')
   body.className = 'mine-body'
+  /* **The name is the one thing here you can change**, so it is an input rather than a heading —
+     it looks like the heading it replaced until you put a caret in it, which is what stops the
+     page growing a button to say something the field can say by being editable. */
   body.innerHTML = `
-    <h2 class="mine-name">${mine.name}</h2>
+    <label class="mine-rename">
+      <span class="sr">Name</span>
+      <input class="mine-name" value="${mine.name}" maxlength="18" spellcheck="false"
+             autocomplete="off" aria-label="Your Oglet's name">
+    </label>
 
     <p class="verdict-head"><span class="${tier.c}">${tier.name}</span> ${stars(tier)}</p>
 
@@ -85,10 +99,29 @@ function hero(host, thumbs) {
 
     <p class="since">Yours since ${dateOf(mine.born)}</p>`
 
+  /* Committed on blur and on Enter rather than on every keystroke: a name is a decision, and
+     writing storage once per character would also mean the world's Zzz changing mid-word. */
+  const field = body.querySelector('.mine-name')
+  const commit = () => {
+    field.value = rename(field.value)
+  }
+  field.addEventListener('blur', commit)
+  field.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') field.blur()
+    if (e.key === 'Escape') {
+      field.value = mine.name
+      field.blur()
+    }
+  })
+
+  /* **Copying gives you `shareCode()`, not the bare id.** The id alone redraws the creature
+     perfectly — it always has — but it cannot carry a name you chose, because the name is derived
+     from the id rather than stored in it. A renamed Oglet therefore copies as `id~Name`, and an
+     unrenamed one copies as exactly the id it always did. See `state/session.js#shareCode`. */
   const copy = body.querySelector('.idcopy')
   copy.addEventListener('click', async () => {
     try {
-      await navigator.clipboard.writeText(mine.id)
+      await navigator.clipboard.writeText(shareCode())
       copy.textContent = 'Copied'
       setTimeout(() => (copy.textContent = 'Copy'), 1800)
     } catch {
@@ -178,6 +211,7 @@ const SHELL_LORE = {
   legendary: 'The veins run gold all the way through the shell, which should make it brittle. It is not.',
   void: 'Two colours that do not occur together anywhere else, and a shell that is cold to the touch.',
   god: 'It has been about to open since before you found it, and the cracks have never once cooled.',
+  soulless: 'The Void shell with the colour taken out. Whatever is in it is not going to look back at you.',
 }
 
 /** A shell, opened. Its own viewer rather than `ui/sheet.js`, which is about mutations. */
@@ -237,7 +271,10 @@ function eggSheet(thumbs) {
 }
 
 function eggs(host, thumbs) {
-  const yours = rarityOf(mine.genome).tier
+  /* Your shell is your verdict — except that a Soulless has no verdict, because it is not scored
+     from traits. It gets its own tier and its own egg, and that egg only ever holds one thing. */
+  const yours = soulOf(mine.id) ? SOULLESS_TIER : rarityOf(mine.genome).tier
+  const shelves = [...TIERS, SOULLESS_TIER]
   const sheet = eggSheet(thumbs)
 
   const head = document.createElement('h2')
@@ -245,12 +282,15 @@ function eggs(host, thumbs) {
   head.innerHTML = `
     <span class="gene-title">Eggs</span>
     <span class="gene-note">what it was in</span>
-    <span class="gene-count">${TIERS.length} shells</span>`
+    <span class="gene-count">${shelves.length} shells</span>`
+
+  const rule = document.createElement('div')
+  rule.className = 'gene-bar'
 
   const row = document.createElement('div')
   row.className = 'eggrow'
 
-  for (const tier of TIERS) {
+  for (const tier of shelves) {
     const card = document.createElement('button')
     card.type = 'button'
     card.className = 'eggcard'
@@ -280,13 +320,65 @@ function eggs(host, thumbs) {
     row.appendChild(card)
   }
 
-  host.append(head, row)
-  host.insertAdjacentHTML(
-    'beforeend',
-    `<p class="note">A shell is drawn from the tier of the creature already inside it, and speckled
-      from that creature's own seed — so two Legendary eggs are the same kind of thing and not the
-      same egg. The cracks on the last three glow.</p>`,
-  )
+  host.append(head, rule, row)
+}
+
+/* ── the Soulless ───────────────────────────────────────────
+   A category on this page that is **not a gene**. Nothing here is rolled, weighted or scored, and
+   none of it enters the dex — a Soulless is a way of drawing the whole creature, not a mutation it
+   can carry, and `render/soulless.js` explains why that distinction is load-bearing rather than
+   pedantic. It is placed after the genes and before the eggs, because it is the one section on
+   this page that is about how an Oglet is *drawn* rather than what it is. */
+
+function soulless(host, thumbs, ctx) {
+  const mySoul = soulOf(mine.id)
+  const head = document.createElement('h2')
+  head.className = 'gene-head'
+  head.innerHTML = `
+    <span class="gene-title">Soulless</span>
+    <span class="gene-note">not a mutation</span>
+    <span class="gene-count">${chanceText(SOULLESS_CHANCE)}</span>`
+
+  const rule = document.createElement('div')
+  rule.className = 'gene-bar'
+
+  const grid = document.createElement('div')
+  grid.className = 'grid'
+
+  for (const theme of SOULLESS) {
+    const card = document.createElement('button')
+    card.type = 'button'
+    card.className = 'card'
+    // the same light in the corner a mutation you carry gets — and nobody will ever see it
+    if (mySoul?.id === theme.id) {
+      card.classList.add('yours')
+      card.title = 'You are this'
+    }
+
+    const stage = document.createElement('div')
+    stage.className = 'orb card-stage'
+    const thumb = new Thumb(soullessGenome(), 104, { scale: PORTRAIT_SCALE, theme })
+    thumbs.push(thumb)
+    stage.appendChild(thumb.canvas)
+
+    /* The same three lines a mutation card carries, because a reader comparing them should not
+       have to work out that this one is measured differently. The occurrence shown is the chance
+       of being Soulless **at all** rather than of being this particular one: which of the three
+       you get is a coin toss after a one-in-ten-million, and the ten million is the number. */
+    const meta = document.createElement('div')
+    meta.className = 'card-meta'
+    meta.innerHTML = `
+      <span class="nm">${theme.name}</span>
+      <span class="rr ${SOULLESS_TIER.c}">${SOULLESS_TIER.name}</span>
+      ${stars(SOULLESS_TIER)}
+      <span class="pc">${chanceText(SOULLESS_CHANCE)}</span>`
+
+    card.append(stage, meta)
+    card.addEventListener('click', () => ctx.sheet.openSoul(theme))
+    grid.appendChild(card)
+  }
+
+  host.append(head, rule, grid)
 }
 
 function section(host, cat, ctx) {
@@ -341,13 +433,9 @@ export function buildGenomePage(host, thumbs) {
   host.appendChild(dexHead)
 
   for (const cat of CATS) section(host, cat, ctx)
+  soulless(host, thumbs, ctx)
   eggs(host, thumbs)
 
-  host.insertAdjacentHTML(
-    'beforeend',
-    `<p class="note">${combinations().toLocaleString()} combinations. A trait is rare because
-      it is rare, not because a table says so.</p>`,
-  )
 
   ctx.refreshProgress()
 }

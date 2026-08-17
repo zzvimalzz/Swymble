@@ -45,8 +45,26 @@ const WINDOW = 1.7
 /** How far outside its own radius the stroke still counts — a pet does not have to be accurate,
     and it leans toward your cursor while you do it, so the target is moving under your hand. */
 const REACH = 1.7
+/**
+ * How long after leaving it a stroke still counts.
+ *
+ * **This is what makes petting work on a phone**, and its absence is why it did not. A stroke is
+ * measured by *reversals*, and on a touchscreen you sweep a finger a good deal wider than the
+ * creature — so the reversal happens off to the side, outside `REACH`, where the old code wiped
+ * the direction and the stroke history entirely. Every pass was therefore discarded and the
+ * counter never reached two, no matter how long you rubbed at it.
+ *
+ * Reversals are now counted wherever the pointer is, and only the *crediting* is gated on having
+ * been over the creature recently. A wide sweep across it counts; a wide sweep somewhere else
+ * still counts for nothing.
+ *
+ * 0.9s, and generously: a finger sweeping a phone travels a good deal further than the creature is
+ * wide, so most of each pass is spent off it. Anything tighter and a wide stroke fails on exactly
+ * the gesture this exists to support.
+ */
+const GRACE = 0.9
 
-export const createPet = () => ({ dir: 0, at: 0, strokes: [], level: 0, was: null })
+export const createPet = () => ({ dir: 0, at: 0, strokes: [], level: 0, was: null, nearAt: -9, crossed: false })
 
 /** True while it is actually being stroked, which is the only time the face is worn. */
 export const isPetted = (o) => o.pet.level > 0.5
@@ -64,6 +82,7 @@ export function updatePet(o, dt, now) {
     p.level = Math.max(0, p.level - dt * 0.9)
     p.was = null
     p.dir = 0
+    p.crossed = false
   }
 
   if (o.phase !== 'awake' || o.game.on || o.drive.annoy > 0.4) return fade()
@@ -88,17 +107,46 @@ export function updatePet(o, dt, now) {
     }
     p.was = null
   } else {
-    if (!ptr.in || Math.hypot(ptr.x - o.cx, ptr.y - o.cy) >= o.rad * REACH) return fade()
+    /* Free-handed. On a desktop this is the pointer sweeping across it without pressing; **on a
+       phone it is a press that started somewhere else** and is now travelling over it — pressing
+       the creature itself picks it up, so the only way to stroke one on a touchscreen without
+       holding it is to come at it from off to the side. That gesture now works, and it is what
+       `GRACE` is for. */
+    if (!ptr.in) return fade()
+    if (Math.hypot(ptr.x - o.cx, ptr.y - o.cy) < o.rad * REACH) {
+      p.nearAt = now
+      p.crossed = true
+    }
+
+    /* **A stroke is a pass ACROSS it, and that is both halves of this rule.**
+       The reversal may happen anywhere — a finger on a phone sweeps far wider than the creature,
+       and requiring the turn to land on it threw away every pass. But the reversal only counts if
+       the hand has actually been over the creature *since the last one*, which is what stops a
+       cursor waggling nearby, or one pass and a wave, from reading as affection. `crossed` is
+       consumed by the reversal it earns, so two strokes really is two passes. */
     if (p.was !== null) {
       const dx = ptr.x - p.was
       const speed = Math.abs(dx) / Math.max(dt, 1e-3)
       if (speed > SLOW && speed < FAST) {
         const dir = Math.sign(dx)
-        if (p.dir !== 0 && dir !== p.dir) p.strokes.push(now)
+        if (p.dir !== 0 && dir !== p.dir && p.crossed) {
+          p.strokes.push(now)
+          p.crossed = false
+        }
         p.dir = dir
       }
     }
     p.was = ptr.x
+
+    /* And none of it counts unless the hand has actually been over the creature lately. Note this
+       stops the *crediting* and does not wipe `strokes` — they expire on `WINDOW` like everything
+       else. Wiping here was the first attempt and it recreated the original bug in miniature: a
+       sweep wide enough to reverse well clear of the creature spends most of a second outside it
+       per pass, so the history was being thrown away between strokes instead of at the edge. */
+    if (now - p.nearAt > GRACE) {
+      p.level = Math.max(0, p.level - dt * 0.9)
+      return
+    }
   }
   p.strokes = p.strokes.filter((t) => now - t < WINDOW)
 

@@ -6,7 +6,7 @@
 
 import { TAU, pick, rand } from '../core/math.js'
 import { WELL } from '../core/theme.js'
-import { Body } from '../render/body.js'
+import { BARE_FRAME, Body } from '../render/body.js'
 import { drawEgg, drawShards, shellFor } from '../render/egg.js'
 import { drawPupil } from '../render/eye.js'
 import { createStageCanvas } from '../world/canvas.js'
@@ -22,19 +22,32 @@ import { flashAt, flashCovers } from './hatch-beats.js'
  */
 export const PORTRAIT_SCALE = 0.155
 
+/**
+ * The same frame, whatever is standing in it.
+ *
+ * `PORTRAIT_SCALE` was derived against a creature 2.8 eye-radii to its far corner, which is every
+ * Oglet that has no body — 98.5% of them. One with a body is over three, so it would cross the rim
+ * of its circle. Dividing by the creature's own static `frame` fits the rare ones and leaves the
+ * common ones **bit-identical**, which matters: nothing already on the site should move because a
+ * gene was added that it does not carry.
+ */
+export const fitScale = (body, base = PORTRAIT_SCALE) => (base * BARE_FRAME) / body.frame
+
 export class Thumb {
   /**
    * `expressive` lets it smile now and then. Catalogue cards leave it off on purpose: a raised
    * lower lid hides the bottom of the very silhouette the card exists to show.
    */
-  constructor(genome, size, { scale = PORTRAIT_SCALE, dprCap = 2, expressive = false, palette } = {}) {
+  constructor(genome, size, { scale = PORTRAIT_SCALE, dprCap = 2, expressive = false, palette, theme } = {}) {
     const { canvas, ctx } = createStageCanvas(size, dprCap)
     this.canvas = canvas
     this.ctx = ctx
     this.size = size
-    this.scale = scale
+    this.base = scale
     this.expressive = expressive
-    this.body = new Body(genome, { palette })
+    this.theme = theme ?? null
+    this.body = new Body(genome, { palette, theme })
+    this.scale = fitScale(this.body, scale)
     this.next = rand(0, 4)
     this.phase = rand(0, 10) // so a grid of them does not blink in unison
   }
@@ -42,13 +55,18 @@ export class Thumb {
   /**
    * Point an existing Thumb at a different creature, keeping its canvas.
    *
-   * `#/gallery` walks 46,648 combinations through a pool of about fifty of these, so a scroll
+   * `#/gallery` walks 186,592 combinations through a pool of about fifty of these, so a scroll
    * must not allocate a canvas per card — that is megabytes a second and a garbage collector
    * pause you can feel. Rebuilding the `Body` is only field setup and one hash.
    */
-  retarget(genome, palette) {
+  retarget(genome, palette, theme = null) {
     const old = this.body
-    this.body = new Body(genome, { palette })
+    // the theme is re-set rather than kept: `#/gallery` walks past the Soulless at the very end of
+    // the wall, so one pooled card has to be able to become one and stop being one again
+    this.theme = theme
+    this.body = new Body(genome, { palette, theme })
+    // the new creature may be a bodied one, and a card that swaps to one has to re-fit its frame
+    this.scale = fitScale(this.body, this.base)
     /* **Carry the motion across.** A fresh Body starts with its gaze centred, its springs at rest
        and its blink timer reset, so a card that swapped creature mid-scroll visibly *snapped* —
        fifty of them doing it at once made the whole wall twitch every time it moved. The state
@@ -297,8 +315,8 @@ export class HatchThumb {
           this.body.glance(this.body.S.tx, this.body.S.ty)
         }
         this.body.update(dt, t)
-        // PORTRAIT_SCALE, like every other thumbnail: the scale that keeps a wide shape in frame
-        this.body.draw(x, s * PORTRAIT_SCALE, t)
+        // fitted like every other thumbnail, so a bodied creature comes out of the shell in frame
+        this.body.draw(x, s * fitScale(this.body), t)
       } else {
         drawEgg(x, R, t, { tier: this.tier, seed: this.seed, cracks: 6, open })
         if (open > 0) drawShards(x, R, this.seed, open, this.tier)

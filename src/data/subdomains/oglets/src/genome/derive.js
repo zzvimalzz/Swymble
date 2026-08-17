@@ -84,6 +84,26 @@ export function genomeOf(id, { epoch = 0 } = {}) {
   return g
 }
 
+/**
+ * WHETHER AN OGLET IS SOULLESS, and which one — an index into the theme list, or −1.
+ *
+ * A Soulless is **not a gene**: it is not in `GENES`, never enters `odds()`, has no allele and no
+ * weight, and adding one would have broken the tier quota and the combination count for something
+ * that is a *rendering* rather than a trait. So it is drawn from its own stream instead, exactly
+ * like a gene would be — which keeps every property the id is supposed to have. It is pure, it is
+ * stable forever, it needs nothing stored, and because the stream is its own, adding this did not
+ * disturb a single existing Oglet.
+ *
+ * One in ten million. See `SOULLESS_TIER`.
+ */
+export const SOULLESS_CHANCE = 1e-7
+
+export function soullessIndex(id, count) {
+  if (!(count > 0)) return -1
+  const draw = streamFor(String(id).trim().toLowerCase(), 'soulless')
+  return draw() < SOULLESS_CHANCE ? Math.floor(draw() * count) % count : -1
+}
+
 /** A new Oglet: its identity, and the creature that identity draws. */
 export function hatchId() {
   const id = newId()

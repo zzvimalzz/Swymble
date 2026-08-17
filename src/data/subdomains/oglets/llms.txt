@@ -22,13 +22,26 @@ greet it or when it is playing; cross when it is mashed; sad only when you are
 on the page and not coming near. An Oglet alone is perfectly content on its own.
 
 **Genome** is your Oglet's own page, and then every mutation it could have been
-drawn with. It shows the creature at size, its name, its four traits as tags
+drawn with. It shows the creature at size, its name, its five traits as tags
 with how often each occurs, its rarity — scored one trait at a time across seven
 tiers from Common to God — the true odds of its exact combination, and its ID.
-Below that are all 59 mutations across four genes — eye shape, pupil, eye
-colour and pupil colour — each a live drawing with its tier, star rating and how common
+Below that are all 63 mutations across five genes — eye shape, pupil, eye
+colour, pupil colour and body — each a live drawing with its tier, star rating and how common
 it is. Open one and it tells you where it is supposed to have come from.
 Mutations you have not met yet stay hidden until you do.
+
+Almost every Oglet has no body at all: it is a pair of eyes, and that is the
+species. About one in sixty-seven carries a silhouette instead — a Circle, a
+Cloud or a Wisp — and the eyes become the holes it is made of rather than
+features laid on top of it. It is the rarest thing an Oglet can have.
+
+There is also a **Soulless**, and it is the rarest thing here by a wide margin:
+0.00001%, one in ten million, in a tier of its own above God. It is not a
+mutation — it is a theme, a way of drawing the whole creature, white-bodied with
+ink capsules for eyes and no pupil at all. Having no pupil, it expresses with the
+*shape* of its eyes rather than with lids. It comes out of its own black-and-
+white egg, which is the one shell on the site that tells you exactly what is in
+it rather than merely how rare it is.
 
 The eye shapes are Round, Egg, Bean, Capsule, Dome, Arch, Block, Diamond, Slab,
 Bud, Wedge and Sphere (a genuinely three-dimensional eye, lit and shaded). The pupils are Dot, Oval, Slit, Bar, Ring, Square, Rhomb,

@@ -6,7 +6,7 @@
    stop it mattering. */
 
 import { hatchId, nameOf } from '../genome/index.js'
-import { LEGACY_KEY, STORAGE_KEY, packOglet, unpackOglet } from './storage.js'
+import { LEGACY_KEY, STORAGE_KEY, cleanName, packOglet, unpackOglet } from './storage.js'
 
 const store = {
   read() {
@@ -70,6 +70,34 @@ export function persist() {
   if (bondSource) mine.bond = bondSource() ?? mine.bond
   mine.seen = Date.now()
   store.write(mine)
+}
+
+/**
+ * Rename it. Returns the name that stuck — a blank or unusable one puts back the name its id
+ * draws, so there is always something to call it and nothing to undo.
+ */
+export function rename(value) {
+  mine.name = cleanName(value) || nameOf(mine.id)
+  persist()
+  return mine.name
+}
+
+/**
+ * **The Oglet, as one string you can carry somewhere else.**
+ *
+ * An id alone redraws the creature perfectly — that is the whole design — but it cannot carry a
+ * name you chose, because the name is derived *from* the id and not stored in it. So a renamed
+ * Oglet copies as `id~Name`: the id is unchanged and still the only thing that decides what the
+ * creature looks like, with the name riding alongside rather than inside it. An Oglet still
+ * wearing the name it was born with copies as the bare id, exactly as before.
+ */
+export const shareCode = () =>
+  mine.name === nameOf(mine.id) ? mine.id : `${mine.id}~${mine.name}`
+
+/** The inverse. Total: anything unusable comes back as a bare id and no name. */
+export function readShareCode(code) {
+  const [id, ...rest] = String(code ?? '').trim().split('~')
+  return { id: id.toLowerCase(), name: cleanName(rest.join('~')) }
 }
 
 export function startPersisting() {

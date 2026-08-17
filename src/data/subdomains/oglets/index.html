@@ -22,6 +22,44 @@
 <link rel="stylesheet" href="./src/styles/genome.css">
 <link rel="stylesheet" href="./src/styles/gallery.css">
 <link rel="stylesheet" href="./src/styles/hatch.css">
+<!--
+  The Assets contact sheet and the Lab bench have NO stylesheet link here on purpose. The build
+  strips every `*.dev.*` file (`vite.config.ts#shouldPublishSubdomainFile`), so a static link would
+  be a 404 on every production load; each page attaches its own instead — `core/dev.js#useDevStyles`.
+-->
+
+<!--
+  WHICH PAGE THIS IS, DECIDED BEFORE THE FIRST PAINT.
+
+  Every view below carries `hidden`, so nothing is on screen until something says which one. That
+  something used to be `ui/router.js` — but this site is native ES modules with no bundler, so the
+  router does not run until forty-odd files have been fetched and parsed. Reloading on `#/genome`
+  therefore painted the landing page first and swapped it out a fifth of a second later, on every
+  refresh, on every tab.
+
+  This runs synchronously in the head instead. It only unhides; it makes no decisions the router
+  will not make again the same way, and the route table below is the same list as `ROUTES`.
+
+  **It has to be an id selector to beat `.view[hidden]{display:none}`, which means it also beats
+  the router hiding that same view later** — so `ui/router.js` deletes this rule the first time it
+  navigates. Without that, the page you first loaded stays painted underneath every page after it.
+  Hence the id below: it is how the router finds this to remove it.
+-->
+<script>
+  ;(function () {
+    var VIEWS = { home: 'viewHome', world: 'viewWorld', genome: 'viewGenome',
+      gallery: 'viewGallery', hatch: 'viewHatch', assets: 'viewAssets', lab: 'viewLab' }
+    var raw = location.hash.replace(/^#\/?/, '').trim().toLowerCase()
+    // A bare URL is the landing, always — see the `initial` note in src/main.js.
+    var boot = Object.prototype.hasOwnProperty.call(VIEWS, raw) ? raw : 'home'
+    document.documentElement.dataset.route = boot
+    var style = document.createElement('style')
+    style.id = 'bootView'
+    style.textContent = '#' + VIEWS[boot] + '[hidden]{display:block}'
+    document.head.appendChild(style)
+  })()
+</script>
+<noscript><style>#viewHome[hidden]{display:block}</style></noscript>
 </head>
 <body data-route="home">
 
@@ -41,6 +79,8 @@
     <a href="#/world" data-route="world">World</a>
     <a href="#/genome" data-route="genome">Genome</a>
     <a href="#/gallery" data-route="gallery">Gallery</a>
+    <a href="#/assets" data-route="assets">Assets</a><!-- temporary -->
+    <a href="#/lab" data-route="lab">Lab</a><!-- temporary -->
   </nav>
 </header>
 
@@ -49,7 +89,7 @@
   <!-- ── HOME ─────────────────────────────────────────────
        A door, not a pitch: the name, and the way in. The O is an eye, and src/ui/home.js is the
        only thing that touches this page — it makes that eye watch you and blink. -->
-  <section class="view scroller home" id="viewHome">
+  <section class="view scroller home" id="viewHome" hidden>
     <a class="back" href="https://swymble.com/labs">← Swymble Labs</a>
 
     <div class="home-inner">
@@ -81,6 +121,22 @@
   <!-- ── GALLERY ────────────────────────────────────────── -->
   <section class="view scroller" id="viewGallery" hidden>
     <div id="gallery"></div>
+  </section>
+
+  <!-- ── ASSETS ─────────────────────────────────────────────
+       TEMPORARY contact sheet. Delete this section, the nav link, the stylesheet above,
+       src/ui/assets.js, src/styles/assets.css and the `assets` entry in src/ui/router.js
+       together. -->
+  <section class="view scroller" id="viewAssets" hidden>
+    <div id="assets"></div>
+  </section>
+
+  <!-- ── LAB ────────────────────────────────────────────────
+       TEMPORARY bench: a throwaway world with a picker for every gene, plus Soulless. Delete this
+       section, the nav link, src/styles/lab.css, src/ui/lab.js and the `lab` entry in
+       src/ui/router.js together. -->
+  <section class="view" id="viewLab" hidden>
+    <div id="lab"></div>
   </section>
 
 </main>

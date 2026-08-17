@@ -33,9 +33,10 @@ function heartPath(ctx, r) {
  * @param {number} t seconds
  * @param {number} seed the Oglet's own seed
  * @param {number} amount 0…1 ramp, from `Body.love`
+ * @param {number} edge how far out the creature actually reaches, in pixels — see `drawThoughts`
  * @param {string} colour taken from the eye, so the fondness belongs to the creature
  */
-export function drawHearts(ctx, R, t, seed, amount, colour) {
+export function drawHearts(ctx, R, t, seed, amount, colour, edge = R) {
   if (amount <= 0.01) return
 
   ctx.save()
@@ -54,8 +55,8 @@ export function drawHearts(ctx, R, t, seed, amount, colour) {
     // a beat: it swells a little twice on the way up, which is the whole reason it is a heart
     const beat = 1 + Math.sin(phase * 12 + i) * 0.09
     const size = R * (0.3 + bits * 0.1) * (0.72 + phase * 0.5) * beat
-    const x = side * R * (0.72 + phase * 0.5) + Math.sin(phase * 3.1 + i * 2) * R * 0.1
-    const y = -R * (0.72 + phase * 1.15)
+    const x = side * edge * (0.72 + phase * 0.5) + Math.sin(phase * 3.1 + i * 2) * edge * 0.1
+    const y = -edge * (1.02 + phase * 0.7)
 
     ctx.globalAlpha = amount * fade * 0.82
     ctx.save()

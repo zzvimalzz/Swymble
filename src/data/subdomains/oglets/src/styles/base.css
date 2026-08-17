@@ -68,6 +68,9 @@ a{color:inherit}
 .t4.t4{color:#ffc95c}                   /* Legendary */
 .t5.t5{color:#ff7ae0}                   /* Void */
 .t6.t6{color:#ff5c4d;text-shadow:0 0 14px rgb(255 92 77 / .55)}   /* God */
+/* Soulless — the only tier above God, and the only one with no hue at all. That is the joke the
+   creature is: everything the seven below say with a colour, this one has to say with none. */
+.t7.t7{color:#ffffff;text-shadow:0 0 18px rgb(255 255 255 / .55)}
 
 .stars{font-style:normal;font-size:12px;letter-spacing:.14em;white-space:nowrap}
 .stars.dim{color:rgb(var(--pearl) / .34)}

@@ -10,16 +10,32 @@
 
 /* ── the wall ───────────────────────────────────────────
    Virtualised: `ui/gallery.js` positions about fifty pooled cards absolutely inside a spacer the
-   full height of all 46,648. **`--gc-cols` and `--gc-row` are the single source of the layout** —
+   full height of all 186,592. **`--gc-cols` and `--gc-row` are the single source of the layout** —
    the script reads them off this element rather than keeping its own copy, so the media queries
    below stay the only place the shape of the grid is decided. Change the card's height and
    `--gc-row` must follow it, or the rows will overlap. */
-.gwall{position:relative;--gc-cols:6;--gc-row:236px}
+/* ── the tools ──────────────────────────────────────────
+   A search and a filter per gene. They sit above the wall and never scroll with it. */
+.gal-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:16px}
+.gal-search{flex:1 1 200px;min-width:0;font:inherit;font-size:13px;color:var(--txt);
+            background:var(--well);border:1px solid var(--hair);border-radius:4px;padding:8px 10px}
+.gal-search::placeholder{color:var(--txt-3)}
+.gal-search:focus-visible{outline:1px solid var(--hair-2);outline-offset:1px}
+.gal-tools select{font:inherit;font-size:12px;color:var(--txt);background:var(--well);
+                  border:1px solid var(--hair);border-radius:4px;padding:7px 8px;max-width:150px}
+.gal-tools .btn{font-size:12px;padding:7px 11px;white-space:nowrap}
+.gal-tools .btn[hidden]{display:none}
+.gal-flip[aria-pressed="true"]{color:var(--txt);border-color:var(--hair-2)}
+.gal-hits{font-size:12px;letter-spacing:.06em;color:var(--txt-3);margin-left:auto;white-space:nowrap}
+.gal-empty{margin:40px 0;text-align:center;font-size:13px;color:var(--txt-3);letter-spacing:.04em}
+.gal-empty[hidden]{display:none}
+
+.gwall{position:relative;--gc-cols:6;--gc-row:252px}
 .gcard{position:absolute;top:0;left:0;width:16.6667%;height:var(--gc-row);
        font:inherit;color:inherit;text-align:center;cursor:pointer;
        background:none;border:1px solid var(--hair);border-radius:4px;padding:14px 10px 12px;
        display:flex;flex-direction:column;align-items:center;gap:10px;
-       transition:border-color .18s;contain:layout paint}
+       transition:border-color .18s;contain:layout paint;overflow:hidden;justify-content:flex-start}
 .gcard[hidden]{display:none}
 .gcard:hover{border-color:var(--hair-2)}
 .gcard:focus-visible{outline:1px solid var(--hair-2);outline-offset:2px}
@@ -31,7 +47,9 @@
 .gcard[data-tier="t5"]{border-color:rgb(255 122 224 / .46)}
 .gcard[data-tier="t6"]{border-color:rgb(255 92 77 / .6);box-shadow:0 0 18px rgb(255 92 77 / .16)}
 
-.gcard-stage{width:120px;height:120px;flex:0 0 auto}
+/* Scales with its column instead of being a fixed 120px, so the three- and two-column layouts
+   have room for the four lines of type underneath rather than clipping the last one. */
+.gcard-stage{width:min(118px,100%);aspect-ratio:1;flex:0 0 auto}
 .gcard-stage canvas{width:100%;height:100%}
 .gcard-meta{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;min-width:0}
 .gcard-no{font-size:12px;letter-spacing:.14em;color:var(--txt-3)}
@@ -39,7 +57,8 @@
             max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gcard-tier{font-size:12px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .gcard-tier .stars{font-size:12px;letter-spacing:.06em}
-.gcard-odds{font-size:12px;letter-spacing:.04em;color:var(--txt-3)}
+.gcard-odds{font-size:12px;letter-spacing:.04em;color:var(--txt-3);
+            max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* The number is real text in the card, not `content: attr(...)` — generated content is not
    reliably announced, and the position in the run is information rather than decoration. */
@@ -55,5 +74,12 @@
 .gal-id .idcode{font-size:12px}
 
 @media (max-width:900px){ .gwall{--gc-cols:4} }
-@media (max-width:620px){ .gwall{--gc-cols:3;--gc-row:210px} .gcard{padding:10px 6px} }
-@media (max-width:420px){ .gwall{--gc-cols:2} }
+@media (max-width:620px){ .gwall{--gc-cols:3;--gc-row:226px} .gcard{padding:10px 6px;gap:8px} }
+/* Below 420 the toolbar becomes two rows of controls rather than one that scrolls: the search
+   takes the whole first line, the selects pair up, and the buttons sit with the count. */
+@media (max-width:420px){
+  .gwall{--gc-cols:2}
+  .gal-search{flex:1 1 100%}
+  .gal-tools select{flex:1 1 44%;max-width:none}
+  .gal-hits{margin-left:0;flex:1 1 100%}
+}

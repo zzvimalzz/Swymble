@@ -5,7 +5,7 @@
    space — it tracks a speck only it can see, daydreams, or goes looking for you.
 
    (`speck` is the behaviour. The bestiary reserves `mote` for the one-eyed form, so the two
-   never share a name — see `.docs/Oglets-Plan/02-BESTIARY.md`.)
+   never share a name — see `.docs/OGLETS.md` §1.)
    ═══════════════════════════════════════════════════════════ */
 
 import { TAU, clamp, pick, rand } from '../core/math.js'

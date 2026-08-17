@@ -14,8 +14,16 @@
    Because it wraps the whole draw, the pupil and the colours go through it too.
    ═══════════════════════════════════════════════════════════ */
 
-/** How many fat pixels across the creature's whole box. Lower is chunkier. */
-const GRID = 22
+/**
+ * How many fat pixels across the creature's whole box. Lower is chunkier.
+ *
+ * **36, not 22.** The grid is fixed while the creature is not: on a 104px catalogue card 22 cells
+ * read as a deliberate low-resolution rendering, and in the world — where an Oglet is three times
+ * that — the same 22 cells become fourteen-pixel blocks and the face stops resolving into a face
+ * at all. A pupil two blocks wide cannot look anywhere. At 36 the chunk is still unmistakably the
+ * mutation and the creature underneath it is legible at every size it is drawn.
+ */
+const GRID = 36
 /** How far past the eye radius the box reaches; must clear the widest gaze. */
 const SPAN = 6.4
 

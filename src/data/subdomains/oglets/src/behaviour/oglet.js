@@ -23,8 +23,9 @@ import { updateSocial } from './social.js'
 const DASH = 250
 
 export class Oglet {
-  constructor(g, scale, seat) {
-    this.body = new Body(g)
+  /** `opts` goes straight to the `Body` — a `theme` for a Soulless, a `palette` for a card. */
+  constructor(g, scale, seat, opts) {
+    this.body = new Body(g, opts)
     this.g = g
     this.scale = scale
     this.seat = seat
@@ -256,6 +257,10 @@ export class Oglet {
     aimGaze(this, dt, now, att)
     this.steer(dt, now, att)
 
+    /* No beat is ever started here. Orbit, Burst and Comet exist and are tested, and nothing an
+       Oglet does plays one — see the note in `render/body.js#update`. `#/assets` is the only
+       caller today, and `#/lab` can fire one by hand. */
+
     this.body.update(dt, now)
     this._rad = Math.max(this.body.radius * this.R * Math.abs(this.b.z), this._rad * 0.985)
   }
@@ -390,7 +395,7 @@ export class Oglet {
       const x = this.cx + hr * 0.62 + Math.sin(p * 3.4 + z.ph) * hr * 0.2
       const y = this.cy - hr * 0.72 - p * hr * 1.45
       ctx.globalAlpha = Math.sin(p * Math.PI) * 0.7
-      ctx.fillStyle = this.body.cols(t, 1).e
+      ctx.fillStyle = this.body.accent(t)
       ctx.font = `600 ${size.toFixed(1)}px ui-monospace,Menlo,monospace`
       ctx.fillText('z', x, y)
     }
