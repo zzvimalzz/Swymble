@@ -4,6 +4,7 @@
    ═══════════════════════════════════════════════════════════ */
 
 import { DEV, DEV_ROUTES } from './core/dev.js'
+import { watchVersion } from './core/version.js'
 import { seedFromMine } from './state/dex.js'
 import { firstMeeting, mine, persist, startPersisting } from './state/session.js'
 import { buildGalleryPage } from './ui/gallery.js'
@@ -167,3 +168,7 @@ document.addEventListener('visibilitychange', () => {
 
 startPersisting()
 startLoop()
+
+/* Last, and on purpose: a tab left open for days is the normal way to use this page, and until
+   now nothing in it would ever have noticed a deploy. See the header of `core/version.js`. */
+watchVersion()

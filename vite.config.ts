@@ -1,4 +1,5 @@
 /// <reference types="vitest/config" />
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import react from '@vitejs/plugin-react'
@@ -199,6 +200,37 @@ function listPlainSubdomains() {
     })
 }
 
+/** The stamp a plain subdomain's open tabs poll. Named here so the client and the build agree. */
+const BUILD_STAMP_FILE = 'version.txt'
+
+/**
+ * A content hash of everything the subdomain just published, written beside it.
+ *
+ * **It is a hash and not a timestamp or a commit SHA on purpose.** A rebuild that changes nothing
+ * has to produce the same stamp, or every deploy of an unrelated part of the site would reload
+ * every open Oglets tab for no reason. Hashing the published bytes makes the stamp change when —
+ * and only when — the thing the browser is running changes.
+ *
+ * Paths go into the digest as well as contents, so a rename is a change even when no file's bytes
+ * move, and the list is sorted because `readdir` order is not a promise.
+ */
+function writeBuildStamp(publishedRoot: string) {
+  const digest = crypto.createHash('sha256')
+
+  const walk = (dir: string): string[] =>
+    fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const full = path.join(dir, entry.name)
+      return entry.isDirectory() ? walk(full) : [full]
+    })
+
+  for (const file of walk(publishedRoot).sort()) {
+    digest.update(path.relative(publishedRoot, file).split(path.sep).join('/'))
+    digest.update(fs.readFileSync(file))
+  }
+
+  fs.writeFileSync(path.join(publishedRoot, BUILD_STAMP_FILE), `${digest.digest('hex').slice(0, 16)}\n`)
+}
+
 function copySubdomainSitesToDist() {
   if (!fs.existsSync(SUBDOMAINS_SOURCE_ROOT)) {
     return
@@ -219,11 +251,15 @@ function copySubdomainSitesToDist() {
       continue
     }
 
+    const publishedRoot = path.join(distSubdomainsRoot, entry.name)
+
     fs.cpSync(
       subdomainRoot,
-      path.join(distSubdomainsRoot, entry.name),
+      publishedRoot,
       { recursive: true, filter: shouldPublishSubdomainFile },
     )
+
+    writeBuildStamp(publishedRoot)
   }
 }
 
