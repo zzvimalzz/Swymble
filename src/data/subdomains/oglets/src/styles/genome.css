@@ -107,6 +107,13 @@
 .sheet-lore{margin:0 0 12px;font-size:13px;line-height:1.9;color:var(--txt-2);max-width:32ch}
 .sheet-mech{margin:0;font-size:12px;line-height:1.7;color:var(--txt-3);letter-spacing:.03em}
 
+/* The egg sheet reuses `.sheet-card` but names its own inner parts — `eggSheet()` in
+   ui/genome-page.js. These lived only in assets.dev.css, which the page deliberately never links. */
+.egg-stage-lg{width:200px;height:200px;margin-bottom:14px}
+.egg-name{font-size:24px;letter-spacing:.1em;margin-bottom:6px}
+.egg-kind{margin:0 0 14px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--txt-3)}
+.egg-lore{margin:0;font-size:13px;line-height:1.9;color:var(--txt-2);max-width:32ch}
+
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes rise{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
 
