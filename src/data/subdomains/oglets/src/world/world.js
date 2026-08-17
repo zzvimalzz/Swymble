@@ -14,6 +14,7 @@ import { SLEPT_AWAY, awayFor, firstMeeting, mine, trackBond } from '../state/ses
 import { createWorldCanvas } from './canvas.js'
 import { bindPointer } from './input.js'
 import { addTicker } from './loop.js'
+import { askMotion, hasMotion } from './motion.js'
 import { population } from './stage.js'
 
 /** How long you can be away before coming back counts as an event worth reacting to. */
@@ -55,7 +56,18 @@ export function createWorld(canvas, { isActive, onFirstTouch } = {}) {
   }
 
   bindPointer(canvas, {
-    onFirstTouch,
+    /* The phone's own sensors need a real gesture to be granted on iOS, and the first touch on
+       the canvas is the only one we are guaranteed. Nothing waits on it: if it is refused, or
+       there is no gyroscope, `tilt` stays at zero and the world never knows. */
+    onFirstTouch: () => {
+      onFirstTouch?.()
+      if (hasMotion()) {
+        askMotion(() => {
+          const now = performance.now() / 1000
+          for (const c of population) c.tossed(now)
+        })
+      }
+    },
     // the first move or touch after you have been away is what triggers the welcome
     onNotice: (now) => {
       if (!greetPending) return

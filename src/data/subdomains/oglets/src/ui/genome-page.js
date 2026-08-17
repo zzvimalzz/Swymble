@@ -14,18 +14,21 @@ import {
   CAT_LABELS,
   GENES,
   chanceText,
+  TIERS,
   combinations,
   geneOf,
   groupId,
+  hash,
   odds,
   rarityOf,
   tierOfAllele,
 } from '../genome/index.js'
+import { SHELLS } from '../render/egg.js'
 import { discover, isFound, progressOf, totalProgress } from '../state/dex.js'
 import { mine } from '../state/session.js'
 import { createSheet } from './sheet.js'
 import { paletteFor, specimen } from './specimen.js'
-import { PORTRAIT_SCALE, PupilThumb, Thumb } from './thumbs.js'
+import { EggThumb, PORTRAIT_SCALE, PupilThumb, Thumb } from './thumbs.js'
 
 /** A pupil card shows the pupil alone; everything else shows the whole creature. */
 const thumbFor = (cat, alleleId, size) => {
@@ -161,6 +164,131 @@ function mutationCard(cat, allele, ctx) {
   return el
 }
 
+/* ── the eggs ───────────────────────────────────────────────
+   Seven shells, one per tier, and the point of the row is that **the egg tells you what is in it**
+   before it opens. Somebody who has already hatched theirs can come here and see what they were
+   looking at for five minutes; somebody who has not yet can see what they are hoping for. */
+
+/** What each shell is, in a line. The row shows the difference; this says what it means. */
+const SHELL_LORE = {
+  common: 'The shell most Oglets come in. Nothing on it is trying to tell you anything.',
+  uncommon: 'It holds its bubbles for weeks without one of them breaking. Nobody has explained that.',
+  rare: 'The bands move if you watch long enough, and stop the moment you look directly at them.',
+  epic: 'Wrapped, rather than grown. Whatever did the wrapping did not leave an end to pull.',
+  legendary: 'The veins run gold all the way through the shell, which should make it brittle. It is not.',
+  void: 'Two colours that do not occur together anywhere else, and a shell that is cold to the touch.',
+  god: 'It has been about to open since before you found it, and the cracks have never once cooled.',
+}
+
+/** A shell, opened. Its own viewer rather than `ui/sheet.js`, which is about mutations. */
+function eggSheet(thumbs) {
+  const root = document.createElement('div')
+  root.className = 'sheet'
+  root.hidden = true
+  root.innerHTML = `
+    <div class="sheet-scrim" data-close></div>
+    <div class="sheet-card egg-card" role="dialog" aria-modal="true" aria-label="Egg">
+      <button class="sheet-close" data-close aria-label="Close">×</button>
+      <div class="egg-stage-lg"></div>
+      <h3 class="egg-name"></h3>
+      <p class="egg-kind"></p>
+      <p class="egg-lore"></p>
+    </div>`
+  document.body.appendChild(root)
+
+  const stage = root.querySelector('.egg-stage-lg')
+  let live = null
+
+  const close = () => {
+    root.hidden = true
+    document.body.classList.remove('sheet-open')
+    if (live) {
+      const at = thumbs.indexOf(live)
+      if (at >= 0) thumbs.splice(at, 1)
+      live = null
+    }
+    stage.replaceChildren()
+  }
+
+  root.addEventListener('click', (e) => {
+    if (e.target.closest('[data-close]')) close()
+  })
+  addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !root.hidden) close()
+  })
+
+  return {
+    open(tier, seed, isYours) {
+      const shell = SHELLS[tier.id]
+      live = new EggThumb({ tier: tier.id, seed, loop: true }, 200)
+      thumbs.push(live)
+      stage.replaceChildren(live.canvas)
+
+      root.querySelector('.egg-name').textContent = `${tier.name} egg`
+      root.querySelector('.egg-kind').innerHTML =
+        `<span class="${tier.c}">${'★'.repeat(tier.stars)}</span> ${shell.pattern}${shell.heat > 0 ? ' · glowing' : ''}${isYours ? ' · yours' : ''}`
+      root.querySelector('.egg-lore').textContent = SHELL_LORE[tier.id] ?? ''
+
+      root.hidden = false
+      document.body.classList.add('sheet-open')
+      root.querySelector('.sheet-close').focus()
+    },
+  }
+}
+
+function eggs(host, thumbs) {
+  const yours = rarityOf(mine.genome).tier
+  const sheet = eggSheet(thumbs)
+
+  const head = document.createElement('h2')
+  head.className = 'gene-head'
+  head.innerHTML = `
+    <span class="gene-title">Eggs</span>
+    <span class="gene-note">what it was in</span>
+    <span class="gene-count">${TIERS.length} shells</span>`
+
+  const row = document.createElement('div')
+  row.className = 'eggrow'
+
+  for (const tier of TIERS) {
+    const card = document.createElement('button')
+    card.type = 'button'
+    card.className = 'eggcard'
+    card.dataset.tier = tier.c
+
+    /* Each shell is drawn from a fixed seed per tier so the row is stable between visits — except
+       yours, which uses your own Oglet's seed, so the one you actually had is the one you see. */
+    const isYours = tier.id === yours.id
+    const seed = isYours ? hash(`egg:${mine.id}`) : hash(`egg-sample:${tier.id}`)
+    /* Looping, so the row is seven shells *failing* rather than seven swatches. Each one is
+       phased off its own random offset, so they never split in unison. */
+    const thumb = new EggThumb({ tier: tier.id, seed, loop: true }, 108)
+    thumbs.push(thumb)
+    card.addEventListener('click', () => sheet.open(tier, seed, isYours))
+
+    const label = document.createElement('span')
+    label.className = `nm ${tier.c}`
+    label.textContent = tier.name
+
+    card.append(thumb.canvas, label)
+    if (isYours) {
+      const note = document.createElement('span')
+      note.className = 'yours'
+      note.textContent = 'yours was this one'
+      card.appendChild(note)
+    }
+    row.appendChild(card)
+  }
+
+  host.append(head, row)
+  host.insertAdjacentHTML(
+    'beforeend',
+    `<p class="note">A shell is drawn from the tier of the creature already inside it, and speckled
+      from that creature's own seed — so two Legendary eggs are the same kind of thing and not the
+      same egg. The cracks on the last three glow.</p>`,
+  )
+}
+
 function section(host, cat, ctx) {
   const label = CAT_LABELS[cat]
 
@@ -213,6 +341,7 @@ export function buildGenomePage(host, thumbs) {
   host.appendChild(dexHead)
 
   for (const cat of CATS) section(host, cat, ctx)
+  eggs(host, thumbs)
 
   host.insertAdjacentHTML(
     'beforeend',

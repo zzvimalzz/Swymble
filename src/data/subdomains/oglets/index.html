@@ -20,6 +20,8 @@
 <link rel="stylesheet" href="./src/styles/home.css">
 <link rel="stylesheet" href="./src/styles/world.css">
 <link rel="stylesheet" href="./src/styles/genome.css">
+<link rel="stylesheet" href="./src/styles/gallery.css">
+<link rel="stylesheet" href="./src/styles/hatch.css">
 </head>
 <body data-route="home">
 
@@ -38,6 +40,7 @@
   <nav class="routes" aria-label="Pages">
     <a href="#/world" data-route="world">World</a>
     <a href="#/genome" data-route="genome">Genome</a>
+    <a href="#/gallery" data-route="gallery">Gallery</a>
   </nav>
 </header>
 
@@ -66,6 +69,18 @@
   <!-- ── GENOME ─────────────────────────────────────────── -->
   <section class="view scroller" id="viewGenome" hidden>
     <div id="genome"></div>
+  </section>
+
+  <!-- ── HATCH ──────────────────────────────────────────────
+       Reached only by a first-time visitor pressing Enter, and only until the shell breaks; after
+       that `mine.hatched` is true and the route redirects to World. No nav link on purpose. -->
+  <section class="view" id="viewHatch" hidden>
+    <div id="hatch"></div>
+  </section>
+
+  <!-- ── GALLERY ────────────────────────────────────────── -->
+  <section class="view scroller" id="viewGallery" hidden>
+    <div id="gallery"></div>
   </section>
 
 </main>

@@ -29,9 +29,14 @@ describe('storage', () => {
     expect(back.legacy).toBe(false)
   })
 
+  /* The point of this one is the *absence* of anything describing the creature — the id redraws
+     it, so what is on screen and what is on disk cannot drift apart. The egg fields are progress
+     through the hatch, not appearance, so they belong; a `shape` or a hex colour never would. */
   it('stores the id and nothing about the appearance', () => {
     const raw = JSON.parse(packOglet(oglet))
-    expect(Object.keys(raw).sort()).toEqual(['born', 'bond', 'dex', 'id', 'seen', 'v'].sort())
+    expect(Object.keys(raw).sort()).toEqual(
+      ['born', 'bond', 'dex', 'eggAt', 'eggHelp', 'hatched', 'id', 'seen', 'v'].sort(),
+    )
   })
 
   it('keeps a first-release Oglet exactly as it was', () => {

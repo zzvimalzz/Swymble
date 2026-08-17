@@ -26,10 +26,21 @@ const store = {
   },
 }
 
+/**
+ * A new record. **The creature is decided here, not when the shell breaks.**
+ *
+ * The id is drawn the moment somebody first opens the page, and written to storage immediately —
+ * so the egg on `#/hatch` is a curtain over a decision already made. Rolling it at the end of the
+ * animation would mean a reload half-way through produced a different Oglet, and "nobody else
+ * gets yours, and yours never changes" is the entire product.
+ */
 export function hatch() {
   const { id, genome } = hatchId()
   const at = Date.now()
-  return { id, genome, name: nameOf(id), bond: 0, born: at, seen: at, dex: [] }
+  return {
+    id, genome, name: nameOf(id), bond: 0, born: at, seen: at, dex: [],
+    hatched: false, eggAt: at, eggHelp: 0,
+  }
 }
 
 const saved = store.read()

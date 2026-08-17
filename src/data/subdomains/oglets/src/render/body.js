@@ -11,12 +11,19 @@ import { clamp, lerp, rand, smootherstep } from '../core/math.js'
 import { Spring } from '../core/spring.js'
 import { DILATION, expressionOf } from '../emotions/expressions.js'
 import { geneOf, hash } from '../genome/index.js'
-import { PHI, PITCH, YAW, drawClosedArc, drawPupil, drawSphereShading, eyePath, eyeXform, lidPath, squashes } from './eye.js'
+import { PHI, PITCH, YAW, drawClosedArc, drawPupil, drawSphereShading, eyePath, eyeXform, lidPath } from './eye.js'
+import { drawHearts } from './hearts.js'
 import { isHex, resolveColour } from './hues.js'
 import { OVERLAYS } from './overlays.js'
 import { drawGlitched } from './glitch.js'
 import { drawPixelated } from './pixelate.js'
+import { drawTears } from './tears.js'
 import { drawThoughts } from './thoughts.js'
+
+/** How far the pupil hangs back at full sway, in eye radii. Enough to see, small enough that it
+    never leaves the socket — past about 0.2 it stops reading as depth and starts reading as a
+    loose part. */
+const SWAY = 0.19
 
 export class Body {
   /**
@@ -38,11 +45,19 @@ export class Body {
     /** God-line mutations are renderings rather than shapes — see render/pixelate.js. */
     this.god = this.shape.god ?? null
 
-    this.S = { gx: 0, gy: 0, tx: 0, ty: 0, li: 0, lo: 0, bi: 0, bo: 0, w: 1, h: 1, tilt: 0,
-      blinkL: 0, blinkR: 0, pop: 0, sleep: 0, dil: 1 }
+    /* `px`/`py` are the gaze **as the pupil has got round to it**, which is not the same number
+       as `gx`/`gy` — see `sp.pupX` below. */
+    this.S = { gx: 0, gy: 0, px: 0, py: 0, tx: 0, ty: 0, li: 0, lo: 0, bi: 0, bo: 0, bell: 0,
+      w: 1, h: 1, tilt: 0, blinkL: 0, blinkR: 0, pop: 0, sleep: 0, dil: 1 }
     this.sp = { x: new Spring(0, 66), y: new Spring(0, 66),
+      /* THE PUPIL IS A SEPARATE OBJECT, SUSPENDED. The eye sockets swing with the gaze the
+         instant it changes — `drawPeeper` feeds `gx/gy` straight into the yaw and pitch. These
+         two springs are much softer, so the pupil arrives *after* the shape it sits in has
+         already turned, and for a fifth of a second the two are visibly out of register.
+         That lag is the entire depth cue: a decal cannot lag its own surface. */
+      pupX: new Spring(0, 44), pupY: new Spring(0, 44),
       li: new Spring(0, 54), lo: new Spring(0, 54),
-      bi: new Spring(0, 54), bo: new Spring(0, 54),
+      bi: new Spring(0, 54), bo: new Spring(0, 54), bell: new Spring(0, 46),
       w: new Spring(1, 54), h: new Spring(1, 54), tilt: new Spring(0, 42),
       sleep: new Spring(0, 20), dil: new Spring(1, 34) }
     this.blk = { t: 1e9, dur: 0.3, next: rand(1, 5), q: 0, eye: 0 }
@@ -54,6 +69,17 @@ export class Body {
     /** 0…1, how close the thing it is watching is. Converges the pupils — the difference
         between looking *at* you and looking past you. The world sets it; a thumbnail leaves it. */
     this.verge = 0
+    /**
+     * How hard the creature is being moved, −1…1 per axis. The world sets it from velocity; a
+     * thumbnail leaves it at zero.
+     *
+     * The pupil hangs **back** against it. A thing suspended in a socket does not accelerate
+     * with its housing — shove the eye left and the pupil is briefly still where it was, which
+     * is the same reason a spirit level works and the reason this reads as two layers rather
+     * than one drawing. It is the strongest of the two cues here, because it fires on every
+     * drag, throw and chase rather than only on a change of gaze.
+     */
+    this.sway = { x: 0, y: 0 }
     /* How far apart the two eyes sit, over and above the gap gene. The gap alone assumes a
        roughly circular eye; a wide one (Slab is 1.24 half-widths) then overlaps its partner and
        the pair reads as a single green bar with two dots pasted on it. Narrow shapes are left
@@ -61,6 +87,14 @@ export class Body {
     this.spread = 1 + Math.max(0, this.shape.rx - 1) * 1.3
     /** 0…1 ramp behind the thinking face, so the question marks fade rather than pop. */
     this.think = 0
+    /** The same, for crying. Rises fast and falls slow: the tears outlast the face by a beat,
+        because a creature that stops crying the instant it cheers up was never crying. */
+    this.cry = 0
+    /** And for `crazy`: 0…1 behind the out-of-phase pupil swell. Ramped rather than switched,
+        so the two eyes come apart and settle back rather than snapping into it. */
+    this.giddy = 0
+    /** And for `petted`, behind the hearts. */
+    this.love = 0
   }
 
   setExpr(n, s, now) {
@@ -143,17 +177,29 @@ export class Body {
       S.gy = this.sp.y.to(S.ty, dt)
     }
 
+    /* The pupil catching up with where the eye is already looking. Outside the saccade branch
+       on purpose: a saccade force-syncs the gaze springs so the eye can snap, and the whole
+       point is that the pupil is not allowed to. */
+    S.px = this.sp.pupX.to(S.gx, dt)
+    S.py = this.sp.pupY.to(S.gy, dt)
+
     const X = expressionOf(this.expr)
     const pop = S.pop
     S.li = this.sp.li.to(X.li * (1 - pop * 0.9), dt)
     S.lo = this.sp.lo.to(X.lo * (1 - pop * 0.9), dt)
     S.bi = this.sp.bi.to(X.bi * (1 - pop * 0.9), dt)
     S.bo = this.sp.bo.to(X.bo * (1 - pop * 0.9), dt)
+    // sprung like the lids themselves, so a smile arrives with them instead of snapping on
+    S.bell = this.sp.bell.to(X.bell ?? 0, dt)
     S.w = this.sp.w.to(X.w + pop * 0.14, dt)
     S.h = this.sp.h.to(X.h + pop * 0.22, dt)
     S.tilt = this.sp.tilt.to(X.tilt, dt)
     S.sleep = this.sp.sleep.to(this.asleep ? 1 : 0, dt)
     this.think += ((this.expr === 'thinking' ? 1 : 0) - this.think) * Math.min(1, dt * 2.4)
+    const crying = this.expr === 'crying' ? 1 : 0
+    this.cry += (crying - this.cry) * Math.min(1, dt * (crying ? 3.2 : 0.9))
+    this.giddy += ((this.expr === 'crazy' ? 1 : 0) - this.giddy) * Math.min(1, dt * 3.4)
+    this.love += ((this.expr === 'petted' ? 1 : 0) - this.love) * Math.min(1, dt * 2.2)
 
     /* Pupils dilate on delight and constrict on temper — the fastest way to read a mood, and
        the reason a happy Oglet looks *soft*. Springs, so it is a change you can watch happen. */
@@ -185,33 +231,28 @@ export class Body {
     if (shut < 0.999) {
       ctx.save()
       ctx.globalAlpha = 1 - shut
-      if (squashes(this.shape)) {
-        /* A flame has no lid to draw across it — a flat cut takes the tongue off and looks
-           broken. It closes by guttering instead: the whole silhouette shortens and settles,
-           which is what a fire dying down actually does. */
-        const shut = Math.max(li, lo, S.bi, S.bo)
-        ctx.translate(0, ry * shut * 0.55)
-        ctx.scale(1 + shut * 0.18, Math.max(0.06, 1 - shut))
-        eyePath(ctx, this.shape, rx, ry, m, top, t)
+      eyePath(ctx, this.shape, rx, ry, m, top, t)
+      ctx.clip()
+      if (li > 0.002 || lo > 0.002) {
+        lidPath(ctx, rx, ry, m, li, lo, true)
         ctx.clip()
-      } else {
-        eyePath(ctx, this.shape, rx, ry, m, top, t)
+      }
+      if (S.bi > 0.002 || S.bo > 0.002) {
+        lidPath(ctx, rx, ry, m, S.bi, S.bo, false, S.bell)
         ctx.clip()
-        if (li > 0.002 || lo > 0.002) {
-          lidPath(ctx, rx, ry, m, li, lo, true)
-          ctx.clip()
-        }
-        if (S.bi > 0.002 || S.bo > 0.002) {
-          lidPath(ctx, rx, ry, m, S.bi, S.bo, false)
-          ctx.clip()
-        }
       }
       ctx.fillStyle = c.e
       ctx.fillRect(-rx * 3, -ry * 3, rx * 6, ry * 6)
       // a God-line eye colour draws on its own iris, inside the same clip, with this Oglet's
       // own seed — so two Oglets carrying Veins do not carry the same veins
       OVERLAYS[this.iris.overlay]?.(ctx, rx, ry, t, m, this.seed)
-      drawPupil(ctx, this.pup, this.g.pupilSize * this.S.dil, rx, ry, px * rx, py * ry, c, t)
+      /* CRAZY: the two pupils swing in **opposite phase** — `m` shifts the sine by half a turn,
+         so the left one blows up at exactly the moment the right one pinches down. Everything
+         else on this creature is symmetrical or genetic; this is the only thing the two eyes
+         ever disagree about in the moment, and it is the whole reason the face reads as unhinged
+         rather than as merely surprised. */
+      const swing = 1 + this.giddy * 0.46 * Math.sin(t * 6.2 + (m > 0 ? Math.PI : 0))
+      drawPupil(ctx, this.pup, this.g.pupilSize * this.S.dil * swing, rx, ry, px * rx, py * ry, c, t)
       // a shaded shape lights the finished eye, pupil included — it is the last thing drawn
       if (this.shape.shade === 'sphere') drawSphereShading(ctx, rx, ry)
       ctx.restore()
@@ -251,8 +292,12 @@ export class Body {
         R * this.shape.rx * S.w * sx * aw,
         R * this.shape.ry * S.h * sy * ah,
         m,
-        clamp(S.gx * this.pup.travel - 0.06 * m, -0.62, 0.62) + bite - this.verge * 0.13 * m,
-        clamp(S.gy * this.pup.travel * 0.74 + lift, -0.85, 0.85),
+        /* `S.px`, not `S.gx` — the lagged gaze — plus the sway. Both are the same idea from two
+           directions: the eye is the housing and the pupil is the thing hanging inside it, so it
+           is always a beat behind wherever the housing has got to. */
+        clamp(S.px * this.pup.travel - 0.06 * m, -0.62, 0.62) + bite
+          - this.verge * 0.13 * m - this.sway.x * SWAY,
+        clamp(S.py * this.pup.travel * 0.74 + lift, -0.85, 0.85) - this.sway.y * SWAY * 0.8,
         turn * 0.3,
         cl,
         this.cols(t, m), // resolved per eye: Chimera gives the two of them different colours
@@ -261,23 +306,49 @@ export class Body {
     }
   }
 
-  /** Where each eye's centre lands this frame. */
+  /**
+   * Where each eye lands this frame — its centre and its drawn half-height. Anything that hangs
+   * off an eye rather than being drawn inside it (tears, so far) needs both, and needs them from
+   * the same perspective maths `drawPeeper` uses or it will sit slightly off on a turned head.
+   */
   eyeCentres(R) {
     const S = this.S
-    const Rh = (R * this.g.gap * this.spread) / Math.sin(PHI)
+    const g = this.g
+    const Rh = (R * g.gap * this.spread) / Math.sin(PHI)
     return [-1, 1].map((m) => {
       const q = eyeXform(m, S.gx * YAW, S.gy * PITCH)
       const persp = 3.2 / (3.2 + (1 - q.nz))
-      return { m, x: q.nx * Rh * persp, y: q.ny * Rh * persp }
+      const turn = clamp(1 - q.fx / Math.cos(PHI), 0, 0.42)
+      const sx = clamp(q.fx / Math.cos(PHI), 0.45, 1.06) * persp
+      const sy = q.fy * (1 + turn * 0.28) * persp
+      const aw = m < 0 ? g.asymW : 2 - g.asymW
+      const ah = m < 0 ? g.asymH : 2 - g.asymH
+      return {
+        m,
+        x: q.nx * Rh * persp,
+        y: q.ny * Rh * persp,
+        rx: R * this.shape.rx * S.w * sx * aw,
+        ry: R * this.shape.ry * S.h * sy * ah,
+      }
     })
   }
 
   draw(ctx, R, t) {
-    if (this.god === 'pixel') drawPixelated(ctx, R, (into) => this.drawPeeper(into, R, t))
-    else if (this.god === 'glitch') drawGlitched(ctx, R, t, this.seed, (into) => this.drawPeeper(into, R, t))
-    else this.drawPeeper(ctx, R, t)
-    // thoughts sit outside the pixel pass on purpose: they are not part of the creature
+    /* Tears go *inside* the God-line pass, and thoughts stay outside it. The difference is
+       whose they are: a tear comes out of the eye and is part of the creature, so a Pixel Oglet
+       cries in fat pixels and a Glitch one's tears tear with it — that is the rule in
+       03-GENOME.md §7, that an expression survives the rendering rather than the rendering being
+       excused. A question mark is not part of the creature; it is the drawing telling you what
+       is going on, and it stays crisp. */
+    const creature = (into) => {
+      this.drawPeeper(into, R, t)
+      if (this.cry > 0.01) drawTears(into, R, t, this.seed, this.cry, this.eyeCentres(R))
+    }
+    if (this.god === 'pixel') drawPixelated(ctx, R, creature)
+    else if (this.god === 'glitch') drawGlitched(ctx, R, t, this.seed, creature)
+    else creature(ctx)
     drawThoughts(ctx, R, t, this.seed, this.think, this.cols(t, 1).e)
+    drawHearts(ctx, R, t, this.seed, this.love, this.cols(t, 1).e)
   }
 
   /** Conservative personal space, measured from the drawn geometry rather than declared. */

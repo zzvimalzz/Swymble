@@ -1,0 +1,59 @@
+/* The hatching. One egg, centred, and four lines of type — there is nothing else to do on this
+   page and it should not pretend otherwise. */
+
+/* No bar while it is hatching. The World link would open an empty room, and Genome would show a
+   creature the visitor has not been given yet — the whole page is one thing happening and there
+   is nowhere else to be until it has. Same treatment the landing gets. */
+body[data-route="hatch"] .topbar{display:none}
+
+#hatch{position:absolute;inset:0;display:flex;flex-direction:column;
+       align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;
+       --hatch-heat:0;--hatch-glow:#e5a08e}
+
+/* The ground picks up the shell's colour as it heats. A hot shell on a dead-black field reads as
+   a sticker; this is the only thing on the page that hints at the tier without naming it. */
+#hatch::before{content:"";position:absolute;inset:0;pointer-events:none;
+               background:radial-gradient(circle at 50% 46%, var(--hatch-glow), transparent 62%);
+               opacity:var(--hatch-heat);transition:opacity 1.2s linear}
+
+/* THE BREAK FLASH. Fixed rather than absolute so it is the whole screen and not the egg's corner of
+   it — the shell going is the loudest moment in the product and should not be contained by a 320px
+   box. `--flash` is set from the shell's own glow, so the colour names the tier.
+
+   **Every stop is fully opaque, corners included.** At opacity 1 the screen must show *nothing*:
+   that blackout is what buys the swap in `ui/hatch.js`, where the egg is taken away and the
+   creature put in its place. An earlier version faded to transparent at 82%, which left the corners
+   and then the shards showing through — so the change happened in front of you and the whole thing
+   read as a dissolve between two drawings. White at the core and the tier's colour outward, so it
+   reads as light rather than as a coloured sheet.
+
+   The opacity is driven from the ticker (`hatch-beats.js#flashAt`), never by a CSS animation: the
+   rise, the hold and the fade all have to agree with the frame the swap happens on. */
+.hatch-flash{position:fixed;inset:0;z-index:5;pointer-events:none;opacity:0;
+             background:radial-gradient(circle at 50% 46%,
+               #fff 0%, #fff 12%,
+               color-mix(in srgb, var(--flash) 55%, #fff) 30%,
+               var(--flash) 62%,
+               color-mix(in srgb, var(--flash) 82%, #000) 100%)}
+
+.hatch-stage{position:relative;width:320px;height:320px;max-width:86vw;max-height:56vh}
+.hatch-canvas{display:block;width:100%;height:100%;border-radius:50%;
+              background:var(--well);cursor:pointer;touch-action:manipulation}
+
+.hatch-kicker{margin:0;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-3)}
+.hatch-beat{margin:0;min-height:1.4em;font-size:17px;letter-spacing:.1em;color:var(--txt)}
+.hatch-clock{margin:0;min-height:1.4em;font-size:12px;letter-spacing:.08em;color:var(--txt-3)}
+.hatch-hint{margin:0;font-size:12px;letter-spacing:.06em;color:rgb(var(--pearl) / .42)}
+.hatch-skip{margin:2px 0 0}
+.hatch-hint[hidden],.hatch-skip[hidden]{display:none}
+
+/* ── the egg variants, on the Genome page ───────────────── */
+.eggrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px;margin-bottom:6px}
+.eggcard{border:1px solid var(--hair);border-radius:4px;padding:12px 8px;
+         display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.eggcard[data-tier="t6"]{border-color:rgb(255 92 77 / .5)}
+.eggcard[data-tier="t5"]{border-color:rgb(255 122 224 / .38)}
+.eggcard[data-tier="t4"]{border-color:rgb(255 201 92 / .34)}
+.eggcard canvas{display:block;width:76px;height:76px}
+.eggcard .nm{font-size:12px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.eggcard .yours{font-size:12px;color:var(--txt-3);letter-spacing:.05em}

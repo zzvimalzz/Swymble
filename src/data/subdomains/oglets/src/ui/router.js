@@ -1,9 +1,12 @@
-/* Three pages, one hash. `#/`, `#/world`, `#/genome`.
+/* Five pages, one hash. `#/`, `#/world`, `#/genome`, `#/gallery`, `#/hatch`.
 
    Real links rather than buttons, so a page can be shared, opened in a new tab and read by a
-   crawler. An unknown hash falls back to Home rather than showing nothing. */
+   crawler. An unknown hash falls back to Home rather than showing nothing.
 
-export const ROUTES = ['home', 'world', 'genome']
+   `hatch` has no nav link on purpose: it is reached once, by a first-time visitor pressing Enter,
+   and redirects to World for anybody who has already hatched. */
+
+export const ROUTES = ['home', 'world', 'genome', 'gallery', 'hatch']
 
 const hashOf = (route) => (route === 'home' ? '#/' : `#/${route}`)
 

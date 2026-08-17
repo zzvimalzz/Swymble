@@ -5,7 +5,9 @@
 
 import { seedFromMine } from './state/dex.js'
 import { firstMeeting, mine, persist, startPersisting } from './state/session.js'
+import { buildGalleryPage } from './ui/gallery.js'
 import { buildGenomePage } from './ui/genome-page.js'
+import { mountHatch } from './ui/hatch.js'
 import { mountHome } from './ui/home.js'
 import { createRouter } from './ui/router.js'
 import { thumbTicker } from './ui/thumbs.js'
@@ -39,16 +41,37 @@ const thumbs = []
 let builtGenome = false
 addTicker(thumbTicker(thumbs, onRoute('genome')))
 
+/* ── the gallery, same deal ─────────────────────────────── */
+const galleryThumbs = []
+let builtGallery = false
+addTicker(thumbTicker(galleryThumbs, onRoute('gallery')))
+
+/* ── the egg ────────────────────────────────────────────────
+   Mounted eagerly rather than on first entry, because it has to be ticking before the route
+   arrives: a returning visitor's egg has been growing on a stored timestamp the whole time. */
+const hatchView = mine.hatched ? null : mountHatch($('hatch'), { onHatched: () => router.go('world') })
+
 /* ── routing ────────────────────────────────────────────── */
 let enteredWorld = false
 router = createRouter({
-  views: { home: $('viewHome'), world: $('viewWorld'), genome: $('viewGenome') },
+  views: { home: $('viewHome'), world: $('viewWorld'), genome: $('viewGenome'),
+    gallery: $('viewGallery'), hatch: $('viewHatch') },
   links: [...document.querySelectorAll('nav [data-route]')],
   indicator: document.querySelector('.routes'),
-  // your own Oglet is the reason you came back; the landing is for the first time only
-  initial: firstMeeting ? 'home' : 'world',
+  /* Your own Oglet is the reason you came back; the landing is for the first time only. Somebody
+     who left half-way through a hatch comes back to the egg, not to an empty world. */
+  initial: firstMeeting ? 'home' : mine.hatched ? 'world' : 'hatch',
   onEnter(route) {
     document.body.dataset.route = route
+    /* An egg is not somewhere you can arrive at will. Anyone who has hatched — including anyone
+       who reloads during the reveal — is sent straight to the world, which covers the bookmark,
+       the shared link and the back button in one line. */
+    if (route === 'hatch' && !hatchView) {
+      router.go('world')
+      return
+    }
+    if (route === 'hatch') hatchView.onEnter()
+    else hatchView?.onLeave()
     if (route === 'world') {
       world.resize() // the canvas had no size while it was hidden
       if (!enteredWorld) {
@@ -62,14 +85,20 @@ router = createRouter({
       builtGenome = true
       buildGenomePage($('genome'), thumbs)
     }
+    if (route === 'gallery' && !builtGallery) {
+      builtGallery = true
+      buildGalleryPage($('gallery'), galleryThumbs)
+    }
   },
 })
 
-/* Enter is the one navigation that gets a performance: the world opens out of the button. */
+/* Enter is the one navigation that gets a performance: the world opens out of the button. On a
+   first visit it opens onto an egg instead — the Oglet was already decided at module load, so the
+   shell is a curtain over it rather than a dice roll. */
 const enter = $('enterWorld')
 enter.addEventListener('click', (e) => {
   e.preventDefault()
-  radialEnter(enter, () => router.go('world'))
+  radialEnter(enter, () => router.go(hatchView ? 'hatch' : 'world'))
 })
 
 /* ── coming and going ───────────────────────────────────── */

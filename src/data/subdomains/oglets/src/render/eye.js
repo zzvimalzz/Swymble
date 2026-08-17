@@ -52,7 +52,6 @@ export function eyeXform(m, yaw, pitch) {
  * turns its notch inward. `top` is the extra height the perspective turn asks for.
  */
 export function eyePath(ctx, shape, rx, ry, m, top, t = 0) {
-  if (shape.god === 'flames') return flamePath(ctx, rx, ry, m, t)
   if (shape.poly) return polyPath(ctx, shape, rx, ry, m, top)
 
   const side = ry * (shape.side ?? 0)
@@ -81,46 +80,6 @@ export function eyePath(ctx, shape, rx, ry, m, top, t = 0) {
  * `round` is one number or one per corner — per-corner is what makes an Arch: two corners fully
  * rounded into a semicircle and two left square.
  */
-/**
- * FLAMES — a God-line shape, and the only outline here that is not the same twice.
- *
- * A polar outline sampled every few degrees: `reach` stretches it upward, `taper` narrows it
- * toward the tip, and three sine waves at different speeds do the flickering. The two eyes are
- * phase-shifted by `m` so they never burn in step, which is most of why it reads as fire rather
- * than as a wobbling blob.
- */
-function flamePath(ctx, rx, ry, m, t) {
-  const N = 120
-  const sway = Math.sin(t * 1.9 + m * 1.7) * 0.14
-  ctx.beginPath()
-  for (let i = 0; i <= N; i++) {
-    const a = -Math.PI / 2 + (i / N) * TAU
-    const up = Math.max(0, -Math.sin(a)) // 1 straight up, 0 at the sides and below
-    const lean = Math.cos(a) // −1 inner side … +1 outer side
-
-    /* Three tongues, not one. `main` is the tall centre one; `licks` puts two shorter ones
-       either side of it and runs them up and down at their own rate, which is what stops the
-       whole thing reading as a single wobbling leaf. */
-    const main = 0.85 * up ** 1.7
-    const licks = 0.62 * up ** 1.05 * Math.max(0, Math.sin(lean * 7.5 + t * 4.5 + m * 2))
-    const curl = 0.22 * up ** 2 * Math.sin(t * 9 + lean * 6 + m) // the tips whip over
-    const reach = 1 + main + licks
-
-    // fire is fat at the bottom and pinched at the top, and only the top may move
-    const taper = 1 - 0.66 * up ** 1.15
-    const wob = up * up
-    const flick =
-      1 +
-      wob * (0.16 * Math.sin(a * 4 + t * 9 + m) + 0.1 * Math.sin(a * 9 - t * 14 + m * 2))
-
-    const x = Math.cos(a) * rx * taper * flick + (sway + curl) * rx * up
-    const y = Math.sin(a) * ry * reach * flick
-    if (i === 0) ctx.moveTo(x, y)
-    else ctx.lineTo(x, y)
-  }
-  ctx.closePath()
-}
-
 function polyPath(ctx, shape, rx, ry, m, top) {
   const scale = Math.min(rx, ry)
   const pts = shape.poly.map(([x, y]) => [x * rx * m, (y < 0 ? y * (1 + top) : y) * ry])
@@ -155,26 +114,62 @@ export function roundedPoly(ctx, pts, radii) {
   ctx.closePath()
 }
 
-/** True when a shape closes by shrinking rather than by having a lid drawn across it. */
-export const squashes = (shape) => shape.lids === 'squash'
+/* A shape used to be able to declare how it *closes* (`lids: 'squash'`), because a flat lid
+   across a flame took the tongue off and left a stump. Flames is gone and it was the only user,
+   so the hook went with it — every shape here now wears the standard lid. Bring it back the
+   moment a radial shape lands (a star wants `'shrink'`: close by scaling from the centre); the
+   design is in `03-GENOME.md` §7. */
 
 /**
  * A lid, as a clipping region. `a` and `bv` are its inner and outer heights — the gap between
  * those two numbers is the whole expression system, so they are deliberately independent.
  * The path runs far past the eye on both sides so it can be used as a clip without seams.
  */
-export function lidPath(ctx, rx, ry, m, a, bv, upper) {
+export function lidPath(ctx, rx, ry, m, a, bv, upper, bell = 0) {
   const xi = -2.4 * rx * m
   const xo = 2.4 * rx * m
   const sg = upper ? 1 : -1
   const base = upper ? -ry * 1.25 : ry * 1.25
   const yi = base + sg * a * (2.5 * ry)
   const yo = base + sg * bv * (2.5 * ry)
-  const cy = (yi + yo) / 2 + (upper ? ry * 0.1 * Math.max(a, bv) : -ry * 0.9 * Math.max(a, bv))
+
+  /* The gentle bow the lid has always had. It used to be one `quadraticCurveTo` with a control
+     point on the centre line, and `arc` here is exactly half that control's offset — a quadratic
+     Bezier whose x runs linearly deviates from its chord by a parabola, so the two are the same
+     curve written differently. Nothing that looked right before moves. */
+  const arc = (upper ? ry * 0.05 : -ry * 0.45) * Math.max(a, bv)
+
+  /* THE BELL. Curving the old quadratic harder could never make a smile, because the curve is
+     stretched over ±2.4rx to work as a seamless clip and the eye only occupies the middle fifth
+     of that — bending it enough to show inside the eye put the lid over the whole eye at the
+     edges. So the bell is its own term: a gaussian, `w` wide, centred on the eye. Off (0) it is
+     the lid that was always here; on, the middle lifts into the eye and the corners stay put,
+     which is what a smiling lower lid actually does.
+
+     It scales with the lid's own height, so a lid that is barely raised cannot grow a smile. */
+  const rise = sg * bell * Math.max(a, bv) * ry * 1.3
+  /* The bump's width follows the eye — but it is capped against the eye's *height*, because the
+     rise is a height and a wide short eye (Slab is 1.24 × 0.76) would otherwise spread a small
+     rise over a long span and flatten it back into the bar this exists to replace. This is a
+     patch on the real problem — lid depths are still read against the eye's nominal size rather
+     than the shape's, which is item 1 in `04-EMOTION.md` §4.
+
+     **Wider than the eye, on purpose.** At 0.7 the gaussian had decayed to 13% by the eye's edge,
+     so the lid ran flat along the corners and then spiked in the middle — two hard changes of
+     direction and a thin point where it met the outline. At 1.05 it is still at 40% out there:
+     the whole visible bottom is one continuous dome instead of a bar with a bump on it, and the
+     amplitude is raised to keep the same depth of smile. */
+  const w = Math.min(rx, ry * 1.2) * 1.05
+
+  const N = 28
   ctx.beginPath()
   ctx.moveTo(xi * 40, yi)
   ctx.lineTo(xi, yi)
-  ctx.quadraticCurveTo(0, cy, xo, yo)
+  for (let i = 0; i <= N; i++) {
+    const u = i / N
+    const x = xi + (xo - xi) * u
+    ctx.lineTo(x, yi + (yo - yi) * u + 4 * u * (1 - u) * arc + rise * Math.exp(-((x / w) ** 2)))
+  }
   ctx.lineTo(xo * 40, yo)
   ctx.lineTo(xo * 40, sg * ry * 80)
   ctx.lineTo(xi * 40, sg * ry * 80)

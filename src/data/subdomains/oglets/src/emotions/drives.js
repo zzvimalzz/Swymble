@@ -67,6 +67,45 @@ export function updateDrives(o, dt, senses) {
   d.cheer = Math.max(0, d.cheer - dt * 0.05) // an unspent good mood fades rather than banking up
 }
 
+/**
+ * Being upset, and what happens when it keeps happening.
+ *
+ * A creature that scowls at the tenth jab exactly as it scowled at the first is a state machine.
+ * `angers` counts the times it has actually lost its temper with you, and past `GIVES_UP` it
+ * stops scowling and gives up instead — sad, and half the time crying. That is the difference
+ * between annoying it and bullying it, and it is the only place on the site where *repeating*
+ * an action changes what it means.
+ *
+ * The counter fades: `FORGETS` of not being upset takes one off it, so nothing here is
+ * permanent and an Oglet you were once rough with can be got back.
+ */
+export const GIVES_UP = 3
+const FORGETS = 45
+
+/**
+ * The face a fresh mistreatment earns, and the count that goes with it. Crying only ever comes
+ * out of *this* — the momentary reaction — never out of the sustained look below, because a face
+ * held for as long as `annoy` stays high is a mood, and crying is not a mood.
+ */
+export function upsetFace(o, now) {
+  o.angers++
+  o.angerAt = now
+  if (o.angers >= GIVES_UP) return Math.random() < 0.5 ? 'crying' : 'sad'
+  // a sweet Oglet has no scowl in it and gives up a beat earlier than a sharp one
+  return o.g.temper < 0.9 && o.angers >= 2 ? 'crying' : 'angry'
+}
+
+/** The face it *wears* while `annoy` stays high, once the reaction beat has run out. */
+export const upsetLook = (o) => (o.angers >= GIVES_UP ? 'sad' : 'angry')
+
+/** Called every frame: an old grudge is not a grudge. */
+export function forgive(o, now) {
+  if (o.angers > 0 && now - o.angerAt > FORGETS) {
+    o.angers--
+    o.angerAt = now
+  }
+}
+
 /** What a poke does to the drives. Returns the expression it earned, or null for none. */
 export function pokeDrives(o, now) {
   const d = o.drive
@@ -75,7 +114,7 @@ export function pokeDrives(o, now) {
   d.annoy = clamp(d.annoy + (0.17 + o.taps.length * 0.06) * o.g.temper, 0, 1.3)
   d.ignored = 0
 
-  if (d.annoy > 0.5) return 'angry'
+  if (d.annoy > 0.5) return upsetFace(o, now)
   if (d.annoy > 0.28) return 'sad'
   // one poke, on its own, is a hello rather than a jab — mashing is what earns the scowl above
   if (o.taps.length === 1) {
@@ -83,4 +122,40 @@ export function pokeDrives(o, now) {
     d.lonely = Math.max(0, d.lonely - 0.4)
   }
   return null
+}
+
+/* ── being shaken ─────────────────────────────────────────
+   Carrying it about is fine and it rather likes it. Whipping it back and forth is not, and the
+   two are told apart by *direction reversals*, not by speed: a long fast sweep across the room
+   is one movement, and four changes of mind inside a second and a half is a shake.
+
+   `SHAKE_SPEED` is therefore **not** a "you are shaking it hard enough" threshold — it only
+   throws away jitter, so a hand resting still does not clock up reversals from noise. It has to
+   sit well *below* the speed of a real swing: the reversal happens as the velocity passes
+   through zero, so gating it high means the interesting frames are exactly the ones discarded,
+   and no shake is ever seen however hard you shake it. It is comfortably above the idle drift
+   (`DASH` is 250) and comfortably below a carry. */
+const SHAKE_SPEED = 420
+const SHAKE_WINDOW = 1.5
+const SHAKE_FLIPS = 4
+
+export const createShake = () => ({ dir: 0, flips: [], until: 0 })
+
+/** @returns {boolean} true on the frame a shake is recognised. */
+export function trackShake(o, now) {
+  const s = o.shake
+  const v = o.b.vx
+  if (Math.abs(v) < SHAKE_SPEED) return false
+
+  const dir = Math.sign(v)
+  if (s.dir !== 0 && dir !== s.dir) s.flips.push(now)
+  s.dir = dir
+  s.flips = s.flips.filter((t) => now - t < SHAKE_WINDOW)
+
+  if (s.flips.length < SHAKE_FLIPS || now < s.until) return false
+  s.flips.length = 0
+  s.until = now + 1.2 // one shake per beat, however long you keep going
+  o.drive.annoy = clamp(o.drive.annoy + 0.34 * o.g.temper, 0, 1.3)
+  o.drive.cheer = 0
+  return true
 }

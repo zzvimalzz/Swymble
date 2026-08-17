@@ -20,18 +20,18 @@ must be served over HTTP, never opened over `file://`, and that an import needs
 its real `.js` extension.
 
 ```
-index.html            the shell: nav bar, three views, nothing else
+index.html            the shell: nav bar, the views, nothing else
 src/
   main.js             the entry — wires pages to the one animation loop
-  core/               math, Spring, colour, the two canvas colours
-  genome/             genes · tiers · roll · codec · names · hash  (pure, tested)
+  core/               math, Spring, colour, the canvas colours
+  genome/             genes · tiers · roll · codec · names · hash · character  (pure, tested)
   state/              storage (pure, tested) · session (this browser's Oglet)
   emotions/           expressions · drives · face
-  render/             eye geometry · Body
-  behaviour/          oglet · attention · social · sleep · separate
-  world/              stage · canvas · input · loop · world
-  ui/                 router · home · genome-page · sheet · thumbs
-  styles/             base · nav · home · world · genome
+  render/             eye geometry · Body · thoughts · tears · hearts · God-line passes
+  behaviour/          oglet · attention · social · sleep · play · pet · separate
+  world/              stage · canvas · input · loop · motion · world
+  ui/                 router · home · hatch · genome-page · gallery · sheet · thumbs
+  styles/             base · nav · home · world · genome · gallery · hatch
 tests/                run by `npm test` at the repo root
 ```
 
@@ -54,15 +54,16 @@ npm run build             # writes dist/subdomains/oglets/
 npm run preview           # then http://localhost:4173/subdomains/oglets/
 ```
 
-## The four pages
+## The pages
 
-Routing is by hash — `#/`, `#/world`, `#/genome` — on real `<a>`
-links, so a page can be shared and read by a crawler.
+Routing is by hash on real `<a>` links, so a page can be shared and read by a
+crawler.
 
 | Page | What it is |
 | --- | --- |
 | **Home** | The landing, and the only page with no bar on it — a door does not need a menu. The name, and one button. The O of the wordmark is an eye that follows your cursor and blinks (`ui/home.js`, CSS transitions, no ticker); Enter opens the world out of the button itself (`ui/transition.js`). A first-time visitor starts here; a returning one goes straight to the world. |
-| **World** | The live canvas. One Oglet, drag and poke, its own attention and moods. |
+| **Hatch** | `#/hatch`, and only ever once. A first visit opens onto an **egg** whose shell is drawn from the tier of the creature already inside it, and which takes five minutes — tapping halves it, leaving does not restart it. See `.docs/Oglets-Plan/05-HATCHING.md`. |
+| **World** | The live canvas. One Oglet, drag it, poke it, stroke it, throw it and play catch. Its own attention, moods and sleep. |
 | **Genome** | Your Oglet at size — id, traits, rarity — then every mutation it could have drawn. Built the first time it is opened. Each card is a real render, in a circle, with one mutation changed; tap one to open it and read its lore. |
 
 ## Inside it
@@ -74,7 +75,13 @@ links, so a page can be shared and read by a crawler.
 | `genome/tiers.js` / `rarity.js` | Seven tiers cut by occurrence, and an Oglet's own rarity scored one trait at a time rather than by multiplying odds. `.docs/Oglets-Plan/03-GENOME.md` has the tables. |
 | `genome/codec.js` | The first release's nine-character code, both ways. Still read, because an Oglet from before ids existed keeps the face it has always had. |
 | `render/body.js` | Genome + expression + gaze + blink. Draws an Oglet and knows nothing about the world, so the thumbnails and the landing portrait reuse it. |
+| `render/thoughts.js` / `tears.js` / `hearts.js` | The three channels a face does not have to share: question marks for `thinking`, blue drops for `crying`, rising hearts for `petted`. All seeded off the Oglet, so its thoughts, its tears and its fondness are its own. When a new emotion would have to fight the lids for room, it gets one of these instead. |
 | `behaviour/oglet.js` | One inhabitant: drives, sleep phases, solo behaviour, social states (`approach` → `engage` → `play`), drag and poke. |
+| `behaviour/play.js` | **Catch** — the one thing here you do rather than watch. Carry it, put it down, and it comes after your cursor; reach it and it pops and comes again. Ten catches wears it out and it goes to sleep. |
+| `behaviour/pet.js` | **Stroking it.** A pet and a shake are the same gesture at different speeds — 25–380 px/s against 420+, and a fast passage wipes the stroke history rather than merely not adding to it. Two ways in, because a phone has no hover: swept across it free-handed, or stroked while held. It buys the most bond of anything you can do. |
+| `ui/gallery.js` | `#/gallery` — **every** one of the 46,648 categorical combinations, commonest first, numbered. Virtualised: ~36 pooled cards inside a spacer the height of the whole wall, re-pointed by `Thumb.retarget()`, keyed as a *ring* so one row of scrolling only re-points one row of cards. |
+| `render/egg.js` | One glossy shell per tier, patterned from the creature's own seed, plus the crack progression and the shatter. **The egg tells you what is in it** — that is what makes a five-minute wait a tell rather than a loading bar. |
+| `world/motion.js` | The phone as an input: tilt is gravity (and a little depth), a device shake is the same upset a hand shake is. Permission is asked from the first touch, because iOS will only ask inside a gesture. Absent everywhere else, and nothing downstream notices. |
 | `world/stage.js` | The three shared mutables: `view`, `ptr`, `population`. Mutate in place, never reassign. |
 | `world/loop.js` | One `requestAnimationFrame` for the whole site. Each view registers a ticker and decides whether the frame concerns it. |
 

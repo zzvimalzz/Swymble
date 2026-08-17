@@ -29,6 +29,12 @@ export function packOglet(state) {
     born: Math.round(state.born ?? 0),
     seen: Math.round(state.seen ?? 0),
     dex: cleanDex(state.dex),
+    /* The egg. `hatched` is the only gate on ever showing it again; `eggAt` is when it was laid
+       and `eggHelp` the seconds of tapping banked into it — both stored, because a five-minute
+       hatch that restarted on every reload would be an insult rather than a wait. */
+    hatched: state.hatched !== false,
+    eggAt: Math.round(state.eggAt ?? 0),
+    eggHelp: Math.round(clamp(state.eggHelp ?? 0, 0, 3600)),
   })
 }
 
@@ -64,5 +70,11 @@ export function unpackOglet(raw) {
     born: number(data.born, 0),
     seen: number(data.seen, 0),
     dex: cleanDex(data.dex),
+    /* **Anything saved before the egg existed counts as hatched.** A v1 record, or a v2 one with
+       no `hatched` field, belongs to somebody who already has an Oglet and has had it for months
+       — showing them an egg would be taking it away. Only an explicit `false` means unhatched. */
+    hatched: data.hatched !== false,
+    eggAt: number(data.eggAt, 0),
+    eggHelp: Number.isFinite(data.eggHelp) ? clamp(data.eggHelp, 0, 3600) : 0,
   }
 }

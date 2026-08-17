@@ -25,7 +25,7 @@ on the page and not coming near. An Oglet alone is perfectly content on its own.
 drawn with. It shows the creature at size, its name, its four traits as tags
 with how often each occurs, its rarity — scored one trait at a time across seven
 tiers from Common to God — the true odds of its exact combination, and its ID.
-Below that are all 60 mutations across four genes — eye shape, pupil, eye
+Below that are all 59 mutations across four genes — eye shape, pupil, eye
 colour and pupil colour — each a live drawing with its tier, star rating and how common
 it is. Open one and it tells you where it is supposed to have come from.
 Mutations you have not met yet stay hidden until you do.
@@ -35,12 +35,12 @@ Bud, Wedge and Sphere (a genuinely three-dimensional eye, lit and shaded). The p
 Cross, Spark, Target and Heart. Eye colour and pupil colour are separate genes,
 so an unusual pupil colour can turn up on an ordinary eye.
 
-Eleven mutations belong to the **God line**: mutations that are renderings rather
+Ten mutations belong to the **God line**: mutations that are renderings rather
 than values, rarer than one roll in a hundred thousand, and each making its
 Oglet God rarity on its own. They are Pixel (the whole creature
 redrawn as a grid of 22 chunky pixels), Glitch (the picture of it tearing into
-displaced bands with the colour channels pulling apart), Flames (an eye that is burning and never twice the
-same), Hypnotic (a pupil that is a turning spiral), Eclipse (a pupil that is a
+displaced bands with the colour channels pulling apart),
+Hypnotic (a pupil that is a turning spiral), Eclipse (a pupil that is a
 black disc inside a corona of streamers), Veins (a bloodshot eye), Cosmos (an eye with a nebula and
 drifting stars behind it in three parallax layers), Chimera and Discord (the two
 eyes, or the two pupils, holding different colours), and Prism and Spectrum

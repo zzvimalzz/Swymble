@@ -8,11 +8,14 @@
    ═══════════════════════════════════════════════════════════ */
 
 import { TAU, clamp, rand } from '../core/math.js'
-import { createDrives, pokeDrives, updateDrives } from '../emotions/drives.js'
+import { createDrives, createShake, forgive, pokeDrives, trackShake, updateDrives, upsetFace } from '../emotions/drives.js'
 import { settleFace } from '../emotions/face.js'
 import { Body } from '../render/body.js'
+import { tilt } from '../world/motion.js'
 import { attentive, minSide, population, ptr, view } from '../world/stage.js'
 import { aimGaze, chooseAttention } from './attention.js'
+import { createPet, updatePet } from './pet.js'
+import { chaseTarget, createGame, endGame, maybeStart, updatePlay } from './play.js'
 import { updateSleep } from './sleep.js'
 import { updateSocial } from './social.js'
 
@@ -46,6 +49,19 @@ export class Oglet {
     this.gdx = 0
     this.gdy = 0
     this.taps = []
+    /** Catch, with you — `behaviour/play.js`. Starts when you put it down after carrying it. */
+    this.game = createGame()
+    /** Direction reversals while being carried; four in a beat and a half is a shake, not a walk. */
+    this.shake = createShake()
+    /** The same reversals, slower and while you are *not* holding it — `behaviour/pet.js`. */
+    this.pet = createPet()
+    /** How many times you have actually made it lose its temper, and when the last one was.
+        Past `GIVES_UP` it stops scowling and gives up instead. It forgives on a timer. */
+    this.angers = 0
+    this.angerAt = 0
+    /** Set once it has been played with to exhaustion. The only sleep that is not boredom. */
+    this.tired = false
+    this.tiredAt = 0
 
     this.soc = { state: 'none', partner: null, until: 0, role: null, nextTry: rand(3, 9), bumped: false, nextEmote: 0 }
     this.pending = null
@@ -72,6 +88,13 @@ export class Oglet {
   setExpr(n, s, now) {
     this.body.setExpr(n, s, now)
   }
+  /** You put it down. If you had actually been carrying it, that is a throw, and the game is on. */
+  release(now) {
+    endGame(this, now)
+    this.shake.flips.length = 0
+    maybeStart(this, now)
+  }
+
   /** Screen point → gaze target in the −1…1 space the Body works in. */
   aimAt(p) {
     return {
@@ -80,17 +103,26 @@ export class Oglet {
     }
   }
 
+  /**
+   * `startled` is the difference between waking up and *being* woken. Sleeping its nap out, or
+   * noticing you on the way back, is a nice thing that happens to it and it comes round pleased.
+   * Being grabbed or jabbed while asleep is not, and it goes wide-eyed for a beat first — brief
+   * on purpose, because surprise that is held stops being surprise and becomes fear.
+   */
   wake(now, startled) {
     if (this.phase === 'awake') return
     this.phase = 'awake'
     this.phaseAt = now
     this.drive.idle = 0
     this.yawned = false
+    this.tired = false
+    this.sleepAfter = rand(18, 32)
+    this.game.catches = 0 // it slept it off; the game starts again from nothing
     this.body.asleep = false
     this.body.drowsy = false
     this.body.S.pop = startled ? 1 : 0.55
     this.body.blinkNow(startled ? 0.32 : 0.2)
-    if (!startled) this.setExpr('happy', 1.4, now)
+    this.setExpr(startled ? 'startled' : 'happy', startled ? rand(0.6, 0.95) : 1.4, now)
   }
 
   /** Shows a feeling, and lets whoever it is with catch it. */
@@ -105,10 +137,51 @@ export class Oglet {
     let r = e
     if (e === 'sad') r = this.g.temper > 1.15 ? 'happy' : 'sad'
     if (e === 'angry') r = this.g.temper > 1.05 ? 'angry' : 'sad'
+    // nobody catches crying and cries back — you either go to them or you look away
+    if (e === 'crying') r = this.g.temper > 1.2 ? 'neutral' : 'sad'
     this.pending = { expr: r, at: now + rand(0.35, 0.8), dur: rand(1.2, 2.0) }
     this.attn = 'peer'
     this.peer = from
     this.attnUntil = now + rand(1.5, 3)
+  }
+
+  /**
+   * A noise somewhere it is not. Two taps on the empty canvas and it snaps round to look — the
+   * cheapest way to prove the thing is actually *watching the room* rather than watching you.
+   *
+   * It reuses `seek` for the aftermath rather than getting an attention state of its own,
+   * because the meaning is the same: something of yours happened over there and it is peering at
+   * where. `seek` earns `focus`, so the beat reads startled → squinting at the spot → back.
+   */
+  startleAt(x, y, now) {
+    if (this.phase !== 'awake') this.wake(now, true)
+    else this.setExpr('startled', rand(0.5, 0.85), now)
+    const t = this.aimAt({ x, y })
+    this.body.glance(t.x, t.y)
+    this.body.S.pop = Math.max(this.body.S.pop, 0.7)
+    this.attn = 'seek'
+    this.peer = null
+    this.attnAt = now
+    this.attnUntil = now + rand(1.8, 3.2)
+    this.drive.ignored = 0
+  }
+
+  /**
+   * The whole phone thrashed about. Deliberately the same outcome as being shaken by hand —
+   * `upsetFace` counts it, so shaking the device three times gives up on you exactly as shaking
+   * it with a finger three times does. One gesture, one meaning, two ways of performing it.
+   */
+  tossed(now) {
+    if (this.phase !== 'awake') this.wake(now, true)
+    const a = rand(0, TAU)
+    this.b.vx += Math.cos(a) * 640
+    this.b.vy += Math.sin(a) * 640
+    this.b.vz -= 6
+    this.b.shake = 1
+    this.body.poke()
+    this.drive.annoy = clamp(this.drive.annoy + 0.34 * this.g.temper, 0, 1.3)
+    this.drive.cheer = 0
+    this.react(upsetFace(this, now), now)
   }
 
   startle(who, now) {
@@ -129,17 +202,24 @@ export class Oglet {
     this.b.vz -= 5
     this.body.poke()
 
-    const reaction = pokeDrives(this, now)
-    if (reaction === 'angry') {
-      this.setExpr('angry', 2.2, now)
-      this.b.shake = 1
-      const p = this.soc.partner
-      if (p) p.receive('angry', this, now)
-    } else if (reaction === 'sad') {
-      this.setExpr('sad', 1.2, now)
-    }
+    this.react(pokeDrives(this, now), now)
 
     for (const o of population) if (o !== this && Math.random() < 0.7) o.startle(this, now)
+  }
+
+  /**
+   * Wearing what a mistreatment earned. One place, because a poke and a shake now both come out
+   * of `upsetFace()` and have to look the same — the two would drift apart otherwise, and an
+   * Oglet that gives up at the third poke but never at the third shake is telling two stories.
+   */
+  react(expr, now) {
+    if (!expr) return
+    this.game.on = false // nobody plays through this
+    const held = expr === 'angry' ? 2.2 : expr === 'crying' ? 3.4 : 1.6
+    this.setExpr(expr, held, now)
+    if (expr === 'angry') this.b.shake = 1 // only a scowl squares up; giving up does not
+    const p = this.soc.partner
+    if (p) p.receive(expr, this, now)
   }
 
   update(dt, now) {
@@ -153,6 +233,10 @@ export class Oglet {
     const att = attentive(now)
     // the pupils converge on whatever is close: looking *at* you, not past you
     this.body.verge = att && this.attn === 'user' ? clamp(1 - reach / (this._rad * 3.4), 0, 1) : 0
+    /* And they hang back against however hard it is being moved — see `Body.sway`. Divided by a
+       speed a bit above a chase, so an idle drift barely registers and a throw pins it. */
+    this.body.sway.x = clamp(this.b.vx / 1400, -1, 1)
+    this.body.sway.y = clamp(this.b.vy / 1400, -1, 1)
     updateDrives(this, dt, {
       attentive: att,
       close: reach < this._rad * 2.8,
@@ -160,8 +244,13 @@ export class Oglet {
       alone: population.length < 2,
     })
 
+    forgive(this, now)
+    if (this.dragging && trackShake(this, now)) this.react(upsetFace(this, now), now)
+
     updateSleep(this, dt, now)
     updateSocial(this, dt, now)
+    updatePlay(this, dt, now)
+    updatePet(this, dt, now)
     settleFace(this, now)
     chooseAttention(this, now, att)
     aimGaze(this, dt, now, att)
@@ -189,7 +278,12 @@ export class Oglet {
       const p = s.partner
       let tx
       let ty
-      if (p && (s.state === 'approach' || s.state === 'engage')) {
+      if (this.game.on) {
+        // straight at the cursor, and fast — this is the one time it comes after you
+        const g = chaseTarget()
+        tx = g.x
+        ty = g.y
+      } else if (p && (s.state === 'approach' || s.state === 'engage')) {
         const dx = b.x - p.b.x
         const dy = b.y - p.b.y
         const n = Math.max(Math.hypot(dx, dy), 1)
@@ -226,7 +320,16 @@ export class Oglet {
         }
       }
 
-      const chase = this.soc.state === 'play' && this.soc.role === 'chase'
+      /* TILT. Not a force fighting the spring — the spring would win and the world would only
+         shudder. Tilting moves where it *wants to be*, so it slides downhill and settles against
+         the low wall, which is what a thing loose in a box does. `limX/limY` already clamp it,
+         so a phone held on its side does not push it through the edge. */
+      if (tilt.on && this.phase !== 'asleep') {
+        tx += tilt.x * limX * 0.92
+        ty += tilt.y * limY * 0.92
+      }
+
+      const chase = this.game.on || (this.soc.state === 'play' && this.soc.role === 'chase')
       const k = this.phase === 'asleep' ? 2.4 : (chase ? 9 : 5.5) * this.g.pace
       const c = this.phase === 'asleep' ? 3.2 : 3.7
       b.vx += (k * (clamp(tx, -limX, limX) - b.x) - c * b.vx) * dt
@@ -235,7 +338,11 @@ export class Oglet {
 
     b.x += b.vx * dt
     b.y += b.vy * dt
-    b.vz += (34 * (1 - b.z) - 8.2 * b.vz) * dt
+    /* Tilting also takes it *away* from you, not only sideways: the further over the phone goes
+       the smaller it rests, so the movement reads as sliding down into the box rather than
+       across a flat picture of one. Capped low — this is a depth cue, not a zoom. */
+    const rest = tilt.on ? 1 - Math.min(0.15, Math.hypot(tilt.x, tilt.y) * 0.15) : 1
+    b.vz += (34 * (rest - b.z) - 8.2 * b.vz) * dt
     b.z += b.vz * dt
     b.shake = Math.max(0, b.shake - dt * 0.8)
   }

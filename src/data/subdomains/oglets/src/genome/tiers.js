@@ -47,6 +47,33 @@ export const tierIndex = (tier) => TIERS.indexOf(tier)
  * A chance, written the way a reader can compare two of them. Big numbers get no decimals, small
  * ones get two, and a God-line 0.0005 gets significant figures rather than rounding to "0.00%".
  */
+const SUPERS = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']
+
+/**
+ * "1 in …", written so it fits on a card.
+ *
+ * A God-line combination is about one in 10²¹, and `toLocaleString()` renders that as
+ * `1,199,999,999,999,999,000,000` — twenty-six characters of mostly zeroes, wrapping onto three
+ * lines and lying about its own precision in the bargain. Three registers instead:
+ *
+ *   under a million   every digit, grouped — these are numbers a reader can hold
+ *   under a quadrillion   compact (1.2M, 340B) — still a quantity anybody recognises
+ *   above that   `1.2 × 10²¹`, because past a point the exponent *is* the information
+ */
+export function oddsText(chance) {
+  if (!(chance > 0)) return '1 in ∞'
+  const n = 1 / chance
+  if (n < 1e6) return `1 in ${Math.round(n).toLocaleString()}`
+  if (n < 1e15) {
+    const compact = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 })
+    return `1 in ${compact.format(n)}`
+  }
+  const exp = Math.floor(Math.log10(n))
+  const mantissa = (n / 10 ** exp).toFixed(1)
+  const sup = String(exp).replace(/\d/g, (d) => SUPERS[+d])
+  return `1 in ${mantissa} × 10${sup}`
+}
+
 export function chanceText(w) {
   const v = w * 100
   if (v >= 5) return `${Math.round(v)}%`

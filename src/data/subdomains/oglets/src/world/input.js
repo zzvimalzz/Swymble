@@ -7,9 +7,15 @@
 
 import { population, ptr, view } from './stage.js'
 
+/* Taps on the empty canvas, and how many of them count as a noise. One is you missing; two is
+   you knocking on the glass, and it looks. */
+const NOISE_TAPS = 2
+const NOISE_WINDOW = 1.6
+
 export function bindPointer(canvas, { onFirstTouch, onNotice } = {}) {
   let held = null
   let touched = false
+  let empty = []
 
   const local = (e) => {
     const r = canvas.getBoundingClientRect()
@@ -51,6 +57,19 @@ export function bindPointer(canvas, { onFirstTouch, onNotice } = {}) {
           break
         }
       }
+
+      /* Nothing under it: you tapped the room, not the creature. One of those is a miss and is
+         ignored; two inside `NOISE_WINDOW` is a knock on the glass, and everybody looks. */
+      if (held) {
+        empty.length = 0
+      } else {
+        empty.push(ptr.t0)
+        empty = empty.filter((t) => ptr.t0 - t < NOISE_WINDOW)
+        if (empty.length >= NOISE_TAPS) {
+          empty.length = 0
+          for (const c of population) c.startleAt(p.x, p.y, ptr.t0)
+        }
+      }
     },
     { passive: true },
   )
@@ -75,7 +94,11 @@ export function bindPointer(canvas, { onFirstTouch, onNotice } = {}) {
   const release = () => {
     const now = performance.now() / 1000
     if (held && ptr.moved < 12 && now - ptr.t0 < 0.35) held.poke(now)
-    if (held) held.dragging = false
+    if (held) {
+      held.dragging = false
+      // putting it down is what starts a game of catch — see behaviour/play.js
+      held.release(now)
+    }
     held = null
     ptr.down = false
     document.body.classList.remove('grabbing')

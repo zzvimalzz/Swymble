@@ -1,0 +1,59 @@
+/* The Gallery. Six creatures to a row on a wide screen, fewer as it narrows — a card whose type
+   has been squeezed under 12px is not a smaller card, it is an unreadable one. */
+
+#gallery{padding:22px 16px calc(56px + env(safe-area-inset-bottom));max-width:1180px;margin:0 auto}
+
+.gal-top{border-bottom:1px solid var(--hair);padding-bottom:20px;margin-bottom:22px}
+.gal-title{font-size:30px;letter-spacing:.1em;line-height:1;margin:10px 0 12px}
+.gal-lede{margin:0 0 10px;font-size:13px;line-height:1.9;color:var(--txt-2);max-width:64ch;letter-spacing:.02em}
+.gal-count{margin:0;font-size:12px;line-height:1.9;color:var(--txt-3);max-width:64ch;letter-spacing:.02em}
+
+/* ── the wall ───────────────────────────────────────────
+   Virtualised: `ui/gallery.js` positions about fifty pooled cards absolutely inside a spacer the
+   full height of all 46,648. **`--gc-cols` and `--gc-row` are the single source of the layout** —
+   the script reads them off this element rather than keeping its own copy, so the media queries
+   below stay the only place the shape of the grid is decided. Change the card's height and
+   `--gc-row` must follow it, or the rows will overlap. */
+.gwall{position:relative;--gc-cols:6;--gc-row:236px}
+.gcard{position:absolute;top:0;left:0;width:16.6667%;height:var(--gc-row);
+       font:inherit;color:inherit;text-align:center;cursor:pointer;
+       background:none;border:1px solid var(--hair);border-radius:4px;padding:14px 10px 12px;
+       display:flex;flex-direction:column;align-items:center;gap:10px;
+       transition:border-color .18s;contain:layout paint}
+.gcard[hidden]{display:none}
+.gcard:hover{border-color:var(--hair-2)}
+.gcard:focus-visible{outline:1px solid var(--hair-2);outline-offset:2px}
+
+/* The rarest trait a creature carries lights its edge — the one thing you can read across a
+   whole wall at arm's length, before any of the type resolves. */
+.gcard[data-tier="t3"]{border-color:rgb(199 155 255 / .38)}
+.gcard[data-tier="t4"]{border-color:rgb(255 201 92 / .42)}
+.gcard[data-tier="t5"]{border-color:rgb(255 122 224 / .46)}
+.gcard[data-tier="t6"]{border-color:rgb(255 92 77 / .6);box-shadow:0 0 18px rgb(255 92 77 / .16)}
+
+.gcard-stage{width:120px;height:120px;flex:0 0 auto}
+.gcard-stage canvas{width:100%;height:100%}
+.gcard-meta{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;min-width:0}
+.gcard-no{font-size:12px;letter-spacing:.14em;color:var(--txt-3)}
+.gcard-name{font-size:13px;letter-spacing:.06em;color:var(--txt);
+            max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gcard-tier{font-size:12px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.gcard-tier .stars{font-size:12px;letter-spacing:.06em}
+.gcard-odds{font-size:12px;letter-spacing:.04em;color:var(--txt-3)}
+
+/* The number is real text in the card, not `content: attr(...)` — generated content is not
+   reliably announced, and the position in the run is information rather than decoration. */
+
+/* ── one of them, opened ────────────────────────────────── */
+.gal-card{width:min(400px,100%)}
+.gal-no{margin:0 0 4px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--txt-3)}
+.gal-name{font-size:24px;letter-spacing:.1em;margin-bottom:8px}
+.gal-verdict{font-size:15px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 14px}
+.gal-tags{justify-content:center;margin-bottom:12px}
+.gal-odds{margin:0 0 16px;font-size:12px;letter-spacing:.05em;color:var(--txt-3)}
+.gal-id{justify-content:center;text-align:center}
+.gal-id .idcode{font-size:12px}
+
+@media (max-width:900px){ .gwall{--gc-cols:4} }
+@media (max-width:620px){ .gwall{--gc-cols:3;--gc-row:210px} .gcard{padding:10px 6px} }
+@media (max-width:420px){ .gwall{--gc-cols:2} }
