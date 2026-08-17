@@ -256,7 +256,7 @@ export function buildGalleryPage(host, thumbs) {
   const tools = document.createElement('div')
   tools.className = 'gal-tools'
   tools.innerHTML = `
-    <input class="gal-search" type="search" placeholder="Search mutations, tiers, or #4201" aria-label="Search the gallery">
+    <input class="gal-search" type="search" placeholder="Search · try cloud, void, #4201" aria-label="Search the gallery">
     ${CATS.map((cat) => `<select data-filter="${cat}" aria-label="${CAT_LABELS[cat].title}">
         <option value="">${CAT_LABELS[cat].title}</option>
         ${GENES[cat].map((a, i) => `<option value="${i}">${a.name}</option>`).join('')}
@@ -265,7 +265,7 @@ export function buildGalleryPage(host, thumbs) {
       <option value="">Rarity</option>
       ${[...TIERS, SOULLESS_TIER].map((t) => `<option value="${t.id}">${t.name}</option>`).join('')}
     </select>
-    <button class="btn btn-quiet gal-flip" type="button" aria-pressed="false">Rarest first</button>
+    <button class="btn btn-quiet gal-flip" type="button" aria-pressed="false">Rarest</button>
     <button class="btn btn-quiet gal-clear" type="button" hidden>Clear</button>
     <span class="gal-hits"></span>`
 
@@ -375,7 +375,7 @@ export function buildGalleryPage(host, thumbs) {
   flip.addEventListener('click', () => {
     desc = !desc
     flip.setAttribute('aria-pressed', String(desc))
-    flip.textContent = desc ? 'Commonest first' : 'Rarest first'
+    flip.textContent = desc ? 'Commonest' : 'Rarest'
     repaint()
   })
 

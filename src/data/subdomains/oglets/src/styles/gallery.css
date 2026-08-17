@@ -16,17 +16,22 @@
    `--gc-row` must follow it, or the rows will overlap. */
 /* ── the tools ──────────────────────────────────────────
    A search and a filter per gene. They sit above the wall and never scroll with it. */
-.gal-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:16px}
-.gal-search{flex:1 1 200px;min-width:0;font:inherit;font-size:13px;color:var(--txt);
-            background:var(--well);border:1px solid var(--hair);border-radius:4px;padding:8px 10px}
+/* Compact on purpose: eight controls in one line, and the wall is what the page is for. Nothing
+   here is bigger than it has to be to stay tappable — 12px type and a 30px control, which is the
+   floor this project sets for both. */
+.gal-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:14px}
+.gal-search{flex:1 1 150px;min-width:0;font:inherit;font-size:12px;color:var(--txt);
+            background:var(--well);border:1px solid var(--hair);border-radius:3px;padding:6px 8px}
 .gal-search::placeholder{color:var(--txt-3)}
 .gal-search:focus-visible{outline:1px solid var(--hair-2);outline-offset:1px}
-.gal-tools select{font:inherit;font-size:12px;color:var(--txt);background:var(--well);
-                  border:1px solid var(--hair);border-radius:4px;padding:7px 8px;max-width:150px}
-.gal-tools .btn{font-size:12px;padding:7px 11px;white-space:nowrap}
+.gal-tools select{font:inherit;font-size:12px;color:var(--txt-2);background:var(--well);
+                  border:1px solid var(--hair);border-radius:3px;padding:6px 4px 6px 6px;
+                  max-width:112px}
+.gal-tools select:hover{color:var(--txt)}
+.gal-tools .btn{font-size:12px;padding:6px 9px;white-space:nowrap;letter-spacing:.04em}
 .gal-tools .btn[hidden]{display:none}
 .gal-flip[aria-pressed="true"]{color:var(--txt);border-color:var(--hair-2)}
-.gal-hits{font-size:12px;letter-spacing:.06em;color:var(--txt-3);margin-left:auto;white-space:nowrap}
+.gal-hits{font-size:12px;letter-spacing:.04em;color:var(--txt-3);margin-left:auto;white-space:nowrap}
 .gal-empty{margin:40px 0;text-align:center;font-size:13px;color:var(--txt-3);letter-spacing:.04em}
 .gal-empty[hidden]{display:none}
 
@@ -73,13 +78,16 @@
 .gal-id{justify-content:center;text-align:center}
 .gal-id .idcode{font-size:12px}
 
+/* ── the toolbar on a phone ─────────────────────────────────
+   Search on its own line, six filters three-across, then the buttons and the count. Four short
+   rows instead of seven tall ones — the toolbar is how you get to the wall, not the thing you
+   came for, and at 176px it was taking a third of the screen before a single creature appeared. */
+@media (max-width:620px){
+  .gal-search{flex:1 1 100%}
+  .gal-tools select{flex:1 1 30%;max-width:none;padding:6px 2px 6px 5px}
+  .gal-tools .btn{flex:0 0 auto}
+  .gal-hits{margin-left:auto}
+}
+
 @media (max-width:900px){ .gwall{--gc-cols:4} }
 @media (max-width:620px){ .gwall{--gc-cols:3;--gc-row:226px} .gcard{padding:10px 6px;gap:8px} }
-/* Below 420 the toolbar becomes two rows of controls rather than one that scrolls: the search
-   takes the whole first line, the selects pair up, and the buttons sit with the count. */
-@media (max-width:420px){
-  .gwall{--gc-cols:2}
-  .gal-search{flex:1 1 100%}
-  .gal-tools select{flex:1 1 44%;max-width:none}
-  .gal-hits{margin-left:0;flex:1 1 100%}
-}
