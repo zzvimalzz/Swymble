@@ -675,6 +675,108 @@ export function planetLongitudes(date) {
 /* ---------- the solar return: the reason to come back ---------- */
 
 /**
+ * The instant the Sun comes back to the longitude it held at birth, in a given calendar year.
+ *
+ * A birthday is a calendar convention. This is the astronomical event underneath it, and it is
+ * not the same moment: the year is not a whole number of days, so the return drifts by about six
+ * hours a year and lands anywhere in a window roughly a day and a half wide around the date.
+ *
+ * Solved by walking rather than by formula. The Sun covers 0.9856 degrees a day, so dividing the
+ * remaining angle by that rate lands within minutes on the first step and converges to the
+ * model's own floor on the third.
+ *
+ * Accuracy: sunLongitude is the low-precision solar series, good to about a hundredth of a
+ * degree, which is a quarter of an hour of the Sun's motion. Anything printed from this must say
+ * so rather than quoting a minute it cannot stand behind. There is no point iterating further:
+ * the limit here is the model, not the search.
+ */
+export function solarReturn(birthDate, calendarYear) {
+  /* start from the birthday in that year, which is never more than a day off the answer */
+  return sunCrossing(sunLongitude(birthDate), anniversary(birthDate, calendarYear));
+}
+
+/**
+ * The moment the Sun stands opposite where it stood at birth: the half-year, exactly.
+ *
+ * The calendar half-birthday is six months on. This is the astronomical event under it, and the
+ * two are a day or so apart for the same reason a birthday and a solar return are.
+ */
+export function solarHalfReturn(birthDate, calendarYear) {
+  const guess = new Date(anniversary(birthDate, calendarYear).getTime() + 182.6 * 86400000);
+  return sunCrossing(norm360(sunLongitude(birthDate) + 180), guess);
+}
+
+/**
+ * The moment the Sun enters the sign it was in at birth, which is what a season being "yours"
+ * actually means. It runs from here to about a month later, and the birthday sits inside it.
+ */
+export function seasonStart(birthDate, calendarYear) {
+  const target = Math.floor(sunLongitude(birthDate) / 30) * 30;
+  /* a fortnight before the birthday is inside the season for anybody, so the search is never
+     more than half a sign from its answer and cannot converge on last year's crossing */
+  const guess = new Date(anniversary(birthDate, calendarYear).getTime() - 15 * 86400000);
+  return sunCrossing(target, guess);
+}
+
+/** The birth clock time on the same calendar date in another year, as an instant. */
+function anniversary(birthDate, calendarYear) {
+  return new Date(Date.UTC(
+    calendarYear,
+    birthDate.getUTCMonth(),
+    birthDate.getUTCDate(),
+    birthDate.getUTCHours(),
+    birthDate.getUTCMinutes(),
+  ));
+}
+
+/**
+ * When the Sun is next at `target` degrees, searched outward from `near`.
+ *
+ * Solved by walking rather than by formula. The Sun covers 0.9856 degrees a day, so dividing the
+ * remaining angle by that rate lands within minutes on the first step and converges to the
+ * model's own floor on the third. The difference is taken the signed short way round, so a search
+ * that starts on the far side of zero degrees walks towards its answer rather than round the year.
+ *
+ * The guess must be inside half a year of the answer, or this finds the wrong crossing. Every
+ * caller above is inside a fortnight of one.
+ */
+function sunCrossing(target, near) {
+  let t = near;
+  for (let i = 0; i < 6; i++) {
+    const diff = ((target - sunLongitude(t) + 540) % 360) - 180;
+    if (Math.abs(diff) < 1e-6) break;
+    t = new Date(t.getTime() + (diff / 0.98561) * 86400000);
+  }
+  return t;
+}
+
+/**
+ * This birthday's date in a given calendar year, as a local date.
+ *
+ * 29 February is observed on 1 March in common years, the same rule nextBirthday uses: moving it
+ * to the 28th would put the day before the person's actual one.
+ */
+export function birthdayIn(year, month, day) {
+  const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  return month === 2 && day === 29 && !leap
+    ? new Date(year, 2, 1)
+    : new Date(year, month - 1, day);
+}
+
+/**
+ * Six calendar months on from that birthday, which is what anybody means by a half-birthday.
+ *
+ * Clamped rather than allowed to overflow: six months from 31 August is the end of February, and
+ * letting the Date constructor roll it forward would put the day in March.
+ */
+export function halfBirthday(year, month, day) {
+  const from = birthdayIn(year, month, day);
+  const y = from.getFullYear(), m = from.getMonth() + 6, d = from.getDate();
+  const rolled = new Date(y, m, d);
+  return rolled.getDate() === d ? rolled : new Date(y, m + 1, 0);
+}
+
+/**
  * The next time this birthday comes round.
  * 29 February is observed on 1 March in common years rather than silently
  * moved — a leap-day birthday is a fact about the person, not a bug to hide.

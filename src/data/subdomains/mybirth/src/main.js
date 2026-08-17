@@ -48,6 +48,8 @@ import {
   shareCardHTML,
 } from "./ui/today.js";
 import { signIcon } from "./ui/glyphs.js";
+import { mountInstall, isStandalone } from "./ui/install.js";
+import { buildICS, ICS_FILENAME, personToken } from "./ui/calendar.js";
 // roadmap 1.9 recomputes the card it is about to rasterise rather than
 // scraping it off the DOM: the on-screen card has its text clamped
 import { dailyReading } from "./sky/reading.js";
@@ -60,6 +62,28 @@ import { valueOf, mark, scopeNote, wireProvenance } from "./facts/provenance.js"
 initAnalytics();
 // one delegated listener for every provenance marker the page ever renders
 wireProvenance();
+
+/* ---------- installable ---------- */
+/*
+   The worker is registered in a built site only. In dev it would sit in front of Vite's module
+   graph and serve yesterday's edit back, which costs an hour the first time it happens and is
+   confusing every time after that. Registered after load so it never competes with the first
+   paint for bandwidth.
+*/
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      /* an unregistered worker costs the offline shell and nothing else */
+    });
+  });
+}
+
+if (isStandalone()) trackEvent(EVENTS.APP_OPEN);
+
+mountInstall({
+  savedPeople: () => loadSaves().length,
+  onInstalled: () => trackEvent(EVENTS.INSTALLED),
+});
 
 /* ---------- starfield ---------- */
 (function starfield() {
@@ -2744,6 +2768,8 @@ function renderToday() {
   // the archive is always one press away, from the empty state too
   mount.querySelectorAll("[data-goto-archive]").forEach((btn) => {
     btn.addEventListener("click", () => {
+      // in place, keeping the loaded page; the reload is only the fallback now
+      if (openPerson(active)) return;
       if (active?.shareURL) location.href = active.shareURL;
       else activateTab("archive");
     });
@@ -2811,6 +2837,7 @@ let skyCountdown = null;
 function renderSaves() {
   const list = document.getElementById("saves-list");
   const empty = document.getElementById("saves-empty");
+  const foot = document.getElementById("saves-foot");
   if (!list) return;
   /*
      Records written by earlier versions of the site are still in people's
@@ -2827,9 +2854,11 @@ function renderSaves() {
   if (!saves.length) {
     list.innerHTML = "";
     if (empty) empty.hidden = false;
+    if (foot) foot.hidden = true;
     return;
   }
   if (empty) empty.hidden = true;
+  if (foot) foot.hidden = false;
 
   /*
      Sorted by whose return comes next, not by when they were saved. That one
@@ -2853,7 +2882,7 @@ function renderSaves() {
       : `${s.days} days`;
     return `
     <div class="save-card${today ? " is-today" : ""}${soon ? " is-soon" : ""}"
-         data-url="${esc(s.shareURL)}" tabindex="0" role="button"
+         data-url="${esc(s.shareURL)}" data-key="${esc(s.key)}" tabindex="0" role="button"
          aria-label="${esc(s.name)}, born ${ordinalShort(s.day)} ${monthName(s.month)} ${s.year}">
       <div class="save-card__top">
         <p class="save-card__name">${esc(s.name)}</p>
@@ -2882,11 +2911,166 @@ function renderSaves() {
   });
   list.querySelectorAll(".save-card").forEach((card) => {
     const url = card.dataset.url;
-    if (!url) return;
-    const go = () => { location.href = url; };
+    const save = enriched.find((s) => s.key === card.dataset.key);
+    if (!url && !save) return;
+    /*
+       In place. Opening a saved person used to be a full page load: the browser threw away a
+       painted document, a warm WebGL context and every chapter already fetched, to arrive at the
+       same screen a second and a half later. The reload survives only as the fallback for a
+       record too old or too broken to rebuild inputs from.
+    */
+    const go = () => {
+      if (openPerson(save)) return;
+      if (url) location.href = url;
+    };
     card.addEventListener("click", go);
-    card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") go(); });
+    card.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();   // space on a role=button must not scroll the list
+      go();
+    });
   });
+}
+
+/* ---------- the returns, as a calendar file ---------- */
+/*
+   Everything else on this site needs the tab open. This does not: once the file is imported, the
+   reminder arrives on whatever the reader already checks, for ten years, with no account, no
+   server and nothing of theirs sent anywhere. It is the cheapest durable thing here.
+*/
+document.getElementById("saves-ics")?.addEventListener("click", (e) => {
+  const text = buildICS(loadSaves(), { origin: location.origin });
+  if (!text) return;
+  downloadBlob(new Blob([text], { type: "text/calendar;charset=utf-8" }), ICS_FILENAME);
+  trackEvent(EVENTS.KEEPSAKE, { kind: "calendar" });
+
+  /* a download is invisible on a phone, and a button that appears to do nothing gets pressed
+     four more times, which is four more files in somebody's downloads folder */
+  const btn = e.currentTarget;
+  const was = btn.textContent;
+  btn.textContent = "Saved. Open it to add the days.";
+  btn.disabled = true;
+  setTimeout(() => { btn.textContent = was; btn.disabled = false; }, 4000);
+});
+
+/* ---------- a day, read out of a query string ---------- */
+
+/**
+ * The birthplace, rebuilt from a label and a fix.
+ *
+ * "Town, State, Country" or "Town, Country" or just "Country": the middle slot only exists when
+ * there are three parts, or the label reads back duplicated as "Town, Country, Country".
+ */
+function placeFrom(label, lat, lon, { countryCode = "", timezone = "" } = {}) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  const parts = label.split(",").map((s) => s.trim()).filter(Boolean);
+  return {
+    lat, lon, label,
+    name: parts[0] || "",
+    admin1: parts.length >= 3 ? parts[1] : "",
+    country: parts.length >= 2 ? parts[parts.length - 1] : "",
+    countryCode, timezone,
+  };
+}
+
+/**
+ * Everything runGeneration wants, read out of a share link's parameters.
+ *
+ * Null when the four required fields are not all there. Whether the values are *sane* is left to
+ * validate(), which is the one place that decides it.
+ */
+function inputsFromParams(p) {
+  if (!p.get("n") || !p.get("d") || !p.get("m") || !p.get("y")) return null;
+  // links written before the birthplace field carried a country in "c"
+  const placeLabel = (p.get("p") || p.get("c") || "").trim();
+  return {
+    name: p.get("n").trim(),
+    day: parseInt(p.get("d"), 10),
+    month: parseInt(p.get("m"), 10),
+    year: parseInt(p.get("y"), 10),
+    placeLabel,
+    place: placeFrom(placeLabel, parseFloat(p.get("la")), parseFloat(p.get("lo")), {
+      countryCode: (p.get("cc") || "").trim(),
+      timezone: (p.get("tz") || "").trim(),
+    }),
+    time: (p.get("t") || "").trim(),
+  };
+}
+
+/** Reflect a recovered day into the form, so "recover another" and re-edits stay consistent. */
+function fillForm(inputs) {
+  const set = (id, v) => { const el = document.getElementById(id); if (el != null && v) el.value = v; };
+  set("f-name", inputs.name); set("f-day", inputs.day);
+  set("f-year", inputs.year); set("f-place", inputs.placeLabel); set("f-time", inputs.time);
+  setMonthField(inputs.month);
+  setTimeField(inputs.time);
+  if (inputs.place) {
+    selectedPlace = inputs.place;
+    document.getElementById("place-field")?.classList.add("is-resolved");
+  }
+}
+
+/**
+ * A saved record, as the archive's own inputs.
+ *
+ * The share link is preferred because it is what the full page load used to be handed, so an
+ * in-place open recovers byte-identical inputs rather than a near-enough reconstruction. Records
+ * written before share URLs existed, or whose link did not survive a storage round trip, are
+ * rebuilt from the fields: everything the sky needs is stored beside them.
+ */
+function personInputs(save) {
+  if (!save) return null;
+  if (save.shareURL) {
+    try {
+      const fromShare = inputsFromParams(new URL(save.shareURL, location.origin).searchParams);
+      if (fromShare) return fromShare;
+    } catch { /* a mangled stored link is not worth refusing to open the person over */ }
+  }
+  const placeLabel = save.placeLabel || "";
+  return {
+    name: save.name,
+    day: +save.day, month: +save.month, year: +save.year,
+    placeLabel,
+    place: placeFrom(placeLabel, save.lat, save.lon, { timezone: save.tz || "" }),
+    time: save.time || "",
+  };
+}
+
+/**
+ * Open a saved person's archive without leaving the page.
+ *
+ * This used to be `location.href = save.shareURL`, which threw away a painted page, a warm three.js
+ * context and every fetched chapter to arrive at the same screen the hard way. The share URL is
+ * still what ends up in the address bar, written by runGeneration: it is the address that can be
+ * sent to somebody else, and a key out of this browser's storage is not.
+ *
+ * @returns {boolean} whether the person could be opened; false leaves the caller its old fallback.
+ */
+function openPerson(save, { reveal = true } = {}) {
+  const inputs = personInputs(save);
+  if (!inputs || validate(inputs)) return false;
+  trackEvent(EVENTS.ARCHIVE_START, { entry: "person" });
+  activateTab("archive");
+  fillForm(inputs);
+  runGeneration(inputs, { reveal });
+  return true;
+}
+
+/**
+ * A saved person, by whichever of their two addresses arrived.
+ *
+ * The calendar file writes the opaque token, because those events end up on somebody else's
+ * server. A link written by hand can use the storage key itself, encoded or not, since that is
+ * the name a person would type. Both resolve against local storage and neither means anything in
+ * another browser.
+ */
+function findSave(key) {
+  if (!key) return null;
+  const saves = loadSaves();
+  return saves.find((s) => s.key === key)
+    || saves.find((s) => s.key === decodeURIComponent(key))
+    || saves.find((s) => personToken(s.key) === key)
+    || null;
 }
 
 /* ---------- arrive via a shared link → prefill + auto-generate ---------- */
@@ -2894,7 +3078,29 @@ function renderSaves() {
   initPlaceField();
 
   const p = new URLSearchParams(location.search);
-  if (!p.get("n") || !p.get("d") || !p.get("m") || !p.get("y")) {
+
+  /*
+     ?person=<key> is this browser's own address for somebody it has already saved. It carries no
+     birth details, which is the point: a home-screen shortcut, a bookmark and one day a
+     notification can all name a person without writing their date and coordinates into a URL that
+     ends up in a history file. It resolves against local storage, so it means nothing anywhere
+     else, and it falls through to the ordinary landing when it resolves to nobody.
+  */
+  const person = findSave(p.get("person"));
+  if (person) {
+    activeProfileKey = person.key;
+    try { localStorage.setItem(TODAY_KEY, person.key); } catch {}
+    // the hash still decides which of that person's two screens opens, and "#new" is a request
+    // for an empty form that naming a person does not override
+    const landing = rootTab();
+    if (landing === "archive" && location.hash !== "#new" && openPerson(person, { reveal: true })) return;
+    activateTab(landing);
+    dropBootVeil(landing === "today" ? "sky" : "space");
+    return;
+  }
+
+  const inputs = inputsFromParams(p);
+  if (!inputs) {
     /*
        A plain visit with nothing in the URL. A first-time visitor gets the
        form, which is the whole product to them. Anyone who has saved a day
@@ -2907,32 +3113,6 @@ function renderSaves() {
     return;
   }
 
-  // links written before the birthplace field carried a country in "c"
-  const placeLabel = (p.get("p") || p.get("c") || "").trim();
-  const lat = parseFloat(p.get("la")), lon = parseFloat(p.get("lo"));
-  // "Town, State, Country" or "Town, Country" or just "Country": the middle
-  // slot only exists when there are three parts, or the label reads back
-  // duplicated as "Town, Country, Country"
-  const parts = placeLabel.split(",").map((s) => s.trim()).filter(Boolean);
-  const place = Number.isFinite(lat) && Number.isFinite(lon)
-    ? {
-        lat, lon, label: placeLabel,
-        name: parts[0] || "",
-        admin1: parts.length >= 3 ? parts[1] : "",
-        country: parts.length >= 2 ? parts[parts.length - 1] : "",
-        countryCode: (p.get("cc") || "").trim(),
-        timezone: (p.get("tz") || "").trim(),
-      }
-    : null;
-
-  const inputs = {
-    name: p.get("n").trim(),
-    day: parseInt(p.get("d"), 10),
-    month: parseInt(p.get("m"), 10),
-    year: parseInt(p.get("y"), 10),
-    placeLabel, place,
-    time: (p.get("t") || "").trim()
-  };
   if (validate(inputs)) return; // malformed link, just show the landing
   trackEvent(EVENTS.ARCHIVE_START, { entry: "link" });
   /*
@@ -2943,17 +3123,7 @@ function renderSaves() {
   */
   const landing = rootTab({ fromLink: true });
   activateTab(landing);
-
-  // reflect into the form so "recover another" and re-edits stay consistent
-  const set = (id, v) => { const el = document.getElementById(id); if (el != null && v) el.value = v; };
-  set("f-name", inputs.name); set("f-day", inputs.day);
-  set("f-year", inputs.year); set("f-place", placeLabel); set("f-time", inputs.time);
-  setMonthField(inputs.month);
-  setTimeField(inputs.time);
-  if (place) {
-    selectedPlace = place;
-    document.getElementById("place-field")?.classList.add("is-resolved");
-  }
+  fillForm(inputs);
 
   /*
      Landing on the archive, runGeneration raises its own veil and takes the

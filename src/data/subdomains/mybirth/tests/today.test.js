@@ -10,7 +10,7 @@
 */
 
 import { describe, it, expect } from "vitest";
-import { buildProfile, dailySkyHTML, clickIsOnBackdrop, shareCardHTML } from "../src/ui/today.js";
+import { buildProfile, dailySkyHTML, clickIsOnBackdrop, shareCardHTML, momentOf } from "../src/ui/today.js";
 import { dailyReading, AREA_KEYS, areaLabel } from "../src/sky/reading.js";
 import depthFile from "../src/sky/contents/depth.json";
 import placementsFile from "../src/sky/contents/placements.json";
@@ -412,5 +412,53 @@ describe("the birth-time gate", () => {
     const asked = dailySkyHTML(noTime, { now: DAY });
     expect(asked).toContain("Add your birth time");
     expect(asked).not.toContain("sky-card");
+  });
+});
+
+/*
+   The two lighter moments (roadmap 2.7). The rest of the year this returns null, which is most of
+   what it has to get right: a page that announces something every day announces nothing.
+*/
+describe("the half-year and the season", () => {
+  /* born 17 May 1991, which is Taurus */
+  const taurus = profile;
+  /* born 5 January, which is Capricorn, whose season straddles the new year */
+  const capricorn = buildProfile({ ...SAVE, key: "cap", day: 5, month: 1, year: 1990 });
+
+  it("says nothing on an ordinary day", () => {
+    expect(momentOf(taurus, new Date(2026, 7, 15, 9, 0))).toBeNull();
+  });
+
+  it("marks the half-year six months after the birthday", () => {
+    const half = momentOf(taurus, new Date(2026, 10, 17, 9, 0));
+    expect(half.kind).toBe("half");
+    expect(half.line).toContain("Half a year since you turned 35");
+  });
+
+  it("counts the days of the season the sun was in at birth", () => {
+    const season = momentOf(taurus, new Date(2026, 4, 1, 9, 0));
+    expect(season.kind).toBe("season");
+    expect(season.line).toContain("back in Taurus");
+    const day = Number(season.line.match(/Day (\d+)/)[1]);
+    /* Taurus opens around 20 April, so the first of May is a week and a half in */
+    expect(day).toBeGreaterThan(8);
+    expect(day).toBeLessThan(15);
+  });
+
+  it("does not report a season that straddles the new year as being on its 370th day", () => {
+    const inside = momentOf(capricorn, new Date(2026, 11, 28, 9, 0));
+    expect(inside.kind).toBe("season");
+    const day = Number(inside.line.match(/Day (\d+)/)[1]);
+    expect(day).toBeLessThan(32);
+    /* and the same season, read from the other side of the new year */
+    const after = momentOf(capricorn, new Date(2027, 0, 10, 9, 0));
+    expect(Number(after.line.match(/Day (\d+)/)[1])).toBeGreaterThan(day);
+    expect(Number(after.line.match(/Day (\d+)/)[1])).toBeLessThan(32);
+  });
+
+  it("prints the moment inside the sun module rather than as a card", () => {
+    const onHalf = dailySkyHTML(taurus, { now: new Date(2026, 10, 17, 9, 0) });
+    expect(onHalf).toContain('data-moment="half"');
+    expect(dailySkyHTML(taurus, { now: DAY })).not.toContain("data-moment");
   });
 });

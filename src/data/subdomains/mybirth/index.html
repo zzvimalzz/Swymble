@@ -4,6 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#05060c" />
+    <!--
+      Installable. The manifest and the icons are served from public/ at the root, exactly as the
+      fonts are, because mybirth.swymble.com is the only host this site is meant to be read on:
+      the Cloudflare worker in cloudflare/mybirth-subdomain-worker.js maps / to the built folder.
+
+      Apple honours none of the manifest, so the same three facts are repeated in its own meta
+      tags. Without them an iOS home-screen launch opens in Safari with a URL bar, which is the
+      one thing an installed app must not do, and is also the condition web push checks for.
+    -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="MyBirth" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta
       name="description"
       content="MyBirth turns your name, birth date, and birthplace into a cinematic archive of the moon, weather, headlines, music, film, and symbols from the day you arrived."
@@ -295,6 +310,17 @@
             </p>
             <div id="saves-list" class="saves-list"></div>
             <p class="panel-empty" id="saves-empty">No saves yet. Generate a result and it will appear here.</p>
+            <!--
+              The one thing here that keeps working with the tab closed. Hidden until there is
+              somebody to write, and toggled by renderSaves with the empty state.
+            -->
+            <div class="saves-foot" id="saves-foot" hidden>
+              <button type="button" class="btn-ghost" id="saves-ics">Put these returns in your calendar</button>
+              <p class="saves-foot__note">
+                The next ten returns for everyone here, as one file. It imports into Google,
+                Apple or Outlook, and each day carries the exact time the sun comes back.
+              </p>
+            </div>
           </div>
         </section>
       </div><!-- /panel-saves -->

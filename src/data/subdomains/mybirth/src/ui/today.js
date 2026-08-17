@@ -33,7 +33,7 @@
 import {
   moonPhase, skyReturn, nextBirthday, milestones, cosmicOdometer,
   ordinal, prettyDate, monthName, chartAngles, signAt, zonedToUTC,
-  moonPhaseRarity, skyAgainstBirth
+  moonPhaseRarity, skyAgainstBirth, halfBirthday, seasonStart, sunLongitude
 } from "../sky/astro.js";
 import { dailyReading, aspectLabel, chartAt } from "../sky/reading.js";
 import { signIcon, planetIcon } from "./glyphs.js";
@@ -252,7 +252,7 @@ export function dailySkyHTML(p, { astro = false, profiles = [], theme = "light",
 
       <div class="sky-grid">
         ${moonModuleHTML(s, todayMoon, moonDays)}
-        ${sunModuleHTML(p, s, nb, daysToReturn)}
+        ${sunModuleHTML(p, s, nb, daysToReturn, now)}
         ${countModuleHTML(odo, ms, now)}
         <div class="async-slot" data-slot="space"></div>
       </div>
@@ -911,10 +911,61 @@ function moonModuleHTML(s, todayMoon, moonDays) {
 
 /* ---------- 5. sun position ---------- */
 
-function sunModuleHTML(p, s, nb, daysToReturn) {
+/*
+   The two lighter moments of the year.
+
+   A solar return is one morning out of three hundred and sixty-five, and the countdown to it is
+   the same sentence for the other three hundred and sixty-four. These are the other two times the
+   sky says something about the reader specifically: the half-year, and the month the Sun spends
+   back in the sign it was in when they were born. Both are computed, both are checkable, and
+   neither is an interpretation.
+
+   Pure and exported, because it is the only decision in the module below and this project has no
+   DOM test environment. Returns null on the roughly eleven months of the year when neither is
+   true, which is the answer most days.
+*/
+export function momentOf(p, now = new Date()) {
+  if (!p) return null;
+  const y = now.getFullYear();
+  const sameDay = (a, b) => a.getFullYear() === b.getFullYear()
+    && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+  /* a half-birthday for a July birth falls in the following January, so last year's counts too */
+  for (const year of [y - 1, y]) {
+    if (!sameDay(halfBirthday(year, p.month, p.day), now)) continue;
+    const age = year - p.year;
+    return {
+      kind: "half",
+      line: `Half a year since you turned ${age}. The next return is the same distance away.`,
+    };
+  }
+
+  const natal = signAt(sunLongitude(p.birthDate));
+  if (signAt(sunLongitude(now)).index !== natal.index) return null;
+
+  /*
+     Which crossing started the season now running. Three candidates because a season that
+     straddles the new year belongs to the birthday on the far side of it: taking this year's
+     alone would report a Capricorn season as being on its three hundred and seventieth day.
+  */
+  const started = [y - 1, y, y + 1]
+    .map((year) => seasonStart(p.birthDate, year))
+    .filter((d) => d <= now)
+    .sort((a, b) => b - a)[0];
+  if (!started) return null;
+
+  const day = Math.floor((now - started) / DAY) + 1;
+  return {
+    kind: "season",
+    line: `The Sun is back in ${natal.sign}, where it stood when you were born. Day ${day} of the season.`,
+  };
+}
+
+function sunModuleHTML(p, s, nb, daysToReturn, now = new Date()) {
   if (!nb) return "";
   const pct = Math.round(s.yearProgress * 100);
   const turning = nb.date.getFullYear() - p.year;
+  const moment = momentOf(p, now);
 
   return `
     <section class="sky-mod${nb.isToday ? " is-today" : ""}" data-return data-target="${nb.date.getTime()}">
@@ -937,6 +988,7 @@ function sunModuleHTML(p, s, nb, daysToReturn) {
              You turn <b>${turning}</b> on a <b>${esc(nb.weekday)}</b>, under a
              ${esc(nb.moon.name.toLowerCase())} at ${Math.round(nb.moon.illumination * 100)}% lit.
            </p>`}
+      ${moment ? `<p class="sky-mod__note" data-moment="${moment.kind}">${esc(moment.line)}</p>` : ""}
       <div class="sky-meter"><span style="width:${pct}%"></span></div>
       <p class="sky-meter__cap">${pct}% round this lap &middot; ${s.degreesToReturn.toFixed(1)}&deg; to cover</p>
     </section>`;

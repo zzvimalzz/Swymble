@@ -150,6 +150,8 @@ export const EVENTS = {
   SHARE_COPY: "share_copy",              // the link was copied
   PERSON_SAVED: "person_saved",
   PEOPLE_OPEN: "people_open",
+  INSTALLED: "installed",                // the browser reported an install
+  APP_OPEN: "app_open",                  // opened from a home screen, not a tab
 };
 const ALLOWED = new Set(Object.values(EVENTS));
 
@@ -158,8 +160,10 @@ const ALLOWED = new Set(Object.values(EVENTS));
    cannot be passed by accident because only these strings survive.
 */
 const ALLOWED_PROPS = {
-  kind: new Set(["certificate_png", "certificate_pdf", "ticket", "link", "sky_card"]),
-  entry: new Set(["form", "link"]),
+  kind: new Set(["certificate_png", "certificate_pdf", "ticket", "link", "sky_card", "calendar"]),
+  // "person" is a saved record reopened from People or from ?person=, which is a returning
+  // reader and not a new one: counting it as a link would inflate every acquisition number
+  entry: new Set(["form", "link", "person"]),
   theme: new Set(["paper", "ink"]),
   had_time: new Set(["yes", "no"]),
 };

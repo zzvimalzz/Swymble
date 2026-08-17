@@ -19,6 +19,7 @@
     "generate:site-data": "node scripts/generate-site-data.mjs",
     "generate:mcp-card": "node scripts/generate-mcp-card.mjs",
     "generate:og-cards": "node scripts/generate-og-cards.mjs",
+    "generate:mybirth-icons": "node scripts/generate-mybirth-icons.mjs",
     "generate:agent-files": "npm run generate:markdown && npm run generate:site-data && npm run generate:mcp-card",
     "build:main": "npm run generate:seo && tsc -b && vite build && npm run generate:og-cards && node scripts/prerender-meta.mjs && node scripts/prerender-snapshot.mjs && npm run generate:agent-files",
     "build:mybirth": "npm --prefix src/data/subdomains/mybirth run build",

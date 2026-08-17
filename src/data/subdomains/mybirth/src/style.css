@@ -4342,3 +4342,118 @@ html.is-wiping .sky-who__btn { transition: none !important; }
 /* the people who share the date: the description wraps rather than truncating,
    now that there are six well-known names rather than nine obscure ones */
 .person__desc { white-space: normal; overflow: visible; text-overflow: clip; }
+
+/* ============================================================
+   THE INSTALL OFFER  (see src/ui/install.js)
+
+   Chrome, not content: it belongs to the browser's job rather than the
+   page's, so it is drawn as a raised card at the foot of the screen and
+   never as a section of whichever tab is open. It appears at most once
+   per visitor per two months, and only after a day has been saved.
+
+   The paper theme gets its own two lines because the Daily Sky's tokens
+   are scoped to #panel-today and this sits on <body>, outside them.
+   ============================================================ */
+.install {
+  position: fixed;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 60;
+  width: min(520px, calc(100vw - 28px));
+  transform: translate(-50%, 18px);
+  opacity: 0;
+  transition: opacity 0.45s var(--ease), transform 0.45s var(--ease);
+  background: rgba(10, 12, 22, 0.94);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-card);
+  box-shadow: 0 24px 60px -22px rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+}
+.install.is-in { opacity: 1; transform: translate(-50%, 0); }
+/*
+   Room to get clear of a bar that is standing on the foot of the window. Padding alone was not
+   enough: the landing and the panels are centred inside a full-height stage, so their last line
+   sits at the bottom of the viewport whether the document scrolls or not, and the bar was over
+   the sentence explaining the calendar file. While the offer is up those stages give up its
+   height, and the padding covers everything that simply runs long.
+*/
+body.has-install { padding-bottom: 170px; }
+body.has-install .stage--intro,
+body.has-install .stage--panel { min-height: calc(100svh - 56px - 170px); }
+.install__inner { padding: 16px 18px; }
+.install__line {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--paper);
+}
+.install__line b { font-weight: 600; color: var(--lunar); }
+.install__row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.install__yes, .install__no {
+  font-family: var(--mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--track-micro);
+  text-transform: uppercase;
+  padding: 10px 16px;
+  min-height: 40px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: background-color 0.25s var(--ease), color 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+.install__yes { background: var(--lunar); color: var(--ink); border: 1px solid var(--lunar); }
+.install__yes:hover { background: #fffdf6; border-color: #fffdf6; }
+.install__no { background: none; color: var(--paper-soft); border: 1px solid var(--line-strong); }
+.install__no:hover { color: var(--paper); border-color: var(--paper-soft); }
+
+body.on-paper:not(.sky-dark) .install {
+  background: rgba(251, 249, 244, 0.96);
+  border-color: rgba(20, 18, 13, 0.2);
+  box-shadow: 0 24px 60px -26px rgba(20, 18, 13, 0.5);
+}
+body.on-paper:not(.sky-dark) .install__line { color: #14120d; }
+body.on-paper:not(.sky-dark) .install__line b { color: #8a6712; }
+body.on-paper:not(.sky-dark) .install__yes { background: #14120d; color: #f2efe7; border-color: #14120d; }
+body.on-paper:not(.sky-dark) .install__no { color: #6b6457; border-color: rgba(20, 18, 13, 0.2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .install { transition: opacity 0.2s linear; transform: translate(-50%, 0); }
+}
+
+/* ---- the calendar export on the People tab (see src/ui/calendar.js) ----
+   Under the list rather than beside the heading: it is about everybody on
+   the page, so it reads after them, not before. */
+.saves-foot {
+  margin-top: clamp(24px, 5vh, 40px);
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.saves-foot[hidden] { display: none; }
+.saves-foot__note {
+  max-width: 46ch;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--fs-caption);
+  line-height: 1.6;
+  color: var(--paper-soft);
+  text-align: center;
+}
+#saves-ics:disabled { opacity: 0.7; cursor: default; transform: none; border-color: var(--lunar); color: var(--lunar); }
+
+/* the half-year and the season, when either is true today (see momentOf in ui/today.js).
+   Set apart from the module's own line: it is news about the reader rather than a
+   description of the meter under it. */
+.sky-mod__note {
+  margin: 14px 0 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--pg);
+  font-family: var(--sans);
+  font-size: var(--fs-caption);
+  line-height: 1.6;
+  color: var(--pi-soft);
+}
