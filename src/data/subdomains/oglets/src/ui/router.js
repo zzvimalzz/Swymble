@@ -1,15 +1,12 @@
-/* Six pages, one hash. `#/`, `#/world`, `#/genome`, `#/gallery`, `#/hatch`, `#/assets`.
+/* Five pages, one hash. `#/`, `#/world`, `#/genome`, `#/gallery`, `#/hatch`.
 
    Real links rather than buttons, so a page can be shared, opened in a new tab and read by a
    crawler. An unknown hash falls back to Home rather than showing nothing.
 
-   `assets` (the contact sheet) and `lab` (the throwaway world) are benches, and they exist **only
-   on a bench**: `core/dev.js` keeps them out of this list in production, so `#/lab` typed into a
-   production URL falls back to Home like any other hash that names nothing. */
+   This list is duplicated by the boot script in `index.html`, which decides which view to paint
+   before the modules load. Change one and change the other. */
 
-import { DEV, DEV_ROUTES } from '../core/dev.js'
-
-export const ROUTES = ['home', 'world', 'genome', 'gallery', 'hatch', ...(DEV ? DEV_ROUTES : [])]
+export const ROUTES = ['home', 'world', 'genome', 'gallery', 'hatch']
 
 const hashOf = (route) => (route === 'home' ? '#/' : `#/${route}`)
 

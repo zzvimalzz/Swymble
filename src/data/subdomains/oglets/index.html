@@ -22,11 +22,6 @@
 <link rel="stylesheet" href="./src/styles/genome.css">
 <link rel="stylesheet" href="./src/styles/gallery.css">
 <link rel="stylesheet" href="./src/styles/hatch.css">
-<!--
-  The Assets contact sheet and the Lab bench have NO stylesheet link here on purpose. The build
-  strips every `*.dev.*` file (`vite.config.ts#shouldPublishSubdomainFile`), so a static link would
-  be a 404 on every production load; each page attaches its own instead — `core/dev.js#useDevStyles`.
--->
 
 <!--
   WHICH PAGE THIS IS, DECIDED BEFORE THE FIRST PAINT.
@@ -48,7 +43,7 @@
 <script>
   ;(function () {
     var VIEWS = { home: 'viewHome', world: 'viewWorld', genome: 'viewGenome',
-      gallery: 'viewGallery', hatch: 'viewHatch', assets: 'viewAssets', lab: 'viewLab' }
+      gallery: 'viewGallery', hatch: 'viewHatch' }
     var raw = location.hash.replace(/^#\/?/, '').trim().toLowerCase()
     // A bare URL is the landing, always — see the `initial` note in src/main.js.
     var boot = Object.prototype.hasOwnProperty.call(VIEWS, raw) ? raw : 'home'
@@ -79,8 +74,6 @@
     <a href="#/world" data-route="world">World</a>
     <a href="#/genome" data-route="genome">Genome</a>
     <a href="#/gallery" data-route="gallery">Gallery</a>
-    <a href="#/assets" data-route="assets">Assets</a><!-- temporary -->
-    <a href="#/lab" data-route="lab">Lab</a><!-- temporary -->
   </nav>
 </header>
 
@@ -121,22 +114,6 @@
   <!-- ── GALLERY ────────────────────────────────────────── -->
   <section class="view scroller" id="viewGallery" hidden>
     <div id="gallery"></div>
-  </section>
-
-  <!-- ── ASSETS ─────────────────────────────────────────────
-       TEMPORARY contact sheet. Delete this section, the nav link, the stylesheet above,
-       src/ui/assets.js, src/styles/assets.css and the `assets` entry in src/ui/router.js
-       together. -->
-  <section class="view scroller" id="viewAssets" hidden>
-    <div id="assets"></div>
-  </section>
-
-  <!-- ── LAB ────────────────────────────────────────────────
-       TEMPORARY bench: a throwaway world with a picker for every gene, plus Soulless. Delete this
-       section, the nav link, src/styles/lab.css, src/ui/lab.js and the `lab` entry in
-       src/ui/router.js together. -->
-  <section class="view" id="viewLab" hidden>
-    <div id="lab"></div>
   </section>
 
 </main>

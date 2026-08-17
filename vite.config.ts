@@ -168,20 +168,7 @@ function subdomainOwnsPath(subdomain: string, requestUrl: string, allowBuiltSubd
  */
 function shouldPublishSubdomainFile(source: string) {
   const name = path.basename(source)
-  if (name === 'tests' || /\.(test|spec)\.[cm]?[jt]sx?$/.test(name)) {
-    return false
-  }
-  /*
-   * `*.dev.js` / `*.dev.css` are benches, not pages — the Oglets contact sheet and its throwaway
-   * world. They are how the shells, faces and bodies get looked at while they are being made, and
-   * a visitor should never meet one: `03-GENOME.md` records the last time such a tool shipped and
-   * the conclusion that "the tool was right; the route was wrong".
-   *
-   * Stripping them here is safe only because nothing static ever names one — the routes are gated
-   * on `core/dev.js`, the imports are dynamic, and each page attaches its own stylesheet. Keep all
-   * four of those true together or a production load starts 404ing.
-   */
-  return !/\.dev\.(?:[cm]?[jt]sx?|css)$/.test(name)
+  return name !== 'tests' && !/\.(test|spec)\.[cm]?[jt]sx?$/.test(name)
 }
 
 /** Every subdomain folder this server serves directly — i.e. the ones with no build of their own. */
