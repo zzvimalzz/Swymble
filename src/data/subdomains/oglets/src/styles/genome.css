@@ -80,6 +80,13 @@
                    box-shadow:0 0 0 3px rgb(var(--pearl) / .16), 0 0 16px 4px rgb(var(--pearl) / .5)}
 
 /* unmet — the dex */
+/* SEALED — a Soulless nobody holds. It looks locked, but unlike `.locked` there is nothing behind
+   it to tap: it is a div, so it takes no focus, and it must not lift under the cursor either or the
+   card promises an interaction it does not have. See `soulless()` in ui/genome-page.js. */
+.card.sealed{border-style:dashed;background:transparent;cursor:default}
+.card.sealed:hover{border-color:var(--hair);transform:none}
+.card.sealed .nm{color:var(--txt-3)}
+
 .card.locked{border-style:dashed;background:transparent}
 .card.locked .card-stage{background:rgb(var(--pearl) / .035);border-style:dashed}
 .lock{font-size:30px;color:rgb(var(--pearl) / .42);line-height:1}

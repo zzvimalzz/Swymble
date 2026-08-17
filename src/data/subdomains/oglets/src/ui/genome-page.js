@@ -25,11 +25,13 @@ import {
   tierOfAllele,
 } from '../genome/index.js'
 import { SHELLS } from '../render/egg.js'
+import { maxRadius, profileOf, tracePath } from '../render/silhouette.js'
 import { SOULLESS, soulOf, soullessGenome } from '../render/soulless.js'
 import { discover, isFound, progressOf, totalProgress } from '../state/dex.js'
 import { mine, rename, shareCode } from '../state/session.js'
 import { createSheet } from './sheet.js'
 import { paletteFor, specimen } from './specimen.js'
+import { createStageCanvas } from '../world/canvas.js'
 import { EggThumb, PORTRAIT_SCALE, PupilThumb, Thumb } from './thumbs.js'
 
 /** A pupil card shows the pupil alone; everything else shows the whole creature. */
@@ -330,6 +332,26 @@ function eggs(host, thumbs) {
    pedantic. It is placed after the genes and before the eggs, because it is the one section on
    this page that is about how an Oglet is *drawn* rather than what it is. */
 
+/**
+ * **A Soulless you are not: its outline, and nothing inside it.**
+ *
+ * Drawn from the same `FORMS` entry the real one is built from, so the shadow is that specific
+ * creature's shape rather than a generic blob — a Cloud and a Pebble are told apart by it. Flat,
+ * unlit and static on purpose: it is a space where something would be, not a preview of it.
+ *
+ * `PEARL` at 9%, which is the same ink the card's own hairline uses.
+ */
+function soulShadow(theme, size) {
+  const { canvas, ctx } = createStageCanvas(size, 2)
+  const profile = profileOf(theme.form)
+  const R = size / 2
+  ctx.translate(R, R)
+  tracePath(ctx, profile, (R * 0.92) / maxRadius(profile))
+  ctx.fillStyle = 'rgba(246,243,236,.09)'
+  ctx.fill()
+  return canvas
+}
+
 function soulless(host, thumbs, ctx) {
   const mySoul = soulOf(mine.id)
   const head = document.createElement('h2')
@@ -345,36 +367,52 @@ function soulless(host, thumbs, ctx) {
   const grid = document.createElement('div')
   grid.className = 'grid'
 
+  /* **SEALED, AND THERE IS NO WAY IN.** An unmet *mutation* is a card you tap to meet — the dex is
+     a catalogue and being able to read it is the point. A Soulless is not in the dex and never
+     enters it, so the same affordance would be a lie: there is nothing a reader can do to open
+     one. The only key is being one, at one in ten million.
+
+     So an unheld Soulless is a `<div>` and not a `<button>` — nothing focusable that does nothing —
+     showing its own silhouette and no name. Hold one and that single card, and only it, unseals. */
   for (const theme of SOULLESS) {
-    const card = document.createElement('button')
-    card.type = 'button'
-    card.className = 'card'
-    // the same light in the corner a mutation you carry gets — and nobody will ever see it
-    if (mySoul?.id === theme.id) {
-      card.classList.add('yours')
-      card.title = 'You are this'
-    }
+    const yours = mySoul?.id === theme.id
+    const card = document.createElement(yours ? 'button' : 'div')
+    if (yours) card.type = 'button'
+    card.className = yours ? 'card yours' : 'card sealed'
 
     const stage = document.createElement('div')
     stage.className = 'orb card-stage'
-    const thumb = new Thumb(soullessGenome(), 104, { scale: PORTRAIT_SCALE, theme })
-    thumbs.push(thumb)
-    stage.appendChild(thumb.canvas)
 
-    /* The same three lines a mutation card carries, because a reader comparing them should not
-       have to work out that this one is measured differently. The occurrence shown is the chance
-       of being Soulless **at all** rather than of being this particular one: which of the three
-       you get is a coin toss after a one-in-ten-million, and the ten million is the number. */
     const meta = document.createElement('div')
     meta.className = 'card-meta'
-    meta.innerHTML = `
-      <span class="nm">${theme.name}</span>
-      <span class="rr ${SOULLESS_TIER.c}">${SOULLESS_TIER.name}</span>
-      ${stars(SOULLESS_TIER)}
-      <span class="pc">${chanceText(SOULLESS_CHANCE)}</span>`
+
+    if (yours) {
+      card.title = 'You are this'
+      const thumb = new Thumb(soullessGenome(), 104, { scale: PORTRAIT_SCALE, theme })
+      thumbs.push(thumb)
+      stage.appendChild(thumb.canvas)
+
+      /* The same three lines a mutation card carries, because a reader comparing them should not
+         have to work out that this one is measured differently. The occurrence shown is the chance
+         of being Soulless **at all** rather than of being this particular one: which of the four
+         you get is a coin toss after a one-in-ten-million, and the ten million is the number. */
+      meta.innerHTML = `
+        <span class="nm">${theme.name}</span>
+        <span class="rr ${SOULLESS_TIER.c}">${SOULLESS_TIER.name}</span>
+        ${stars(SOULLESS_TIER)}
+        <span class="pc">${chanceText(SOULLESS_CHANCE)}</span>`
+      card.addEventListener('click', () => ctx.sheet.openSoul(theme))
+    } else {
+      card.title = 'A Soulless cannot be met. It is only ever unsealed by being one.'
+      stage.appendChild(soulShadow(theme, 104))
+      meta.innerHTML = `
+        <span class="nm">Sealed</span>
+        <span class="rr dim">Only by being one</span>
+        <i class="stars dim">${'☆'.repeat(SOULLESS_TIER.stars)}</i>
+        <span class="pc">${chanceText(SOULLESS_CHANCE)}</span>`
+    }
 
     card.append(stage, meta)
-    card.addEventListener('click', () => ctx.sheet.openSoul(theme))
     grid.appendChild(card)
   }
 
