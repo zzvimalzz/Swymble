@@ -77,10 +77,24 @@ const parseLabSource = (source, fallbackId) => {
 };
 
 /**
- * Every lab that is allowed on the public site, in display order. `private` labs are filtered
+ * Every lab that is allowed on the public site, newest-updated first. `private` labs are filtered
  * out here rather than by each caller, so a lab can never be excluded from /labs but still be
  * listed in the sitemap or described in llms.txt.
  */
+const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+/** Mirrors labRecency() in src/data/labs/index.ts. Unparseable copy sorts last, never first. */
+const labRecency = (updatedAt) => {
+  const match = /^([A-Za-z]{3})[a-z]*\s+(\d{4})$/.exec((updatedAt ?? '').trim());
+  if (!match) return -1;
+  const month = MONTHS.indexOf(match[1].toLowerCase());
+  return month < 0 ? -1 : Number(match[2]) * 12 + month;
+};
+
+/** Mirrors compareLabs() in src/data/labs/index.ts. */
+const compareLabs = (a, b) =>
+  labRecency(b.updatedAt) - labRecency(a.updatedAt) || a.order - b.order || a.id.localeCompare(b.id);
+
 export const loadLabs = async () => {
   const entries = await fs.readdir(LABS_DIR, { withFileTypes: true });
   const labFiles = entries
@@ -96,7 +110,7 @@ export const loadLabs = async () => {
     labs.push(parseLabSource(source, fileName.replace(/\.ts$/, '')));
   }
 
-  return labs.filter((lab) => lab.visibility !== 'private').sort((a, b) => a.order - b.order);
+  return labs.filter((lab) => lab.visibility !== 'private').sort(compareLabs);
 };
 
 /** Mirrors labSeoTitle() / labSeoDescription() in src/utils/labSeo.ts. */

@@ -63,108 +63,6 @@ usually replies within 24 hours.
 
 ## Swymble Labs projects
 
-### Cortex
-
-Page: https://swymble.com/labs/cortex
-Category: ARTIFICIAL INTELLIGENCE · Status: In Development · Last updated: Mar 2026
-Tags: AI, R&D, Private
-
-Cortex is Swymble’s AI research project: a cognitive platform whose whole
-premise is that an assistant is only useful over a long engagement if it can
-remember one. It is aimed at operator decision support — the person driving a
-complex digital workflow — rather than at one-off question answering.
-
-Architecturally it is built on persistent memory with a hybrid retrieval layer
-over pgvector and Redis, fronted by a multi-provider LLM gateway with failover
-so no single model provider is a single point of failure.
-
-The interface side is treated as its own research problem. Cortex’s UX
-experiments are operator-first: what a person needs to see to trust and
-correct a system that is holding context on their behalf.
-
-Cortex is under active R&D, with the detailed architecture private and
-controlled pilot evaluations in progress.
-
-Features:
-
-- Persistent long-context memory: Context carries across sessions instead of
-resetting, which is what makes the platform useful for ongoing work rather
-than single questions.
-- Hybrid retrieval: Retrieval runs over pgvector and Redis together, trading
-off semantic recall against latency.
-- Multi-provider LLM gateway: Model calls route through a gateway with
-failover across providers, so one provider outage is not a platform outage.
-- Operator-first UX: The interface research focuses on what an operator needs
-in order to trust, inspect and correct the system’s memory.
-
-At a glance:
-
-- Category: Artificial intelligence, R&D
-- Retrieval: pgvector and Redis hybrid
-- Model access: Multi-provider gateway with failover
-- Status: In development — controlled pilots
-
-Questions and answers:
-
-Q: What is Cortex?
-A: Cortex is an AI platform built by Swymble Labs. It focuses on persistent
-long-context memory and operator decision support, using a hybrid pgvector and
-Redis retrieval layer behind a multi-provider LLM gateway.
-
-Q: Is Cortex publicly available?
-A: No. Cortex is under active R&D with a private architecture and controlled
-pilot evaluations. Private demos can be requested by email at
-hello@swymble.com.
-
-### MyBirth
-
-Page: https://swymble.com/labs/mybirth
-Category: BIRTH ARCHIVE · Status: Live · Last updated: Jun 2026
-Tags: Astronomy, Storytelling, Public
-
-MyBirth takes a name, a birth date and a birthplace and reconstructs that
-specific day as a cinematic archive: the phase of the moon overhead, the
-weather, the headlines, the music and film people were paying attention to,
-and the symbols traditionally attached to that date.
-
-Everything it shows is pulled live from public, key-free data sources at the
-moment you ask for it, so the archive is assembled per request rather than
-read out of a pre-written table of stock facts.
-
-The result is built to be given away. Each archive has its own shareable URL
-and ends in a keepsake certificate with a phase-accurate rendering of that
-night’s moon, which is what makes it work as a birthday gift rather than a
-novelty lookup.
-
-MyBirth is live at mybirth.swymble.com.
-
-Features:
-
-- Live public data: Astronomy, weather, news, music and film details are
-fetched from key-free public sources when the archive is generated.
-- Phase-accurate moon: The moon shown on the keepsake certificate is rendered
-for the actual phase on the birth date, not a generic illustration.
-- Shareable birth story URL: Every archive gets its own link, so it can be
-sent as a gift or kept as a memento.
-
-At a glance:
-
-- Where: mybirth.swymble.com
-- Price: Free, no account needed
-- Inputs: Name, birth date, birthplace
-- Status: Live
-
-Questions and answers:
-
-Q: What is MyBirth?
-A: MyBirth is a free web app from Swymble Labs that turns a name, birth date
-and birthplace into a cinematic archive of the moon, weather, headlines,
-music, film and symbols from that exact day.
-
-Q: Where can I use MyBirth?
-A: MyBirth is live at https://mybirth.swymble.com. It runs in the browser and
-does not require an account.
-
 ### MyDompet
 
 Page: https://swymble.com/labs/mydompet
@@ -224,6 +122,84 @@ the same way with the network switched off.
 Q: How does MyDompet handle shared bills if there is no server?
 A: Split Bill sends end-to-end encrypted packets between phones through a
 relay. The relay only forwards ciphertext and never sees a transaction amount.
+
+### Oglets
+
+Page: https://swymble.com/labs/oglets
+Category: BROWSER CREATURE · Status: Live · Last updated: Aug 2026
+Tags: Toy, Canvas, Public
+
+An Oglet is a pair of eyes with a soul bolted on. There is no body, no limbs
+and no mouth — the eye is the whole face, and the expression lives in the
+geometry of the lids rather than in a set of swapped pictures. The upper lid's
+inner and outer edges move independently, so an Oglet can be a little sad or
+very sad, and can be interrupted halfway into either.
+
+You are given exactly one, rolled the first time you open the page and kept in
+your browser afterwards. There is deliberately no reroll button: being able to
+replace it on a whim is what would stop it mattering. Drag it, or tap it once
+to say hello. Leave it alone and it entertains itself — it tracks a speck only
+it can see, daydreams, or goes to check the last place your cursor was — and
+then naps. Come back and it greets you.
+
+Nothing it feels is arbitrary. Every expression is traced to a drive: it is
+happy when you hold it or when you return, cross when it is mashed, and sad
+only when you are on the page and not coming near. An Oglet by itself is
+perfectly content by itself.
+
+The genome page shows the alleles that made it — eye shape, pupil, palette and
+finish — each rendered as a live thumbnail with its real weight. Rarity is not
+a lookup table: a trait is rare because its allele is rare, which is what
+makes the same weights usable for inheritance later.
+
+Everything runs client-side on one canvas. There are no accounts, no network
+calls and no tracking; the only thing stored is your Oglet's nine-character
+code, in your browser.
+
+Features:
+
+- One creature, kept in your browser: Rolled on first visit, stored as a
+nine-character code, and the same one every time you come back. No account,
+and no way to reroll it.
+- Emotion as geometry: Lids, gaze and blinks are simulated rather than
+animated, so expressions blend, overlap and get interrupted the way a real
+face does.
+- Feelings with reasons: Bond, cheer, annoyance and loneliness drive every
+expression. Sadness only ever comes from being ignored while you are on the
+page.
+- A genome you can read: Four genes and 576 categorical combinations, each
+allele shown as a live drawing with its true weight and rarity tier.
+
+At a glance:
+
+- Where: oglets.swymble.com
+- Price: Free, no account needed
+- Data storage: Local browser storage only
+- Built with: One canvas, plain ES modules, no dependencies
+- Status: Live
+
+Questions and answers:
+
+Q: What is Oglets?
+A: Oglets is a free browser toy by Swymble Labs. An Oglet is a small creature
+made mostly of eyes, drawn from a weighted genome. You are given one the first
+time you open the page, it is kept in your browser, and it watches your
+cursor, reacts to being held or ignored, and sleeps when you are away.
+
+Q: Where can I get an Oglet?
+A: Oglets is live at https://oglets.swymble.com. It runs in the browser with
+no account and no download, and your Oglet is created automatically the first
+time you open it.
+
+Q: Can I get a different Oglet?
+A: No, and that is deliberate. You get one Oglet, rolled on your first visit
+and stored in your browser. Being able to reroll it on a whim is exactly what
+would stop it mattering.
+
+Q: Does Oglets collect any data?
+A: No. Oglets runs entirely client-side with no accounts, no network calls and
+no tracking. The only thing stored is your Oglet's nine-character code in your
+own browser's local storage.
 
 ### what2watch
 
@@ -326,83 +302,54 @@ Q: Where can I play Watch Paint Dry?
 A: Watch Paint Dry is live at https://www.watchpaintdry.net. It runs in the
 browser with no account or download.
 
-### Oglets
+### MyBirth
 
-Page: https://swymble.com/labs/oglets
-Category: BROWSER CREATURE · Status: Live · Last updated: Aug 2026
-Tags: Toy, Canvas, Public
+Page: https://swymble.com/labs/mybirth
+Category: BIRTH ARCHIVE · Status: Live · Last updated: Jun 2026
+Tags: Astronomy, Storytelling, Public
 
-An Oglet is a pair of eyes with a soul bolted on. There is no body, no limbs
-and no mouth — the eye is the whole face, and the expression lives in the
-geometry of the lids rather than in a set of swapped pictures. The upper lid's
-inner and outer edges move independently, so an Oglet can be a little sad or
-very sad, and can be interrupted halfway into either.
+MyBirth takes a name, a birth date and a birthplace and reconstructs that
+specific day as a cinematic archive: the phase of the moon overhead, the
+weather, the headlines, the music and film people were paying attention to,
+and the symbols traditionally attached to that date.
 
-You are given exactly one, rolled the first time you open the page and kept in
-your browser afterwards. There is deliberately no reroll button: being able to
-replace it on a whim is what would stop it mattering. Drag it, or tap it once
-to say hello. Leave it alone and it entertains itself — it tracks a speck only
-it can see, daydreams, or goes to check the last place your cursor was — and
-then naps. Come back and it greets you.
+Everything it shows is pulled live from public, key-free data sources at the
+moment you ask for it, so the archive is assembled per request rather than
+read out of a pre-written table of stock facts.
 
-Nothing it feels is arbitrary. Every expression is traced to a drive: it is
-happy when you hold it or when you return, cross when it is mashed, and sad
-only when you are on the page and not coming near. An Oglet by itself is
-perfectly content by itself.
+The result is built to be given away. Each archive has its own shareable URL
+and ends in a keepsake certificate with a phase-accurate rendering of that
+night’s moon, which is what makes it work as a birthday gift rather than a
+novelty lookup.
 
-The genome page shows the alleles that made it — eye shape, pupil, palette and
-finish — each rendered as a live thumbnail with its real weight. Rarity is not
-a lookup table: a trait is rare because its allele is rare, which is what
-makes the same weights usable for inheritance later.
-
-Everything runs client-side on one canvas. There are no accounts, no network
-calls and no tracking; the only thing stored is your Oglet's nine-character
-code, in your browser.
+MyBirth is live at mybirth.swymble.com.
 
 Features:
 
-- One creature, kept in your browser: Rolled on first visit, stored as a
-nine-character code, and the same one every time you come back. No account,
-and no way to reroll it.
-- Emotion as geometry: Lids, gaze and blinks are simulated rather than
-animated, so expressions blend, overlap and get interrupted the way a real
-face does.
-- Feelings with reasons: Bond, cheer, annoyance and loneliness drive every
-expression. Sadness only ever comes from being ignored while you are on the
-page.
-- A genome you can read: Four genes and 576 categorical combinations, each
-allele shown as a live drawing with its true weight and rarity tier.
+- Live public data: Astronomy, weather, news, music and film details are
+fetched from key-free public sources when the archive is generated.
+- Phase-accurate moon: The moon shown on the keepsake certificate is rendered
+for the actual phase on the birth date, not a generic illustration.
+- Shareable birth story URL: Every archive gets its own link, so it can be
+sent as a gift or kept as a memento.
 
 At a glance:
 
-- Where: oglets.swymble.com
+- Where: mybirth.swymble.com
 - Price: Free, no account needed
-- Data storage: Local browser storage only
-- Built with: One canvas, plain ES modules, no dependencies
+- Inputs: Name, birth date, birthplace
 - Status: Live
 
 Questions and answers:
 
-Q: What is Oglets?
-A: Oglets is a free browser toy by Swymble Labs. An Oglet is a small creature
-made mostly of eyes, drawn from a weighted genome. You are given one the first
-time you open the page, it is kept in your browser, and it watches your
-cursor, reacts to being held or ignored, and sleeps when you are away.
+Q: What is MyBirth?
+A: MyBirth is a free web app from Swymble Labs that turns a name, birth date
+and birthplace into a cinematic archive of the moon, weather, headlines,
+music, film and symbols from that exact day.
 
-Q: Where can I get an Oglet?
-A: Oglets is live at https://oglets.swymble.com. It runs in the browser with
-no account and no download, and your Oglet is created automatically the first
-time you open it.
-
-Q: Can I get a different Oglet?
-A: No, and that is deliberate. You get one Oglet, rolled on your first visit
-and stored in your browser. Being able to reroll it on a whim is exactly what
-would stop it mattering.
-
-Q: Does Oglets collect any data?
-A: No. Oglets runs entirely client-side with no accounts, no network calls and
-no tracking. The only thing stored is your Oglet's nine-character code in your
-own browser's local storage.
+Q: Where can I use MyBirth?
+A: MyBirth is live at https://mybirth.swymble.com. It runs in the browser and
+does not require an account.
 
 ### Territory
 
@@ -438,6 +385,59 @@ on a virtual map.
 Q: Can I try Territory?
 A: Not yet publicly. Territory is in development and currently running a
 private alpha. Get in touch through swymble.com/contact to ask about access.
+
+### Cortex
+
+Page: https://swymble.com/labs/cortex
+Category: ARTIFICIAL INTELLIGENCE · Status: Archived · Last updated: Mar 2026
+Tags: AI, R&D, Private
+
+Cortex is Swymble’s AI research project: a cognitive platform whose whole
+premise is that an assistant is only useful over a long engagement if it can
+remember one. It is aimed at operator decision support — the person driving a
+complex digital workflow — rather than at one-off question answering.
+
+Architecturally it is built on persistent memory with a hybrid retrieval layer
+over pgvector and Redis, fronted by a multi-provider LLM gateway with failover
+so no single model provider is a single point of failure.
+
+The interface side is treated as its own research problem. Cortex’s UX
+experiments are operator-first: what a person needs to see to trust and
+correct a system that is holding context on their behalf.
+
+Cortex is under active R&D, with the detailed architecture private and
+controlled pilot evaluations in progress.
+
+Features:
+
+- Persistent long-context memory: Context carries across sessions instead of
+resetting, which is what makes the platform useful for ongoing work rather
+than single questions.
+- Hybrid retrieval: Retrieval runs over pgvector and Redis together, trading
+off semantic recall against latency.
+- Multi-provider LLM gateway: Model calls route through a gateway with
+failover across providers, so one provider outage is not a platform outage.
+- Operator-first UX: The interface research focuses on what an operator needs
+in order to trust, inspect and correct the system’s memory.
+
+At a glance:
+
+- Category: Artificial intelligence, R&D
+- Retrieval: pgvector and Redis hybrid
+- Model access: Multi-provider gateway with failover
+- Status: In development — controlled pilots
+
+Questions and answers:
+
+Q: What is Cortex?
+A: Cortex is an AI platform built by Swymble Labs. It focuses on persistent
+long-context memory and operator decision support, using a hybrid pgvector and
+Redis retrieval layer behind a multi-provider LLM gateway.
+
+Q: Is Cortex publicly available?
+A: No. Cortex is under active R&D with a private architecture and controlled
+pilot evaluations. Private demos can be requested by email at
+hello@swymble.com.
 
 ## Client projects
 

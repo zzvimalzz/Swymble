@@ -65,7 +65,7 @@ const lab: SwymbleLab = {
   },
   actions: [
     {
-      label: 'OPEN MYBIRTH',
+      label: 'VISIT SITE',
       href: createSubdomainUrl('mybirth'),
       kind: 'external',
     },

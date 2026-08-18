@@ -152,6 +152,17 @@
   --status-rgb: var(--sw-accent-cyan-rgb);
 }
 
+/* Archived is the one status that is not a colour of activity — grey, and no glow on the dot,
+   so a finished lab reads as finished at a glance in the grid. */
+.lab-status-badge--archived {
+  --status-color: #9a9a9a;
+  --status-rgb: 154, 154, 154;
+}
+
+.lab-status-badge--archived::before {
+  box-shadow: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lab-status-badge--live::before {
     animation: none;

@@ -65,7 +65,7 @@ const lab: SwymbleLab = {
   },
   actions: [
     {
-      label: 'OPEN WHAT2WATCH',
+      label: 'VISIT SITE',
       href: createSubdomainUrl('what2watch'),
       kind: 'external',
     },

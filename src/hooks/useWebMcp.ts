@@ -84,7 +84,7 @@ const buildTools = (): WebMcpTool[] => [
       properties: {
         status: {
           type: 'string',
-          enum: ['Live', 'In Development', 'Private Beta'],
+          enum: ['Live', 'In Development', 'Private Beta', 'Archived'],
           description: 'Only return labs with this status. Omit to return all of them.',
         },
       },

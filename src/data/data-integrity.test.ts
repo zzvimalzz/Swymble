@@ -8,6 +8,7 @@ import { SWYMBLE_DATA } from './config';
 import { parseDateKey } from '../components/desktop/CareerRepository/layout';
 import { buildResumeModel } from '../utils/resumeModel';
 import { labDisplayName, labSeoDescription, labSeoTitle } from '../utils/labSeo';
+import { labRecency } from './labs';
 
 // Content lives in plain TS files edited by hand — these tests catch the mistakes a
 // typechecker can't: duplicate ids/anchors, malformed dates, dangling category references,
@@ -118,6 +119,22 @@ describe('labs', () => {
       expect(fromScripts?.updatedAt, `lab ${lab.id} updatedAt`).toBe(lab.updatedAt);
       expect(fromScripts?.detail?.oneLiner ?? '', `lab ${lab.id} oneLiner`).toBe(lab.detail?.oneLiner ?? '');
     }
+  });
+
+  it('lists labs newest-updated first, and the build scripts agree on that order', async () => {
+    const publicLabs = SWYMBLE_DATA.labs.filter((entry) => entry.visibility !== 'private');
+
+    // Every updatedAt has to parse — an unreadable one silently sinks the lab to the bottom.
+    for (const lab of publicLabs) {
+      expect(labRecency(lab.updatedAt), `lab ${lab.id} updatedAt "${lab.updatedAt}"`).toBeGreaterThan(0);
+    }
+
+    const recencies = publicLabs.map((lab) => labRecency(lab.updatedAt));
+    expect(recencies).toEqual([...recencies].sort((x, y) => y - x));
+
+    // The sitemap, llms.txt and the feed are generated from the parser, not the app.
+    const fromScripts = (await loadParsedLabs()).map((lab) => lab.id);
+    expect(fromScripts).toEqual(publicLabs.map((lab) => lab.id));
   });
 
   it('names the lab in its own one-liner, so a quoted answer says what it is about', () => {

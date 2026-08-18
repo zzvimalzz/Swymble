@@ -64,7 +64,7 @@ const lab: SwymbleLab = {
   },
   actions: [
     {
-      label: 'OPEN WATCH PAINT DRY',
+      label: 'VISIT SITE',
       href: 'https://www.watchpaintdry.net/',
       kind: 'external',
     },

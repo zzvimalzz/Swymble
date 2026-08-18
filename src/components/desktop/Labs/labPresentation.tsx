@@ -9,6 +9,7 @@ export const STATUS_MODIFIER: Record<SwymbleLab['status'], string> = {
   Live: 'live',
   'In Development': 'development',
   'Private Beta': 'beta',
+  Archived: 'archived',
 };
 
 /** The lab's own actions, falling back to its single primaryAction. */
@@ -60,7 +61,7 @@ export function LabActions({
     <div className="lab-actions">
       {showDetailLink && (
         <Link to={`/labs/${lab.id}`} className="lab-btn">
-          FULL DETAILS
+          DETAILS
         </Link>
       )}
 

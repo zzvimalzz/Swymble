@@ -6,8 +6,8 @@ const lab: SwymbleLab = {
   seoName: 'Cortex',
   category: 'ARTIFICIAL INTELLIGENCE',
   image: '/images/labs/cortex_logo.png',
-  status: 'In Development',
-  visibility: 'teaser',
+  status: 'Archived',
+  visibility: 'public',
   publicSummary:
     'A proprietary cognitive platform focused on long-context memory and operator decision support for complex digital workflows.',
   safeHighlights: [
@@ -66,13 +66,6 @@ const lab: SwymbleLab = {
     ],
   },
   blogCategoryId: 'cortex',
-  actions: [
-    {
-      label: 'REQUEST PRIVATE DEMO',
-      href: 'mailto:hello@swymble.com?subject=CORTEX%20Private%20Demo',
-      kind: 'mailto',
-    },
-  ],
 };
 
 export default lab;

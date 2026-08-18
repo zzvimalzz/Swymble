@@ -25,13 +25,13 @@ client projects and to independent products.
 Each lab has its own page with a full description, and several are live
 products anyone can use today.
 
-- https://swymble.com/labs/cortex : Cortex is a Swymble Labs AI platform built around persistent long-context memory and operator decision support for complex digital workflows.
-- https://swymble.com/labs/mybirth : MyBirth is a free web app that rebuilds the day you were born — moon phase, weather, headlines, music and film — as a shareable keepsake archive.
 - https://swymble.com/labs/mydompet : MyDompet is an offline-first money tracker for Android and iOS that keeps every transaction in SQLite on your own phone, with no account server.
+- https://swymble.com/labs/oglets : Oglets is a free browser toy: a small creature made mostly of eyes, drawn from a weighted genome, that lives in your browser and watches you.
 - https://swymble.com/labs/what2watch : what2watch is a free Swymble Labs web app that packs tens of thousands of movies and shows into one interactive voronoi wall you can browse by mood.
 - https://swymble.com/labs/watchpaintdry : Watch Paint Dry is a free browser toy: a wall of fresh paint, a timer counting how long you stare at it, and achievements for your patience.
-- https://swymble.com/labs/oglets : Oglets is a free browser toy: a small creature made mostly of eyes, drawn from a weighted genome, that lives in your browser and watches you.
+- https://swymble.com/labs/mybirth : MyBirth is a free web app that rebuilds the day you were born — moon phase, weather, headlines, music and film — as a shareable keepsake archive.
 - https://swymble.com/labs/territory : Territory is a fitness gamification app from Swymble Labs that turns real-world movement into claimable territory on a virtual map.
+- https://swymble.com/labs/cortex : Cortex is a Swymble Labs AI platform built around persistent long-context memory and operator decision support for complex digital workflows.
 
 ## Client projects
 

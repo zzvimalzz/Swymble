@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import SmartImage from '../../components/SmartImage';
 import { LabActions, STATUS_MODIFIER, labActionsOf } from '../../components/desktop/Labs/labPresentation';
 import { SWYMBLE_DATA } from '../../data/config';
@@ -138,7 +138,7 @@ export default function DesktopLabDetail() {
       )}
 
       {detail?.features?.length ? (
-        <section className="lab-detail-section" aria-labelledby="lab-features-heading">
+        <section className="lab-detail-section lab-detail-section--wide" aria-labelledby="lab-features-heading">
           <h2 id="lab-features-heading">How it works</h2>
           <div className="lab-detail-features">
             {detail.features.map((feature) => (
@@ -202,17 +202,32 @@ export default function DesktopLabDetail() {
       </section>
 
       {otherLabs.length ? (
-        <section className="lab-detail-section" aria-labelledby="lab-more-heading">
+        <section className="lab-detail-section lab-detail-section--wide" aria-labelledby="lab-more-heading">
           <h2 id="lab-more-heading">More from Swymble Labs</h2>
+          {/* Logo first, name on a faded band at the foot of the card. The one-liner is a click
+              away on the lab's own page; repeating it here just rebuilds the /labs grid. */}
           <ul className="lab-detail-more">
-            {otherLabs.map((entry) => (
+            {otherLabs.slice(0, 3).map((entry) => (
               <li key={entry.id}>
-                <Link to={`/labs/${entry.id}`}>
-                  <strong>{labDisplayName(entry)}</strong>
-                  <span>{entry.detail?.oneLiner ?? entry.publicSummary}</span>
+                <Link to={`/labs/${entry.id}`} className="lab-more-card">
+                  <span className="lab-more-card__art">
+                    <SmartImage src={entry.image} alt="" fit="contain" padding={0} />
+                  </span>
+                  <span className="lab-more-card__label">{labDisplayName(entry)}</span>
                 </Link>
               </li>
             ))}
+
+            {/* Four tiles, and the fourth is the way out. Listing every other lab here turned the
+                foot of the page into a second /labs grid. */}
+            <li>
+              <Link to="/labs" className="lab-more-card lab-more-card--all">
+                <span className="lab-more-card__art">
+                  <ArrowRight size={40} aria-hidden="true" />
+                </span>
+                <span className="lab-more-card__label">MORE</span>
+              </Link>
+            </li>
           </ul>
         </section>
       ) : null}

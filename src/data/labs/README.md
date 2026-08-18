@@ -28,7 +28,7 @@ const lab: SwymbleLab = {
   category: 'CATEGORY LABEL',
   categoryColor: '#efff04',            // optional accent
   image: '/images/lab-logo.png',
-  status: 'In Development',            // 'In Development' | 'Private Beta' | 'Live'
+  status: 'In Development',            // 'In Development' | 'Private Beta' | 'Live' | 'Archived'
   visibility: 'teaser',                // see below
   publicSummary: 'Public-safe summary.',
   safeHighlights: ['Highlight one', 'Highlight two'],

@@ -36,19 +36,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://swymble.com/labs/cortex</loc>
-    <lastmod>2026-03-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://swymble.com/labs/mybirth</loc>
-    <lastmod>2026-06-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://swymble.com/labs/mydompet</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://swymble.com/labs/oglets</loc>
     <lastmod>2026-08-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -66,14 +60,20 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://swymble.com/labs/oglets</loc>
-    <lastmod>2026-08-01</lastmod>
+    <loc>https://swymble.com/labs/mybirth</loc>
+    <lastmod>2026-06-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://swymble.com/labs/territory</loc>
     <lastmod>2026-05-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://swymble.com/labs/cortex</loc>
+    <lastmod>2026-03-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -119,14 +119,16 @@ export type SwymbleLab = {
   category: string;
   categoryColor?: string;
   image: string;
-  status: 'In Development' | 'Private Beta' | 'Live';
+  /** 'Archived' is for work that is finished with, not work that failed — it still gets a page
+   *  and a card, just no claim to be running. Keep it out of SoftwareApplication in labSeo.ts. */
+  status: 'In Development' | 'Private Beta' | 'Live' | 'Archived';
   visibility: SwymbleLabVisibility;
   publicSummary: string;
   safeHighlights: string[];
   tags: string[];
   updatedAt: string;
-  /** Display order on /labs, ascending. Leave gaps of 10 between entries so new labs can be
-   *  slotted in without renumbering everything else. */
+  /** Tie-break only. /labs is ordered by `updatedAt`, newest first (see data/labs/index.ts);
+   *  `order` decides the sequence of labs sharing a month. Gaps of 10 leave room to slot one in. */
   order: number;
   blogCategoryId?: string;
   blogLink?: string;

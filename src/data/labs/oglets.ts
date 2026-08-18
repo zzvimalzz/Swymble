@@ -81,7 +81,7 @@ const lab: SwymbleLab = {
   },
   actions: [
     {
-      label: 'OPEN OGLETS',
+      label: 'VISIT SITE',
       href: createSubdomainUrl('oglets'),
       kind: 'external',
     },
