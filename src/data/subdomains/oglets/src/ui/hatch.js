@@ -9,10 +9,13 @@
    tier, so the wait is not a loading bar — it is a five-minute tell, and a red shell glowing
    through its cracks means something before it opens.
 
-   Three ways out, and all three matter (see `.docs/OGLETS.md` §9): tapping brings it forward and
-   the credit is banked so a reload keeps it, leaving and coming back finds it further along
-   because progress is derived from a timestamp, and `Skip` still *breaks* the shell rather than
-   dissolving to the world.
+   **There is no way to ask for it early**, and that is the whole design (see `.docs/OGLETS.md` §9).
+   The `Open it now` button is gone: a five-minute wait with an escape hatch beside it is not a
+   wait, it is a five-minute suggestion, and a visitor who takes the hatch has been told by the page
+   itself that what they were watching was worth nothing. Two ways the clock moves, and both matter:
+   tapping the egg takes **one second** off per tap and the credit is banked so a reload keeps it,
+   and leaving and coming back finds it further along because progress is derived from a timestamp
+   rather than counted.
    ═══════════════════════════════════════════════════════════ */
 
 import { approach, clamp, rand } from '../core/math.js'
@@ -70,15 +73,13 @@ export function mountHatch(host, { onHatched } = {}) {
     <p class="hatch-kicker">Something has been left for you</p>
     <p class="hatch-beat"></p>
     <p class="hatch-clock"></p>
-    <button class="btn btn-quiet hatch-skip" type="button" hidden>Open it now</button>
-    <p class="hatch-hint">Tap the egg — it helps.</p>`
+    <p class="hatch-hint">Tap the egg to help it along.</p>`
 
   const stageEl = host.querySelector('.hatch-stage')
   const flashEl = host.querySelector('.hatch-flash')
   flashEl.style.setProperty('--flash', shell.glow)
   const beatEl = host.querySelector('.hatch-beat')
   const clockEl = host.querySelector('.hatch-clock')
-  const skipEl = host.querySelector('.hatch-skip')
   const hintEl = host.querySelector('.hatch-hint')
 
   const SIZE = 320
@@ -108,6 +109,10 @@ export function mountHatch(host, { onHatched } = {}) {
     state.lurch = (Math.random() < 0.5 ? -1 : 1) * (0.5 + Math.random() * 0.5) * hard
   }
 
+  /**
+   * The shell goes. **Only the clock reaching `FULL` calls this** — there is no way to ask for it.
+   * See `hatch-beats.js`: the five minutes are the point, and tapping is the only lever.
+   */
   const breakNow = (now) => {
     if (state.broke) return
     state.broke = now
@@ -116,7 +121,6 @@ export function mountHatch(host, { onHatched } = {}) {
     mine.hatched = true
     mine.eggHelp = Math.min(MAX_HELP, mine.eggHelp ?? 0)
     persist()
-    skipEl.hidden = true
     hintEl.hidden = true
     if (!reducedMotion()) thump(1.4)
   }
@@ -134,8 +138,6 @@ export function mountHatch(host, { onHatched } = {}) {
     // it answers every tap even when the tap earned nothing — mashing is not work, but it is felt
     thump(credited === null ? 0.5 : 1)
   })
-
-  skipEl.addEventListener('click', () => breakNow(performance.now() / 1000))
 
   addTicker((dt, t) => {
     if (!state.live) return
@@ -163,7 +165,6 @@ export function mountHatch(host, { onHatched } = {}) {
       beatEl.textContent = beat.name
       const left = remainingOf(progress)
       clockEl.textContent = left > 0 ? `about ${minutes(left)} to go` : 'any moment'
-      skipEl.hidden = beat.index < 2
       hintEl.hidden = beat.index < 1
     } else if (!state.handedOver && lit > flashLength(calm) + AFTER) {
       state.handedOver = true

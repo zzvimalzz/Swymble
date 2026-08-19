@@ -91,7 +91,7 @@ export function bindPointer(canvas, { onFirstTouch, onNotice } = {}) {
     { passive: true },
   )
 
-  const release = () => {
+  const release = (e) => {
     const now = performance.now() / 1000
     if (held && ptr.moved < 12 && now - ptr.t0 < 0.35) held.poke(now)
     if (held) {
@@ -101,6 +101,12 @@ export function bindPointer(canvas, { onFirstTouch, onNotice } = {}) {
     }
     held = null
     ptr.down = false
+    /* **A finger coming off is not the same as a cursor leaving the page.** `pointerleave` fires
+       the moment a touch ends and clears `ptr.in`, so without this the world decided you had gone
+       between every single tap. `ptr.lift` is stamped only by a finger or a pen, and `attentive`
+       in `world/stage.js` keeps you present for a few seconds afterwards. A mouse never gets here
+       with a non-mouse `pointerType`, so nothing about the desktop changes. */
+    if (e && e.pointerType !== 'mouse') ptr.lift = now
     document.body.classList.remove('grabbing')
   }
 

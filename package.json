@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "concurrently --names \"main,mybirth,what2watch\" -c \"cyan,green,yellow\" \"vite\" \"npm --prefix src/data/subdomains/mybirth run dev\" \"npm --prefix src/data/subdomains/what2watch run dev\"",
     "dev:main": "vite",
-    "dev:mybirth": "npm --prefix src/data/subdomains/mybirth run dev",
-    "dev:what2watch": "npm --prefix src/data/subdomains/what2watch run dev",
+    "dev:mybirth": "concurrently --names \"main,mybirth\" -c \"cyan,green\" \"vite\" \"npm --prefix src/data/subdomains/mybirth run dev\"",
+    "dev:what2watch": "concurrently --names \"main,what2watch\" -c \"cyan,yellow\" \"vite\" \"npm --prefix src/data/subdomains/what2watch run dev\"",
     "generate:sitemap": "node scripts/generate-sitemap.mjs",
     "generate:robots": "node scripts/generate-robots.mjs",
     "generate:llms": "node scripts/generate-llms.mjs",
