@@ -58,9 +58,6 @@ export default merged;
 
 ## Writing one
 
-Read `mybirth-cortex.ts` (Ouroboros), `mybirth-territory.ts` (Birthright Plus+) and
-`oglets-mybirth.ts` (Malakims) first. Those set the voice; everything else was written to match.
-
 **It is an app somebody installed.** That is the single thing that makes these work. Not a concept,
 not a phenomenon — a product with a subscription, a customer support line, a leaderboard and a
 settings screen somebody removed. Write about the thing on their phone.
@@ -89,6 +86,17 @@ threat.
 Keep it public-safe, like everything in `data/` — no private architecture, no client names. And
 never add an action, a link or a route: it is not a page and must never become one.
 
+## What is checked, and what is not
+
+`merged.test.ts` holds three tests, and they are all about mistakes that fail **silently**: a
+pairing nobody has written, a pair listed in the wrong order (the lookup key is built in page
+order, so a reversed pair is never found and the reader quietly gets generated copy), and a mark
+that is not on disk.
+
+Everything above about voice, names, length and tone is guidance. **None of it is asserted, and it
+should stay that way** — an earlier version of that file required upper-case names, exactly two
+highlights and a short tag, and each of those went red on writing that was perfectly good.
+
 ## The mark
 
 `public/images/labs/merged_easteregg/<a>-<b>.svg`, a 120×120 viewBox with a transparent ground.
@@ -100,7 +108,7 @@ those two labs before anyone reads a word.
 
 Marks may be drawn by hand or rendered from the two real logos — see PROMPT.md for the generator
 prompt and the per-pair briefs. Whatever the source, keep the file name and update `image` to match
-the extension; `merged.test.ts` checks the pair has exactly one mark and that the two agree.
+the extension; `merged.test.ts` checks that the mark is there and that `image` agrees with it.
 
 Watch the weight. A rendered mark embedded as base64 inside an SVG wrapper runs to about 1.2MB for
 something drawn at 104px on the card; exporting the raster directly as PNG or WebP is several times

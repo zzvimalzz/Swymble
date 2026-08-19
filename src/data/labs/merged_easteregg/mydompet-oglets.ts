@@ -4,7 +4,7 @@ const merged: SwymbleMergedLab = {
   pair: ["mydompet", "oglets"],
   name: "PayPeek",
   category: "Financial Surveillance",
-  tagline: "An offline-first money tracker that has grown an eye. Nothing ever leaves your phone, because nothing needs to. It already knows.",
+  tagline: "An offline-first money tracker that has grown eyes. Nothing ever leaves your phone, because nothing needs to. It already knows.",
   highlights: [
     "Fully on-device: no cloud, no server, no escape",
     "Can't stop you spending, but can make you feel profoundly observed while you do it",

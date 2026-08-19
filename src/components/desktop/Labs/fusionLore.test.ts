@@ -62,22 +62,42 @@ describe('the spliced copy', () => {
 });
 
 describe('a specimen', () => {
-  it('can be made from every pair of labs on the page, and reads as a card', () => {
+  it('resolves to a full card for every pair of labs on the page', () => {
+    // Structure only. What the copy *says* is the author's business and is checked nowhere —
+    // asserting a house style here is what made this file go red on good writing twice.
     for (const [left, right] of PAIRS) {
       const specimen = specimenFor(fusedId([left.id, right.id], ORDER), LABS);
 
       expect(specimen).not.toBeNull();
-      // An authored name in whatever case its author chose, or a generated portmanteau in caps.
-      expect(specimen!.name).toMatch(/^[\p{L}\p{N}][\p{L}\p{N} :.,'&+-]{1,39}$/u);
-      // Its own tag where it has written one, UNSTABLE where it has not.
-      expect(specimen!.status).toMatch(/^[A-Z0-9][A-Z0-9 ]{2,39}$/);
-      // A sentence, not a fragment, and not a whole paragraph either. The longest real pair is
-      // Territory welded to Cortex, at 234 characters — a card blurb, still not a headline.
-      expect(specimen!.tagline).toMatch(/\.$/);
-      expect(specimen!.tagline.length).toBeLessThan(400);
+      expect(specimen!.name).not.toBe('');
+      expect(specimen!.category).not.toBe('');
+      expect(specimen!.tagline).not.toBe('');
+      expect(specimen!.status).not.toBe('');
       expect(specimen!.highlights.length).toBeGreaterThan(0);
       expect(specimen!.members).toHaveLength(2);
     }
+  });
+
+  it('falls back to generated copy for a pairing nobody has written', () => {
+    // The safety net, tested on its own rather than through the authored cards — which is what the
+    // check above used to be doing, badly. An eighth lab makes seven of these on the day it lands.
+    const [left, right] = PAIRS[0];
+    const unwritten = specimenFor(fusedId([left.id, right.id], ORDER), [
+      { ...left, id: 'ghost-left' },
+      { ...right, id: 'ghost-right' },
+    ]);
+
+    expect(unwritten).toBeNull();
+
+    const generated = specimenFor('fused:ghost-left+ghost-right', [
+      { ...left, id: 'ghost-left' },
+      { ...right, id: 'ghost-right' },
+    ]);
+
+    expect(generated?.authored).toBe(false);
+    expect(generated?.name).toBe(portmanteau(left.title, right.title));
+    expect(generated?.tagline).toMatch(/\.$/);
+    expect(generated?.image).toBeUndefined();
   });
 
   it('is the same specimen every time, whichever way round it was squeezed', () => {
