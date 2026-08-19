@@ -104,6 +104,26 @@ describe('tapping', () => {
     expect(creditTap(0, 0, TAP_GAP / 2)).toBeNull()
   })
 
+  /* The hint under the egg says "a second off, every time" and it is the only promise the page
+     makes about the wait, now that the button that skipped it is gone. */
+  it('takes exactly one second off, because that is what the egg says it does', () => {
+    expect(TAP_HELP).toBe(1)
+    const laid = 1_000
+    const before = progressOf(laid, 0, laid + 60_000)
+    expect(progressOf(laid, creditTap(0, 0, TAP_GAP + 0.01), laid + 60_000)).toBe(before + 1)
+  })
+
+  it('makes the floor cost 150 taps — a lever, not a second button', () => {
+    let help = 0
+    let taps = 0
+    while (help < MAX_HELP) {
+      help = creditTap(help, 0, ++taps * (TAP_GAP + 0.1)) ?? help
+    }
+    expect(taps).toBe(MAX_HELP / TAP_HELP)
+    // and the gap means those taps cannot be spent faster than 0.6s apart
+    expect(taps * TAP_GAP).toBeGreaterThan(60)
+  })
+
   it('cannot be mashed past the cap', () => {
     let help = 0
     for (let i = 0; i < 500; i++) help = creditTap(help, 0, (i + 1) * (TAP_GAP + 0.1)) ?? help

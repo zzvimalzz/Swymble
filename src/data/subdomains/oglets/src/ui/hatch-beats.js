@@ -14,14 +14,27 @@
    `eggHelp` so it survives a reload too. Capped at `MAX_HELP`, which is deliberately exactly half
    of `FULL`: **however hard you work at it, it takes two and a half minutes; ignore it entirely
    and it takes five.**
+
+   **A tap is worth one second, and it is the only way through.** There is no longer a button that
+   opens the egg — the wait is the thing, and an escape hatch beside it says the wait was never
+   real. One second is the point: it is small enough that the clock has to be *worked* down over a
+   hundred and fifty deliberate taps, and it is a number a visitor can read straight off the line
+   above it, which three never was.
    ═══════════════════════════════════════════════════════════ */
 
 /** Seconds from laid to hatched, untouched. */
 export const FULL = 300
 /** The most tapping can take off it — half. */
 export const MAX_HELP = 150
-/** Seconds of credit per tap, and the gap below which a tap does not count. Mashing is not work. */
-export const TAP_HELP = 3
+/**
+ * Seconds of credit per tap, and the gap below which a tap does not count. Mashing is not work.
+ *
+ * The gap is what keeps the pair honest. At one second a tap, a masher at eight a second would
+ * clear the whole `MAX_HELP` in under twenty — which is the button this replaced, wearing a
+ * different hat. Throttled to `TAP_GAP`, the best anybody can do is 1s of credit per 0.6s of
+ * waiting, so the floor at two and a half minutes still costs a minute and a half of tapping.
+ */
+export const TAP_HELP = 1
 export const TAP_GAP = 0.6
 
 /**

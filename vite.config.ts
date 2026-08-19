@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import crypto from 'node:crypto'
 import fs from 'node:fs'
+import http from 'node:http'
 import path from 'node:path'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
@@ -134,6 +135,88 @@ function resolveSubdomainIndexFallbackPath(requestPathname: string) {
 
 function isSubdomainAppSource(subdomainRoot: string) {
   return fs.existsSync(path.join(subdomainRoot, 'package.json'))
+}
+
+/**
+ * The dev-server port a subdomain app listens on, read out of its own Vite config.
+ *
+ * Parsed rather than hardcoded here so the two cannot drift: the nested project owns its port and
+ * this server follows it. `clientPort` (the HMR socket) is deliberately not matched — the regex is
+ * case-sensitive and needs a word boundary. An app with no explicit port is simply not proxied.
+ */
+function readSubdomainAppDevPort(subdomain: string) {
+  const subdomainRoot = path.join(SUBDOMAINS_SOURCE_ROOT, subdomain)
+
+  for (const fileName of ['vite.config.ts', 'vite.config.js', 'vite.config.mjs']) {
+    const configPath = path.join(subdomainRoot, fileName)
+
+    if (!fs.existsSync(configPath)) {
+      continue
+    }
+
+    const match = /\bport:\s*(\d{4,5})/.exec(fs.readFileSync(configPath, 'utf8'))
+    return match ? Number(match[1]) : null
+  }
+
+  return null
+}
+
+/** Every subdomain that runs a dev server of its own, with the port it listens on. */
+function listSubdomainApps() {
+  if (!fs.existsSync(SUBDOMAINS_SOURCE_ROOT)) {
+    return []
+  }
+
+  return fs
+    .readdirSync(SUBDOMAINS_SOURCE_ROOT, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && isSubdomainAppSource(path.join(SUBDOMAINS_SOURCE_ROOT, entry.name)))
+    .map((entry) => ({ name: entry.name, port: readSubdomainAppDevPort(entry.name) }))
+    .filter((app): app is { name: string; port: number } => app.port !== null)
+}
+
+/**
+ * Hand a whole request to a subdomain app's own dev server.
+ *
+ * A subdomain app is a separate Vite project on a port of its own, so `mybirth.localhost:5173` used
+ * to fall through to the main site's SPA fallback and quietly serve the *main* site — the one thing
+ * worse than a 404. Proxying makes every subdomain in the repo, plain or app, reachable the way it
+ * is in production: by hostname, from one port.
+ *
+ * **Only HTTP is proxied.** Each app aims its HMR socket straight at its own port
+ * (`server.hmr.clientPort` in its config), so live reload never crosses this server and the two
+ * Vite websocket endpoints never have to share one upgrade handler.
+ */
+function proxyToSubdomainApp(
+  app: { name: string; port: number },
+  request: http.IncomingMessage,
+  response: http.ServerResponse,
+) {
+  const upstreamRequest = http.request(
+    {
+      // `localhost`, not `127.0.0.1`: Vite binds the loopback interface the OS prefers, and on
+      // Windows that is `::1` only — an IPv4 dial is refused and every proxied request 502s.
+      host: 'localhost',
+      port: app.port,
+      method: request.method,
+      path: request.url ?? '/',
+      headers: request.headers,
+    },
+    (upstreamResponse) => {
+      response.writeHead(upstreamResponse.statusCode ?? 502, upstreamResponse.headers)
+      upstreamResponse.pipe(response)
+    },
+  )
+
+  upstreamRequest.on('error', () => {
+    response.statusCode = 502
+    response.setHeader('Content-Type', CONTENT_TYPES['.txt'])
+    response.end(
+      `${app.name} is not running on port ${app.port}.\n\n` +
+        `Start everything with: npm run dev   (or just this app with: npm run dev:${app.name})\n`,
+    )
+  })
+
+  request.pipe(upstreamRequest)
 }
 
 /**
@@ -318,6 +401,20 @@ function createStaticSubdomainPlugin(): Plugin {
       command = resolvedConfig.command
     },
     configureServer(server) {
+      const subdomainApps = listSubdomainApps()
+
+      server.middlewares.use((request, response, next) => {
+        const subdomain = resolveSubdomainFromHost(request.headers.host)
+        const app = subdomain ? subdomainApps.find((entry) => entry.name === subdomain) : undefined
+
+        if (!app) {
+          next()
+          return
+        }
+
+        proxyToSubdomainApp(app, request, response)
+      })
+
       server.middlewares.use((request, response, next) => {
         rewriteRequest(request)
 
@@ -328,15 +425,14 @@ function createStaticSubdomainPlugin(): Plugin {
         next()
       })
 
-      // Plain subdomains have no dev process of their own — this server *is* their dev server,
-      // reached by hostname rather than by port. `npm run dev` names only main/mybirth/what2watch,
-      // so without this they look like they are simply not running. Print their URLs alongside
-      // Vite's own so every subdomain in the repo is visible from one place.
+      // Every subdomain is reachable from this one port by hostname: a plain one is served
+      // straight off disk by the middleware above, an app is proxied to its own dev server. Print
+      // them all next to Vite's own URLs so the whole site is visible from one place.
       const printUrls = server.printUrls.bind(server)
       server.printUrls = () => {
         printUrls()
         const port = server.config.server.port ?? 5173
-        for (const name of listPlainSubdomains()) {
+        for (const name of [...listPlainSubdomains(), ...subdomainApps.map((app) => app.name)].sort()) {
           server.config.logger.info(`  \x1b[32m➜\x1b[0m  \x1b[1m${name}\x1b[0m:  \x1b[36mhttp://${name}.localhost:${port}/\x1b[0m`)
         }
       }
@@ -368,6 +464,11 @@ export default defineConfig({
     exclude: ['**/node_modules/**', '**/dist/**', 'src/data/subdomains/what2watch/**'],
   },
   server: {
+    // Every subdomain is reached as <name>.localhost on THIS port, and the subdomain apps are
+    // proxied from here, so the port is part of the contract rather than an implementation
+    // detail. Pinned and strict: a clash is an error you can read, not a silently moved site.
+    port: 5173,
+    strictPort: true,
     allowedHosts: ['.localhost'],
   },
   build: {

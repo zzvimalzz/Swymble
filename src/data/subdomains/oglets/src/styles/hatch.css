@@ -36,7 +36,12 @@ body[data-route="hatch"] .topbar{display:none}
                var(--flash) 62%,
                color-mix(in srgb, var(--flash) 82%, #000) 100%)}
 
-.hatch-stage{position:relative;width:320px;height:320px;max-width:86vw;max-height:56vh}
+/* Square, and squeezed by whichever of the three limits bites first. `width`/`height` as two
+   independent caps let a short landscape phone make the box 310 × 320, and the canvas inside it is
+   square — so the egg either overflowed the box or, once the canvas learned to shrink
+   (`world/canvas.js#createStageCanvas`), squashed to fit it. One `min()` and an aspect ratio keeps
+   it a circle at every size. */
+.hatch-stage{position:relative;width:min(320px,86vw,56vh);aspect-ratio:1}
 .hatch-canvas{display:block;width:100%;height:100%;border-radius:50%;
               background:var(--well);cursor:pointer;touch-action:manipulation}
 
@@ -44,8 +49,7 @@ body[data-route="hatch"] .topbar{display:none}
 .hatch-beat{margin:0;min-height:1.4em;font-size:17px;letter-spacing:.1em;color:var(--txt)}
 .hatch-clock{margin:0;min-height:1.4em;font-size:12px;letter-spacing:.08em;color:var(--txt-3)}
 .hatch-hint{margin:0;font-size:12px;letter-spacing:.06em;color:rgb(var(--pearl) / .42)}
-.hatch-skip{margin:2px 0 0}
-.hatch-hint[hidden],.hatch-skip[hidden]{display:none}
+.hatch-hint[hidden]{display:none}
 
 /* ── the egg variants, on the Genome page ───────────────── */
 .eggrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin-bottom:6px}
