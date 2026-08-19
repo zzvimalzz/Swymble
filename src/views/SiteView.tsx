@@ -13,6 +13,7 @@ import DesktopFooter from '../components/desktop/DesktopFooter';
 import DesktopNav from '../components/desktop/DesktopNav';
 import GlitchCursor from '../components/desktop/GlitchCursor';
 import FloatingControls from '../components/site/FloatingControls';
+import { LABS_COMPACT_QUERY } from '../components/desktop/Labs/breakpoints';
 import NavSheet from '../components/site/NavSheet';
 import DesktopHome from './desktop/DesktopHome';
 import DesktopProjects from './desktop/DesktopProjects';
@@ -25,6 +26,7 @@ import DesktopLabs from './desktop/DesktopLabs';
 import DesktopNotFound from './desktop/DesktopNotFound';
 import DesktopResume from './desktop/DesktopResume';
 
+import useMediaQuery from '../hooks/useMediaQuery';
 import { SWYMBLE_DATA } from '../data/config';
 import { SITE_ROUTES } from '../routes';
 import type { SiteRouteElements } from '../routes';
@@ -61,6 +63,9 @@ export default function SiteView() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   /** Set by the labs page while its gravity mode is on — see DesktopLabs. */
   const [gravityActive, setGravityActive] = useState(false);
+  // The same query DesktopLabs hands useGravityMode. Both have to read it, or the button and the
+  // thing it triggers disagree — which is how the phone ended up with an anvil that did nothing.
+  const isLabsCompact = useMediaQuery(LABS_COMPACT_QUERY);
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   // True only during the very first render — used to skip the page-transition fade on
@@ -187,7 +192,11 @@ export default function SiteView() {
         // Gravity belongs to the labs page and nowhere else. The shell only knows that the button
         // exists there; what it does is entirely DesktopLabs' business, hence the event rather
         // than a prop drilled through the router.
-        showGravity={location.pathname === '/labs' && (showScrollTop || gravityActive)}
+        // Not on a phone: gravity is desktop-only (see breakpoints.ts), and a button for a mode
+        // that cannot start is worse than no button.
+        showGravity={
+          location.pathname === '/labs' && !isLabsCompact && (showScrollTop || gravityActive)
+        }
         onGravity={() => window.dispatchEvent(new CustomEvent('swymble:gravity'))}
         gravityActive={gravityActive}
       />

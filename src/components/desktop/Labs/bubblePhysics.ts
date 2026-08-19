@@ -21,7 +21,20 @@ export type Bubble = {
   r: number;
 };
 
-export type Bounds = { width: number; height: number };
+export type Bounds = {
+  width: number;
+  height: number;
+  /**
+   * The top wall, measured down from the stage origin. Optional and 0 when left out, so every
+   * existing caller and test means what it always meant.
+   *
+   * It exists because the floor already tracks the viewport (visibleFloor) and nothing tracked the
+   * ceiling. On a desktop the fixed nav is a solid obstacle and hid that; below 860px the nav is
+   * display:none and there was nothing at the top at all, so scrolling down left bubbles stranded
+   * above the fold with no wall to push them along.
+   */
+  top?: number;
+};
 
 /** A box the bubbles are not allowed inside — the page's own headings, measured from the DOM.
  *  Stage coordinates, same as the bubbles. */
@@ -412,6 +425,8 @@ function kickFromBarriers(
 }
 
 function resolveWalls(bubbles: Bubble[], bounds: Bounds, restitution: number, heldId: string | null) {
+  const ceiling = bounds.top ?? 0;
+
   for (const bubble of bubbles) {
     const held = bubble.id === heldId;
 
@@ -423,8 +438,8 @@ function resolveWalls(bubbles: Bubble[], bounds: Bounds, restitution: number, he
       if (!held && bubble.vx > 0) bubble.vx = -bubble.vx * restitution;
     }
 
-    if (bubble.y - bubble.r < 0) {
-      bubble.y = bubble.r;
+    if (bubble.y - bubble.r < ceiling) {
+      bubble.y = ceiling + bubble.r;
       if (!held && bubble.vy < 0) bubble.vy = -bubble.vy * restitution;
     } else if (bubble.y + bubble.r > bounds.height) {
       bubble.y = bounds.height - bubble.r;

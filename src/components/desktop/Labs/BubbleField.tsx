@@ -5,7 +5,15 @@ import type { SwymbleLab } from '../../../data/types';
 import { STATUS_MODIFIER } from './labPresentation';
 import { labDisplayName } from '../../../utils/labSeo';
 import { arrived, step, stepToward, type Bubble, type Bounds, type Rect, type Target } from './bubblePhysics';
-import { radiusFor, rowTargets, seedBubbles, visibleFloor } from './bubbleLayout';
+import {
+  isSolidObstacle,
+  type Placement,
+  radiusFor,
+  rowTargets,
+  seedBubbles,
+  visibleCeiling,
+  visibleFloor,
+} from './bubbleLayout';
 import {
   BURST_LIFE,
   ageBurst,
@@ -48,6 +56,20 @@ const FLICK_WINDOW_MS = 90;
  *  snapping into place. Critically damped either way — see stepToward(). */
 const ROW_STIFFNESS = 42;
 
+/**
+ * The smallest a row bubble is ever drawn.
+ *
+ * The row sizes itself from the strip's width, which on a phone gives seven bubbles 18.9px of
+ * radius — a 38px tap target, under the 44px floor site-responsive.css holds everything else to,
+ * with a logo inside too small to tell one lab from another. 26px puts the target at 52px and
+ * lets the row run wider than the strip instead; the strip is a scroller, see retarget().
+ */
+const ROW_MIN_RADIUS = 26;
+
+/** How far a finger may travel across the row before the press counts as a scroll rather than a
+ *  tap. Below it the bubble it started on is still selected on release. */
+const ROW_PAN_SLOP = 6;
+
 type BubbleFieldProps = {
   labs: SwymbleLab[];
   selectedId: string | null;
@@ -81,6 +103,9 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
   const pointerRef = useRef<{ x: number; y: number } | null>(null);
   const samplesRef = useRef<PointerSample[]>([]);
   const draggedRef = useRef(false);
+  /** A drag on a bubble while the row is up. It pans the strip instead of grabbing the circle —
+   *  see onPointerDown. Null whenever nothing is being dragged in the row. */
+  const panRef = useRef<{ pointerId: number; startX: number; startScroll: number } | null>(null);
   const obstaclesRef = useRef<Rect[]>([]);
   const clockRef = useRef(0);
   const frameCountRef = useRef(0);
@@ -99,6 +124,9 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
    *  floor before anyone has touched anything. */
   const previousModeRef = useRef<FieldMode | null>(null);
   const targetsRef = useRef<Map<string, Target>>(new Map());
+  /** The row's slots in the strip's own coordinates — before scrollLeft is taken off them. What
+   *  the scroller below aims at; the targets themselves have already had it subtracted. */
+  const slotsRef = useRef<Map<string, Placement>>(new Map());
   const [reducedMotion, setReducedMotion] = useState(false);
 
   // THE FUSION EGG. Squeeze one bubble into another that has nowhere to go and the two merge.
@@ -124,6 +152,12 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
     return () => query.removeEventListener('change', onChange);
   }, []);
 
+  /** The strip the row lives in, or null before it is mounted. */
+  const bandOf = useCallback(
+    () => stageRef.current?.parentElement?.querySelector<HTMLElement>('[data-bubble-band]') ?? null,
+    [],
+  );
+
   /** Where the row wants each bubble. Recomputed on selection and on resize; the spring reads it
    *  every frame, so a stage that is still collapsing is followed rather than fought. */
   const retarget = useCallback(() => {
@@ -136,16 +170,38 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
 
     // The row lives in the strip the page reserves for it, not in the middle of a full-page
     // field. Measured, so the strip can be moved or resized in CSS alone.
-    const band = stage.parentElement?.querySelector('[data-bubble-band]');
+    const band = stage.parentElement?.querySelector<HTMLElement>('[data-bubble-band]');
     const origin = stage.getBoundingClientRect();
     const box = band ? band.getBoundingClientRect() : null;
     const area = box
       ? { x: box.left - origin.left, y: box.top - origin.top, width: box.width, height: box.height }
       : { x: 0, y: 0, width: bounds.width, height: Math.min(bounds.height, 180) };
 
-    const slots = rowTargets(ids.length, { width: area.width, height: area.height }).map((slot) => ({
+    const laid = rowTargets(
+      ids.length,
+      { width: area.width, height: area.height },
+      { minRadius: ROW_MIN_RADIUS },
+    );
+
+    // On a narrow strip the row is wider than the box it sits in, and the strip becomes a
+    // horizontal scroller so the labs off the end can still be reached. The track is an empty
+    // spacer inside the strip whose only job is to give it something to scroll — its width is
+    // set from the row rather than in CSS, so the two cannot drift apart.
+    const track = band?.querySelector<HTMLElement>('[data-bubble-band-track]');
+    if (track && laid.length > 0) {
+      const pad = laid[0].x - laid[0].r;
+      track.style.width = `${laid[laid.length - 1].x + laid[0].r + pad}px`;
+    }
+
+    // The bubbles are drawn in the stage, which does not scroll; the strip underneath them does.
+    // Riding its scrollLeft is what keeps a circle over the slot it belongs to.
+    const scrolled = band?.scrollLeft ?? 0;
+
+    slotsRef.current = new Map(ids.map((id, index) => [id, laid[index]]));
+
+    const slots = laid.map((slot) => ({
       ...slot,
-      x: slot.x + area.x,
+      x: slot.x + area.x - scrolled,
       y: slot.y + area.y,
     }));
     targetsRef.current = new Map(
@@ -162,19 +218,28 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
    * hard-coded, so the heading can change size, the open card can appear, and the field simply
    * finds them in the way — see [data-bubble-obstacle] in DesktopLabs.tsx.
    */
-  /** The field is as deep as the reader has seen. See visibleFloor() for why it only ever grows. */
+  /** The field is the part of the page the reader is looking at — both edges, not just the floor.
+   *  See visibleFloor()/visibleCeiling(). */
   const measureFloor = useCallback(() => {
     const stage = stageRef.current;
     if (!stage) return;
 
     const box = stage.getBoundingClientRect();
+    const stageTop = box.top + window.scrollY;
     floorRef.current = visibleFloor({
-      stageTop: box.top + window.scrollY,
+      stageTop,
       stageHeight: stage.clientHeight,
       scrollY: window.scrollY,
       viewportHeight: window.innerHeight,
     });
-    boundsRef.current = { width: stage.clientWidth, height: floorRef.current };
+    // The top of the viewport is a wall too. Without it, scrolling down leaves everything above
+    // the fold stranded up there: on a desktop the fixed nav is a solid obstacle and covers for
+    // that, but it is display:none below 860px and nothing was holding the top at all.
+    boundsRef.current = {
+      width: stage.clientWidth,
+      height: floorRef.current,
+      top: visibleCeiling({ stageTop, scrollY: window.scrollY, floor: floorRef.current }),
+    };
   }, []);
 
   const measureObstacles = useCallback(() => {
@@ -182,21 +247,32 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
     if (!stage) return;
 
     const origin = stage.getBoundingClientRect();
+    // The largest bubble in play, which is what has to fit past a box for it to be solid. The
+    // fused one is bigger than the rest, so this is measured rather than derived from the count.
+    const radius = bubblesRef.current.reduce(
+      (widest, bubble) => Math.max(widest, bubble.r),
+      radiusFor(ids.length, boundsRef.current),
+    );
+
     // The nav is `position: fixed` and changes height when it compacts, so it is measured with
     // everything else on every scroll rather than once — its box moves relative to the field.
     const solid = [...document.querySelectorAll('[data-bubble-obstacle], .desktop-nav')];
-    obstaclesRef.current = solid.map((node) => {
-      const box = node.getBoundingClientRect();
-      // A little padding: a logo grazing a headline's exact glyph box still reads as a collision.
-      const inset = -6;
-      return {
-        x: box.left - origin.left + inset,
-        y: box.top - origin.top + inset,
-        width: box.width - inset * 2,
-        height: box.height - inset * 2,
-      };
-    });
-  }, []);
+    obstaclesRef.current = solid
+      .map((node) => {
+        const box = node.getBoundingClientRect();
+        // A little padding: a logo grazing a headline's exact glyph box still reads as a collision.
+        const inset = -6;
+        return {
+          x: box.left - origin.left + inset,
+          y: box.top - origin.top + inset,
+          width: box.width - inset * 2,
+          height: box.height - inset * 2,
+        };
+      })
+      // A box with no way past it is not an obstacle, it is a wall across the field — see
+      // isSolidObstacle. The specimen card on a phone is the case that forced this.
+      .filter((box) => isSolidObstacle({ box, bounds: boundsRef.current, radius }));
+  }, [ids.length]);
 
   const paint = useCallback(() => {
     if (pausedRef.current) return;
@@ -524,6 +600,61 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
     return () => window.removeEventListener('scroll', onScroll);
   }, [measureFloor, measureObstacles]);
 
+  /**
+   * Brings the chosen bubble into the strip, and only as far as it has to.
+   *
+   * The row is wider than the screen on a phone, so choosing a lab by swiping the card can select a
+   * bubble that is off the end of it. Centred where there is room, nudged to the nearer edge where
+   * there is not — a bubble already comfortably in view is left exactly where it is, because the
+   * strip jumping on every swipe is worse than the row being slightly off-centre.
+   */
+  useEffect(() => {
+    if (mode !== 'row' || !selectedId) return;
+
+
+    const band = bandOf();
+    const slot = slotsRef.current.get(selectedId);
+    if (!band || !slot || band.scrollWidth <= band.clientWidth) return;
+
+    // Its own radius again on each side, so the neighbours show and the row reads as continuing.
+    const margin = slot.r * 2.4;
+    const left = slot.x - slot.r - margin;
+    const right = slot.x + slot.r + margin;
+
+    let next = band.scrollLeft;
+    if (right > band.scrollLeft + band.clientWidth) next = right - band.clientWidth;
+    else if (left < band.scrollLeft) next = left;
+    else return;
+
+    band.scrollTo({ left: Math.max(0, next), behavior: reducedMotion ? 'auto' : 'smooth' });
+  }, [bandOf, mode, reducedMotion, selectedId]);
+
+  // The row's own scroller. Only the strip scrolls — the bubbles are in the stage above it and are
+  // moved by re-aiming their targets, which is also why this is a plain listener rather than the
+  // strip simply containing them: the solver owns every transform on a bubble.
+  useEffect(() => {
+    const band = bandOf();
+    if (!band) return undefined;
+
+    let queued = false;
+    const onBandScroll = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        retarget();
+        // And wake the loop. The row is a critically damped spring that arrives and stops
+        // (`arrived()`), so once it has settled nothing is reading the targets any more — new ones
+        // were written on every scroll and the circles stayed exactly where the strip had left
+        // them. Re-aiming is only half of a move.
+        startLoop();
+      });
+    };
+
+    band.addEventListener('scroll', onBandScroll, { passive: true });
+    return () => band.removeEventListener('scroll', onBandScroll);
+  }, [bandOf, retarget, startLoop]);
+
   useEffect(() => {
     modeRef.current = mode;
     measureObstacles();
@@ -626,8 +757,31 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
   };
 
   const onPointerDown = (event: ReactPointerEvent<HTMLButtonElement>, id: string) => {
+    if (event.button !== 0) return;
+
+    /*
+     * In the row, a drag on a bubble scrolls the row.
+     *
+     * The bubbles carry `touch-action: none` so the solver can own a drag, which also means the
+     * browser will not scroll the strip underneath them — and the row is wider than a phone, so
+     * the labs off the end were reachable only by finding the few pixels of gap between two
+     * circles. Dragging the row is the obvious gesture and it was doing nothing at all.
+     *
+     * Not a throw, because there is nothing to throw: every bubble is springing to a slot and
+     * would be pulled straight back. A tap still selects — see the slop check in onClick.
+     */
+    if (mode === 'row') {
+      const band = bandOf();
+      if (!band || band.scrollWidth <= band.clientWidth) return;
+
+      event.currentTarget.setPointerCapture(event.pointerId);
+      draggedRef.current = false;
+      panRef.current = { pointerId: event.pointerId, startX: event.clientX, startScroll: band.scrollLeft };
+      return;
+    }
+
     // While gravity has them, the bubbles are dragged by that solver, not this one.
-    if (reducedMotion || paused || mode === 'row' || event.button !== 0) return;
+    if (reducedMotion || paused) return;
 
     const bubble = bubblesRef.current.find((entry) => entry.id === id);
     if (!bubble) return;
@@ -647,6 +801,21 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const pan = panRef.current;
+    if (pan) {
+      if (pan.pointerId !== event.pointerId) return;
+
+      const band = bandOf();
+      if (!band) return;
+
+      const dx = event.clientX - pan.startX;
+      if (Math.abs(dx) > ROW_PAN_SLOP) draggedRef.current = true;
+      // 'auto' explicitly: the strip is scroll-behavior: smooth so that selecting a lab eases
+      // across, and a smooth scroll re-aimed every pointermove lags a finger badly.
+      band.scrollTo({ left: pan.startScroll - dx, behavior: 'auto' });
+      return;
+    }
+
     const held = heldRef.current;
     if (!held || held.pointerId !== event.pointerId) return;
 
@@ -663,6 +832,14 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
   };
 
   const releasePointer = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (panRef.current?.pointerId === event.pointerId) {
+      panRef.current = null;
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+      return;
+    }
+
     const held = heldRef.current;
     if (!held || held.pointerId !== event.pointerId) return;
 

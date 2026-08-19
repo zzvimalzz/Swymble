@@ -6,7 +6,7 @@
  * are, and the first frame jumps.
  */
 
-import type { Bounds, Bubble } from './bubblePhysics';
+import type { Bounds, Bubble, Rect } from './bubblePhysics';
 
 export type Placement = { x: number; y: number; r: number };
 
@@ -16,9 +16,13 @@ export type Placement = { x: number; y: number; r: number };
  *  past ~0.3 the field is a jammed pile that cannot be relaxed into a non-overlapping start. */
 const FILL = 0.2;
 
+/** The usable depth of a stage: everything between the ceiling and the floor. `bounds.top` is 0
+ *  unless the reader has scrolled, so this is `bounds.height` for a page sitting at the top. */
+const depthOf = (bounds: Bounds): number => Math.max(0, bounds.height - (bounds.top ?? 0));
+
 export const radiusFor = (count: number, bounds: Bounds): number => {
   if (count <= 0) return 0;
-  const fromArea = Math.sqrt((bounds.width * bounds.height * FILL) / (count * Math.PI));
+  const fromArea = Math.sqrt((bounds.width * depthOf(bounds) * FILL) / (count * Math.PI));
   return Math.max(30, Math.min(88, fromArea));
 };
 
@@ -30,9 +34,14 @@ const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
  * same answer every time for the same inputs.
  */
 export const seedPositions = (count: number, bounds: Bounds, radius: number): Placement[] => {
+  const ceiling = bounds.top ?? 0;
+  const depth = depthOf(bounds);
   const centreX = bounds.width / 2;
-  const centreY = bounds.height / 2;
-  const maxRadius = Math.max(0, Math.min(centreX, centreY) - radius);
+  // Centred between the two walls, not between the stage top and the floor: a re-seed part-way
+  // down the page would otherwise put half the field above the ceiling and leave the solver to
+  // spend its first second shoving everything back down.
+  const centreY = ceiling + depth / 2;
+  const maxRadius = Math.max(0, Math.min(centreX, depth / 2) - radius);
   const placements: Placement[] = [];
 
   for (let index = 0; index < count; index += 1) {
@@ -41,7 +50,7 @@ export const seedPositions = (count: number, bounds: Bounds, radius: number): Pl
     const angle = index * GOLDEN_ANGLE;
     // The stage is wider than it is tall, so the spiral is stretched to match rather than
     // leaving two empty columns at the sides.
-    const spreadX = Math.min(maxRadius * (bounds.width / bounds.height), centreX - radius);
+    const spreadX = Math.min(maxRadius * (bounds.width / Math.max(1, depth)), centreX - radius);
     placements.push({
       x: centreX + Math.cos(angle) * t * spreadX,
       y: centreY + Math.sin(angle) * t * maxRadius,
@@ -96,7 +105,10 @@ const relax = (placements: Placement[], bounds: Bounds, iterations = 240): Place
 
     for (const placement of result) {
       placement.x = Math.min(Math.max(placement.x, placement.r), bounds.width - placement.r);
-      placement.y = Math.min(Math.max(placement.y, placement.r), bounds.height - placement.r);
+      placement.y = Math.min(
+        Math.max(placement.y, (bounds.top ?? 0) + placement.r),
+        bounds.height - placement.r,
+      );
     }
 
     if (worst < 0.0005) break;
@@ -123,6 +135,15 @@ export type RowOptions = {
   gap?: number;
   /** Radius in the row. Smaller than the field: the row is a control strip, not the content. */
   radius?: number;
+  /**
+   * The smallest a row bubble may be drawn, whatever the width says.
+   *
+   * The width-derived radius is fine on a desktop and collapses on a phone: seven labs across
+   * 390px gives 18.9px — a 38px tap target, under the 44px floor the rest of the site enforces,
+   * with a logo inside it too small to identify. Holding a floor here is what makes the row
+   * overflow, which is the behaviour described above and the reason the stage scrolls.
+   */
+  minRadius?: number;
   /** The chosen bubble is drawn larger. */
   selectedScale?: number;
 };
@@ -141,7 +162,8 @@ export const rowTargets = (count: number, bounds: Bounds, options: RowOptions = 
   // Width only. The strip animates its height open from zero, and a radius derived from that
   // height is zero on the first frame — the bubbles shrink to invisible dots and never recover,
   // because the targets are not recomputed once the animation finishes.
-  const radius = options.radius ?? Math.min(48, (bounds.width / count) * 0.34);
+  const radius =
+    options.radius ?? Math.max(options.minRadius ?? 0, Math.min(48, (bounds.width / count) * 0.34));
   const gap = options.gap ?? radius * 0.55;
   const top = options.top ?? bounds.height / 2;
   const selectedScale = options.selectedScale ?? 1;
@@ -182,4 +204,74 @@ export const visibleFloor = ({
   // Never so shallow that there is no room to move at all, whatever the viewport is doing.
   const smallest = Math.min(stageHeight, 320);
   return Math.min(stageHeight, Math.max(smallest, seen));
+};
+
+/** The shallowest the field is ever allowed to get. Shared by both edges: whichever of them is
+ *  moving, there must still be somewhere for seven circles to be. */
+const MIN_FIELD = 320;
+
+/**
+ * The top of the field: the top of what the reader can actually see, in stage coordinates.
+ *
+ * The mirror of `visibleFloor`, and it exists for the same reason. The floor opens the field up as
+ * the reader scrolls down; without a ceiling that follows, everything above the fold simply stays
+ * up there — on a desktop the fixed nav is a solid obstacle and hides that, but below 860px the
+ * nav is `display: none` and there is nothing at the top at all.
+ *
+ * Together they make the field the part of the page you are looking at, in both directions: scroll
+ * down and the ceiling comes with you, shoving the bubbles ahead of it.
+ */
+export const visibleCeiling = ({
+  stageTop,
+  scrollY,
+  floor,
+}: {
+  /** The stage's offset from the top of the document. */
+  stageTop: number;
+  scrollY: number;
+  /** Whatever `visibleFloor` just returned — the ceiling is never allowed to close on it. */
+  floor: number;
+}): number => Math.max(0, Math.min(scrollY - stageTop, floor - MIN_FIELD));
+
+/** A box taller than this share of the field is one you have to go *around*, not over. Below it,
+ *  there is always room above or below and the box is solid whatever its width. */
+const SHORT_ENOUGH = 0.4;
+
+/**
+ * Whether a box on the page should be solid to the bubbles.
+ *
+ * Not everything measurable can be an obstacle. A box the bubbles cannot get past is not a thing
+ * they bounce off, it is a wall across the field: `pushOutOf` ranks its exits, finds that every
+ * one of them puts the bubble off the stage, and leaves it inside. On a phone the specimen card is
+ * exactly that — 351px of a 390px stage and 743px of an 844px viewport — and the field ended up
+ * stacked inside it, overlapping by a full diameter.
+ *
+ * Two ways to earn it, and a box needs one:
+ *   - **a lane down one side** wide enough for a whole bubble, which is what "the bubbles orbit
+ *     the card you just made" means and what a desktop card leaves;
+ *   - **being short**, so there is room over it or under it however wide it is. That is the page
+ *     heading and the subtitle, which span the column at every width and are always passable
+ *     vertically.
+ *
+ * Measured, so there is no breakpoint in it: the same card is solid on a desktop and transparent
+ * on a phone because of what it actually leaves behind, not because of a media query.
+ */
+export const isSolidObstacle = ({
+  box,
+  bounds,
+  radius,
+}: {
+  /** Stage coordinates, the same ones the solver works in. */
+  box: Rect;
+  /** The visible field — `top` included, since a lane has to be in view to be a lane. */
+  bounds: Bounds;
+  /** The largest bubble that has to get past it. */
+  radius: number;
+}): boolean => {
+  const diameter = radius * 2;
+  const lane = Math.max(box.x, bounds.width - (box.x + box.width));
+  if (lane >= diameter) return true;
+
+  const band = Math.max(1, bounds.height - (bounds.top ?? 0));
+  return box.height <= band * SHORT_ENOUGH;
 };

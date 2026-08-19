@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { MAX_DT, arrived, atRest, maxOverlap, step, stepToward, type Bubble, type Bounds, type Rect } from './bubblePhysics';
-import { radiusFor, rowTargets, seedBubbles, seedPositions, visibleFloor } from './bubbleLayout';
+import {
+  isSolidObstacle,
+  radiusFor,
+  rowTargets,
+  seedBubbles,
+  seedPositions,
+  visibleCeiling,
+  visibleFloor,
+} from './bubbleLayout';
 
 const BOUNDS: Bounds = { width: 900, height: 520 };
 const IDS = ['cortex', 'mybirth', 'mydompet', 'oglets', 'territory', 'watchpaintdry', 'what2watch'];
@@ -205,6 +213,36 @@ describe('bubble layout', () => {
     const targets = rowTargets(IDS.length, BOUNDS);
     expect(targets[0].x - targets[0].r).toBeGreaterThanOrEqual(-0.001);
     expect(targets[targets.length - 1].x + targets[0].r).toBeLessThanOrEqual(BOUNDS.width + 0.001);
+  });
+});
+
+/** A 390px stage is a phone held upright, which is where the width-derived radius falls apart. */
+describe('the row on a phone', () => {
+  const PHONE: Bounds = { width: 390, height: 176 };
+
+  it('would shrink the bubbles below a usable tap target without a floor', () => {
+    // The number this exists to prevent: 18.9px of radius, a 38px target, under the 44px the rest
+    // of the site holds itself to. Asserted so nobody quietly removes the floor below.
+    expect(rowTargets(IDS.length, PHONE)[0].r * 2).toBeLessThan(44);
+  });
+
+  it('holds the floor and lets the row run off the end instead', () => {
+    const targets = rowTargets(IDS.length, PHONE, { minRadius: 26 });
+
+    expect(targets[0].r * 2).toBeGreaterThanOrEqual(44);
+    // Wider than the stage on purpose — the strip scrolls. See .lab-bubble-band.
+    expect(targets[targets.length - 1].x + targets[0].r).toBeGreaterThan(PHONE.width);
+  });
+
+  it('changes nothing on a stage wide enough to hold the row already', () => {
+    expect(rowTargets(IDS.length, BOUNDS, { minRadius: 26 })).toEqual(rowTargets(IDS.length, BOUNDS));
+  });
+
+  it('still spaces the row evenly once the floor is holding it', () => {
+    const targets = rowTargets(IDS.length, PHONE, { minRadius: 26 });
+    const gaps = targets.slice(1).map((target, index) => target.x - targets[index].x);
+
+    for (const gap of gaps) expect(gap).toBeCloseTo(gaps[0], 6);
   });
 });
 
@@ -424,3 +462,91 @@ describe('a barrier that moves into a bubble propels it', () => {
   });
 });
 
+
+/** The ceiling is the half of "the field is the part of the page you are looking at" that was
+ *  missing. On a desktop the fixed nav is a solid obstacle and covered for it; below 860px the nav
+ *  is display:none and nothing held the top at all. */
+describe('the top of the field', () => {
+  const FLOOR = 1000;
+
+  it('is the stage top until the reader has scrolled past it', () => {
+    expect(visibleCeiling({ stageTop: 0, scrollY: 0, floor: FLOOR })).toBe(0);
+    expect(visibleCeiling({ stageTop: 400, scrollY: 200, floor: FLOOR })).toBe(0);
+  });
+
+  it('follows the viewport down', () => {
+    expect(visibleCeiling({ stageTop: 0, scrollY: 300, floor: FLOOR })).toBe(300);
+    expect(visibleCeiling({ stageTop: 120, scrollY: 500, floor: FLOOR })).toBe(380);
+  });
+
+  it('never closes on the floor, however far the page is scrolled', () => {
+    const ceiling = visibleCeiling({ stageTop: 0, scrollY: 5000, floor: FLOOR });
+    expect(FLOOR - ceiling).toBeGreaterThanOrEqual(320);
+  });
+
+  it('walls the bubbles in at the top, not just at zero', () => {
+    const bounds: Bounds = { width: 900, height: 900, top: 400 };
+    // Fired straight up from inside the visible band.
+    const rising = seedBubbles(IDS, bounds).map((bubble) => ({ ...bubble, vy: -8000 }));
+    let current = rising;
+    for (let frame = 0; frame < 180; frame += 1) current = step(current, bounds, 1 / 60);
+
+    for (const bubble of current) expect(bubble.y - bubble.r).toBeGreaterThanOrEqual(400 - 0.001);
+  });
+
+  it('seeds inside the band rather than above it', () => {
+    const bounds: Bounds = { width: 900, height: 900, top: 400 };
+    for (const bubble of seedBubbles(IDS, bounds)) {
+      expect(bubble.y - bubble.r).toBeGreaterThanOrEqual(400 - 0.001);
+      expect(bubble.y + bubble.r).toBeLessThanOrEqual(900 + 0.001);
+    }
+  });
+
+  it('leaves a stage with no ceiling exactly as it was', () => {
+    const open: Bounds = { width: 900, height: 520 };
+    expect(seedBubbles(IDS, { ...open, top: 0 })).toEqual(seedBubbles(IDS, open));
+  });
+});
+
+/** Measured from the two real cases, because the whole point of the rule is that no breakpoint
+ *  appears in it — the same card is solid on one and transparent on the other. */
+describe('what counts as something to bounce off', () => {
+  // /labs at 1440x900: the specimen is 864 wide and leaves 288px of stage either side.
+  const DESKTOP: Bounds = { width: 1440, height: 900, top: 0 };
+  const DESKTOP_CARD: Rect = { x: 288, y: 456, width: 864, height: 540 };
+  // /labs at 390x844: 351 wide, 20px either side, and taller than the viewport it sits in.
+  const PHONE: Bounds = { width: 390, height: 1054, top: 210 };
+  const PHONE_CARD: Rect = { x: 20, y: 251, width: 351, height: 743 };
+
+  it('is solid when a whole bubble fits down one side of it', () => {
+    expect(isSolidObstacle({ box: DESKTOP_CARD, bounds: DESKTOP, radius: 88 })).toBe(true);
+  });
+
+  it('is not solid when nothing can get past it', () => {
+    // 20px of lane for a 109px bubble, and 88% of the band tall. Left solid, pushOutOf finds that
+    // every exit puts the bubble off the stage and simply leaves it inside — which is what the
+    // field did: seven circles stacked in the card, overlapping by a full diameter.
+    expect(isSolidObstacle({ box: PHONE_CARD, bounds: PHONE, radius: 54.5 })).toBe(false);
+  });
+
+  it('is solid while it is short, however wide it is', () => {
+    // The page heading and the subtitle span the column at every width and are always passable
+    // over the top or under the bottom. They must not be caught by the rule above.
+    const heading: Rect = { x: 20, y: 240, width: 351, height: 90 };
+    expect(isSolidObstacle({ box: heading, bounds: PHONE, radius: 54.5 })).toBe(true);
+  });
+
+  it('stops being solid as it grows past the field', () => {
+    const band = PHONE.height - (PHONE.top ?? 0);
+    const short: Rect = { x: 20, y: 240, width: 351, height: band * 0.39 };
+    const tall: Rect = { ...short, height: band * 0.41 };
+    expect(isSolidObstacle({ box: short, bounds: PHONE, radius: 54.5 })).toBe(true);
+    expect(isSolidObstacle({ box: tall, bounds: PHONE, radius: 54.5 })).toBe(false);
+  });
+
+  it('reads the lane on whichever side is the wider one', () => {
+    const offCentre: Rect = { x: 0, y: 100, width: 1000, height: 800 };
+    expect(isSolidObstacle({ box: offCentre, bounds: DESKTOP, radius: 88 })).toBe(true);
+    expect(isSolidObstacle({ box: offCentre, bounds: DESKTOP, radius: 240 })).toBe(false);
+  });
+});

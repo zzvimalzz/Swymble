@@ -4,8 +4,8 @@ import { Link, useLocation } from 'react-router-dom';
 import BubbleField from '../../components/desktop/Labs/BubbleField';
 import SmartImage from '../../components/SmartImage';
 import { useGravityMode } from '../../components/desktop/Labs/useGravityMode';
-import LabAccordion from '../../components/desktop/Labs/LabAccordion';
 import { specimenFor } from '../../components/desktop/Labs/fusionLore';
+import { LABS_COMPACT_QUERY } from '../../components/desktop/Labs/breakpoints';
 import { LabActions, STATUS_MODIFIER } from '../../components/desktop/Labs/labPresentation';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import { SWYMBLE_DATA } from '../../data/config';
@@ -15,8 +15,9 @@ import { serializeJsonLd } from '../../utils/jsonLd';
 import { labsIndexJsonLd } from '../../utils/labSeo';
 import '../../styles/desktop-labs.css';
 
-/** Where the card grid has already collapsed to one column, and the stacked cards get long. */
-const COMPACT_QUERY = '(max-width: 780px)';
+/** How far a swipe on the compact card has to travel before it counts as one, in px. Short
+ *  enough for a thumb, long enough that scrolling the page past a card does not trip it. */
+const SWIPE_DISTANCE = 60;
 
 /** Whether to ease the page across to a new specimen or simply be there. */
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
@@ -28,7 +29,7 @@ export default function DesktopLabs() {
   // rebuilt both observers, and re-seeded the field — on every single render.
   const visibleLabs = useMemo(() => SWYMBLE_DATA.labs?.filter((lab) => lab.visibility !== 'private') ?? [], []);
 
-  const isCompact = useMediaQuery(COMPACT_QUERY);
+  const isCompact = useMediaQuery(LABS_COMPACT_QUERY);
   const reducedMotion = useMediaQuery(REDUCED_MOTION_QUERY);
 
   // Deliberately component state and not a URL parameter: an open card is a thing you did a
@@ -122,10 +123,6 @@ export default function DesktopLabs() {
   useEffect(() => {
     window.dispatchEvent(new CustomEvent('swymble:gravity-state', { detail: { active: gravityActive } }));
   }, [gravityActive]);
-  // Null, not the first lab: the point of collapsing is that the whole list is visible at once,
-  // and opening one by default puts the reader back to scrolling before they have chosen anything.
-  const [openLabId, setOpenLabId] = useState<string | null>(null);
-
   // Depend on the primitive pathname, not the `location` object itself. See DesktopProjects.tsx
   // for why depending on the whole object causes a scroll-to-top mid-scroll.
   useEffect(() => {
@@ -210,17 +207,18 @@ export default function DesktopLabs() {
             REQUEST PRIVATE BRIEFING
           </a>
         </div>
-      ) : isCompact ? (
-        <LabAccordion
-          labs={visibleLabs}
-          openId={openLabId}
-          onToggle={(id) => setOpenLabId((current) => (current === id ? null : id))}
-        />
       ) : (
         <>
           {/* The strip the row collapses into. Zero height while the field is loose, so the
-              bubbles have the whole page; measured by BubbleField, never positioned by it. */}
-          <div className={`lab-bubble-band${openLab ? ' is-open' : ''}`} data-bubble-band />
+              bubbles have the whole page; measured by BubbleField, never positioned by it.
+
+              The track inside it is an empty spacer. Where the row is wider than the screen — a
+              phone, mostly — the strip is a horizontal scroller and this is the only thing giving
+              it anything to scroll. Its width is written by BubbleField.retarget(), because the
+              row's width is the row's business. */}
+          <div className={`lab-bubble-band${openLab ? ' is-open' : ''}`} data-bubble-band>
+            <div className="lab-bubble-band__track" data-bubble-band-track aria-hidden="true" />
+          </div>
 
           <BubbleField
             labs={visibleLabs}
@@ -366,6 +364,17 @@ export default function DesktopLabs() {
                   // the one card that was pressed, falling into the pile; pressing another bubble
                   // swaps it for that lab's card. A stack of blurred cards behind it was scenery
                   // the physics had to carry and the reader could not use.
+                  // Three renderings of the same card.
+                  //
+                  // With gravity on there is no deck at all — just the one card that was pressed,
+                  // falling into the pile; pressing another bubble swaps it for that lab's card. A
+                  // stack of blurred cards behind it was scenery the physics had to carry and the
+                  // reader could not use.
+                  //
+                  // On a phone there is no deck either, for the opposite reason: the neighbours sit
+                  // at ±56% of a card that is already 84% of the screen, which puts every one of
+                  // them entirely off it. Nothing is rotating where nobody can see it, so only the
+                  // front card is mounted and swiping it is what moves between labs.
                   if (gravityActive) {
                     if (offset !== 0) return null;
 
@@ -377,6 +386,44 @@ export default function DesktopLabs() {
                       >
                         {renderCard(deckLab, offset)}
                       </article>
+                    );
+                  }
+
+                  if (isCompact) {
+                    if (offset !== 0) return null;
+
+                    return (
+                      <motion.article
+                        key={deckLab.id}
+                        className="lab-deck__card is-front"
+                        style={{ zIndex: 3 }}
+                        // Keyed on the lab, so choosing another one remounts this and the new card
+                        // plays its entrance. There is no exit — the card being replaced is gone
+                        // the moment its key changes, and a crossfade between two cards in the same
+                        // absolute box read as a smear rather than a change.
+                        initial={{ opacity: 0, x: 24 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                        // The row is up in the strip and its bubbles are 52px across; swiping the
+                        // card is the second way through the labs, and the one a thumb reaches.
+                        // Elastic rather than free: the card is absolutely positioned and dragging
+                        // it off its own box is not a thing it can come back from.
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={0.18}
+                        dragMomentum={false}
+                        onDragEnd={(_event, info) => {
+                          if (Math.abs(info.offset.x) < SWIPE_DISTANCE) return;
+                          const next = openIndex + (info.offset.x < 0 ? 1 : -1);
+                          // Stops at both ends rather than wrapping: the row above it does not
+                          // wrap either, and a card that jumps from the last lab to the first
+                          // reads as having lost the reader's place.
+                          if (next < 0 || next >= visibleLabs.length) return;
+                          selectLab(visibleLabs[next].id);
+                        }}
+                      >
+                        {renderCard(deckLab, offset)}
+                      </motion.article>
                     );
                   }
 
