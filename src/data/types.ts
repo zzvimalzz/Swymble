@@ -140,6 +140,38 @@ export type SwymbleLab = {
   detail?: SwymbleLabDetail;
 };
 
+/**
+ * One authored specimen: what two labs become when they are squeezed together on /labs.
+ *
+ * These are hand-written, one file per pair in `data/labs/merged_easteregg/`, with its own drawn
+ * mark in `public/images/labs/merged_easteregg/`. A generator still stands behind them (see
+ * components/desktop/Labs/fusionLore.ts) so a newly added lab cannot produce a blank card, but
+ * every pair that exists today is written and drawn rather than derived.
+ *
+ * Nothing here is a product. It is never linked, never listed, and never in the sitemap.
+ */
+export type SwymbleMergedLab = {
+  /** The two lab ids, in the order /labs lists them. This is the key the field looks it up by. */
+  pair: [string, string];
+  /** The mutant's name. Upper case, like a lab title. */
+  name: string;
+  /** A category that sounds real and is not — 'SURVEILLANCE FINANCE'. */
+  category: string;
+  /** One sentence selling something that should not exist. */
+  tagline: string;
+  /** Two claims, in the voice of a real feature list. */
+  highlights: string[];
+  /**
+   * The chip where a lab card carries its status. Write whatever suits the specimen — 'LEAKING',
+   * 'DO NOT INHALE', 'CONTAINED'. Falls back to LAB_FUSION.status when left out.
+   *
+   * Deliberately a free string and not a union: it is a joke on a status, not a status.
+   */
+  tag?: string;
+  /** The drawn mark, `/images/labs/merged_easteregg/<a>-<b>.<ext>` — SVG, PNG or WebP. */
+  image: string;
+};
+
 // ABOUT PAGE — see data/about/README.md
 // The page is framed as a git repository: a header (`whoami`), a README, a language breakdown,
 // the career graph, a `git config` block and a `git remote` sign-off. These types back everything

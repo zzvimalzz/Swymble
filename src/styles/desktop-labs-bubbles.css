@@ -334,3 +334,485 @@ html.is-gravity .footer-legal {
   border-color: var(--sw-border-volt);
   background: rgba(var(--sw-accent-volt-rgb), 0.14);
 }
+
+/* ── THE FUSION EGG ──────────────────────────────────────────────────────────
+   Squeeze one bubble into another that has nowhere to go and the two merge. The geometry is in
+   components/desktop/Labs/fusionNeck.ts; everything here is paint. */
+
+/* The skin between two straining bubbles. Behind the buttons — a filter over the bubbles
+   themselves would blur their logos into paste — and `overflow: visible` because the patches sit
+   just outside the circles, which is the whole point of them. */
+.lab-bubble-goo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* The same background the bubbles carry, so the neck reads as more of the same body rather than
+   as a shape drawn between two of them. */
+.lab-bubble-goo__fill {
+  fill: rgba(10, 10, 12, 0.92);
+}
+
+/* Only the outer curve is stroked. The filled patch closes through a line that runs under the
+   circles, and their background is not quite opaque enough to hide a stroke on it. */
+.lab-bubble-goo__edge {
+  fill: none;
+  stroke: var(--sw-border-soft);
+  stroke-width: 1;
+}
+
+/* --bubble-strain is written by the loop every frame, 0 to 1. A ramp rather than a class that
+   flips: the reader is being told how close they are, not that something has happened. */
+.lab-bubble {
+  --bubble-strain: 0;
+}
+
+/* A ring rather than another box-shadow. The base rule and `:hover` both own `box-shadow`, and a
+   strain rule appended after them would quietly win over the hover state on every bubble. */
+.lab-bubble::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid rgba(var(--sw-accent-volt-rgb), 0.8);
+  opacity: var(--bubble-strain);
+  transform: scale(calc(1 - var(--bubble-strain) * 0.03));
+  pointer-events: none;
+}
+
+/* ── the specimen ─────────────────────────────────────────────────────────── */
+
+/* Brighter than a lab and visibly not one. It wobbles faster as its containment runs out, so the
+   burst is something the reader sees coming rather than something that happens to them. */
+.lab-bubble--fused {
+  border-color: rgba(var(--sw-accent-volt-rgb), 0.55);
+  background:
+    radial-gradient(circle at 32% 26%, rgba(var(--sw-accent-volt-rgb), 0.16), transparent 62%),
+    rgba(10, 10, 12, 0.95);
+  box-shadow:
+    0 0 0 1px rgba(var(--sw-accent-volt-rgb), 0.28),
+    0 0 28px rgba(var(--sw-accent-volt-rgb), 0.2);
+  animation: lab-fusion-wobble 1.1s ease-in-out infinite;
+  /* The loop owns `transform`, so the wobble is a filter and a scale on the artwork inside
+     instead. A keyframe on the bubble itself would fight the solver sixty times a second. */
+  z-index: 3;
+}
+
+@keyframes lab-fusion-wobble {
+  0%,
+  100% {
+    border-radius: 50%;
+  }
+  33% {
+    border-radius: 48% 52% 55% 45% / 52% 48% 52% 48%;
+  }
+  66% {
+    border-radius: 53% 47% 45% 55% / 47% 53% 47% 53%;
+  }
+}
+
+/* Two halves of two logos in one circle, not quite lining up. The seam is the joke — a clean
+   composite would look like a third product rather than an accident. */
+.lab-bubble__art--chimera {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.lab-chimera {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  animation: lab-chimera-twitch 2.6s steps(1, end) infinite;
+}
+
+.lab-chimera--left {
+  clip-path: inset(0 50% 0 0);
+  transform: translate(-6%, -3%) rotate(-3deg);
+}
+
+.lab-chimera--right {
+  clip-path: inset(0 0 0 50%);
+  transform: translate(6%, 3%) rotate(3deg);
+  animation-delay: 0.9s;
+  filter: hue-rotate(35deg);
+}
+
+/* It never settles. A specimen that held still would read as a logo somebody designed. */
+@keyframes lab-chimera-twitch {
+  0%,
+  80%,
+  100% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0.55;
+  }
+  90% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-bubble--fused,
+  .lab-chimera {
+    animation: none;
+  }
+}
+
+/* ── the specimen card ────────────────────────────────────────────────────
+   A containment vessel that is not containing. This is the only place on the site with this
+   palette — everything else is volt and neon on near-black — because the specimen is the only
+   thing on the site that is leaking.
+
+   It is also solid to the bubbles: `data-bubble-obstacle` in DesktopLabs, so the field bounces
+   off the thing it just made instead of drifting behind it. */
+
+.lab-specimen {
+  /* Scoped to the card, never on :root. Nothing else may catch this. */
+  --waste: #b6ff1f;
+  --waste-glow: 182, 255, 31;
+
+  position: relative;
+  z-index: 2;
+  /* Wide enough for a two-line name and a real paragraph. The card is the payoff, not a toast. */
+  width: min(100%, 54rem);
+  /* Room underneath for the drips, which hang past the card and must not be clipped. */
+  margin: 2.6rem auto 5.5rem;
+  padding: 2rem 2.4rem 2.6rem;
+  display: grid;
+  /* One column, one rhythm. Every gap in the card comes from here rather than from margins on
+     the pieces, so adding a paragraph or a fourth highlight cannot double a gap or collapse one. */
+  gap: 1.5rem;
+  border: 1px solid rgba(var(--waste-glow), 0.42);
+  /* Not a rounded rectangle: the bottom corners have sagged. */
+  border-radius: 16px 16px 24px 30px;
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(var(--waste-glow), 0.16), transparent 58%),
+    radial-gradient(90% 70% at 92% 8%, rgba(var(--waste-glow), 0.08), transparent 62%),
+    linear-gradient(180deg, rgba(18, 26, 6, 0.96), rgba(9, 11, 8, 0.97));
+  box-shadow:
+    0 0 46px -8px rgba(var(--waste-glow), 0.28),
+    inset 0 1px 0 rgba(var(--waste-glow), 0.22),
+    0 40px 80px -46px rgba(0, 0, 0, 0.95);
+  /* The drips hang out of the bottom, so nothing here may clip. */
+  overflow: visible;
+}
+
+/* The bank of ooze along the bottom edge and the drips falling out of it. Half in the card and
+   half below it, which is what makes the card read as the thing that is leaking. */
+.lab-specimen__ooze {
+  position: absolute;
+  left: -1px;
+  bottom: -74px;
+  width: calc(100% + 2px);
+  height: 96px;
+  fill: var(--waste);
+  pointer-events: none;
+  filter: drop-shadow(0 0 12px rgba(var(--waste-glow), 0.45));
+}
+
+/* Swell, stretch, thin, let go — and the sheet above makes another. The stagger is set per drip
+   in the markup, so no two are ever at the same point in it. */
+.lab-specimen__drip {
+  transform-origin: 50% 0;
+  animation: lab-specimen-drip 4.2s cubic-bezier(0.55, 0, 0.85, 0.35) infinite;
+}
+
+@keyframes lab-specimen-drip {
+  0%,
+  16% {
+    transform: translateY(0) scaleY(0.5);
+    opacity: 0;
+  }
+  32% {
+    transform: translateY(0) scaleY(1);
+    opacity: 1;
+  }
+  66% {
+    transform: translateY(26px) scaleY(1.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(80px) scaleY(0.55);
+    opacity: 0;
+  }
+}
+
+/* The label row. Its own line across the card so a long category and a long tag both have room,
+   with the right end kept clear of the close button. */
+.lab-specimen__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.25rem;
+  padding-right: 3.25rem;
+  min-height: 2rem;
+}
+
+.lab-specimen .lab-category {
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  color: rgba(var(--waste-glow), 0.85);
+}
+
+/* The tag the specimen gave itself — 'LEAKING', 'DO NOT INHALE'. Set per pair in
+   data/labs/merged_easteregg/; UNSTABLE when a card leaves it out. */
+.lab-status-badge--unstable {
+  color: #0b0f04;
+  border-color: rgba(var(--waste-glow), 0.65);
+  background: var(--waste);
+  text-shadow: none;
+}
+
+/* The mark and the name, side by side. */
+.lab-specimen__head {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+}
+
+.lab-specimen__mark {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 124px;
+  height: 124px;
+  border: 1px solid rgba(var(--waste-glow), 0.35);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 26%, rgba(var(--waste-glow), 0.16), transparent 62%),
+    rgba(6, 9, 4, 0.94);
+  box-shadow: inset 0 0 24px rgba(var(--waste-glow), 0.18);
+}
+
+/* It has been in there a while. */
+.lab-specimen__mark::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--waste-glow), 0.16);
+  animation: lab-specimen-pulse 3.4s ease-in-out infinite;
+}
+
+@keyframes lab-specimen-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.12;
+  }
+}
+
+.lab-specimen__mark img {
+  display: block;
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+}
+
+.lab-specimen__name {
+  /* min-width:0 so a long unbroken name shrinks instead of pushing the mark off the card. */
+  min-width: 0;
+  margin: 0;
+  font-size: clamp(1.8rem, 3.2vw, 2.7rem);
+  letter-spacing: 0.03em;
+  line-height: 1.08;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  color: #f2ffdc;
+  text-shadow: 0 0 22px rgba(var(--waste-glow), 0.4);
+}
+
+/* Margins are zeroed on the pieces: the card's own `gap` owns every space in it, so more copy
+   can be added without a stray margin doubling a gap. */
+/* The name falls as this span rather than as the heading — see DesktopLabs. It has to be
+   inline-block for that to work at all: `transform` does nothing to a non-replaced inline box,
+   which is why `.gravity-word` sets the same thing, and why the title sat still while the rest of
+   the card came apart around it. */
+.lab-specimen__name > span {
+  display: inline-block;
+  /* The wrapping moves onto the span with the text: an inline-block is its own block container,
+     so balancing set on the heading no longer reaches the words inside it. */
+  max-width: 100%;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.lab-specimen .lab-desc {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.8;
+  color: #d8e6c4;
+}
+
+.lab-specimen .lab-highlights {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.lab-specimen .lab-highlight-item {
+  position: relative;
+  padding-left: 1.35rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: rgba(216, 230, 196, 0.76);
+}
+
+.lab-specimen .lab-highlight-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.78em;
+  width: 7px;
+  height: 1px;
+  background: rgba(var(--waste-glow), 0.7);
+}
+
+@media (max-width: 780px) {
+  .lab-specimen {
+    padding: 1.6rem 1.5rem 2rem;
+    gap: 1.25rem;
+  }
+
+  .lab-specimen__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-specimen__drip,
+  .lab-specimen__mark::after {
+    animation: none;
+  }
+}
+
+/* The only way out of a specimen. No timer: the two labs stay fused for as long as the card is
+   open, because a joke you are still reading should not be taken away from you. */
+.lab-specimen__close {
+  position: absolute;
+  /* Inside the card's padding, and clear of the label row — which reserves the matching space on
+     its right so a long tag stops before it rather than under it. */
+  top: 1rem;
+  right: 1.1rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: rgba(var(--sw-accent-volt-rgb), 0.85);
+  background: transparent;
+  border: 1px solid rgba(var(--sw-accent-volt-rgb), 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--sw-motion-fast) var(--sw-ease-standard),
+    border-color var(--sw-motion-fast) var(--sw-ease-standard);
+}
+
+.lab-specimen__close:hover,
+.lab-specimen__close:focus-visible {
+  background: rgba(var(--sw-accent-volt-rgb), 0.14);
+  border-color: rgba(var(--sw-accent-volt-rgb), 0.65);
+}
+
+.lab-specimen__close:focus-visible {
+  outline: 2px solid var(--sw-accent-volt);
+  outline-offset: 2px;
+}
+
+/* The drawn mark for a pairing — one lab's shape with the other grafted into it. Bigger in the
+   bubble than a lab logo is, because it is the whole point of the thing. */
+.lab-bubble__art--merged {
+  width: 78%;
+  height: 78%;
+}
+
+
+/* ── the rupture ──────────────────────────────────────────────────────────── */
+
+/* The shockwave a specimen leaves when it lets go. Position, radius and opacity are written by
+   the loop; only the colour lives here. */
+.lab-bubble-goo__shock {
+  fill: none;
+  /* The specimen's own colour, not the site accent: the ring is the card letting go. */
+  stroke: #b6ff1f;
+}
+
+/* The two labs are thrown clear rather than set down. The solver owns `transform`, so the spin
+   goes on the artwork inside the bubble — a keyframe on the button itself would fight the frame
+   loop for the same property. */
+.lab-bubble.is-flung .lab-bubble__art {
+  animation: lab-fling 0.72s var(--sw-ease-out-expo);
+}
+
+@keyframes lab-fling {
+  from {
+    transform: rotate(-140deg) scale(0.72);
+  }
+  to {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-bubble.is-flung .lab-bubble__art {
+    animation: none;
+  }
+}
+
+/* The specimen's contents fall *within* the card once the page is down — see the Nest machinery
+   in useGravityMode — and it is the card's own clipping that keeps them in. The rest of the time
+   it has to be visible, because the drips hang past the bottom edge. */
+html.is-gravity .lab-specimen {
+  overflow: hidden;
+}
+
+/* Everything inside it can be picked up, so it all says so. */
+html.is-gravity .lab-specimen [data-gravity-item] {
+  touch-action: none;
+  user-select: none;
+}
+
+/* The dash before a highlight is a pseudo-element on the list item, and the list item is not one
+   of the falling bodies — its *words* are. Left alone, twenty dashes hang in the air in a tidy
+   column while the sentences they belonged to slide off. */
+html.is-gravity .lab-specimen .lab-highlight-item::before {
+  display: none;
+}
+
+/* And the list item stops being a positioning context while the page is down.
+   A nest places its items by `offsetLeft`/`offsetTop`, which are measured against the nearest
+   *positioned* ancestor — the card. `position: relative` on the list item (which the dash above
+   needs, and only the dash) made every word in a highlight measure itself against its own little
+   box instead, so each one was handed an origin near zero. The bodies were inside the card's world
+   the whole time; the elements were drawn hundreds of pixels away from it. */
+html.is-gravity .lab-specimen .lab-highlight-item {
+  position: static;
+}
+
+/* The waste is put away while the card tumbles. Clipped to the card it becomes a solid bar across
+   the bottom — exactly where a nest pours its contents — and buries the text the reader was
+   supposed to watch fall. */
+html.is-gravity .lab-specimen__ooze {
+  display: none;
+}

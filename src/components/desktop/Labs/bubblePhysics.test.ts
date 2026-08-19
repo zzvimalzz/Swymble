@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_DT, arrived, atRest, maxOverlap, step, stepToward, type Bubble, type Bounds } from './bubblePhysics';
+import { MAX_DT, arrived, atRest, maxOverlap, step, stepToward, type Bubble, type Bounds, type Rect } from './bubblePhysics';
 import { radiusFor, rowTargets, seedBubbles, seedPositions, visibleFloor } from './bubbleLayout';
 
 const BOUNDS: Bounds = { width: 900, height: 520 };
@@ -97,6 +97,67 @@ describe('bubble physics', () => {
     // And the one in its way has been shoved along ahead of it.
     expect(other && other.x).toBeGreaterThan(320);
     expect(maxOverlap(dragged)).toBeLessThan(1);
+  });
+
+  it('lets a big bubble shove a small one rather than the two splitting it evenly', () => {
+    // Mass is area, so the fused bubble — √2 wider than a lab — pushes like it. Every bubble in
+    // the loose field is the same size, so this changes nothing for the ordinary case; the test
+    // above ('separates bubbles that start stacked') is what pins that.
+    const pair: Bubble[] = [
+      { id: 'big', x: 440, y: 260, vx: 0, vy: 0, r: 90 },
+      { id: 'small', x: 540, y: 260, vx: 0, vy: 0, r: 40 },
+    ];
+
+    const settled = run(pair, 1);
+    const big = settled.find((bubble) => bubble.id === 'big')!;
+    const small = settled.find((bubble) => bubble.id === 'small')!;
+
+    // Both move apart, but the small one does most of the moving — 90² against 40² is a little
+    // over five to one, and that is the ratio they separate in.
+    expect(small.x).toBeGreaterThan(540);
+    expect(big.x).toBeLessThan(440);
+    expect((small.x - 540) / (440 - big.x)).toBeCloseTo((90 * 90) / (40 * 40), 3);
+  });
+
+  it('splits a contact evenly when the two are the same size', () => {
+    // The mass rule has to reduce to the old equal-share behaviour exactly, or the whole field
+    // changes feel the day a radius is tweaked.
+    const pair: Bubble[] = [
+      { id: 'left', x: 450, y: 260, vx: 0, vy: 0, r: 60 },
+      { id: 'right', x: 550, y: 260, vx: 0, vy: 0, r: 60 },
+    ];
+
+    const settled = run(pair, 1);
+    const left = settled.find((bubble) => bubble.id === 'left')!;
+    const right = settled.find((bubble) => bubble.id === 'right')!;
+
+    expect(450 - left.x).toBeCloseTo(right.x - 550, 9);
+  });
+
+  it('does not wedge a bubble under a box that appeared on top of it', () => {
+    // The specimen card is wide, solid, and sits with the floor not far below it. A bubble the
+    // card opens on top of used to be pushed down — the nearest edge — into a gap it did not fit
+    // in, where the wall pass put it straight back inside. It sat there half-buried for as long as
+    // the card was open. The way out has to be one it fits through.
+    const card: Rect = { x: 60, y: 200, width: 780, height: 260 };
+    const trapped: Bubble[] = [{ id: 'caught', x: 450, y: 430, vx: 0, vy: 0, r: 60 }];
+
+    let current = trapped;
+    for (let frame = 0; frame < 90; frame += 1) {
+      current = step(current, BOUNDS, 1 / 60, { obstacles: [card] });
+    }
+
+    const [bubble] = current;
+    const clear =
+      bubble.y + bubble.r <= card.y + 0.5 ||
+      bubble.y - bubble.r >= card.y + card.height - 0.5 ||
+      bubble.x + bubble.r <= card.x + 0.5 ||
+      bubble.x - bubble.r >= card.x + card.width - 0.5;
+
+    expect(clear).toBe(true);
+    // And it is on the stage, not shoved through the floor to get there.
+    expect(bubble.y + bubble.r).toBeLessThanOrEqual(BOUNDS.height + 0.001);
+    expect(bubble.y - bubble.r).toBeGreaterThanOrEqual(-0.001);
   });
 
   it('does not mutate the bubbles it is given', () => {

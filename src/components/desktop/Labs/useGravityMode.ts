@@ -24,6 +24,9 @@ const FALLING = [
   '.desktop-nav .nav-brand',
   '.desktop-nav .nav-link',
   '.lab-deck__card.is-front',
+  // The specimen card is deliberately *not* here. It falls, but it is picked up by captureDeck
+  // along with the lab deck, because like the deck it needs a world of its own for its contents —
+  // collected here it would drop as one sealed slab.
   '.site-footer .footer-logo-full-centered',
   '.site-footer .footer-copyright',
   '.site-footer .footer-status',
@@ -555,16 +558,59 @@ export function useGravityMode(enabled: boolean) {
       trackedRef.current = trackedRef.current.filter((tracked) => document.contains(tracked.element));
       nestsRef.current = nestsRef.current.filter((nest) => document.contains(nest.container.element));
 
+      // Bubbles can appear and disappear mid-fall too. Closing a specimen's card while the page is
+      // down unmounts the fused bubble — pruned above — and gives back the two labs that were
+      // inside it, which were `hidden` and so had no box when the world was first collected. They
+      // are adopted here, or they hang in the air while everything around them falls.
+      for (const element of document.querySelectorAll<HTMLElement>(BUBBLES)) {
+        if (trackedRef.current.some((tracked) => tracked.element === element)) continue;
+
+        const box = element.getBoundingClientRect();
+        if (box.width < 8 || box.height < 8) continue;
+
+        const existing = new DOMMatrixReadOnly(getComputedStyle(element).transform);
+        const centreX = box.left + box.width / 2;
+        const centreY = box.top + box.height / 2;
+        const radius = Math.min(box.width, box.height) / 2;
+
+        element.style.transition = 'none';
+        element.style.willChange = 'transform';
+
+        trackedRef.current.push({
+          element,
+          originX: centreX - existing.m41 + window.scrollX,
+          originY: centreY - existing.m42 + window.scrollY,
+          fixed: false,
+          previousTransform: element.style.transform,
+          previousTransition: element.style.transition,
+          previousWillChange: element.style.willChange,
+          body: makeBody({
+            id: `late-${trackedRef.current.length}`,
+            shape: 'circle',
+            x: centreX + window.scrollX,
+            y: centreY + window.scrollY,
+            hw: radius,
+            hh: radius,
+            // Thrown clear, the way the rupture throws them when the page is the right way up.
+            vx: (trackedRef.current.length % 2 === 0 ? 1 : -1) * 180,
+            vy: -140,
+            av: 0.6,
+          }),
+        });
+      }
+
       // Whether a card is open comes from the page's own state, not from the DOM: the card is kept
       // mounted through its exit animation, so a closed one is still there to be counted.
       resizeBubbles(open);
-      if (!open) {
-        startLoop();
-        return;
-      }
 
       const known = new Set(trackedRef.current.map((tracked) => tracked.element));
-      const cards = [...document.querySelectorAll<HTMLElement>('.lab-deck__card')];
+      // Both kinds of card get a world of their own. The lab deck exists only while one is open;
+      // a specimen has its own life and is here whenever somebody has made one — which is why
+      // this can no longer return early when no lab card is open.
+      const cards = [
+        ...(open ? document.querySelectorAll<HTMLElement>('.lab-deck__card') : []),
+        ...document.querySelectorAll<HTMLElement>('.lab-specimen'),
+      ];
 
       for (const card of cards) {
         if (known.has(card)) continue;

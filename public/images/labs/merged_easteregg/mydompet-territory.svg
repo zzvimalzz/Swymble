@@ -1,0 +1,3 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="A wallet with a map pin driven through it">
+  <g stroke-linecap="round" stroke-linejoin="round"><rect x="22" y="38" width="76" height="52" rx="10" fill="none" stroke="#3498db" stroke-width="5"/><path d="M22 54H98" stroke="#3498db" stroke-width="4"/><g transform="translate(0 -6) scale(.8) translate(15 12)"><path d="M60 16C42 16 28 30 28 48C28 72 60 106 60 106C60 106 92 72 92 48C92 30 78 16 60 16Z" fill="none" stroke="#ff4d4d" stroke-width="5"/></g><circle cx="60" cy="52" r="7" fill="#ff4d4d"/></g>
+</svg>

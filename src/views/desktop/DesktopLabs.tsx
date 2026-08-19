@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import BubbleField from '../../components/desktop/Labs/BubbleField';
+import SmartImage from '../../components/SmartImage';
 import { useGravityMode } from '../../components/desktop/Labs/useGravityMode';
 import LabAccordion from '../../components/desktop/Labs/LabAccordion';
+import { specimenFor } from '../../components/desktop/Labs/fusionLore';
 import { LabActions, STATUS_MODIFIER } from '../../components/desktop/Labs/labPresentation';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import { SWYMBLE_DATA } from '../../data/config';
@@ -16,11 +18,18 @@ import '../../styles/desktop-labs.css';
 /** Where the card grid has already collapsed to one column, and the stacked cards get long. */
 const COMPACT_QUERY = '(max-width: 780px)';
 
+/** Whether to ease the page across to a new specimen or simply be there. */
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
 export default function DesktopLabs() {
   const location = useLocation();
-  const visibleLabs = SWYMBLE_DATA.labs?.filter((lab) => lab.visibility !== 'private') ?? [];
+  // Memoised, and it matters: this array is BubbleField's `labs` prop, and a fresh one every
+  // render made every callback inside the field new, which re-ran its layout effect, tore down and
+  // rebuilt both observers, and re-seeded the field — on every single render.
+  const visibleLabs = useMemo(() => SWYMBLE_DATA.labs?.filter((lab) => lab.visibility !== 'private') ?? [], []);
 
   const isCompact = useMediaQuery(COMPACT_QUERY);
+  const reducedMotion = useMediaQuery(REDUCED_MOTION_QUERY);
 
   // Deliberately component state and not a URL parameter: an open card is a thing you did a
   // moment ago, not a place. Reloading /labs should hand the bubbles back their freedom rather
@@ -31,6 +40,66 @@ export default function DesktopLabs() {
 
   const selectLab = useCallback((id: string | null) => setOpenId(id), []);
 
+  // The fused bubble, while one exists, and the field's own way of breaking it. Held here rather
+  // than in BubbleField because the card is page furniture — the field draws circles, the page
+  // describes them — and because closing the card is what pulls the two labs apart.
+  const [fused, setFused] = useState<{ id: string; dismiss?: () => void } | null>(null);
+  const onFusion = useCallback(
+    (id: string | null, dismiss?: () => void) => setFused(id ? { id, dismiss } : null),
+    [],
+  );
+  const closeSpecimen = useCallback(() => {
+    fused?.dismiss?.();
+    setFused(null);
+  }, [fused]);
+  const specimen = fused ? specimenFor(fused.id, visibleLabs) : null;
+
+  /**
+   * Brings a new specimen's card fully into view, and only as far as it has to.
+   *
+   * The card appears wherever the reader happens to be on the page, and a tall one made near the
+   * bottom of the viewport is cut in half. This scrolls by exactly the shortfall — if the whole
+   * card is already visible it does nothing at all, which is the point: nobody wants the page
+   * jumping every time they make one.
+   *
+   * Measured from layout (`offsetTop`/`offsetHeight`) rather than `getBoundingClientRect`, because
+   * the card is mid-animation when this runs — it enters from 24px down at 0.96 scale, and the
+   * drawn box would send it about 30px too far.
+   */
+  useEffect(() => {
+    if (!fused) return undefined;
+
+    const frame = requestAnimationFrame(() => {
+      const card = document.querySelector<HTMLElement>('.lab-specimen');
+      if (!card) return;
+
+      let top = 0;
+      for (let node: HTMLElement | null = card; node; node = node.offsetParent as HTMLElement | null) {
+        top += node.offsetTop;
+      }
+
+      // The nav is fixed and sits over the top of the page, so "visible" starts below it. The
+      // gap at the bottom leaves room for the drips, which hang past the card.
+      const nav = document.querySelector('.desktop-nav')?.getBoundingClientRect().height ?? 0;
+      const limitTop = nav + 20;
+      const limitBottom = window.innerHeight - 60;
+
+      const viewTop = top - window.scrollY;
+      const viewBottom = viewTop + card.offsetHeight;
+
+      let delta = 0;
+      if (viewBottom > limitBottom) delta = viewBottom - limitBottom;
+      // Never so far that the top of the card goes under the nav — a card taller than the
+      // viewport is aligned to its top instead, because that is the half worth reading first.
+      if (viewTop - delta < limitTop) delta = viewTop - limitTop;
+      if (Math.abs(delta) < 8) return;
+
+      window.scrollBy({ top: delta, behavior: reducedMotion ? 'auto' : 'smooth' });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [fused, reducedMotion]);
+
   // Only this page has gravity, and only while it is mounted: navigating away puts the page back
   // together, which is the reset a reader gets by leaving and returning.
   const { active: gravityActive, captureDeck } = useGravityMode(!isCompact);
@@ -38,11 +107,14 @@ export default function DesktopLabs() {
   // The deck does not exist when gravity is switched on — it appears only once a bubble has been
   // pressed — so it is handed to the simulation here instead. One frame's delay: the cards have to
   // be laid out before they can be measured.
+  // Also re-run when a specimen appears or goes: closing its card mid-fall unmounts the fused
+  // bubble and gives back two that had no box when the world was collected, and captureDeck is
+  // what prunes the first and adopts the others.
   useEffect(() => {
     if (!gravityActive) return undefined;
     const frame = requestAnimationFrame(() => captureDeck(Boolean(openId)));
     return () => cancelAnimationFrame(frame);
-  }, [captureDeck, gravityActive, openId]);
+  }, [captureDeck, fused?.id, gravityActive, openId]);
 
   // The corner buttons fall with everything else, and they unmount as soon as the reader scrolls
   // back above the rocket's threshold — taking the button that turns gravity *off* with them. The
@@ -157,7 +229,122 @@ export default function DesktopLabs() {
             // While the page is falling, the bubbles are bodies in the rigid-body world instead —
             // two solvers writing the same transforms would fight over every frame.
             paused={gravityActive}
+            onFusion={onFusion}
           />
+
+          {/* What comes out when two bubbles are forced together. Everything on it is derived
+              from the two labs inside it — see components/desktop/Labs/fusionLore.ts. It is not a
+              product and does not link anywhere; in a few seconds it comes apart on its own. */}
+          <AnimatePresence>
+            {specimen && (
+              <motion.article
+                key={specimen.id}
+                className="lab-specimen"
+                // Solid to the field. Without it the bubbles drift behind the card and the page
+                // reads as two layers that do not know about each other; with it they bounce off
+                // the thing they just made. BubbleField re-measures the box a few times a second,
+                // so it follows the card in as it animates.
+                data-bubble-obstacle
+                initial={{ opacity: 0, y: 24, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.08, filter: 'blur(6px)' }}
+                transition={{ duration: 0.42, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {/* The only way out. The specimen holds for as long as the card is open — there is
+                    no timer, because a joke you are still reading should not be taken away. */}
+                <button
+                  type="button"
+                  className="lab-specimen__close"
+                  onClick={closeSpecimen}
+                  aria-label="Close the specimen and separate the two labs"
+                >
+                  ×
+                </button>
+
+                {/* Its own row across the top, rather than sharing one with the name: a long
+                    category and a long tag both have somewhere to go, and neither ends up under
+                    the close button. Not the shared `.lab-meta`, whose spacing belongs to the
+                    lab cards. */}
+                <div className="lab-specimen__meta">
+                  <span className="lab-category" data-gravity-item>
+                    {specimen.category}
+                  </span>
+                  {/* Whatever the specimen calls itself — 'LEAKING', 'DO NOT INHALE'. Set per
+                      pair in data/labs/merged_easteregg/, UNSTABLE when left out. */}
+                  <span className="lab-status-badge lab-status-badge--unstable" data-gravity-item>
+                    {specimen.status}
+                  </span>
+                </div>
+
+                <div className="lab-specimen__head">
+                  {/* The same mark the bubble is carrying, at size. It is the specimen's face and
+                      the fastest way to see which two labs went in. */}
+                  {specimen.image && (
+                    <span className="lab-specimen__mark" data-gravity-item>
+                      <SmartImage src={specimen.image} alt="" fit="contain" padding={0} />
+                    </span>
+                  )}
+
+                  {/* The span falls, not the h2: a heading is a block box the full width of the
+                      card, and as a body it drops as an invisible bar with the name stuck to one
+                      end — the same reason the lab cards hand gravity their title link. */}
+                  <h2 className="lab-specimen__name">
+                    <span data-gravity-item>{specimen.name}</span>
+                  </h2>
+                </div>
+
+                <p className="lab-desc" data-gravity-item data-gravity-words>
+                  {specimen.tagline}
+                </p>
+
+                <ul className="lab-highlights">
+                  {specimen.highlights.map((highlight) => (
+                    <li key={highlight} className="lab-highlight-item" data-gravity-item data-gravity-words>
+                      {highlight}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* The waste. Drawn rather than bordered: a bank of ooze welling along the bottom
+                    edge with drips that stretch, thin and let go, so the card reads as a container
+                    that is not holding. Marked aria-hidden — it is a texture, not information. */}
+                <svg className="lab-specimen__ooze" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                  <defs>
+                    {/* Blur then re-threshold the alpha: touching shapes fuse instead of stacking,
+                        which is what turns a row of ellipses into a single running sheet. */}
+                    <filter id="specimen-goo">
+                      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+                      <feColorMatrix
+                        in="blur"
+                        type="matrix"
+                        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"
+                      />
+                    </filter>
+                  </defs>
+
+                  <g filter="url(#specimen-goo)">
+                    <rect x="-20" y="0" width="440" height="26" />
+                    {/* Each drip hangs from the sheet, swells, and falls on its own clock. */}
+                    <g className="lab-specimen__drip" style={{ animationDelay: '0s' }}>
+                      <ellipse cx="52" cy="30" rx="13" ry="20" />
+                    </g>
+                    <g className="lab-specimen__drip" style={{ animationDelay: '-2.6s' }}>
+                      <ellipse cx="138" cy="28" rx="10" ry="15" />
+                    </g>
+                    <g className="lab-specimen__drip" style={{ animationDelay: '-1.1s' }}>
+                      <ellipse cx="214" cy="32" rx="15" ry="23" />
+                    </g>
+                    <g className="lab-specimen__drip" style={{ animationDelay: '-3.4s' }}>
+                      <ellipse cx="296" cy="28" rx="9" ry="14" />
+                    </g>
+                    <g className="lab-specimen__drip" style={{ animationDelay: '-1.9s' }}>
+                      <ellipse cx="358" cy="31" rx="12" ry="18" />
+                    </g>
+                  </g>
+                </svg>
+              </motion.article>
+            )}
+          </AnimatePresence>
 
           {/* A deck, not a single card: every lab is mounted the whole time, the open one at the
               front and its neighbours set back in the dark. Choosing another bubble rotates the

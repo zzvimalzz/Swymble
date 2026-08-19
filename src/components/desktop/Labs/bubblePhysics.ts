@@ -58,6 +58,14 @@ export const DEFAULTS = {
  *  in one go tunnels every bubble through the walls, so the step is clamped instead. */
 export const MAX_DT = 1 / 30;
 
+/** How much velocity a bubble under press keeps each frame. A tenth: enough that a shove still
+ *  reads as a shove, little enough that nothing can be pumped between two immovable things. */
+const GRIP = 0.1;
+
+/** How fast a bubble leaves a box that appeared on top of it, px/s. Enough to clear the edge in
+ *  a few frames, not so much that the specimen card looks like it fired something. */
+const EVICT_SPEED = 150;
+
 const clampSpeed = (bubble: Bubble, maxSpeed: number) => {
   const speed = Math.hypot(bubble.vx, bubble.vy);
   if (speed <= maxSpeed || speed === 0) return;
@@ -94,6 +102,26 @@ export function step(
   const wander = options.wander ?? null;
   const wanderStrength = wander?.strength ?? DEFAULTS.wanderStrength;
 
+  // Whatever the held bubble is already touching, from the positions this frame started at.
+  //
+  // This is the field's only friction, and without it nothing can be pressed against anything.
+  // A bubble being pushed into a barrier is corrected out of it every frame, `kickFromBarriers`
+  // cannot tell that correction apart from a barrier moving into it, and the bubble is fired away
+  // at up to the kick cap — pushing one against the nav sent it across the page at 400px/s. The
+  // drift did the rest: 40px/s is plenty to walk a contact off its normal and let a bubble squirt
+  // out sideways.
+  //
+  // Worked out here rather than passed in, because a caller could only know about a contact one
+  // frame after it happened, and by then the bubble has already gone.
+  const holder = heldId ? next.find((bubble) => bubble.id === heldId) : undefined;
+  const pressed = new Set<string>();
+  if (holder) {
+    for (const bubble of next) {
+      if (bubble.id === heldId) continue;
+      if (Math.hypot(bubble.x - holder.x, bubble.y - holder.y) < bubble.r + holder.r) pressed.add(bubble.id);
+    }
+  }
+
   for (const [index, bubble] of next.entries()) {
     if (bubble.id === heldId) {
       if (options.heldTo) {
@@ -113,10 +141,13 @@ export function step(
       continue;
     }
 
-    if (wander) {
+    if (wander && !pressed.has(bubble.id)) {
       // Each bubble pushes in its own slowly turning direction. Two irrational-ish rates mean the
       // seven never fall into step with each other, and no randomness is involved, so a test can
       // run the same field twice and get the same answer.
+      //
+      // A bubble under press is exempt: the drift is only ~40px/s, and that is more than enough
+      // to walk a contact off its normal and let the bubble escape the squeeze.
       const angle = index * 2.399963229728653 + wander.time * (0.21 + index * 0.017);
       bubble.vx += Math.cos(angle) * wanderStrength * stepDt;
       bubble.vy += Math.sin(angle) * wanderStrength * stepDt;
@@ -136,13 +167,42 @@ export function step(
 
   resolveWalls(next, bounds, restitution, heldId);
   if (options.obstacles && options.obstacles.length > 0) {
-    resolveObstacles(next, options.obstacles, restitution, heldId, previous);
+    resolveObstacles(next, options.obstacles, restitution, heldId, previous, bounds);
   }
-  kickFromBarriers(next, beforeBarriers, stepDt, heldId);
+  kickFromBarriers(next, beforeBarriers, stepDt, heldId, pressed);
   resolvePairs(next, restitution, heldId);
   // A pair or an obstacle can push a bubble back through a wall; the second pass is what makes
   // "never leaves the stage" true rather than nearly true.
+  //
+  // The obstacles get a second pass for the same reason, and it is not cosmetic: without it a
+  // bubble shoved into the nav by a neighbour simply *stays inside the nav*, because the only
+  // pass that would have pushed it out already ran. Solid boxes were solid against motion and
+  // porous against being pushed.
+  if (options.obstacles && options.obstacles.length > 0) {
+    resolveObstacles(next, options.obstacles, restitution, heldId, previous, bounds);
+  }
   resolveWalls(next, bounds, restitution, heldId);
+
+  // The grip, applied last because it has to survive every impulse above.
+  //
+  // A bubble trapped between the held bubble and a barrier is not merely pushed — it is *pumped*.
+  // It takes the pair impulse, the barrier's reflection and the barrier kick every frame, all in
+  // the same place, and inside a fifth of a second it is doing 800px/s and shoots out of the gap
+  // at the first contact that is a degree off its normal. Damping it before the impulses land
+  // does nothing, because they land afterwards.
+  //
+  // So a pressed bubble simply keeps very little of whatever it ends the frame with. That is what
+  // friction does, it is why anything can be held against anything, and it is the difference
+  // between a squeeze and a catapult.
+  // A fixed fraction per *frame*, deliberately not per second like the field's own drag. This is
+  // a clamp, not a decay: the pump re-injects a full impulse every frame, so an exponential that
+  // is framerate-independent over a second is worth nothing over one frame. At 60fps the drag
+  // constant works out to keeping 88% — which is why the first attempt at this changed nothing.
+  for (const bubble of next) {
+    if (!pressed.has(bubble.id)) continue;
+    bubble.vx *= GRIP;
+    bubble.vy *= GRIP;
+  }
 
   return next;
 }
@@ -176,7 +236,7 @@ function sweepTo(bubble: Bubble, target: { x: number; y: number }, obstacles: re
     bubble.y += stepY;
 
     for (const rect of obstacles) {
-      pushOutOf(bubble, rect, { x: fromX, y: fromY }, 0, true);
+      pushOutOf(bubble, rect, { x: fromX, y: fromY }, 0, true, bounds);
     }
 
     bubble.x = Math.min(Math.max(bubble.x, bubble.r), Math.max(bubble.r, bounds.width - bubble.r));
@@ -190,6 +250,7 @@ function resolveObstacles(
   restitution: number,
   heldId: string | null,
   previous: readonly { x: number; y: number }[],
+  bounds: Bounds,
 ) {
   for (const [index, bubble] of bubbles.entries()) {
     const held = bubble.id === heldId;
@@ -197,7 +258,7 @@ function resolveObstacles(
     const touched: Rect[] = [];
 
     for (const rect of obstacles) {
-      if (pushOutOf(bubble, rect, from, restitution, held)) touched.push(rect);
+      if (pushOutOf(bubble, rect, from, restitution, held, bounds)) touched.push(rect);
     }
 
     // Two boxes at once means the bubble is wedged in a gap it does not fit through — the 81px
@@ -221,6 +282,7 @@ function pushOutOf(
   from: { x: number; y: number },
   restitution: number,
   held: boolean,
+  bounds: Bounds,
 ): boolean {
   {
       const right = rect.x + rect.width;
@@ -228,34 +290,52 @@ function pushOutOf(
       const inside = bubble.x > rect.x && bubble.x < right && bubble.y > rect.y && bubble.y < bottom;
 
       if (inside) {
-        // Which side did it come in from? That is the side it leaves by. Only when the bubble was
-        // already inside last frame too — a page that reflowed under it — is there no answer, and
-        // then the nearest edge is as good a guess as any.
-        const cameFromAbove = from.y <= rect.y;
-        const cameFromBelow = from.y >= bottom;
-        const cameFromLeft = from.x <= rect.x;
-        const cameFromRight = from.x >= right;
+        /**
+         * Which way out.
+         *
+         * The side it came in from is the right answer where there is one — leaving by the far
+         * side reads as a teleport. But it is only a preference: an exit that puts the bubble
+         * outside the stage is no exit at all, and taking it anyway is what wedged bubbles under
+         * the specimen card. The card is wide, it is solid, and the floor sits not far below it,
+         * so "nearest edge" pushed a bubble down into a gap it did not fit in — the wall pass put
+         * it straight back inside, and it sat there half-buried, oscillating, for as long as the
+         * card was open.
+         *
+         * So: prefer the side it came from, then the shortest push, and take the first one it
+         * actually fits through.
+         */
+        const exits = [
+          { x: rect.x - bubble.r, y: bubble.y, cost: bubble.x - rect.x, came: from.x <= rect.x },
+          { x: right + bubble.r, y: bubble.y, cost: right - bubble.x, came: from.x >= right },
+          { x: bubble.x, y: rect.y - bubble.r, cost: bubble.y - rect.y, came: from.y <= rect.y },
+          { x: bubble.x, y: bottom + bubble.r, cost: bottom - bubble.y, came: from.y >= bottom },
+        ];
 
-        if (cameFromAbove) bubble.y = rect.y - bubble.r;
-        else if (cameFromBelow) bubble.y = bottom + bubble.r;
-        else if (cameFromLeft) bubble.x = rect.x - bubble.r;
-        else if (cameFromRight) bubble.x = right + bubble.r;
-        else {
-          const toLeft = bubble.x - rect.x;
-          const toRight = right - bubble.x;
-          const toTop = bubble.y - rect.y;
-          const toBottom = bottom - bubble.y;
-          const nearest = Math.min(toLeft, toRight, toTop, toBottom);
+        const fits = (exit: { x: number; y: number }) =>
+          exit.x >= bubble.r &&
+          exit.x <= bounds.width - bubble.r &&
+          exit.y >= bubble.r &&
+          exit.y <= bounds.height - bubble.r;
 
-          if (nearest === toLeft) bubble.x = rect.x - bubble.r;
-          else if (nearest === toRight) bubble.x = right + bubble.r;
-          else if (nearest === toTop) bubble.y = rect.y - bubble.r;
-          else bubble.y = bottom + bubble.r;
-        }
+        const ranked = exits
+          .slice()
+          .sort((left, right_) => Number(right_.came) - Number(left.came) || left.cost - right_.cost);
+        // Nothing fits on a stage smaller than a bubble. Then the shortest push is all there is.
+        const chosen = ranked.find(fits) ?? ranked[0];
+
+        const outX = Math.sign(chosen.x - bubble.x);
+        const outY = Math.sign(chosen.y - bubble.y);
+        bubble.x = chosen.x;
+        bubble.y = chosen.y;
 
         if (!held) {
           bubble.vx *= restitution;
           bubble.vy *= restitution;
+          // Shoved clear rather than set down against the edge. A bubble the card opened on top of
+          // should visibly get out of the way, and a little speed also stops it settling exactly
+          // on the boundary where the next frame finds it inside again.
+          bubble.vx += outX * EVICT_SPEED;
+          bubble.vy += outY * EVICT_SPEED;
         }
         return true;
       }
@@ -302,11 +382,17 @@ function kickFromBarriers(
   before: readonly { x: number; y: number }[],
   dt: number,
   heldId: string | null,
+  pressed: ReadonlySet<string>,
 ) {
   if (dt <= 0) return;
 
   for (const [index, bubble] of bubbles.entries()) {
     if (bubble.id === heldId) continue;
+    // A bubble being pressed into a barrier is corrected out of it every frame, and this cannot
+    // tell that correction apart from a barrier moving into it. Without this exemption, pushing
+    // one bubble against the nav fires it across the page at the cap — the barrier kicks it away
+    // exactly as hard as it is being pushed in.
+    if (pressed.has(bubble.id)) continue;
 
     const from = before[index];
     if (!from) continue;
@@ -347,7 +433,18 @@ function resolveWalls(bubbles: Bubble[], bounds: Bounds, restitution: number, he
   }
 }
 
-/** Equal-mass impulse along the contact normal, plus a positional correction so two bubbles
+/**
+ * A bubble's mass: its area, give or take the π. Derived rather than stored, so it cannot fall
+ * out of step with the radius the reader can see.
+ *
+ * Every bubble in the loose field is the same size, so this changes nothing for six of the seven.
+ * It exists for the fused one, which is √2 wider and ought to shove like it — a specimen that
+ * bounced off a single the way a single bounces off a single reads as a picture of a big bubble
+ * rather than a big bubble.
+ */
+const massOf = (bubble: Bubble): number => bubble.r * bubble.r;
+
+/** Impulse along the contact normal weighted by mass, plus a positional correction so two bubbles
  *  cannot come to rest inside each other. A held bubble has infinite mass: it takes none of the
  *  correction and none of the impulse. */
 function resolvePairs(bubbles: Bubble[], restitution: number, heldId: string | null) {
@@ -382,8 +479,14 @@ function resolvePairs(bubbles: Bubble[], restitution: number, heldId: string | n
 
       if (aHeld && bHeld) continue;
 
-      const aShare = aHeld ? 0 : bHeld ? 1 : 0.5;
-      const bShare = bHeld ? 0 : aHeld ? 1 : 0.5;
+      // The lighter one gives way. Each takes the share of the correction that belongs to the
+      // *other's* mass, which for two equal bubbles is half each — exactly what this did before
+      // mass existed, so the loose field is unchanged to the last decimal.
+      const massA = massOf(a);
+      const massB = massOf(b);
+      const total = massA + massB;
+      const aShare = aHeld ? 0 : bHeld ? 1 : massB / total;
+      const bShare = bHeld ? 0 : aHeld ? 1 : massA / total;
       a.x -= nx * overlap * aShare;
       a.y -= ny * overlap * aShare;
       b.x += nx * overlap * bShare;
@@ -392,14 +495,20 @@ function resolvePairs(bubbles: Bubble[], restitution: number, heldId: string | n
       const relative = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
       if (relative > 0) continue;
 
-      const impulse = -(1 + restitution) * relative * (aHeld || bHeld ? 1 : 0.5);
+      // The standard reduced-mass impulse. A held bubble is infinitely heavy, so the reduced mass
+      // collapses to the other's and it takes the whole exchange.
+      //
+      // Both special cases come out at the numbers this used before mass existed: two equal
+      // bubbles each change velocity by half, and anything hitting a held bubble takes all of it.
+      const reduced = aHeld || bHeld ? (aHeld ? massB : massA) : (massA * massB) / total;
+      const impulse = -(1 + restitution) * relative * reduced;
       if (!aHeld) {
-        a.vx -= impulse * nx;
-        a.vy -= impulse * ny;
+        a.vx -= (impulse / massA) * nx;
+        a.vy -= (impulse / massA) * ny;
       }
       if (!bHeld) {
-        b.vx += impulse * nx;
-        b.vy += impulse * ny;
+        b.vx += (impulse / massB) * nx;
+        b.vy += (impulse / massB) * ny;
       }
     }
   }

@@ -6,6 +6,26 @@ import { STATUS_MODIFIER } from './labPresentation';
 import { labDisplayName } from '../../../utils/labSeo';
 import { arrived, step, stepToward, type Bubble, type Bounds, type Rect, type Target } from './bubblePhysics';
 import { radiusFor, rowTargets, seedBubbles, visibleFloor } from './bubbleLayout';
+import {
+  BURST_LIFE,
+  ageBurst,
+  applyFusion,
+  burstProgress,
+  startBurst,
+  type Burst,
+  deepestPair,
+  fusedId,
+  isFused,
+  membersOf,
+  readyToFuse,
+  splitAll,
+  splitBubble,
+  strainOf,
+  trackSqueeze,
+  type Squeeze,
+} from './bubbleFusion';
+import { neckEdge, neckPath } from './fusionNeck';
+import { specimenFor } from './fusionLore';
 import '../../../styles/desktop-labs-bubbles.css';
 
 /**
@@ -34,6 +54,12 @@ type BubbleFieldProps = {
   onSelect: (id: string | null) => void;
   /** Set while gravity mode owns the bubbles' transforms. */
   paused?: boolean;
+  /**
+   * The fused bubble's id while one exists, null the rest of the time, and the way to break it
+   * again. The page draws the specimen card from the id and calls `dismiss` when the card is
+   * closed — the two labs come apart at that moment and not before. See DesktopLabs.
+   */
+  onFusion?: (id: string | null, dismiss?: () => void) => void;
 };
 
 /** 'field' is the loose pile you can throw around; 'row' is the carousel strip above the open
@@ -43,7 +69,7 @@ type FieldMode = 'field' | 'row';
 
 type PointerSample = { x: number; y: number; time: number };
 
-export default function BubbleField({ labs, selectedId, onSelect, paused = false }: BubbleFieldProps) {
+export default function BubbleField({ labs, selectedId, onSelect, paused = false, onFusion }: BubbleFieldProps) {
   const mode: FieldMode = selectedId ? 'row' : 'field';
   const stageRef = useRef<HTMLDivElement | null>(null);
   const nodeRefs = useRef(new Map<string, HTMLElement>());
@@ -74,6 +100,21 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
   const previousModeRef = useRef<FieldMode | null>(null);
   const targetsRef = useRef<Map<string, Target>>(new Map());
   const [reducedMotion, setReducedMotion] = useState(false);
+
+  // THE FUSION EGG. Squeeze one bubble into another that has nowhere to go and the two merge.
+  // Nothing in the solver knows about any of this — see bubbleFusion.ts for why it needs nothing
+  // from it. The refs are read by the loop; the one piece of state exists because a fused bubble
+  // is a DOM node React has to mount, and that happens once per merge rather than once a frame.
+  const squeezeRef = useRef<Squeeze | null>(null);
+  const fusionRef = useRef<string | null>(null);
+  const [fusion, setFusion] = useState<string | null>(null);
+  const neckFillRef = useRef<SVGPathElement | null>(null);
+  const neckEdgeRef = useRef<SVGPathElement | null>(null);
+  const burstRingRef = useRef<SVGCircleElement | null>(null);
+  /** A specimen coming apart. Lives for BURST_LIFE and is then forgotten. */
+  const burstRef = useRef<Burst | null>(null);
+  /** The labs currently inside the fused bubble — their own buttons are hidden while it holds. */
+  const swallowed = useMemo(() => new Set(fusion ? membersOf(fusion) : []), [fusion]);
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -166,8 +207,132 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
       node.style.width = `${bubble.r * 2}px`;
       node.style.height = `${bubble.r * 2}px`;
       node.style.transform = `translate3d(${bubble.x - bubble.r}px, ${bubble.y - bubble.r}px, 0)`;
+      // Written every frame rather than toggled on a threshold: the strain drives a glow and a
+      // wobble in CSS, and a number that ramps reads as pressure where a class that flips reads
+      // as a state change.
+      node.style.setProperty('--bubble-strain', '0');
     }
+
+    const squeeze = squeezeRef.current;
+    const strain = strainOf(squeeze);
+    if (squeeze) {
+      for (const id of [squeeze.a, squeeze.b]) {
+        nodeRefs.current.get(id)?.style.setProperty('--bubble-strain', `${strain}`);
+      }
+    }
+
+    // The skin between two bubbles being pressed together. Only ever one pair at a time, so one
+    // path element is enough and nothing has to be created or destroyed while the loop runs.
+    const fill = neckFillRef.current;
+    const edge = neckEdgeRef.current;
+    if (!fill || !edge) return;
+
+    const left = squeeze ? bubblesRef.current.find((bubble) => bubble.id === squeeze.a) : null;
+    const right = squeeze ? bubblesRef.current.find((bubble) => bubble.id === squeeze.b) : null;
+    const path = left && right ? neckPath(left, right, strain) : null;
+
+    fill.setAttribute('d', path ?? '');
+    edge.setAttribute('d', path ? neckEdge(left!, right!, strain) ?? '' : '');
+
+    // The rupture. A ring leaving the place the specimen let go, thinning as it goes — the only
+    // thing on the page that says the two labs did not simply stop being one.
+    const shock = burstRingRef.current;
+    if (!shock) return;
+
+    const burst = burstRef.current;
+    if (!burst) {
+      shock.setAttribute('r', '0');
+      shock.setAttribute('opacity', '0');
+      return;
+    }
+
+    const progress = burstProgress(burst);
+    shock.setAttribute('cx', `${burst.x}`);
+    shock.setAttribute('cy', `${burst.y}`);
+    // Out fast, then easing — a shock, not a bubble of its own. It goes well past the specimen's
+    // own radius and stays thick most of the way: a thin ring that barely clears the bubble is
+    // over before anyone has registered that anything happened.
+    shock.setAttribute('r', `${burst.r * (0.8 + 2.6 * (1 - (1 - progress) ** 3))}`);
+    shock.setAttribute('opacity', `${(1 - progress) ** 1.2}`);
+    shock.setAttribute('stroke-width', `${2 + 14 * (1 - progress) ** 2}`);
   }, []);
+
+  /**
+   * Breaks the specimen and gives the labs back.
+   *
+   * Every way out goes through here — closing the card, pressing the bubble, Escape, opening a
+   * lab, gravity being switched on. A fused bubble that outlives any of those is a bubble with no
+   * DOM node, or a card describing something that is no longer on the page.
+   *
+   * Note what is *not* on that list: a resize. Calling this from reseed() meant the merge was
+   * undone in the same frame it happened, because the layout effect that calls reseed re-runs on
+   * every render and setting the fusion state is itself a render. Nothing ever appeared.
+   */
+  const breakFusion = useCallback(() => {
+    if (!fusionRef.current) return;
+
+    // Where it was standing when it gave, for the shockwave to start from. Taken before the split,
+    // because after it there is no specimen left to ask.
+    const giving = bubblesRef.current.find((bubble) => bubble.id === fusionRef.current);
+    if (giving) {
+      burstRef.current = startBurst(giving);
+      // The two labs are thrown clear rather than set down. They spin for as long as the rupture
+      // is drawn — written straight onto the nodes, like every other bit of motion in this file.
+      for (const id of membersOf(giving.id)) {
+        const node = nodeRefs.current.get(id);
+        if (!node) continue;
+        node.classList.add('is-flung');
+        window.setTimeout(() => node.classList.remove('is-flung'), BURST_LIFE * 1000);
+      }
+    }
+
+    bubblesRef.current = splitAll(bubblesRef.current, radiusFor(ids.length, boundsRef.current));
+    squeezeRef.current = null;
+    fusionRef.current = null;
+    setFusion(null);
+    onFusion?.(null);
+  }, [ids.length, onFusion]);
+
+  /**
+   * The merge itself: the two squeezed bubbles are replaced by the one they become.
+   *
+   * The hold is dropped at the same time. The bubble under the pointer has just stopped existing
+   * — its id is gone and its button is about to be hidden — and pointer capture belongs to that
+   * button, so there is no way to keep dragging the thing that replaced it. Letting go reads as
+   * the squeeze giving way, which is what happened.
+   */
+  const mergeSqueezed = useCallback(() => {
+    const squeeze = squeezeRef.current;
+    if (!squeeze) return;
+
+    const merged = applyFusion(bubblesRef.current, squeeze, ids);
+    squeezeRef.current = null;
+    if (!merged) return;
+
+    const id = fusedId([...membersOf(squeeze.a), ...membersOf(squeeze.b)], ids);
+    const radius = radiusFor(ids.length, boundsRef.current);
+    // One specimen at a time. A second would need a second card, and two cards make the joke a
+    // user interface.
+    bubblesRef.current = merged.flatMap((bubble) =>
+      isFused(bubble.id) && bubble.id !== id ? splitBubble(bubble, radius) : [bubble],
+    );
+
+    const held = heldRef.current;
+    if (held) {
+      const node = nodeRefs.current.get(held.id);
+      if (node?.hasPointerCapture(held.pointerId)) node.releasePointerCapture(held.pointerId);
+    }
+    heldRef.current = null;
+    pointerRef.current = null;
+    samplesRef.current = [];
+    // A merge ends with the pointer up over a bubble, which the browser also calls a click.
+    // Opening a lab because two of them fused would be a strange reward.
+    draggedRef.current = true;
+
+    fusionRef.current = id;
+    setFusion(id);
+    onFusion?.(id, breakFusion);
+  }, [breakFusion, ids, onFusion]);
 
   /** Seeds the field for the stage's current size. Called on mount and on resize — the arrangement
    *  is deterministic, so a resize re-lays it out rather than scattering everything anew. */
@@ -182,6 +347,17 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
 
     // Only the loose field gets re-seeded. Re-seeding while the row is open would teleport every
     // bubble out of its slot the moment the stage finished collapsing.
+    //
+    // A specimen is left strictly alone. It makes the field one bubble short of the lab count,
+    // which is exactly the condition the first branch treats as "the field needs building" — so a
+    // resize during a merge would quietly seed seven fresh bubbles over the top of it. Its radius
+    // is not the field radius either, so the second branch would shrink it back to a single.
+    if (fusionRef.current) {
+      measureObstacles();
+      paint();
+      return;
+    }
+
     if (modeRef.current === 'field' && bubblesRef.current.length !== ids.length) {
       bubblesRef.current = seedBubbles(ids, bounds, radiusFor(ids.length, bounds));
     } else if (modeRef.current === 'field') {
@@ -197,7 +373,7 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
     measureObstacles();
     retarget();
     paint();
-  }, [ids, measureFloor, measureObstacles, paint, retarget]);
+  }, [breakFusion, ids, measureFloor, measureObstacles, paint, retarget]);
 
   // First fill: nothing exists yet, so this is the one place the field is built from scratch.
   useLayoutEffect(() => {
@@ -265,11 +441,23 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
         // at-rest exit. It is stopped by the tab being hidden or the page being scrolled away.
         wander: { time: clockRef.current },
       });
+
+      // THE EGG. Read after the solver has had its say, because the overlap that matters is the
+      // one that *survives* a frame — see bubbleFusion.ts.
+      squeezeRef.current = trackSqueeze(
+        squeezeRef.current,
+        deepestPair(bubblesRef.current, held ? held.id : null),
+        dt,
+      );
+      if (readyToFuse(squeezeRef.current)) mergeSqueezed();
+
+      burstRef.current = ageBurst(burstRef.current, dt);
+
       paint();
 
       frameRef.current = requestAnimationFrame(tick);
     },
-    [measureObstacles, paint, retarget],
+    [breakFusion, measureObstacles, mergeSqueezed, paint, retarget],
   );
 
   const startLoop = useCallback(() => {
@@ -291,6 +479,9 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
   // from wherever they landed rather than teleporting them home.
   useEffect(() => {
     if (paused) {
+      // The specimen falls with everything else — it is a `.lab-bubble` and its card is in
+      // useGravityMode's FALLING list. Its two members are `hidden` and so have no box, which
+      // that hook already skips, so they are simply not in the world while it holds.
       stopLoop();
       return;
     }
@@ -313,7 +504,7 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
     });
     paint();
     startLoop();
-  }, [paint, paused, startLoop, stopLoop]);
+  }, [breakFusion, paint, paused, startLoop, stopLoop]);
 
   // Scrolling moves the fixed nav relative to the field, and compacting it changes its height.
   // Coalesced into one measurement per frame; the loop reads the result, never the DOM.
@@ -341,6 +532,15 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
     // A bubble held when the row opens would keep following a pointer that is no longer down.
     heldRef.current = null;
     pointerRef.current = null;
+    // The row is one lab per slot. A specimen has no slot of its own and its members have no
+    // bubble, so opening a lab card gives them back first.
+    //
+    // Guarded on the mode, and it must stay guarded: this effect depends on `startLoop`, which
+    // depends on `paused`, so it re-runs every time gravity is switched on or off. Breaking
+    // unconditionally meant turning gravity on destroyed the specimen — and because paint() is
+    // suppressed while paused, the rupture was never drawn either. The card simply vanished, and
+    // the two labs turned up already separated when the page came back.
+    if (mode === 'row') breakFusion();
 
     if (previousModeRef.current === null) {
       previousModeRef.current = mode;
@@ -492,6 +692,13 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
   /** The field is a pile of circles with no reading order, so Tab alone is a poor way through it.
    *  Arrows move along the labs in the page's own order — the same order the row uses. */
   const onKeyDown = (event: ReactKeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (event.key === 'Escape' && fusionRef.current) {
+      event.preventDefault();
+      breakFusion();
+      paint();
+      return;
+    }
+
     if (event.key === 'Escape' && selectedId) {
       event.preventDefault();
       onSelect(null);
@@ -507,14 +714,28 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
     if (node instanceof HTMLElement) node.focus();
   };
 
+  const specimen = fusion ? specimenFor(fusion, labs) : null;
+
   return (
     <div className="lab-bubble-stage" ref={stageRef}>
+      {/* The skin between two bubbles being pressed together. Behind the buttons, so their logos
+          stay crisp — a filter over the bubbles themselves would blur the artwork into paste.
+          Two paths because the filled patch closes through a line that runs under the circles,
+          and their background is not quite opaque enough to hide a stroke on it. */}
+      <svg className="lab-bubble-goo" aria-hidden="true" focusable="false">
+        <path className="lab-bubble-goo__fill" ref={neckFillRef} d="" />
+        <path className="lab-bubble-goo__edge" ref={neckEdgeRef} d="" />
+        <circle className="lab-bubble-goo__shock" ref={burstRingRef} cx="0" cy="0" r="0" opacity="0" />
+      </svg>
+
       <ul className="lab-bubble-list">
         {labs.map((lab, index) => {
           const name = labDisplayName(lab);
 
           return (
-            <li key={lab.id}>
+            // Hidden, not unmounted: the button keeps its ref and its place, and comes straight
+            // back when the specimen breaks. Its accessible name is on the fused bubble meanwhile.
+            <li key={lab.id} hidden={swallowed.has(lab.id)}>
               <button
                 type="button"
                 className={`lab-bubble lab-bubble--${STATUS_MODIFIER[lab.status]}${
@@ -559,6 +780,55 @@ export default function BubbleField({ labs, selectedId, onSelect, paused = false
           );
         })}
       </ul>
+
+      {/* The specimen. Outside the list because it is not a lab — it is two of them, briefly, and
+          it has no place in a list of the studio's work. Registered in nodeRefs under its own
+          fused id, so the loop moves it exactly like any other bubble. */}
+      {specimen && (
+        <button
+          type="button"
+          className="lab-bubble lab-bubble--fused"
+          data-cursor="hover"
+          ref={(node) => {
+            if (node) nodeRefs.current.set(specimen.id, node);
+            else nodeRefs.current.delete(specimen.id);
+          }}
+          onPointerDown={(event) => onPointerDown(event, specimen.id)}
+          onPointerMove={onPointerMove}
+          onPointerUp={releasePointer}
+          onPointerCancel={releasePointer}
+          onClick={() => {
+            if (draggedRef.current) {
+              draggedRef.current = false;
+              return;
+            }
+            // Pressing it lets it go early. It was going to come apart anyway.
+            breakFusion();
+            paint();
+          }}
+        >
+          {/* The drawn mark for this exact pairing — a wallet with an eye in it, a brain melting
+              into drips. Every pair on the page has one; the stitched-together halves below are
+              the fallback for a lab that has been added but not yet drawn against the others. */}
+          {specimen.image ? (
+            <span className="lab-bubble__art lab-bubble__art--merged">
+              <SmartImage src={specimen.image} alt="" fit="contain" padding={0} />
+            </span>
+          ) : (
+            <span className="lab-bubble__art lab-bubble__art--chimera">
+              <span className="lab-chimera lab-chimera--left">
+                <SmartImage src={specimen.members[0].image} alt="" fit="contain" padding={0} />
+              </span>
+              <span className="lab-chimera lab-chimera--right">
+                <SmartImage src={specimen.members.at(-1)!.image} alt="" fit="contain" padding={0} />
+              </span>
+            </span>
+          )}
+          <span className="lab-bubble__reader">
+            {specimen.name}. {specimen.status}. {specimen.tagline} Press to separate them.
+          </span>
+        </button>
+      )}
     </div>
   );
 }
