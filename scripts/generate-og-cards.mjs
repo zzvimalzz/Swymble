@@ -17,7 +17,7 @@ import { loadLabs } from './lib/lab-data.mjs';
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
 const OUTPUT_DIR = path.join(DIST_DIR, 'images', 'og');
 const MANIFEST_PATH = path.join(OUTPUT_DIR, 'manifest.json');
-const LOGO_PATH = path.join(ROOT_DIR, 'public', 'images', 'white-logo.png');
+const LOGO_PATH = path.join(ROOT_DIR, 'public', 'images', 'brand', 'white-logo.png');
 
 const CARD_WIDTH = 1200;
 const CARD_HEIGHT = 630;

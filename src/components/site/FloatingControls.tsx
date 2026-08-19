@@ -6,6 +6,10 @@ type FloatingControlsProps = {
   onBack: () => void;
   showRocket: boolean;
   onRocket: () => void;
+  /** Only /labs has anything to drop. It appears with the rocket, above it. */
+  showGravity?: boolean;
+  onGravity?: () => void;
+  gravityActive?: boolean;
 };
 
 /**
@@ -15,9 +19,44 @@ type FloatingControlsProps = {
  * version computed on every scroll and resize: the trigger is a fixed size at a fixed offset, so
  * the stack can be laid out with plain `calc` and costs nothing to keep in place.
  */
-export default function FloatingControls({ showBack, onBack, showRocket, onRocket }: FloatingControlsProps) {
+export default function FloatingControls({
+  showBack,
+  onBack,
+  showRocket,
+  onRocket,
+  showGravity = false,
+  onGravity,
+  gravityActive = false,
+}: FloatingControlsProps) {
   return (
     <div className="floating-controls" data-has-back={showBack || undefined}>
+      <AnimatePresence>
+        {showGravity && (
+          <motion.button
+            key="gravity"
+            type="button"
+            className={`floating-controls__btn floating-controls__btn--gravity${gravityActive ? ' is-active' : ''}`}
+            initial={{ opacity: 0, y: 12, scale: 0.85 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.85 }}
+            transition={{ duration: 0.24 }}
+            onClick={onGravity}
+            aria-pressed={gravityActive}
+            aria-label={gravityActive ? 'Put the page back' : 'Turn on gravity'}
+          >
+            {/* The icon ships black on transparent; the filter is what makes it white, the same
+                way the footer wordmark is handled. */}
+            <img
+              src={`${import.meta.env.BASE_URL}images/icons/gravity.png`}
+              alt=""
+              className="floating-controls__icon"
+              width={22}
+              height={22}
+            />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {showRocket && (
           <motion.button

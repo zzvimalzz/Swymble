@@ -1,7 +1,15 @@
 .desktop-labs-page {
   padding-top: 12rem;
   padding-bottom: 5rem;
-  min-height: 80vh;
+  /* Deep enough for the bubble field to be worth roaming, and deep enough that opening a lab's
+     card fits inside the reserve instead of pushing the footer down the page. Lives here rather
+     than in desktop-labs-bubbles.css because both files set this selector and load order, not
+     specificity, would decide the winner. */
+  min-height: calc(100vh + 30rem);
+  position: relative;
+  /* No overflow clip here: the field is a 100vw layer inside this column, and clipping it cuts
+     the bubbles off at an invisible line exactly where the content column ends. The root already
+     hides horizontal overflow (desktop-core.css:41). */
   display: flex;
   flex-direction: column;
 }

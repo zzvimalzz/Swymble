@@ -218,7 +218,7 @@ export function useRouteSeo() {
         publisher: {
           '@type': 'Organization',
           name: SITE_NAME,
-          logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/icon-512.png` },
+          logo: { '@type': 'ImageObject', url: `${SITE_URL}/images/app/icon-512.png` },
         },
       });
       setRouteJsonLd('breadcrumbs', {

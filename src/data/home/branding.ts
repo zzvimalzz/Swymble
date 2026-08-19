@@ -8,6 +8,6 @@ export const SWYMBLE_BRANDING = {
   name: 'SWYMBLE',
   tagline: 'Products for businesses. Experiments for fun. Stories from both.',
   marquee: 'PROJECTS - SERVICES - APPS - BLOG - LABS - STORY - SWYMBLE',
-  endCardMobileImage: '/images/white-logo.png',
+  endCardMobileImage: '/images/brand/white-logo.png',
   contactIntro: 'Tell me what you want to build. I usually reply within 24 hours.',
 };

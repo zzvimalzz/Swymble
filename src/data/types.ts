@@ -119,6 +119,9 @@ export type SwymbleLab = {
   category: string;
   categoryColor?: string;
   image: string;
+  /** Overrides the colour the bubble field would otherwise pull out of this lab's logo. Hex only,
+   *  e.g. '#ff9ecb'. See scripts/generate-lab-palette.mjs. */
+  accentColor?: string;
   /** 'Archived' is for work that is finished with, not work that failed — it still gets a page
    *  and a card, just no claim to be running. Keep it out of SoftwareApplication in labSeo.ts. */
   status: 'In Development' | 'Private Beta' | 'Live' | 'Archived';

@@ -117,7 +117,7 @@ const injectArticleHead = (html, { title, description, canonicalUrl, image, date
     publisher: {
       '@type': 'Organization',
       name: siteName,
-      logo: { '@type': 'ImageObject', url: `${siteUrl}/images/icon-512.png` },
+      logo: { '@type': 'ImageObject', url: `${siteUrl}/images/app/icon-512.png` },
     },
   };
   const breadcrumbsJsonLd = {

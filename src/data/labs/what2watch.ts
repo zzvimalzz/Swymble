@@ -7,7 +7,7 @@ const lab: SwymbleLab = {
   seoName: 'what2watch',
   category: 'FILM DISCOVERY',
   categoryColor: '#e6b237',
-  image: '/images/what2watch_logo.png',
+  image: '/images/labs/what2watch_logo.png',
   status: 'Live',
   visibility: 'public',
   publicSummary:

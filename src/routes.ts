@@ -24,7 +24,7 @@ export type SiteRouteElements = Record<SiteRoutePath, ReactElement>;
 
 export const SITE_NAME = 'SWYMBLE';
 export const SITE_URL = 'https://swymble.com';
-export const DEFAULT_SEO_IMAGE = `${SITE_URL}/images/og-card.png`;
+export const DEFAULT_SEO_IMAGE = `${SITE_URL}/images/og/og-card.png`;
 
 export const SITE_ROUTES: SiteRoute[] = [
   {

@@ -59,6 +59,8 @@ export default function SiteView() {
   const navigate = useNavigate();
 
   const [showScrollTop, setShowScrollTop] = useState(false);
+  /** Set by the labs page while its gravity mode is on — see DesktopLabs. */
+  const [gravityActive, setGravityActive] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   // True only during the very first render — used to skip the page-transition fade on
@@ -86,7 +88,25 @@ export default function SiteView() {
     setShowScrollTop(latest > 400);
   });
 
+  useEffect(() => {
+    const onGravityState = (event: Event) => {
+      setGravityActive(Boolean((event as CustomEvent<{ active: boolean }>).detail?.active));
+    };
+    window.addEventListener('swymble:gravity-state', onGravityState);
+    return () => window.removeEventListener('swymble:gravity-state', onGravityState);
+  }, []);
+
+  // Gravity ends when the page it belongs to does.
+  useEffect(() => {
+    if (location.pathname !== '/labs') setGravityActive(false);
+  }, [location.pathname]);
+
   const scrollToTop = () => {
+    // A fallen page does not scroll, so the rocket is just another object lying in the pile: it
+    // can be picked up and thrown, and pressing it does nothing. The anvil is what puts the page
+    // back, and it is right below it.
+    if (gravityActive) return;
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -162,8 +182,14 @@ export default function SiteView() {
       <FloatingControls
         showBack={!isHome}
         onBack={handleBack}
-        showRocket={showScrollTop}
+        showRocket={showScrollTop || gravityActive}
         onRocket={scrollToTop}
+        // Gravity belongs to the labs page and nowhere else. The shell only knows that the button
+        // exists there; what it does is entirely DesktopLabs' business, hence the event rather
+        // than a prop drilled through the router.
+        showGravity={location.pathname === '/labs' && (showScrollTop || gravityActive)}
+        onGravity={() => window.dispatchEvent(new CustomEvent('swymble:gravity'))}
+        gravityActive={gravityActive}
       />
 
       <NavSheet isOpen={isNavOpen} onToggle={() => setIsNavOpen((open) => !open)} onClose={closeNav} />

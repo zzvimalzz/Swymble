@@ -56,7 +56,7 @@ export const Intro = () => {
         <div className='flex h-1/3 flex-col items-center justify-center gap-6'>
           <div className='flex flex-col items-center gap-4'>
             <img
-              src='./images/what2watch_logo.png'
+              src='./images/labs/what2watch_logo.png'
               alt=''
               className='size-20 rounded-2xl md:size-28'
             />

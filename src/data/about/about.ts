@@ -5,7 +5,7 @@ import type { SwymbleAbout } from '../types';
 // README.md in this folder for the field-by-field reference.
 export const SWYMBLE_ABOUT: SwymbleAbout = {
   title: 'ABOUT ME',
-  repo: 'swymble engineer',
+  repo: 'Vimal',
   role: 'Software Engineer · Entrepreneur',
   location: 'Kuala Lumpur, Malaysia',
   availability: {

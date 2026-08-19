@@ -268,6 +268,16 @@ export const SWYMBLE_CAREER: SwymbleCareerRepository = [
         tech: ['WebGL', 'React', 'TypeScript'],
         links: [{ label: 'Open What2Watch', href: createSubdomainUrl('what2watch') }],
       },
+      {
+        id: 'product-oglets',
+        type: 'project',
+        title: 'Oglets',
+        date: '08-2026',
+        description:
+          'A browser toy: a creature made mostly of eyes, rolled once from a weighted genome, hatched from an egg and kept in your browser. Its expressions come from drives rather than a list, and 46,648 combinations are reachable.',
+        tech: ['Canvas', 'ES Modules', 'Cloudflare Workers'],
+        links: [{ label: 'Open Oglets', href: createSubdomainUrl('oglets') }],
+      },
     ],
   },
 ];

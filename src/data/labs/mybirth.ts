@@ -7,7 +7,7 @@ const lab: SwymbleLab = {
   seoName: 'MyBirth',
   category: 'BIRTH ARCHIVE',
   categoryColor: '#74e3d0',
-  image: '/images/mybirth_logo.png',
+  image: '/images/labs/mybirth_logo.png',
   status: 'Live',
   visibility: 'public',
   publicSummary:

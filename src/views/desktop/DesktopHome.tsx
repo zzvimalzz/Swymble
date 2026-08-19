@@ -50,7 +50,7 @@ export default function DesktopHome({ baseUrl, heroY, heroOpacity }: DesktopHome
         <div className="hero-wordmark-stack">
           <div className="hero-bg-logo" aria-hidden="true">
             <img
-              src={`${baseUrl}images/white-logo.png`}
+              src={`${baseUrl}images/brand/white-logo.png`}
               alt=""
               loading="eager"
               fetchPriority="high"

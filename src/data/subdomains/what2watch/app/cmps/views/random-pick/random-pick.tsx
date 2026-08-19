@@ -69,7 +69,7 @@ export const RandomPick = () => {
         title='Back to the landing page'
       >
         <img
-          src='./images/what2watch_logo.png'
+          src='./images/labs/what2watch_logo.png'
           alt='what2watch'
           className='size-full object-cover'
         />

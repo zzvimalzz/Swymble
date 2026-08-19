@@ -22,7 +22,7 @@ function AppLoader({ fadingOut }: { fadingOut: boolean }) {
     >
       <img
         className="app-loading-logo"
-        src={`${baseUrl}images/white-logo.png`}
+        src={`${baseUrl}images/brand/white-logo.png`}
         alt=""
         aria-hidden="true"
         width={196}

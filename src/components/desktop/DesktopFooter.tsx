@@ -8,7 +8,7 @@ export default function DesktopFooter({ baseUrl, brandName }: DesktopFooterProps
     <footer className="site-footer">
       <div className="footer-logo-center" data-cursor="hover">
         <img
-          src={`${baseUrl}images/logo-with-name.png`}
+          src={`${baseUrl}images/brand/logo-with-name.png`}
           alt={`${brandName} Logo`}
           className="footer-logo-full-centered"
           loading="lazy"

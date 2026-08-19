@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useCallback, useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
+import BubbleField from '../../components/desktop/Labs/BubbleField';
+import { useGravityMode } from '../../components/desktop/Labs/useGravityMode';
 import LabAccordion from '../../components/desktop/Labs/LabAccordion';
 import { LabActions, STATUS_MODIFIER } from '../../components/desktop/Labs/labPresentation';
-import SmartImage from '../../components/SmartImage';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import { SWYMBLE_DATA } from '../../data/config';
+import type { SwymbleLab } from '../../data/types';
 import { getCategoryAccentStyle } from '../../utils/categoryAccent';
 import { serializeJsonLd } from '../../utils/jsonLd';
 import { labsIndexJsonLd } from '../../utils/labSeo';
@@ -19,6 +21,35 @@ export default function DesktopLabs() {
   const visibleLabs = SWYMBLE_DATA.labs?.filter((lab) => lab.visibility !== 'private') ?? [];
 
   const isCompact = useMediaQuery(COMPACT_QUERY);
+
+  // Deliberately component state and not a URL parameter: an open card is a thing you did a
+  // moment ago, not a place. Reloading /labs should hand the bubbles back their freedom rather
+  // than restoring a row nobody asked for.
+  const [openId, setOpenId] = useState<string | null>(null);
+  const openIndex = visibleLabs.findIndex((lab) => lab.id === openId);
+  const openLab = openIndex >= 0 ? visibleLabs[openIndex] : null;
+
+  const selectLab = useCallback((id: string | null) => setOpenId(id), []);
+
+  // Only this page has gravity, and only while it is mounted: navigating away puts the page back
+  // together, which is the reset a reader gets by leaving and returning.
+  const { active: gravityActive, captureDeck } = useGravityMode(!isCompact);
+
+  // The deck does not exist when gravity is switched on — it appears only once a bubble has been
+  // pressed — so it is handed to the simulation here instead. One frame's delay: the cards have to
+  // be laid out before they can be measured.
+  useEffect(() => {
+    if (!gravityActive) return undefined;
+    const frame = requestAnimationFrame(() => captureDeck(Boolean(openId)));
+    return () => cancelAnimationFrame(frame);
+  }, [captureDeck, gravityActive, openId]);
+
+  // The corner buttons fall with everything else, and they unmount as soon as the reader scrolls
+  // back above the rocket's threshold — taking the button that turns gravity *off* with them. The
+  // shell keeps them mounted while this is true.
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('swymble:gravity-state', { detail: { active: gravityActive } }));
+  }, [gravityActive]);
   // Null, not the first lab: the point of collapsing is that the whole list is visible at once,
   // and opening one by default puts the reader back to scrolling before they have chosen anything.
   const [openLabId, setOpenLabId] = useState<string | null>(null);
@@ -28,6 +59,52 @@ export default function DesktopLabs() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  /** The insides of a deck card, shared by the two renderings of it — see the branch below.
+   *  `data-gravity-item` marks the pieces that fall *within* the card once it is in the pile. */
+  const renderCard = (deckLab: SwymbleLab, offset: number) => (
+    <>
+                {/* The chips fall, not the row: the row is a full-width flex strip, and as a single
+                    body it dropped through the card as one long bar. */}
+                <div className="lab-meta">
+                  <span
+                    className="lab-category category-accent-text"
+                    style={getCategoryAccentStyle(deckLab.category, deckLab.categoryColor)}
+                    data-gravity-item
+                  >
+                    {deckLab.category}
+                  </span>
+                  <span
+                    className={`lab-status-badge lab-status-badge--${STATUS_MODIFIER[deckLab.status]}`}
+                    data-gravity-item
+                  >
+                    {deckLab.status.toUpperCase()}
+                  </span>
+                </div>
+
+                {/* The link falls, not the h2: a heading is a block box the full width of the card,
+                    and as a body it dropped as an invisible bar with the title stuck to one end. */}
+                <h2 className="lab-title">
+                  <Link to={`/labs/${deckLab.id}`} tabIndex={offset === 0 ? 0 : -1} data-gravity-item>
+                    {deckLab.title}
+                  </Link>
+                </h2>
+
+                <p className="lab-desc" data-gravity-item data-gravity-words>
+                  {deckLab.detail?.oneLiner ?? deckLab.publicSummary}
+                </p>
+
+                <ul className="lab-highlights">
+                  {deckLab.safeHighlights.slice(0, 3).map((highlight) => (
+                    <li key={`${deckLab.id}-${highlight}`} className="lab-highlight-item" data-gravity-item data-gravity-words>
+                      {highlight}
+                    </li>
+                  ))}
+                </ul>
+
+                <LabActions lab={deckLab} showDetailLink />
+    </>
+  );
 
   return (
     <section className="layout-content desktop-labs-page">
@@ -42,11 +119,11 @@ export default function DesktopLabs() {
         />
       )}
 
-      <div className="section-header">
+      <div className="section-header" data-bubble-obstacle>
         <h1>SWYMBLE LABS</h1>
       </div>
 
-      <p className="labs-subtitle">
+      <p className="labs-subtitle" data-bubble-obstacle>
         In-progress experiments and proprietary systems.
       </p>
 
@@ -68,68 +145,90 @@ export default function DesktopLabs() {
           onToggle={(id) => setOpenLabId((current) => (current === id ? null : id))}
         />
       ) : (
-        <div className="labs-grid">
-          {visibleLabs.map((labItem, index) => (
-            <motion.div
-              key={labItem.id}
-              className="lab-card"
-              data-cursor="hover"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              whileInView={{ opacity: 1, scale: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-            >
-              <div className="lab-card-image-wrap">
-                <SmartImage src={labItem.image} alt={labItem.title} className="lab-card-image" />
-                <div className="lab-card-overlay">
-                  <span
-                    className={`lab-status-badge lab-status-badge--${STATUS_MODIFIER[labItem.status]}`}
-                  >
-                    {labItem.status.toUpperCase()}
-                  </span>
-                </div>
-              </div>
+        <>
+          {/* The strip the row collapses into. Zero height while the field is loose, so the
+              bubbles have the whole page; measured by BubbleField, never positioned by it. */}
+          <div className={`lab-bubble-band${openLab ? ' is-open' : ''}`} data-bubble-band />
 
-              <div className="lab-card-content">
-                <div className="lab-meta">
-                  <span
-                    className="lab-category category-accent-text"
-                    style={getCategoryAccentStyle(labItem.category, labItem.categoryColor)}
-                  >
-                    {labItem.category}
-                  </span>
-                  <span className={`lab-visibility-badge visibility-${labItem.visibility}`}>
-                    {labItem.visibility.toUpperCase()}
-                  </span>
-                </div>
-                <h3 className="lab-title">
-                  <Link to={`/labs/${labItem.id}`}>{labItem.title}</Link>
-                </h3>
-                <p className="lab-desc">{labItem.publicSummary}</p>
+          <BubbleField
+            labs={visibleLabs}
+            selectedId={openLab ? openLab.id : null}
+            onSelect={selectLab}
+            // While the page is falling, the bubbles are bodies in the rigid-body world instead —
+            // two solvers writing the same transforms would fight over every frame.
+            paused={gravityActive}
+          />
 
-                <ul className="lab-highlights">
-                  {labItem.safeHighlights.map((highlight) => (
-                    <li key={`${labItem.id}-${highlight}`} className="lab-highlight-item">
-                      {highlight}
-                    </li>
-                  ))}
-                </ul>
+          {/* A deck, not a single card: every lab is mounted the whole time, the open one at the
+              front and its neighbours set back in the dark. Choosing another bubble rotates the
+              deck rather than swapping one card for another, so nothing appears from nowhere. */}
+          <AnimatePresence>
+            {openLab && (
+              <motion.div
+                className="lab-deck"
+                initial={{ opacity: 0, y: 28 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 18 }}
+                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {visibleLabs.map((deckLab, index) => {
+                  const offset = index - openIndex;
+                  const depth = Math.abs(offset);
 
-                <div className="lab-tags">
-                  {labItem.tags.map((tag) => (
-                    <span key={`${labItem.id}-${tag}`} className="lab-tag">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
+                  // Two renderings of the same card. With gravity on there is no deck at all — just
+                  // the one card that was pressed, falling into the pile; pressing another bubble
+                  // swaps it for that lab's card. A stack of blurred cards behind it was scenery
+                  // the physics had to carry and the reader could not use.
+                  if (gravityActive) {
+                    if (offset !== 0) return null;
 
-                <div className="lab-updated">UPDATED {labItem.updatedAt.toUpperCase()}</div>
+                    return (
+                      <article
+                        key={deckLab.id}
+                        className="lab-deck__card is-front"
+                        style={{ zIndex: 3, transformOrigin: '50% 50%' }}
+                      >
+                        {renderCard(deckLab, offset)}
+                      </article>
+                    );
+                  }
 
-                <LabActions lab={labItem} showDetailLink />
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                  return (
+                    <motion.article
+                      key={deckLab.id}
+                      className={`lab-deck__card${offset === 0 ? ' is-front' : ''}`}
+                      // z-index cannot be tweened, so it is set outright — a card must change
+                      // stacking the instant it starts moving, not halfway through.
+                      style={{ zIndex: 20 - depth, pointerEvents: depth > 1 ? 'none' : 'auto' }}
+                      animate={{
+                        x: `${offset * 56}%`,
+                        scale: Math.max(0.62, 1 - depth * 0.13),
+                        opacity: depth === 0 ? 1 : depth === 1 ? 0.34 : depth === 2 ? 0.12 : 0,
+                        filter: `blur(${Math.min(depth * 2.5, 6)}px)`,
+                      }}
+                      // A spring for the movement so the deck rotates with some weight to it, and
+                      // a slower tween for the fade and the blur so cards dissolve into the dark
+                      // rather than blinking out of it.
+                      transition={{
+                        x: { type: 'spring', stiffness: 46, damping: 17, mass: 1.1 },
+                        scale: { type: 'spring', stiffness: 46, damping: 17, mass: 1.1 },
+                        opacity: { duration: 0.85, ease: [0.33, 1, 0.68, 1] },
+                        filter: { duration: 0.85, ease: [0.33, 1, 0.68, 1] },
+                      }}
+                      aria-hidden={offset !== 0}
+                      onClick={() => {
+                        if (offset !== 0) selectLab(deckLab.id);
+                      }}
+                    >
+                      {renderCard(deckLab, offset)}
+                    </motion.article>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        </>
       )}
     </section>
   );

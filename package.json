@@ -26,7 +26,8 @@
     "build:what2watch": "npm --prefix src/data/subdomains/what2watch run build",
     "build": "npm run build:main && npm run build:mybirth && npm run build:what2watch",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate:lab-palette": "node scripts/generate-lab-palette.mjs"
   },
   "dependencies": {
     "@fontsource/anton": "^5.2.7",

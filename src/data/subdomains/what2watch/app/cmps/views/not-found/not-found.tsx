@@ -25,7 +25,7 @@ export const NotFound = () => {
       </a>
       <div className='flex flex-col items-center gap-6 text-center'>
         <img
-          src='./images/what2watch_logo.png'
+          src='./images/labs/what2watch_logo.png'
           alt=''
           className='size-16 rounded-2xl md:size-20'
         />

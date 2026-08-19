@@ -43,7 +43,7 @@ const loadRouteDataViaRegex = async () => {
   const siteName = source.match(/export const SITE_NAME = ['"`]([^'"`]+)['"`]/)?.[1] ?? 'SWYMBLE';
   const siteUrl = source.match(/export const SITE_URL = ['"`]([^'"`]+)['"`]/)?.[1] ?? 'https://swymble.com';
   const defaultImageTemplate =
-    source.match(/export const DEFAULT_SEO_IMAGE = `([^`]+)`/)?.[1] ?? '${SITE_URL}/images/logo-with-name.png';
+    source.match(/export const DEFAULT_SEO_IMAGE = `([^`]+)`/)?.[1] ?? '${SITE_URL}/images/brand/logo-with-name.png';
   const defaultImage = defaultImageTemplate.replace(/\$\{SITE_URL\}/g, siteUrl);
 
   const arrayMatch = source.match(/export const SITE_ROUTES: SiteRoute\[\] = \[([\s\S]*?)\n\];/);

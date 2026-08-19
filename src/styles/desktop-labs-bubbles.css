@@ -1,0 +1,336 @@
+/* The bubble field on /labs. Positions come from the solver and are written straight onto each
+   button as a transform, so nothing in here may set `top`, `left` or `transform` on .lab-bubble —
+   a stylesheet and a frame loop fighting over the same property is a bug you cannot see. */
+
+.lab-bubble-stage {
+  /* No container: the field is a layer over the whole page, and the bubbles bounce off the real
+     headings via [data-bubble-obstacle] rather than off a box drawn around them. It cannot catch
+     the pointer — only the bubbles inside it can. */
+  position: absolute;
+  /* Full viewport width, not the content column: the field is the page, and a bubble stopping at
+     an invisible line where `.layout-content` ends is the one thing that gives the trick away.
+     The nav is a solid obstacle rather than a margin, so the field can start at the top. */
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lab-bubble-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  inset: 0;
+}
+
+.lab-bubble {
+  --bubble-ring: var(--sw-border-soft);
+  --bubble-glow: rgba(255, 255, 255, 0.06);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--bubble-ring);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.09), transparent 58%),
+    rgba(10, 10, 12, 0.92);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 18px 40px -24px var(--bubble-glow);
+  padding: 0;
+  color: inherit;
+  pointer-events: auto;
+  touch-action: none;
+  /* Only the properties the loop does not own. Transform is animated by the solver, sixty times a
+     second — a transition on it would fight every frame. */
+  transition: box-shadow var(--sw-motion-fast) var(--sw-ease-standard),
+    border-color var(--sw-motion-fast) var(--sw-ease-standard);
+  will-change: transform;
+}
+
+.lab-bubble:hover,
+.lab-bubble:focus-visible {
+  box-shadow: 0 0 0 1px var(--bubble-ring), 0 22px 48px -22px var(--bubble-glow);
+}
+
+.lab-bubble:focus-visible {
+  outline: 2px solid var(--sw-accent-volt);
+  outline-offset: 4px;
+}
+
+.lab-bubble__art {
+  display: grid;
+  place-items: center;
+  width: 68%;
+  height: 68%;
+  pointer-events: none;
+}
+
+.lab-bubble__art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* The button's accessible name, and the only readable text on a page of logos. Not
+   `display: none`, which would take it out of the accessibility tree as well. */
+.lab-bubble__reader {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Status colours the ring, the same vocabulary as the badges. */
+.lab-bubble--live {
+  --bubble-ring: rgba(var(--sw-accent-neon-rgb), 0.55);
+  --bubble-glow: rgba(var(--sw-accent-neon-rgb), 0.55);
+}
+
+.lab-bubble--development {
+  --bubble-ring: rgba(var(--sw-accent-volt-rgb), 0.5);
+  --bubble-glow: rgba(var(--sw-accent-volt-rgb), 0.45);
+}
+
+.lab-bubble--beta {
+  --bubble-ring: rgba(var(--sw-accent-cyan-rgb), 0.5);
+  --bubble-glow: rgba(var(--sw-accent-cyan-rgb), 0.45);
+}
+
+/* Archived reads as finished, not as failed: grey ring, no glow. */
+.lab-bubble--archived {
+  --bubble-ring: rgba(154, 154, 154, 0.4);
+  --bubble-glow: rgba(0, 0, 0, 0);
+}
+
+.lab-bubble.is-selected {
+  box-shadow: 0 0 0 2px var(--bubble-ring), 0 24px 52px -20px var(--bubble-glow);
+}
+
+/* The strip the row collapses into. Empty and weightless while the field is loose — that is what
+   gives the bubbles the whole page to roam. */
+.lab-bubble-band {
+  height: 0;
+  /* Paced with the row spring in BubbleField (ROW_STIFFNESS): the strip opening and the bubbles
+     arriving are one movement, and the solver re-aims at this box every frame. */
+  transition: height 0.62s var(--sw-ease-out-expo);
+}
+
+.lab-bubble-band.is-open {
+  height: 176px;
+}
+
+/* The deck. Every lab's card is mounted and stacked in the same place; framer-motion moves them
+   sideways, scales them down and blurs them by how far they are from the open one, so choosing
+   another bubble rotates the stack instead of swapping a card in from nowhere.
+
+   Fixed height on purpose: the cards are absolutely positioned inside it, so a long card and a
+   short one cannot move the footer between them. */
+.lab-deck {
+  position: relative;
+  z-index: 2;
+  height: 420px;
+  margin-top: 2rem;
+}
+
+.lab-deck__card {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(780px, 72%);
+  /* Centres the card; framer-motion's own x is applied on top of this. */
+  margin-left: min(-390px, -36%);
+  height: 420px;
+  padding: 1.75rem 2rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  border: 1px solid var(--sw-border-soft);
+  border-radius: var(--sw-radius-card);
+  background: rgba(10, 10, 12, 0.96);
+  box-shadow: 0 32px 70px -40px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+}
+
+/* The cards behind are scenery you can click to bring forward. */
+.lab-deck__card:not(.is-front) {
+  cursor: none;
+}
+
+.lab-deck__card.is-front {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.lab-deck__card .lab-meta {
+  margin-bottom: 0.15rem;
+}
+
+.lab-deck__card .lab-title {
+  margin: 0;
+  font-size: 1.75rem;
+  line-height: 1.15;
+}
+
+.lab-deck__card .lab-desc {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #cfcfcf;
+}
+
+.lab-deck__card .lab-highlights {
+  margin: 0.25rem 0 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.lab-deck__card .lab-highlight-item {
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+/* The buttons get the foot of the card to themselves, with a rule above them, so the card ends on
+   an action rather than trailing off into another line of text. */
+.lab-deck__card .lab-actions {
+  margin-top: auto;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  gap: 0.75rem;
+}
+
+.lab-deck__card .lab-btn {
+  padding: 0.6rem 1.15rem;
+}
+
+@media (max-width: 1100px) {
+  .lab-deck,
+  .lab-deck__card {
+    height: 460px;
+  }
+
+  .lab-deck__card {
+    width: min(680px, 84%);
+    margin-left: min(-340px, -42%);
+  }
+}
+
+/* Whatever the solver does, the page's own words are never underneath a bubble. */
+.desktop-labs-page .section-header,
+.desktop-labs-page .labs-subtitle {
+  position: relative;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-bubble {
+    transition: none;
+  }
+}
+
+/* ── Gravity mode ──
+   The elements keep their place in the layout and are only *transformed*, which is what keeps
+   every link and button live while the page lies in a heap. These rules take away the furniture
+   that would otherwise give the trick away: the bar the nav links were sitting in, the slab the
+   footer draws behind itself, and the rules under headings that have fallen away from them. */
+/* A page that cannot be scrolled should not show a scrollbar either — with one still sitting
+   there the page reads as scrollable and the thumb can be dragged. The gutter is kept reserved so
+   hiding it does not reflow the layout the physics was measured from. */
+html.is-gravity {
+  scrollbar-gutter: stable;
+  scrollbar-width: none;
+}
+
+html.is-gravity::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+html.is-gravity .desktop-nav {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: transparent;
+  box-shadow: none;
+}
+
+html.is-gravity .section-header::after,
+html.is-gravity .section-header {
+  border-color: transparent;
+}
+
+/* The footer is a block with its own background; without this the pieces fall out of a floating
+   black slab that stays behind. */
+/* The wrapper around the footer wordmark is a full-width block. It is no longer a body — the
+   image inside it is — so it simply stays where it is, empty and invisible. Do not give it
+   `display: contents`: that takes the image out of its flex parent and it lays out at its
+   natural 969px instead of the 48px-tall mark, which then tumbles across the whole screen. */
+html.is-gravity .footer-logo-center {
+  padding-bottom: 0;
+}
+
+html.is-gravity .site-footer,
+html.is-gravity .footer-bottom-bar {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* A transform does nothing to a plain inline element, and the card title is an <a> inside its
+   heading — so it has to become inline-block before it can fall. */
+html.is-gravity .lab-deck__card .lab-title a {
+  display: inline-block;
+}
+
+/* A highlight's bullet belongs to the <li>, which is not a body — so the words fell out from
+   under a column of dots that stayed exactly where they were. */
+html.is-gravity .lab-deck__card .lab-highlights {
+  list-style: none;
+}
+
+/* A word of a fallen heading. Inline-block or the transform does not apply; the transform-origin
+   is the centre because that is where the solver's body is. */
+.gravity-word {
+  display: inline-block;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+/* Nothing in a fallen page is draggable in the browser's sense — the physics does the dragging,
+   and a native link or image drag would steal the pointer. */
+html.is-gravity a,
+html.is-gravity img,
+html.is-gravity .gravity-word {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Everything in the heap can be picked up, so it all says so. */
+html.is-gravity .lab-bubble,
+html.is-gravity .gravity-word,
+html.is-gravity .nav-brand,
+html.is-gravity .nav-link,
+html.is-gravity .floating-controls__btn,
+html.is-gravity .footer-logo-full-centered,
+html.is-gravity .footer-copyright,
+html.is-gravity .footer-status,
+html.is-gravity .footer-legal {
+  touch-action: none;
+  user-select: none;
+}
+
+/* The anvil sits with the rocket, and lights up while the page is down. */
+.floating-controls__btn--gravity.is-active {
+  color: var(--accent-volt);
+  border-color: var(--sw-border-volt);
+  background: rgba(var(--sw-accent-volt-rgb), 0.14);
+}

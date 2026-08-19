@@ -41,7 +41,7 @@ const MY_POST: SwymbleBlogPost = {
   summary: 'Short summary shown in cards and meta description.',
   tags: ['AI', 'R&D'],
   categories: ['cortex'],                 // must match ids in meta.ts
-  coverImage: '/images/cortex_website.png', // optional; used as the post's og:image
+  coverImage: '/images/blog/cortex_website.png', // optional; used as the post's og:image
   content: [
     { type: 'heading', text: 'Section Title', level: 2 },
     { type: 'paragraph', text: ['Line one.', 'Line two.'] },
@@ -49,7 +49,7 @@ const MY_POST: SwymbleBlogPost = {
     { type: 'list', style: 'bullet', items: ['Item A', 'Item B'], indent: 1 },
     { type: 'spacer', size: 'sm' },
     { type: 'quote', text: 'Memory is continuity.', cite: 'Internal notes' },
-    { type: 'image', src: '/images/cortex_website.png', caption: 'System overview' },
+    { type: 'image', src: '/images/blog/cortex_website.png', caption: 'System overview' },
     { type: 'code', language: 'typescript', code: 'console.log("hello");' },
   ],
 };

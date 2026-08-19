@@ -25,7 +25,7 @@ export const SWYMBLE_BRANDING = {
   name: 'SWYMBLE',                       // nav/footer/hero brand text
   tagline: 'Short brand statement.',     // hero subtext
   marquee: 'PROJECTS - BLOG - LABS',     // moving headline band
-  endCardMobileImage: '/images/white-logo.png', // end of mobile project swipe
+  endCardMobileImage: '/images/brand/white-logo.png', // end of mobile project swipe
   contactIntro: 'Line shown above the contact form.',
 };
 ```

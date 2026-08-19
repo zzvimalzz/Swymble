@@ -63,6 +63,9 @@ const parseLabSource = (source, fallbackId) => {
     tags: readStringArrayField(cardBody, 'tags'),
     updatedAt: readStringField(cardBody, 'updatedAt') ?? '',
     order: Number(/\border\s*:\s*(\d+)/.exec(cardBody)?.[1] ?? '999'),
+    // Optional hand-set brand colour. generate-lab-palette.mjs prefers it over the hue it would
+    // otherwise pull out of the logo.
+    accentColor: readStringField(cardBody, 'accentColor') ?? '',
     detail: detailBody
       ? {
           oneLiner: readStringField(detailBody, 'oneLiner') ?? '',
